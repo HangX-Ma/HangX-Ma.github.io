@@ -372,7 +372,7 @@
 </ul>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
     <br />
     <font size="2" color="#999"><u>U-Boot Hierarchy, HangX-Ma</u></font>
 </div>
@@ -550,7 +550,7 @@ flowchart
 </ul>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
     <br />
     <font size="2" color="#999"><u>Boot loader sequences, HouchengLin</u></font>
 </div>
@@ -709,7 +709,7 @@ flowchart LR
 <p><code class="language-plaintext highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-plaintext highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-plaintext highlighter-rouge">__image_copy_start</code> 和 <code class="language-plaintext highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-plaintext highlighter-rouge">bss</code> 段都被声明了 <code class="language-plaintext highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-plaintext highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
     <br />
     <font size="2" color="#999"><u>TPL Loading Memory, HangX-Ma</u></font>
 </div>

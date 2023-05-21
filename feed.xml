@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-21T20:38:13+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-21T21:21:58+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
 
 <p>被一件事儿恶心到了， 发现最开始发在博客园上的文章被爬到了一个不知名的小网站， 没有署名， 没有注明来源。 真的对这种侵犯个人权利的事情感到恶心， 至少引用和转载文章需要注明来源。 国内互联网的内容同质化严重， 优质内容也逐渐减少不是没有道理的。</p>
@@ -106,10 +106,11 @@ flowchart LR
         <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span> 
           <span class="s">git clone -b PUBLIC_REPOSITORY_BRANCH git@github.com:YOUR_USER_NAME/YOUR_USER_NAME.github.io.git gitpage_repo</span>
           <span class="s">cd gitpage_repo</span>
-          <span class="s">rm -rf *</span>
+          <span class="s">shopt -s extglob</span>
+          <span class="s">rm -rf !(robots.txt)</span>
           <span class="s">cp -r ../_site/* .</span>
-          <span class="s">git add -A </span>
-          <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "site updated: `date +\"%Y-%m-%d\"`" </span>
+          <span class="s">git add -A</span>
+          <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "Site Updated: `date +'%Y-%m-%d %H:%M:%S'`" </span>
           <span class="s">git push origin master -f -q</span>
 </code></pre></div></div>
 
@@ -121,6 +122,44 @@ flowchart LR
 <a href="https://gist.github.com/Half9000/7d83d7f8dea012926dc7d2203a1f169e">Hexo Deploy with Github Actions workflow</a><br />
 <a href="https://printempw.github.io/use-github-actions-to-deploy-hexo-blog/">使用 GitHub Actions 自动部署 Hexo 博客</a><br />
 <a href="https://blog.csdn.net/shiwanghualuo/article/details/128514693">github actions中如何判断仓库是否有变更</a></p>
+</blockquote>
+
+<h2 id="3-爬虫与目录结构保护">3. 爬虫与目录结构保护</h2>
+
+<p>更改网站的 <code class="language-plaintext highlighter-rouge">robots.txt</code> 为如下形式</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="kc">null</span>
+<span class="nn">---</span>
+
+<span class="na">User-agent</span><span class="pi">:</span> <span class="err">*</span>
+
+<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/assets/</span>   <span class="c1"># /assets/ 是常规资源目录，不怕暴露路径</span>
+<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/norobots/</span> <span class="c1"># 零碎敏感文件、目录等放置在此</span>
+
+<span class="na">Sitemap</span><span class="pi">:</span> <span class="s">https://hangx-ma.github.io/sitemap.xml</span>
+
+</code></pre></div></div>
+
+<p>出于安全考虑，站点的某些目录结构，譬如 <code class="language-plaintext highlighter-rouge">/norobots/</code>， 不希望被外部访问， 所以需要使用重定向来保护目录， 可以使用 GitHub 推荐的 Jekyll 重定向插件 <a href="https://github.com/jekyll/jekyll-redirect-from">Jekyll Redirect From</a>。</p>
+
+<p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
+
+<pre><code class="language-gemfile">gem "jekyll-redirect-from"
+</code></pre>
+
+<p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">redirect_from</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">/norobots/</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<p>具体的目录可以更具自己站点的实际情况定义， 按照上述定义， <code class="language-plaintext highlighter-rouge">访问 {SITE_URL}/norobots/</code> 会直接返回 404 页面， 从而保护了敏感目录。</p>
+
+<blockquote>
+  <p><a href="https://cotes.page/posts/the-seo-to-jekyll/">Jekyll 的 SEO 优化</a></p>
 </blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="Git" /><summary type="html"><![CDATA[通过私有化 Git Pages 源码仓库， 并自动化推送和部署公有 Git Pages 仓库以实现源数据保护。]]></summary></entry><entry><title type="html">关于 Jekyll TeXt 博客搭建</title><link href="https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html" rel="alternate" type="text/html" title="关于 Jekyll TeXt 博客搭建" /><published>2023-05-18T00:00:00+08:00</published><updated>2023-05-18T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html"><![CDATA[<p>之前用 Hexo 搭 Git Pages 的经历实在是惨痛， 个人对前端没什么研究配置非常痛苦， 尤其是还需要装大量的依赖库尝试解决 <strong>图片显示</strong>、 <strong>Markdown显示</strong>， <strong>数学公式显示</strong> 等问题， Node.js 也非常不省心， 库版本冲突也很严重。 咬咬牙用了一段时间博客园， 不简洁， 不优雅， 不顺我心。 偶然间在知乎上看到了一些关于 Hugo， Jekyll， Hexo 相关的比较， Jekyll 虽然用 Ruby 构建速度稍慢 （实际感觉还挺快）， 但关键是 Github 的支持非常友好， 能自动编译并部署网站， 而且相关的社区建设也很不错， 对于只想专注记录并做点代码微调的人而言显得非常良心。 偶然间发现了 <code class="language-plaintext highlighter-rouge">TeXt</code> 这款主题， 文档很新而且很全面， 样式也吸引人， 就此入坑了。 前后花了两天去踩坑配自己心仪的样式， 在此记录一些配置细节， 不定期更新。</p>
 
 <p class="info"><code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 中的配置对 <code class="language-plaintext highlighter-rouge">_config.yml</code> 会进行覆写有更高的优先级。</p>
@@ -625,7 +664,7 @@ YOUR_CODE_HERE
 <h2 id="1-实验说明">1. 实验说明</h2>
 
 <div align="center">
-    <img src="/images/2023-05-14-cs144-lab1/cs144_lab_structure.png" alt="CS144 Labs'structure" width="800" />
+    <img src="/norobots/images/2023-05-14-cs144-lab1/cs144_lab_structure.png" alt="CS144 Labs'structure" width="800" />
     <br />
     <font size="2" color="#999"><u>CS144 Labs'structure</u></font>
 </div>
@@ -657,7 +696,7 @@ YOUR_CODE_HERE
 <p>关于存储空间指导书给了下图的提示。</p>
 
 <div align="center">
-    <img src="/images/2023-05-14-cs144-lab1/bytestream_space_interpretation.png" alt="Memory usage limitation of Reassembler and ByteStream" width="800" />
+    <img src="/norobots/images/2023-05-14-cs144-lab1/bytestream_space_interpretation.png" alt="Memory usage limitation of Reassembler and ByteStream" width="800" />
     <br />
     <font size="2" color="#999"><u>Memory usage limitation of Reassembler and ByteStream</u></font>
 </div>
@@ -2053,13 +2092,13 @@ gb ： 开启多光标模式，选中和当前单词相同的单词
 <h3 id="11-floatscale2">11. floatScale2</h3>
 
 <div align="center">
-    <img src="/images/2023-03-07-csapp-datalab/float32.png" alt="Float32 format, CSAPP, Figure 2.32" width="600" />
+    <img src="/norobots/images/2023-03-07-csapp-datalab/float32.png" alt="Float32 format, CSAPP, Figure 2.32" width="600" />
     <br />
     <font size="2" color="#999"><u>Float32 format, CSAPP, Figure 2.32</u></font>
 </div>
 
 <div align="center">
-    <img src="/images/2023-03-07-csapp-datalab/float32_categories.png" alt="Categories of single-precision floating-point values, Figure 2.33" width="600" />
+    <img src="/norobots/images/2023-03-07-csapp-datalab/float32_categories.png" alt="Categories of single-precision floating-point values, Figure 2.33" width="600" />
     <br />
     <font size="2" color="#999"><u>Categories of single-precision floating-point values, Figure 2.33</u></font>
 </div>
@@ -2316,7 +2355,7 @@ Total points: 36/36
 </ul>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
     <br />
     <font size="2" color="#999"><u>U-Boot Hierarchy, HangX-Ma</u></font>
 </div>
@@ -2494,7 +2533,7 @@ flowchart
 </ul>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
     <br />
     <font size="2" color="#999"><u>Boot loader sequences, HouchengLin</u></font>
 </div>
@@ -2653,7 +2692,7 @@ flowchart LR
 <p><code class="language-plaintext highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-plaintext highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-plaintext highlighter-rouge">__image_copy_start</code> 和 <code class="language-plaintext highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-plaintext highlighter-rouge">bss</code> 段都被声明了 <code class="language-plaintext highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-plaintext highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
 
 <div align="center">
-    <img src="/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
+    <img src="/norobots/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
     <br />
     <font size="2" color="#999"><u>TPL Loading Memory, HangX-Ma</u></font>
 </div>

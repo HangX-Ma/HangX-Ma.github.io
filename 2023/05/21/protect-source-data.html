@@ -409,10 +409,11 @@ flowchart LR
         <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span> 
           <span class="s">git clone -b PUBLIC_REPOSITORY_BRANCH git@github.com:YOUR_USER_NAME/YOUR_USER_NAME.github.io.git gitpage_repo</span>
           <span class="s">cd gitpage_repo</span>
-          <span class="s">rm -rf *</span>
+          <span class="s">shopt -s extglob</span>
+          <span class="s">rm -rf !(robots.txt)</span>
           <span class="s">cp -r ../_site/* .</span>
-          <span class="s">git add -A </span>
-          <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "site updated: `date +\"%Y-%m-%d\"`" </span>
+          <span class="s">git add -A</span>
+          <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "Site Updated: `date +'%Y-%m-%d %H:%M:%S'`" </span>
           <span class="s">git push origin master -f -q</span>
 </code></pre></div></div>
 
@@ -424,6 +425,44 @@ flowchart LR
 <a href="https://gist.github.com/Half9000/7d83d7f8dea012926dc7d2203a1f169e">Hexo Deploy with Github Actions workflow</a><br />
 <a href="https://printempw.github.io/use-github-actions-to-deploy-hexo-blog/">使用 GitHub Actions 自动部署 Hexo 博客</a><br />
 <a href="https://blog.csdn.net/shiwanghualuo/article/details/128514693">github actions中如何判断仓库是否有变更</a></p>
+</blockquote>
+
+<h2 id="3-爬虫与目录结构保护">3. 爬虫与目录结构保护</h2>
+
+<p>更改网站的 <code class="language-plaintext highlighter-rouge">robots.txt</code> 为如下形式</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="kc">null</span>
+<span class="nn">---</span>
+
+<span class="na">User-agent</span><span class="pi">:</span> <span class="err">*</span>
+
+<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/assets/</span>   <span class="c1"># /assets/ 是常规资源目录，不怕暴露路径</span>
+<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/norobots/</span> <span class="c1"># 零碎敏感文件、目录等放置在此</span>
+
+<span class="na">Sitemap</span><span class="pi">:</span> <span class="s">https://hangx-ma.github.io/sitemap.xml</span>
+
+</code></pre></div></div>
+
+<p>出于安全考虑，站点的某些目录结构，譬如 <code class="language-plaintext highlighter-rouge">/norobots/</code>， 不希望被外部访问， 所以需要使用重定向来保护目录， 可以使用 GitHub 推荐的 Jekyll 重定向插件 <a href="https://github.com/jekyll/jekyll-redirect-from">Jekyll Redirect From</a>。</p>
+
+<p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
+
+<pre><code class="language-gemfile">gem "jekyll-redirect-from"
+</code></pre>
+
+<p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">redirect_from</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">/norobots/</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<p>具体的目录可以更具自己站点的实际情况定义， 按照上述定义， <code class="language-plaintext highlighter-rouge">访问 {SITE_URL}/norobots/</code> 会直接返回 404 页面， 从而保护了敏感目录。</p>
+
+<blockquote>
+  <p><a href="https://cotes.page/posts/the-seo-to-jekyll/">Jekyll 的 SEO 优化</a></p>
 </blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
