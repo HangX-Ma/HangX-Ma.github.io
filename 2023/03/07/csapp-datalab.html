@@ -1,0 +1,1687 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>CSAPP - Data Lab - 一只豆腐</title>
+
+<meta name="description" content="Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Data Lab， 实现源码可从 Github 获取。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/03/07/csapp-datalab.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA">
+<meta name="baidu-site-verification" content="codeva-vnhfGS2fxL" /><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewBox="0 0 342 342">
+  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"/>
+  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,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"/>
+</svg>
+<a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>CSAPP - Data Lab</h1></header><span class="split-space">&nbsp;</span>
+          <a class="edit-on-github"
+            title="Edit on Github"
+            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-03-07-csapp-datalab.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="CSAPP - Data Lab"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Course">Course</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=CSAPP">CSAPP</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 07, 2023</span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s07scsapp-datalab.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-07T00:00:00+08:00">
+    <meta itemprop="keywords" content="Course,CSAPP"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Data Lab， 实现源码可从 <a href="https://github.com/HangX-Ma/csapp-2015">Github</a> 获取。
+<!--more--></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Progress and timeline <font color="#4682B4">[1/14]</font></li>
+</ul>
+
+<h2 id="prerequisite">Prerequisite</h2>
+
+<ul>
+  <li>neovim, NvChad</li>
+  <li>WSL2, Ubuntu-20.04</li>
+  <li>gcc, gcc-multlib, gdb, build-essential, make</li>
+</ul>
+
+<blockquote>
+  <p>64 位机器编译时， 由于库不支持 32 位代码编译， 因而需要下载 <code class="language-plaintext highlighter-rouge">gcc-multilib</code>。</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>build-essential make
+<span class="nb">sudo </span>apt <span class="nb">install </span>gcc gcc-multilib gdb
+</code></pre></div></div>
+
+<h2 id="题解与分析">题解与分析</h2>
+
+<h3 id="1-bitxor">1. bitXor</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * bitXor - x^y using only ~ and &amp; 
+ *   Example: bitXor(4, 5) = 1
+ *   Legal ops: ~ &amp;
+ *   Max ops: 14
+ *   Rating: 1
+ */</span>
+<span class="kt">int</span> <span class="nf">bitXor</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="o">~</span><span class="n">x</span> <span class="o">&amp;</span> <span class="n">y</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">y</span><span class="p">;</span>
+  <span class="k">return</span> <span class="o">~</span><span class="p">(</span><span class="o">~</span><span class="n">a</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">b</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>参考数字逻辑电路部分的异或门， 逻辑表达式为 \(A \oplus B = \overline{A}B + A\overline{B}\)， 需要对这部分进行变式推导， 主要应用了反演律（摩根定律） \(\overline{A}B + A\overline{B} = \overline{\overline{\overline{A}B + A\overline{B}}} = \overline{\overline{\overline{A}B} \bullet \overline{A\overline{B}}}\)。 当然更简单的是根据同或门取反实现。</p>
+
+<h3 id="2-tmin">2. tmin</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * tmin - return minimum two's complement integer 
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 4
+ *   Rating: 1
+ */</span>
+<span class="kt">int</span> <span class="nf">tmin</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>32 位机最小的补码是 <code class="language-plaintext highlighter-rouge">0x80000000</code>， 既然能用 <code class="language-plaintext highlighter-rouge">&lt;&lt;</code> 操作符就直接向左移位 31 位。</p>
+
+<h3 id="3-istmax">3. isTmax</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * isTmax - returns 1 if x is the maximum, two's complement number,
+ *     and 0 otherwise 
+ *   Legal ops: ! ~ &amp; ^ | +
+ *   Max ops: 10
+ *   Rating: 1
+ */</span>
+<span class="kt">int</span> <span class="nf">isTmax</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">!</span><span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">^</span> <span class="n">x</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>由于不能使用移位操作符， 需要用替代办法实现。 以 4 位 $TMax_4 = 0111_2$ 为例， $TMax_4 + 1 = 1000_2$， 该数取反也会得到 $TMax_4$， 那么以 <code class="language-plaintext highlighter-rouge">!（~(x + 1) ^ x)</code> 就可以满足要求。 但是用 <code class="language-plaintext highlighter-rouge">btest</code> 检查的时候却报错如下， 发现 <code class="language-plaintext highlighter-rouge">-1</code> 这个例外同样满足上式。 但发现存在 <code class="language-plaintext highlighter-rouge">-1 + 1 = 0</code> 这个特殊性质， 故而可以借此进行两数的区分， <code class="language-plaintext highlighter-rouge">!(x + 1)</code> 若为零则说明输入 <code class="language-plaintext highlighter-rouge">x</code> 是除 <code class="language-plaintext highlighter-rouge">-1</code> 以外的数。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: Test isTmax<span class="o">(</span><span class="nt">-1</span><span class="o">[</span>0xffffffff]<span class="o">)</span> failed...
+...Gives 1[0x1]. Should be 0[0x0]
+</code></pre></div></div>
+
+<h3 id="4-alloddbits">4. allOddBits</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * allOddBits - return 1 if all odd-numbered bits in word set to 1
+ *   where bits are numbered from 0 (least significant) to 31 (most significant)
+ *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 12
+ *   Rating: 2
+ */</span>
+<span class="kt">int</span> <span class="nf">allOddBits</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">mask</span> <span class="o">=</span> <span class="mh">0xAA</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">mask_all</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span> <span class="o">|</span> <span class="p">(</span><span class="n">mask</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">mask</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">mask</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span><span class="p">));</span>
+  <span class="n">x</span> <span class="o">&amp;=</span> <span class="n">mask_all</span><span class="p">;</span>
+  <span class="n">x</span> <span class="o">^=</span> <span class="n">mask_all</span><span class="p">;</span>
+  <span class="k">return</span> <span class="o">!</span><span class="n">x</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>属实有点被坑到， 说是要求不能用超过 8 位的常量， 但实际上可以通过这样取巧的方式定义一个， 具体实现也比较简单， 用掩码解决。</p>
+
+<h3 id="5-negate">5. negate</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * negate - return -x 
+ *   Example: negate(1) = -1.
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 5
+ *   Rating: 2
+ */</span>
+<span class="kt">int</span> <span class="nf">negate</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">x + ~x = -1</code> 因而 <code class="language-plaintext highlighter-rouge">-x = ~x + 1</code>， 需注意补码， 反码， 原码之间的关系。</p>
+
+<h3 id="6-isasciidigit">6. isAsciiDigit</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters '0' to '9')
+ *   Example: isAsciiDigit(0x35) = 1.
+ *            isAsciiDigit(0x3a) = 0.
+ *            isAsciiDigit(0x05) = 0.
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 15
+ *   Rating: 3
+ */</span>
+<span class="kt">int</span> <span class="nf">isAsciiDigit</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">hbits_fit</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0x3</span><span class="p">;</span> 
+  <span class="kt">int</span> <span class="n">lbits_fit</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="o">~</span><span class="mh">0xA</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">);</span> 
+
+  <span class="k">return</span> <span class="p">(</span><span class="o">!</span><span class="n">hbits_fit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">!!</span><span class="n">lbits_fit</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">0x30 = 0011 0000</code> 以及 <code class="language-plaintext highlighter-rouge">0x39 = 0011 1001</code> 可以看出 <code class="language-plaintext highlighter-rouge">0011</code> 也就是 <code class="language-plaintext highlighter-rouge">0x3_</code> 部分对于二者而言是一致的， 因而 <code class="language-plaintext highlighter-rouge">x &gt;&gt; 4 == 3</code> 是首要的判断条件。 另外就是保证末尾 4 位位于 0 ~ 9 之间即可。 那么首先通过 <code class="language-plaintext highlighter-rouge">&amp; 0xF</code> 运算读取最后 4 位的数据， 根据前面的 <code class="language-plaintext highlighter-rouge">negate</code> 实现方式使 <code class="language-plaintext highlighter-rouge">0xA</code> 成为负数方便做差， 若结果是负数则说明尾数在范围之内。</p>
+
+<h3 id="7-conditional">7. conditional</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * conditional - same as x ? y : z 
+ *   Example: conditional(2,4,5) = 4
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 16
+ *   Rating: 3
+ */</span>
+<span class="kt">int</span> <span class="nf">conditional</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt">int</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">ifTrue</span> <span class="o">=</span> <span class="o">!!</span><span class="n">x</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">cond</span> <span class="o">=</span> <span class="o">~</span><span class="n">ifTrue</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+  <span class="kt">int</span> <span class="n">neg_y</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">y</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">cond</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">neg_z</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">z</span> <span class="o">&amp;</span> <span class="n">cond</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">y</span> <span class="o">+</span> <span class="n">neg_y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">+</span> <span class="n">neg_z</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>判断 <code class="language-plaintext highlighter-rouge">x</code> 的属性是第一优先级， <code class="language-plaintext highlighter-rouge">!!x</code> 可以将其转换为 0 和 1 两个数。 这步判断也比较关键， 若为 1 则返回 <code class="language-plaintext highlighter-rouge">y</code> 反之则返回 <code class="language-plaintext highlighter-rouge">z</code>， 故而需要利用对 <code class="language-plaintext highlighter-rouge">x</code> 的判断结果。</p>
+
+<ul>
+  <li>需要依据判断结果消除 <code class="language-plaintext highlighter-rouge">y</code> 或 <code class="language-plaintext highlighter-rouge">z</code> 对结果的影响。</li>
+  <li><code class="language-plaintext highlighter-rouge">-y</code> 和 <code class="language-plaintext highlighter-rouge">-z</code> 与前述结果进行条件加和可以达到目的。</li>
+</ul>
+
+<p>可知对 0 和 1 分别取反可以得到 <code class="language-plaintext highlighter-rouge">0xFFFFFFFF</code> 以及 <code class="language-plaintext highlighter-rouge">0xFFFFFFFE</code>， 若再加上 1 则可以得到 <code class="language-plaintext highlighter-rouge">0x00000000</code> 与 <code class="language-plaintext highlighter-rouge">0xFFFFFFFF</code>， 这个结果正是进行条件选择的依据。 利用 <code class="language-plaintext highlighter-rouge">&amp;</code> 操作符即可选择 <code class="language-plaintext highlighter-rouge">-y</code> 与 <code class="language-plaintext highlighter-rouge">-z</code> 之一为 0， 则该数对后续返回值不会造成影响。</p>
+
+<h3 id="8-islessorequal">8. isLessOrEqual</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * isLessOrEqual - if x &lt;= y  then return 1, else return 0 
+ *   Example: isLessOrEqual(4,5) = 1.
+ *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 24
+ *   Rating: 3
+ */</span>
+<span class="kt">int</span> <span class="nf">isLessOrEqual</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">neg_x</span> <span class="o">=</span> <span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">isLess</span> <span class="o">=</span> <span class="o">!</span><span class="p">((</span><span class="n">neg_x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="n">isEqual</span> <span class="o">=</span> <span class="o">!</span><span class="p">(</span><span class="n">x</span> <span class="o">^</span> <span class="n">y</span><span class="p">);</span>
+  <span class="c1">// we don't know right shift is logical or arithmetic.</span>
+  <span class="kt">int</span> <span class="n">sign_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">sign_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">negxy</span> <span class="o">=</span> <span class="n">sign_x</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">sign_y</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">negyx</span> <span class="o">=</span> <span class="o">~</span><span class="n">sign_x</span> <span class="o">&amp;</span> <span class="n">sign_y</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="n">negxy</span> <span class="o">|</span> <span class="p">(</span><span class="o">!</span><span class="n">negyx</span> <span class="o">&amp;</span> <span class="n">isLess</span><span class="p">)</span> <span class="o">|</span> <span class="n">isEqual</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>可以容易得到 <code class="language-plaintext highlighter-rouge">-x</code> 以及关于 <code class="language-plaintext highlighter-rouge">-x + y</code> 的比较关系， 也就是上式中的 <code class="language-plaintext highlighter-rouge">neg_x</code> 和 <code class="language-plaintext highlighter-rouge">isLess</code>。</p>
+
+<ul>
+  <li>若 <code class="language-plaintext highlighter-rouge">x</code> 为负数， 而 <code class="language-plaintext highlighter-rouge">y</code> 为正数， 显然 <code class="language-plaintext highlighter-rouge">x &lt; y</code>。 但在 <code class="language-plaintext highlighter-rouge">isLess</code> 的判断式中可能会产生溢出导致相反的结果。 那么索性将这部分的判断交由两数的符号而不使用 <code class="language-plaintext highlighter-rouge">isLess</code> 判断式。 因而当 <code class="language-plaintext highlighter-rouge">negxy</code> 为 <code class="language-plaintext highlighter-rouge">1</code> 就无需判断后续的表达式。</li>
+  <li>若 <code class="language-plaintext highlighter-rouge">x</code> 为正数， 而 <code class="language-plaintext highlighter-rouge">y</code> 为负数， 显然 <code class="language-plaintext highlighter-rouge">x &gt; y</code>， 那么只需要返回 <code class="language-plaintext highlighter-rouge">!negyx</code> 就可避免溢出。</li>
+  <li><code class="language-plaintext highlighter-rouge">x</code> 与 <code class="language-plaintext highlighter-rouge">y</code> 同号时交予 <code class="language-plaintext highlighter-rouge">isLess</code> 判断即可， 但这个判断是与 <code class="language-plaintext highlighter-rouge">negyx</code> 或者 <code class="language-plaintext highlighter-rouge">negxy</code> 相关联的， 因而需要选其一进行相与操作， 否则前两点叙述中对 <em>后续部分无需判断</em> 的叙述就不成立了。</li>
+  <li>另外额外考虑两者相等， 通过异或操作符即可判断。</li>
+</ul>
+
+<h3 id="9-logicalneg">9. logicalNeg</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * logicalNeg - implement the ! operator, using all of 
+ *              the legal operators except !
+ *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
+ *   Legal ops: ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *   Max ops: 12
+ *   Rating: 4 
+ */</span>
+<span class="kt">int</span> <span class="nf">logicalNeg</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">ifzero</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="p">((</span><span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">);</span> 
+  <span class="k">return</span> <span class="n">ifzero</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>要求除了 <code class="language-plaintext highlighter-rouge">!</code> 操作符外， 使用任何其他的操作符来实现 <code class="language-plaintext highlighter-rouge">!</code> 的效果。 <code class="language-plaintext highlighter-rouge">0</code> 这个数取负仍然是其本身， 因而可以利用这个特点， 对符号位进行判断。 由于我们需要在输入为 <code class="language-plaintext highlighter-rouge">0</code> 时返回 <code class="language-plaintext highlighter-rouge">1</code>， 以及输入非零时返回 <code class="language-plaintext highlighter-rouge">0</code>， 因而对所获取的符号位需要再取反。 除了 <code class="language-plaintext highlighter-rouge">0</code> 以外的数其负数和正数的符号必然相异， 据此即可得到结果。</p>
+
+<h3 id="10-howmanybits">10. howManyBits</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ *  Examples: howManyBits(12) = 5
+ *            howManyBits(298) = 10
+ *            howManyBits(-5) = 4
+ *            howManyBits(0)  = 1
+ *            howManyBits(-1) = 1
+ *            howManyBits(0x80000000) = 32
+ */</span>
+</code></pre></div></div>
+
+<p>需要分析 example 中所表达的意思， 对于正数而言其实不难推导， <code class="language-plaintext highlighter-rouge">12 = 1100</code> 但返回的位数为 5， 说明对于正数其实是加上了符号位， 那么只需要找到最高位的 1 即可知道该数用补码表示的位数为 <code class="language-plaintext highlighter-rouge">n+1</code> 位， 其中 <code class="language-plaintext highlighter-rouge">n（1~31）</code> 为 1 所在位置。</p>
+
+<p>但是负数部分着实有些迷惑， 看来看去都像是取负之后的结果。 比如 <code class="language-plaintext highlighter-rouge">-5</code> 取负后为 <code class="language-plaintext highlighter-rouge">5 = 0101</code> 加上符号位正好结果为 4。 但是 <code class="language-plaintext highlighter-rouge">-1</code> 和 <code class="language-plaintext highlighter-rouge">0</code> 的结果都为 1 说明对于这两个特殊数字而言符号位是不需要加上的， 那么同理若输入为 <code class="language-plaintext highlighter-rouge">1</code> 也不需要。 （在具体实现中满足了这点要求）</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* howManyBits - return the minimum number of bits required to represent x in
+ *             two's complement
+ *  Examples: howManyBits(12) = 5
+ *            howManyBits(298) = 10
+ *            howManyBits(-5) = 4
+ *            howManyBits(0)  = 1
+ *            howManyBits(-1) = 1
+ *            howManyBits(0x80000000) = 32
+ *  Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+ *  Max ops: 90
+ *  Rating: 4
+ */</span>
+<span class="kt">int</span> <span class="nf">howManyBits</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">div16</span><span class="p">,</span> <span class="n">div8</span><span class="p">,</span> <span class="n">div4</span><span class="p">,</span> <span class="n">div2</span><span class="p">,</span> <span class="n">div1</span><span class="p">,</span> <span class="n">remain</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">;</span>
+  <span class="cm">/* get positive x */</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="p">((</span><span class="o">~</span><span class="n">sign</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">sign</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">x</span><span class="p">));</span>
+  <span class="cm">/* some bits set among high 16 bits or not */</span>
+  <span class="n">div16</span> <span class="o">=</span>  <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">div16</span><span class="p">;</span>
+  <span class="n">div8</span> <span class="o">=</span>  <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">div8</span><span class="p">;</span>
+  <span class="n">div4</span> <span class="o">=</span>  <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">div4</span><span class="p">;</span>
+  <span class="n">div2</span> <span class="o">=</span>  <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">div2</span><span class="p">;</span>
+  <span class="n">div1</span> <span class="o">=</span> <span class="o">!!</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">div1</span><span class="p">;</span>
+  <span class="n">remain</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span>  <span class="n">div16</span> <span class="o">+</span> <span class="n">div8</span> <span class="o">+</span> <span class="n">div4</span> <span class="o">+</span> <span class="n">div2</span> <span class="o">+</span> <span class="n">div1</span> <span class="o">+</span> <span class="n">remain</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>利用分治法， 这部分借鉴了网上的代码。 例如 <code class="language-plaintext highlighter-rouge">div16</code> 实际上就是判断高 16 位是否存在为 1 的 bit， 若存在则至少有 16 位， 那么接着在高 16 位进一步分治。 否则， 在 [16， 8] 之间进行 8 位的分治依次类推。 最差的情况是 [32, 16], [16, 8], [8, 4], [4, 2], [2, 1] 这些区间内都需要进行判断。</p>
+
+<h3 id="11-floatscale2">11. floatScale2</h3>
+
+<div align="center">
+    <img src="/images/2023-03-07-csapp-datalab/float32.png" alt="Float32 format, CSAPP, Figure 2.32" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Float32 format, CSAPP, Figure 2.32</u></font>
+</div>
+
+<div align="center">
+    <img src="/images/2023-03-07-csapp-datalab/float32_categories.png" alt="Categories of single-precision floating-point values, Figure 2.33" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Categories of single-precision floating-point values, Figure 2.33</u></font>
+</div>
+
+<p>根据书中所描述的 float32 的定义， 需要将输入的 <code class="language-plaintext highlighter-rouge">uint32</code> 的数拆分成符号位 <code class="language-plaintext highlighter-rouge">S(31)</code>， 指数位 <code class="language-plaintext highlighter-rouge">exp(23-30)</code>， 以及小数位 <code class="language-plaintext highlighter-rouge">frac(0-22)</code> 并根据这些数的值区分 Normalized， Denormalized, 以及特殊类型 Infinity, NaN。</p>
+
+\[V = (-1)^{S} \times M \times 2^{E}\]
+
+<p>对于此道题而言， 输入 <code class="language-plaintext highlighter-rouge">uf</code> 需要返回 <code class="language-plaintext highlighter-rouge">2 * uf</code>， 根据上述公式， <code class="language-plaintext highlighter-rouge">E</code> 的值应当加 1。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * floatScale2 - Return bit-level equivalent of expression 2*f for
+ *   floating point argument f.
+ *   Both the argument and result are passed as unsigned int's, but
+ *   they are to be interpreted as the bit-level representation of
+ *   single-precision floating point values.
+ *   When argument is NaN, return argument
+ *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. also if, while
+ *   Max ops: 30
+ *   Rating: 4
+ */</span>
+<span class="kt">unsigned</span> <span class="nf">floatScale2</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">uf</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">unsigned</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x80000000</span><span class="p">);</span>
+  <span class="kt">unsigned</span> <span class="n">exp</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x7F800000</span><span class="p">);</span> <span class="c1">// 8 bits</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">exp</span> <span class="o">^</span> <span class="mh">0x7F800000</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">uf</span><span class="p">;</span>
+  <span class="p">}</span> <span class="c1">// NaN or Infinity </span>
+
+  <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="p">;</span> <span class="c1">// acquire exp</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">exp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">uf</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">sign</span><span class="p">;</span> <span class="c1">// only M and S remain</span>
+  <span class="p">}</span>
+  <span class="n">exp</span> <span class="o">=</span> <span class="p">((</span><span class="n">exp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">23</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x7F800000</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">uf</span> <span class="o">&amp;</span> <span class="o">~</span><span class="mh">0x7F800000</span><span class="p">)</span> <span class="o">|</span> <span class="n">exp</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="12-floatfloat2int">12. floatFloat2Int</h3>
+
+<p>对尾数 M 部分的作用以及实现逻辑的理解有缺失， 查阅资料后发现尾数的 M 实际隐藏了一个 1。 严格来说尾数应当是 24 位， $2^0 + 2^{-1} + 2^{-2} + … + 2^{-23}$， 其实际表示的范围为 $[1, 2 - 2^{-23}]$。 （本质上 Normalized 和 Denormalized 是一致的， 书上列了一张表显示二者之间是可以精确衔接的。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * floatFloat2Int - Return bit-level equivalent of expression (int) f
+ *   for floating point argument f.
+ *   Argument is passed as unsigned int, but
+ *   it is to be interpreted as the bit-level representation of a
+ *   single-precision floating point value.
+ *   Anything out of range (including NaN and infinity) should return
+ *   0x80000000u.
+ *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. also if, while
+ *   Max ops: 30
+ *   Rating: 4
+ */</span>
+<span class="kt">int</span> <span class="nf">floatFloat2Int</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">uf</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// fraction should be cut off </span>
+  <span class="kt">int</span> <span class="n">exponent</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="n">bias</span> <span class="o">=</span> <span class="mi">127</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x80000000</span><span class="p">);</span> <span class="c1">// 1 bit</span>
+  <span class="kt">unsigned</span> <span class="n">exp</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x7F800000</span><span class="p">);</span>  <span class="c1">// 8 bits</span>
+  <span class="kt">unsigned</span> <span class="n">frac</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x7FFFFF</span><span class="p">);</span>   <span class="c1">// 23 bits</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">exp</span> <span class="o">^</span> <span class="mh">0x7F800000</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mh">0x80000000u</span><span class="p">;</span>
+  <span class="p">}</span> <span class="c1">// NaN or Infinity </span>
+
+  <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="p">;</span> <span class="c1">// get exponent value</span>
+  <span class="n">exponent</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">-</span> <span class="n">bias</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">exponent</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mh">0x80000000u</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">exponent</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+ 
+  <span class="c1">// give frac the hiden main part</span>
+  <span class="n">frac</span> <span class="o">|=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">23</span><span class="p">;</span>
+  <span class="c1">// fill the gap and move the binary point</span>
+  <span class="n">frac</span> <span class="o">=</span> <span class="p">(</span><span class="n">frac</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">31</span> <span class="o">-</span> <span class="n">exponent</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">((</span><span class="o">!!</span><span class="n">sign</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="o">~</span><span class="n">frac</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">frac</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>另外在计算的时候需要考虑 <code class="language-plaintext highlighter-rouge">bias</code> 对的影响， 32 位机的 <code class="language-plaintext highlighter-rouge">bias</code> 依照公式应当为 $2^k - 1 = 127$， 其中 <code class="language-plaintext highlighter-rouge">k</code> 为 <code class="language-plaintext highlighter-rouge">exp</code> 部分的位数。</p>
+
+<p>由于 exponent 部分的范围是 $[-127, 128]$， 小于零的 exponent 最终截断后的结果为 0， 这是因为尾数 M 部分的范围是 $[1, 2 - 2^{23}]$， 这是一个介于 1 和 2 之间的数， 只要 $exponent &lt;0, exponent \in \scriptstyle{Z}$ 则必有尾数小于 1 成立。 而对于 exponent 大于 31 的情况则以溢出进行处理。</p>
+
+<p>有一处报错值得注意， 当时对于符号部分 <code class="language-plaintext highlighter-rouge">sign</code> 我是与 <code class="language-plaintext highlighter-rouge">frac</code> 做了 <code class="language-plaintext highlighter-rouge">&amp;</code> 操作， 这其实是对浮点数和整数关系的混淆。 浮点数的 <code class="language-plaintext highlighter-rouge">sign</code> 是一种标志， 说明当前的这个浮点数为负数， 因而在转换过程中也应当将其作为符号处理。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: Test floatFloat2Int<span class="o">(</span><span class="nt">-1082130432</span><span class="o">[</span>0xbf800000]<span class="o">)</span> failed
+...
+...Gives <span class="nt">-2147483647</span><span class="o">[</span>0x80000001]. Should be <span class="nt">-1</span><span class="o">[</span>0xffffffff]
+</code></pre></div></div>
+
+<h3 id="13-floatpower2">13. floatPower2</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * floatPower2 - Return bit-level equivalent of the expression 2.0^x
+ *   (2.0 raised to the power x) for any 32-bit integer x.
+ *
+ *   The unsigned value that is returned should have the identical bit
+ *   representation as the single-precision floating-point number 2.0^x.
+ *   If the result is too small to be represented as a denorm, return
+ *   0. If too large, return +INF.
+ * 
+ *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. Also if, while 
+ *   Max ops: 30 
+ *   Rating: 4
+ */</span>
+<span class="kt">unsigned</span> <span class="nf">floatPower2</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">exp</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">bias</span> <span class="o">=</span> <span class="mi">127</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mh">0x7F800000</span><span class="p">;</span> <span class="c1">// +INF(S = 0, exp = 0xFF)</span>
+  <span class="p">}</span>
+  
+  <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">127</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// exp = E + bias</span>
+  <span class="n">exp</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">bias</span><span class="p">;</span> 
+  <span class="k">return</span> <span class="n">exp</span> <span class="o">&lt;&lt;</span> <span class="mi">23</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>最后一题反倒是容易许多， 需要留意 <code class="language-plaintext highlighter-rouge">E</code> 指数部分的范围， 输入的 <code class="language-plaintext highlighter-rouge">x</code> 实际上就是这个指数， 之后只需要将 <code class="language-plaintext highlighter-rouge">exp</code> 通过公式计算出来即可。</p>
+
+<h2 id="总结">总结</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># dlc checker</span>
+dlc:bits.c:149:bitXor: 8 operators
+dlc:bits.c:158:tmin: 1 operators
+dlc:bits.c:169:isTmax: 8 operators
+dlc:bits.c:184:allOddBits: 9 operators
+dlc:bits.c:194:negate: 2 operators
+dlc:bits.c:210:isAsciiDigit: 12 operators
+dlc:bits.c:224:conditional: 14 operators
+dlc:bits.c:243:isLessOrEqual: 19 operators
+dlc:bits.c:256:logicalNeg: 9 operators
+dlc:bits.c:287:howManyBits: 36 operators
+dlc:bits.c:316:floatScale2: 14 operators
+dlc:bits.c:360:floatFloat2Int: 18 operators
+dlc:bits.c:388:floatPower2: 5 operators
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># btest checker</span>
+Score   Rating  Errors  Function
+ 1      1       0       bitXor
+ 1      1       0       tmin
+ 1      1       0       isTmax
+ 2      2       0       allOddBits
+ 2      2       0       negate
+ 3      3       0       isAsciiDigit
+ 3      3       0       conditional
+ 3      3       0       isLessOrEqual
+ 4      4       0       logicalNeg
+ 4      4       0       howManyBits
+ 4      4       0       floatScale2
+ 4      4       0       floatFloat2Int
+ 4      4       0       floatPower2
+Total points: 36/36
+</code></pre></div></div>
+
+<p>整整做了一天半， 还有一些题目参考了别人的思路， 不然想破脑袋也难解决， 在做 Lab 之前还以为这种基础性框架性的书给的 Lab 应该不算太难， 结果是眼高手低。</p>
+
+<p>在做 Lab 的时候也是对之前知识的回顾与查漏， 像浮点数这块我理解的就不是特别透彻， 结果就在做 Lab 时卡住了， 基础知识掌握不牢后续遇到问题就是灾难。 总的来说通过 datalab 我对整数， 浮点数的概念有了比较清晰的理解和认识， 也发现神奇的操作数能在限制极多的情况下也可以实现让人意想不到的功能。 非常建议非 CS 科班但有代码工作需求的同学学习， 即便到研究生阶段也有大用处。</p>
+
+<blockquote>
+  <p>我此前发现过一个非常有趣的网站也是关于 Bit 运算的， 在这里分享一下， <a href="http://graphics.stanford.edu/~seander/bithacks.html" class="button button--outline-primary button--pill">Bit Twiddling Hacks</a>。 CSAPP 有时间还是得多翻翻~</p>
+</blockquote>
+
+<h2 id="website">Website</h2>
+
+<ul>
+  <li><a href="http://www.cs.cmu.edu/afs/cs/academic/class/15213-f15/www/schedule.html">15-213/18-213/15-513: Intro to Computer Systems (ICS)</a></li>
+  <li><a href="http://csapp.cs.cmu.edu/3e/labs.html">Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) - Lab Assignments</a></li>
+  <li><a href="https://github.com/HangX-Ma/csapp-2015">Github repository: csapp-2015</a></li>
+</ul>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-03-07T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/02/27/uboot-concept.html">U-Boot 基础概念与学习分享</a></div><div class="next"><span>NEXT</span><a href="/2023/03/14/vsvim-keyborad-setting.html">vscode(win): vim keyboard mapping</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/03/07/csapp-datalab',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying."><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline"><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" />
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s03s07scsapp-datalab.html';
+      var title = "CSAPP - Data Lab";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s03s07scsapp-datalab.html']").text(view);
+      });
+    });
+  </script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        var copyright = '\n\n'
+        + '\nAuthor: HangX-Ma(一只豆腐)'
+        + '\nEmail: m-contour@qq.com'
+        + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+        + '\nCopyright Notice: '
+        + 'The copyright belongs to the author. '
+        + 'For commercial reproduction, please contact the author for authorization. '
+        + 'For non-commercial reproduction, please indicate the source.'
+
+        clipboardData.setData('text/plain', text + copyright);
+
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+

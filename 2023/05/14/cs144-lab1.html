@@ -1,0 +1,1553 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>cs144-sp23, Lab Checkpoint 1 - 一只豆腐</title>
+
+<meta name="description" content="Lab Checkpoint 0: networking warmup 直接写了 Markdown 记录 Networking by hand 的部分， 另外完成了 ByteStream 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA">
+<meta name="baidu-site-verification" content="codeva-vnhfGS2fxL" /><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewBox="0 0 342 342">
+  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"/>
+  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAiCAYAAAA+stv/AAAN00lEQVRYhWVXCYxd1Xn+z3L3d9/+Zt5s9njGM3jBBsexcWKIoSlEMSlEJGBCICULdalCVUpR05IQCRJSUnUhSgJqSCl2WwkBolATMKsTcCEF4wVv42VmPMubmTdvu/t6zq3uOARQj/TrnnvuPTrL///f/33okb/ZCRhJEEY18JMETozHkMMURkbL0DIcCMMIqnkV5HwXdKwWRH4AAqIQhAFkJBmIjIFhAobpAE4QECwBZwHkdQmIQLeFIf/LxZZpCAL5RbWU/W0UxyF8pNHzXQ5JIoKA0Cf6u/Ag+OwoJHCKcQ6cJ4Dg/7ckSSBJPhzm6TsHoARBTlO2KJJwb71tjzqeD37EfC8I7s1p2i0AeD75yEQaJhFgiGnHIY/FMdvGkuB4payvLuqqF0bRTyzk7wYAi1IK6TSEABCgtI8JQT0CIVQSRYWpMk1YUsAIXVJrdkZblvPSbKPzdc6ThcGe0h+sXlZ9lTEoIgTzCH14JCoSCTDCgiSwG9uW/eRUvX3T2Ey9UMxo3x7uLd9V1PW/9qPgBWQZk0VFXmsy3gMcacWc3pckSdmwA890jOcpwYuSQL4532qcnmuZfxLH7GApq+2M4rjTMu1TMeeQUaVaGDP46NVRhBMgJPHzurJoOF5PTpPB9nxqOsFbR8dr/+FHoTrS371btL2dDcP9FaVkcN1w3zAGBI4fAGNcOXRmancc85e7i9mfEow3duf1+xRZxPNN82FIgIiEflsAfIAFcSdhHD7iOaCm46Z+TvKadjSrSpcdm7RheXfpF4wnr4VRjNcP994z1zLHxuZb2w3XmxuoFC6dbxqPEIJXM8bfa1ru004Qvq2IArhBMBHHfKJp8qfK+eydowPVRw+dmfqKSJAcZ9QnTCwAMJZGEEBy3g10dt6HIGQw2ENfz2XkKwUqqKYb7MUImiN9XY+1bW/fkfHZr65Z3rNxhVC6cGx64eX5lnHh1nXDyVzDevPEudrfJcChO18cyGXUazqWWxdFMtmx/H86ea721FBP5XlNokLbcXYGBANiCQBKAOHz+yA3/OEmKGRFUGU6pSnSnbONzt6GYT+3efXgkY7lvHRkfPbG0YHKd7Oq8nmEUBcAlAzHP0YwHq+32687XlDLavJoTyl/uywKvcWstjEdq+Qzd3lBpNue/+b6lQPf5HZwD7UdkEMGmTRbeAA0CoB8ZuMG4ByBG3ADILnadL0RSRSKIiXFibnmXaMDXd8v6pntccz2W27QYYyX4zj5bcdxDnLOahhTWNHX9SVIYKhjOwcTSDoY4/KJybkfDfV3/T3niWW43piuqpsOnJ19PUw4lAoZCBCHGDjglhVB27GgaZow12x/rlrMXbZmefVhzqGVy6hbANDQTL3988NnZ+7rLuo/9qOw1nGsKKfKyrLurku9IITJWmPvcG/ltlUDPd9/4/DpH0dx6tLSLScna5d0FbK3zy62n26Y1jX93eVBWRQh/f5BIuL+4gmQiQjlvAJaRmnndfWEH0Zpvqum472CAByEkLLxgsFnbC/YMz67+O9uEAKh5MreUv7FvK7Jbcs59+7YxBVZTZa/eOmGPRjjguF4+w3HgyCKnZymDiGUaBcPdz9eLeiXA4EtROSAMAeskFnAsQAUyxAzARiH8umZhR8Ytnuit5T7C5FSeeu64X+UBArHJ2avRYBYKZfRuvL6De+NndtRLeZu27J26MtN09n37P5DJTcI3tVVCRd0bf2WNcP3h1H8q5bpjodx8o7teJsyCp6TArkWzZdAj/uB+mECEeOgAC9nFXR1HEe9QcReA4S2dRdzNzcM+6XXD45dNNPoHFEohaG+inbRyoF3x6bn//Ps/OLzoiisLOrq/ZtWDd5ge+F7huO/ncso6zlPxKZp+5oszuYzSjlmPIgZp0QgVzLC8izxsYZzv6RUKEmyRq9TZeFPVYlsbZvedCGjrRMFwt85OXFzx3bfzsgSdOUyn1ZlaVW1mL3BD6NKFLP6ip4KYAxn3CBcDCJ8WUaW1nUXsp8OovDwkXrz5/WOY1+yZvCWQlbdFkaMezF3KYctiLKJnj5amI9OraDd3dfBuZMn3KCNHhroKmTCmKkIgcAYFzEkHZGkCQsZgVI1pynfqjU6/yMKZN4PoxkvCCAIfVAl4UTEkl+7fnj9yan5G2WJAsEYuvI6mG6we65hvC4IpFtX5VFdkw7wOD4ME/Ca0ecBdQM7UCT2LEESYCB3U4r1hmk/CQlMQcKWio8gUnu+ZbzSNOykq6DvGJuu34pQAgIloCsqzDWMh3O6uqOoqwPnFppAqQaiQJeifaFpgCZL4opqeSdjDDwv3Bsh5wyhpcKKI5818eS5BVBRFkpa9ppKTt8QhFHHDyIbEHS3LB+8IIYwZEAwgrlW59VyLjO8olr+mkgoZBWlUi3lHizlM9ev6CnfGkTxa2l9kEX6Z5osfSqtmn4YQn9X/pZ1Q/23Dfd1b9Vk6ScZmn20PIx/aA4cYGTN6GrggPo1he6qNTsnVVkcGayW7pMF4dJFw/qlIJynDGEcL2FnzPixT65a/oImy4Llemd5kmwRBdpaaJm7NFm6iGLiF3TtFsfzTyaQnFJTVMtqX29ZLg+iaKzWNOpjM42jskjwhi1d42THVZugnFNRvWNtOXR69pmsKueThAfTi+3Hcxm1wTlvU0pAkUQIIwZTC605WRDQ6sHq9xw/xKdm5u/IyHKhZXmzmipuEigZ5Jwf0BTxRcsL/HxGHcpl1K+cmanf0TCcPV4Y1cI4Hu8tZrO2l+wl2z+z8QI/iL8TRkzxg/CAQMmKuabxs7HphccrucxNBV27sNY0DuUyKmBMwAsiaFnuPkDQXNlbuZMQPHJkovZQXznfixHamFFEIWTsQS8MfQC0cqCr9G/1jvnPKY0pZtU7Orb33Gh/9729pfznjY55EvMQr7Q9Z8e5+eZRxmNxcqH14GzTeEYWKc2o8vUXDPT865rBngc4T9SYRZDLyKCrMjQN+6cvvXs8x3nSNdLXdVO9Y50UKOmzvGC61uhAFCcXf2Jk2ZHBamlry3COGbb3VhixffmM8kfn5puH653mYD7Tey12QnheFpVd1aK+be2KvvWCQJSm5UG1nCsJhEy9dXz8S5YbCKuX99R6S/m7U+7nRtESV4QEkjOzjds0Sbh+pK/ynCyJF07MtZ4aqBT/dmVvZc/RidkdTdNuqqq0NubMPzZRe1STpVWbVi1fVi2qf+wFcDv5wtatKUX6Tcy8ehSiJwa7i98KwmjtTMt8NQjDZ4AnU/2V/AMAwIIwrkcxs9q2N53GgyLSNChtywve7Cllt7Yt554gjk+tWlZ9lRKcf398+qamYT/cdrwjhuWBJotXfPbiNYViTvsOh/CA64tArtq8GcI4iOc6rdOEg1fVtP3L+ot3n52pT7l+OK0qsi5S3FhoWXfMd6znIAGDIPAlAYMXRUv5jgm2TMf7L1GgNcAILbSMvYzxMzGD/WECYcq6Es6Ll28Y/VpvJfdAw7Rcgjn4vgTkqks2Q5xEYLs29JcqUNT1OCNp40SAm+sdM5Al0exY7psJQITP05ggpd4pL2YsGVQk2qPJUiIJ1IsZ/6DUzrKY70/JlyJJQ7bjti/o7771krXDE6YbHEpnS5SD7UjndUGCOAgEg1sXYKYOEMf+/1Z6SsObL4RXmi3/6iCKZywvgI7tQDmrAkL4C5yhT2mSuFaWRCxLolfKZsym6ewyFztvpAVCETH4rpc+e7vz+vDwQC+1Q/y07acrEuCIgqKJQAkhQBMCQAi0cQeSpA0x5lBi2ovd+ULz5MTp2SBiSwyYMw4FXfkHxtgnbS/chTB+1vRCDxDqsb3whlXLen5DCPneG8cnfxDmMlDSpHSB9kh/8WdEwLdPtRsx/h0RMSMEIm0CbRkmcB6DTPWUpKcSJ+UEIEqCZjjeq5brHk5z2HY9WL28+t2cpn7j1Ez9Ksb5O5osLuGCItL3ZxbbL8Wc/3rVsuqu+aY5Vmu0n8zKFDzHO7Z2qD9HASyjZUMKaug8HwUfkvTwLmBKQEUYklRbYUgjG/IS+fJU3RVSFZOSkeHeyvrhvq77j0/OXe6F0TvK7yA6LUgYY1BlArOLrd2cc//ilX33m479pB9GSNfUchDEdqWS365oyfsYpzLwQ2VEtqxfk4oLiBhbWji1II6gUlB/mFHk7boi37TYsXf1lXPX1tvW3rO1+hOaLEFaDRlnqT4DFiewtFGRwlzTPF7O65tYAnOSIIx8bvOaowDQ5UXeBVSWH4q5knAQ4QMjV2xem7r/95YK1XxGqUKC711o2y8zzo80DPstALS80bEekQRx6R9MUiaVghEGkQqQ8GQpA6I4TgNaKWS1r8422o8pgvDOwTPndjqet6EkL9/amJdf9B0KniUuWXqBH1O+CSSQV+U/n2vZkwdPT12HMUoL0RZKsZieVhYIcM4giCIoZfXtWVX54lyr81dpXLEUHRGChbb9QiWvf6OczbRPzyy+IQnCjV354iZVtWYI/Zg6B8wZgY8aSkRwfL7c8rxEkYQl1wgUFRBCuhOE4PoR2F4IthuB44cuxmQGYyS6QbC0fU0SU4zotEz3SdcPezFGm/srxRHHD/7bcEIfuApxKP/eaLWifWxHAiFpHEw7M+FrThBAISNDVpXealv+2TjkS9qOJQwAcWiY9j6MyL5UuqeZkwKMKguAQIRFw/yX6YWmuqy7smd2sbNnrtnBlYK+Wy3GIgvD89cAAP8Hiu1jKXG8hHwAAAAASUVORK5CYII="/>
+</svg>
+<a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>cs144-sp23, Lab Checkpoint 1</h1></header><span class="split-space">&nbsp;</span>
+          <a class="edit-on-github"
+            title="Edit on Github"
+            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-14-cs144-lab1.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 1"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Course">Course</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=cs144">cs144</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 14, 2023</span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s14scs144-lab1.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-14T00:00:00+08:00">
+    <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
+<!--more--></p>
+<blockquote>
+  <p><a href="https://kiprey.github.io/2021/11/cs144-lab1/">Kiprey</a> 2021 年的 Lab1 的记录给予了我帮助和启发。</p>
+
+  <p>该实验通过打印信息进行调试会更有效， 可以自己在 <code class="language-plaintext highlighter-rouge">test</code> 文件中增加自己的测试样例。</p>
+</blockquote>
+
+<ul>
+  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
+  <li>CS144 Spring 2023 Lab1 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check1.pdf">Lab Checkpoint 1: stitching substrings into a byte stream</a></li>
+  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
+</ul>
+
+<h2 id="1-实验说明">1. 实验说明</h2>
+
+<div align="center">
+    <img src="/images/2023-05-14-cs144-lab1/cs144_lab_structure.png" alt="CS144 Labs'structure" width="800" />
+    <br />
+    <font size="2" color="#999"><u>CS144 Labs'structure</u></font>
+</div>
+
+<p>Lab1 的实验需要完成 <code class="language-plaintext highlighter-rouge">ByteStream</code> 外部的 <code class="language-plaintext highlighter-rouge">StreamReassembler</code> 部分。 Transmission Control Protocol (TCP) 的传输实现是一种可靠的顺序字节流， 尽管底层网络是以 <em>“best effort”</em> 的形式在进行报文的传输。 这意味着在报文传输的过程中， 数据包中的信息很可能会丢失、 重排、 替换、 或者重复。 这需要 TCP 为数据包提供可靠的底层逻辑。</p>
+
+<p>TCP 的发送端会将字节流分割成短的 <code class="language-plaintext highlighter-rouge">segments</code>， 因此这些数据能够契合报文的容量需求。 但正如前述所说， 底层网络可能会使得这些 <code class="language-plaintext highlighter-rouge">segments</code> 变得不那么可靠， 因而 <code class="language-plaintext highlighter-rouge">StreamReassembler</code> 部分需要实现的， 就是在发送端确保发送的数据是连续的字节流。</p>
+
+<h2 id="2-要求">2. 要求</h2>
+
+<p><code class="language-plaintext highlighter-rouge">StreamReassembler</code> 需要遵循一定的规则。 starter code 中提供了两个公有函数对接口进行了一定的限制。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Insert a new substring to be reassembled into a ByteStream.</span>
+<span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span> <span class="kt">uint64_t</span> <span class="n">first_index</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">data</span><span class="p">,</span> 
+            <span class="kt">bool</span> <span class="n">is_last_substring</span><span class="p">,</span> <span class="n">Writer</span><span class="o">&amp;</span> <span class="n">output</span> <span class="p">);</span>
+<span class="c1">// How many bytes are stored in the Reassembler itself?</span>
+<span class="kt">uint64_t</span> <span class="n">bytes_pending</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>另外， 根据实验说明， 原则上 <code class="language-plaintext highlighter-rouge">Reassembler</code> 需要处理以下几种情况：</p>
+
+<ul>
+  <li>获取的字节流正好是 <code class="language-plaintext highlighter-rouge">ByteStream</code> 所需的下一组字节， 需要将这些字节直接用 <code class="language-plaintext highlighter-rouge">Writer</code> 写入到 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中。</li>
+  <li><code class="language-plaintext highlighter-rouge">ByteStream</code> 很有可能也会存满， 此时若有一部分字节完成 <code class="language-plaintext highlighter-rouge">Reassembler</code> 处理需要传递给 <code class="language-plaintext highlighter-rouge">ByteStream</code>， 则该部分也需要缓存， 实际上就是该部分也需要占用 <code class="language-plaintext highlighter-rouge">Reassembler</code> 内部的缓存空间， 这个内部的缓存空间就是 <em>unassembled</em> 的部分。</li>
+  <li>当收到的字节流能够符合当前的空余空间但在在其更早的字节却不存在的时候 （也就是数据传输产生了空洞， 不连续） 需要将当前收到的字节流在 <code class="language-plaintext highlighter-rouge">Reassembler</code> 中进行缓存。</li>
+  <li><code class="language-plaintext highlighter-rouge">Reassembler</code> 会丢弃那些超出当前空余空间的字节。 并且， 传入 <code class="language-plaintext highlighter-rouge">Reassembler</code> 中的子列 （substring） 可能会存在重复以及重叠， 或者有一部分已经被存入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中， 这些情况都需要考虑并进行处理。</li>
+</ul>
+
+<p>关于存储空间指导书给了下图的提示。</p>
+
+<div align="center">
+    <img src="/images/2023-05-14-cs144-lab1/bytestream_space_interpretation.png" alt="Memory usage limitation of Reassembler and ByteStream" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Memory usage limitation of Reassembler and ByteStream</u></font>
+</div>
+
+<p><code class="language-plaintext highlighter-rouge">Reassembler</code> 与 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的内存上限是之前 Lab0 中规定的 <code class="language-plaintext highlighter-rouge">capacity</code> 的大小。 对于 <code class="language-plaintext highlighter-rouge">Reassembler</code> 而言， <code class="language-plaintext highlighter-rouge">capacity = first_unacceptable_index - first_unpopped_index</code>。 <code class="language-plaintext highlighter-rouge">ByteStream</code> 相对于 <code class="language-plaintext highlighter-rouge">Reassembler</code> 更为底层， 位于网络收发的端口， 负责实际的收发工作。 所以对于途中的几个 <em>first</em> 开头的索引其具备如下含义：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">first_unpopped_index</code>： 已经排序整理且验证正确的部分的起始索引， 这部分（绿色区块）存储在 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中等待发送。</li>
+  <li><code class="language-plaintext highlighter-rouge">first_unassembled_index</code>： 尚未排序的整理验证的部分， 可称其为子列 （substrings）的起始索引， 这部分（红色区块）存储在 <code class="language-plaintext highlighter-rouge">Reassembler</code> 的内部缓存区域。</li>
+  <li><code class="language-plaintext highlighter-rouge">first_unacceptable_index</code>： 需要被丢弃的部分的起始索引。</li>
+</ul>
+
+<h2 id="3-实现思路">3. 实现思路</h2>
+
+<p>依据 <code class="language-plaintext highlighter-rouge">Memory usage limitation of Reassembler and ByteStream</code> 图中所示的几个 <em>index</em>， 其中最为关键的两个应当是 <code class="language-plaintext highlighter-rouge">first_unpopped_index</code> 和 <code class="language-plaintext highlighter-rouge">first_unacceptable_index</code>。 框架程序提供的两个方法函数是不够用的， 我们需要定义几个私有变量以便存储关键信息：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">unassembled_index_</code>： 表示 <code class="language-plaintext highlighter-rouge">first_unassembled_index</code>。</li>
+  <li><code class="language-plaintext highlighter-rouge">unassembled_substrings_</code>： 表示 <em>unassembled</em> 部分的缓存集， 为 <em>map</em> 类型， 可以将存储的 <em>first_index</em> 与其对应的 <em>data</em> 进行映射， 并提高查找速度。</li>
+  <li><code class="language-plaintext highlighter-rouge">is_closed_</code>： 表示接受端已收到最后一节 <em>substring</em>， 并且 <code class="language-plaintext highlighter-rouge">pending_buffer_</code> 也已清空， 此时应当终止此次数据的接收。</li>
+</ul>
+
+<p>另外也对框架代码所给的两个函数的变量与功能进行说明：</p>
+
+<ol>
+  <li>
+    <p><strong>insert</strong></p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span> <span class="kt">uint64_t</span> <span class="n">first_index</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">data</span><span class="p">,</span> 
+         <span class="kt">bool</span> <span class="n">is_last_substring</span><span class="p">,</span> <span class="n">Writer</span><span class="o">&amp;</span> <span class="n">output</span> <span class="p">);</span>
+</code></pre></div>    </div>
+
+    <p>传输 <em>substring</em> 至 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的主体方法， 包含大部分逻辑实现。</p>
+
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">first_index</code>： <em>substring</em> 数据的第一个 index， 需要和上述 <code class="language-plaintext highlighter-rouge">unassembled_index_</code> 进行区分。</li>
+      <li><code class="language-plaintext highlighter-rouge">data</code>： 需要进行传输的 <em>substring</em> 数据。</li>
+      <li><code class="language-plaintext highlighter-rouge">is_last_substring</code>： 最后一条 <em>substring</em> 的标志变量。</li>
+      <li><code class="language-plaintext highlighter-rouge">output</code>： <code class="language-plaintext highlighter-rouge">ByteStream</code> 中实现的 <code class="language-plaintext highlighter-rouge">Writer</code> 类， 将数据写入（push）传输缓存， 这部分信息会被远端的 <code class="language-plaintext highlighter-rouge">Reader</code> 类导出(pop)接收。</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>bytes_pending</strong></p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">uint64_t</span> <span class="n">bytes_pending</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+</code></pre></div>    </div>
+
+    <p>剩余仍存留在 <code class="language-plaintext highlighter-rouge">unassembler</code> 缓存部分的数据大小， 该部分和 <code class="language-plaintext highlighter-rouge">[first_unassembled_index, first_unacceptable_index]</code> 区间的 <code class="language-plaintext highlighter-rouge">available_capability</code> 毫无关系， 需要区分。 <code class="language-plaintext highlighter-rouge">available_capability</code> 表示当前能够接收的 <code class="language-plaintext highlighter-rouge">substring</code> 最大的大小。</p>
+  </li>
+</ol>
+
+<h3 id="30-符号说明与特殊处理">3.0 符号说明与特殊处理</h3>
+
+<h4 id="符号说明">符号说明</h4>
+
+<ul>
+  <li>重叠部分： 以 <code class="language-plaintext highlighter-rouge">=</code> 表示子列和存于 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中或已传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 中的数据重叠的 <em>index</em>。</li>
+  <li>当前数据： 以 <code class="language-plaintext highlighter-rouge">&gt;</code> 表示当前数据。</li>
+  <li>front数据： 以 <code class="language-plaintext highlighter-rouge">F</code> 表示与当前数据最邻近的保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要小。</li>
+  <li>rear数据： 以 <code class="language-plaintext highlighter-rouge">R</code> 表示与当前数据最邻近的保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要大。</li>
+</ul>
+
+<h4 id="特殊情况">特殊情况</h4>
+
+<p>对于特殊情况可以跳过后续繁琐的处理逻辑， 加快处理速度。 对于传入的 <em>substring</em> 而言， 有如下几种特殊情况可以跳过处理直接返回：</p>
+
+<ul>
+  <li><strong>数据重复</strong>， 这意味着 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; unassembled_index_</code>， 传入的 <em>substring</em> 已经是 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的一部分， 无需重复传输数据。</li>
+  <li><strong>缓存不足</strong>， <code class="language-plaintext highlighter-rouge">first_index_ &gt;= unassembled_substrings_ + available_capability</code>， 相当于 <code class="language-plaintext highlighter-rouge">first_index</code> 处于 <code class="language-plaintext highlighter-rouge">first_unacceptable_index</code> 之后的区间， 意味着该 <em>substring</em> 需要被丢弃。 或者 <em><code class="language-plaintext highlighter-rouge">available_capability == 0</code></em>， 此时已经没有空间用于处理。</li>
+  <li><strong>空子列</strong>， <em>substring</em> 传入的 data 的大小为零。</li>
+</ul>
+
+<h3 id="31-unassembled_index_--first_index">3.1 unassembled_index_ &gt;= first_index</h3>
+
+<p>这意味着此时传入的 substring 的一部分是已经传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 中的， 或者全都已经传入了 <code class="language-plaintext highlighter-rouge">ByteStream</code>。 还有可能有一部分和已经在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中缓存的数据重叠， 那么重叠的部分就需要被丢弃。</p>
+
+<ul>
+  <li>
+    <p>部分重叠</p>
+
+    <p>这种情况和有 <code class="language-plaintext highlighter-rouge">rear</code> 部分的处理会差不多， 所以在代码实现上做了整合， 实时细节在 <a href="#32-unassembled_index_--first_index">3.2</a> 节讨论， 唯一有区别的就是在此时需要截断 <code class="language-plaintext highlighter-rouge">[first_index, unassembled_index_]</code> 之间的数据。</p>
+
+    <p>进行截断后的数据是从 <code class="language-plaintext highlighter-rouge">unassembled_index</code> 起始的， 需要检查截断后的 <em>data</em> 的长度， 若截断后的 <em>data</em> 的长度超过了 <em>available_capability</em> 那么需要取 <code class="language-plaintext highlighter-rouge">min(data.size() - overlapped_length, available_capability())</code>。</p>
+
+    <pre><code class="language-txt">      first_index  unassembled_index_
+          v                v      REPEATED_IN_MAP
+  --------+----------------+-----------+---+------+------
+          |================|&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|===|RRRRRR|      
+  --------+----------------+-----------+---+------+------
+                                                  ^
+                                      first_index + data.size() - 1
+</code></pre>
+
+    <pre><code class="language-txt">      first_index  unassembled_index_
+          v                v      REPEATED_IN_MAP
+  --------+----------------+-----------+---+------+------
+          |================|&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|===|&gt;&gt;&gt;&gt;&gt;&gt;|      
+  --------+----------------+-----------+---+------+------
+                                                  ^
+                                      first_index + data.size() - 1
+</code></pre>
+  </li>
+  <li>
+    <p>全部重叠</p>
+
+    <p>这种情况是部分重叠的特殊子集， 已经在特殊情况中处理掉了。</p>
+
+    <pre><code class="language-txt">      first_index     unassembled_index_
+          v                   v
+  --------+-------------------+--------------------------
+          |===================|           ...            
+  --------+-------------------+--------------------------
+                              ^
+                  first_index + data.size() - 1
+</code></pre>
+  </li>
+</ul>
+
+<h3 id="32-unassembled_index_--first_index">3.2 unassembled_index_ &lt; first_index</h3>
+
+<p>在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的数据有些是连续的， 有些则不是连续的， 我们在保存数据的时候是以当前要保存的 <em>data</em> 与该 <em>data</em> 的 <em>first_index</em> 值进行映射的。 那么， 最复杂的情况是， 当前的这段数据正好恰在两段已缓存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 之间。</p>
+
+<ol>
+  <li>
+    <p>讨论传入数据的 <em>first_index</em> 比保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中最邻近的数据的 <em>fisrt_index</em> 小的那部分数据。 可将 <em>index</em> 值较大段的数据称为_rear_index_， 当前数据的 <em>index</em> 仍称作 <em>first_index</em>。 可通过 <code class="language-plaintext highlighter-rouge">map::lower_bound(first_index)</code> 获取大于等于 <code class="language-plaintext highlighter-rouge">first_index</code> 的迭代器。</p>
+
+    <ul>
+      <li>
+        <p>没有重叠</p>
+
+        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理， 判断 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; rear_index</code> 即可。</p>
+
+        <pre><code class="language-txt">                      first_index  rear_index
+                          v            v
+  ----------------------- +----+-------+-------------------+-----------------
+                          |&gt;&gt;&gt;&gt;|       |RRRRRRRRRRRRRRRRRRR|       ...
+  ----------------------- +----+-------+-------------------+-----------------
+                               ^                           ^
+                  first_index + data.size() - 1    rear_index + rear_data.size() - 1
+</code></pre>
+      </li>
+      <li>
+        <p>部分重叠， 与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 需要截断当前的 <em>substring</em> 重复的部分即可， 若截断 <code class="language-plaintext highlighter-rouge">rear</code> 部分重复的数据， 则还需要重新更新 <code class="language-plaintext highlighter-rouge">unassemble_substrings_</code>， 效率不高。 需要满足 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; rear_index + rear_data.size() - 1</code> 的条件， 否则就会变成全部重叠的情况。 此时的重叠部分长度就是 <code class="language-plaintext highlighter-rouge">first_index + data.size() - rear_index</code>。</p>
+
+        <pre><code class="language-txt">              first_index  rear_index
+                  v           v
+  ----------------+-----------+-------+-----------------------+-------------
+                  |&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|=======|RRRRRRRRRRRRRRRRRRRRRRR|    ...
+  ----------------+-----------+-------+-----------------------+-------------
+                                      ^                       ^
+                          first_index + data.size() - 1  rear_index + rear_data.size() - 1
+</code></pre>
+      </li>
+      <li>
+        <p>全部重叠
+  以 <code class="language-plaintext highlighter-rouge">rear</code> 存在全部重叠为例， 这种情况就直接将 <code class="language-plaintext highlighter-rouge">rear</code> 从 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中移除即可。</p>
+
+        <p>需要注意处理完一个最邻近的 <em>substring</em> 后， 可能新的最邻近的 <em>substring</em> 也需要进行处理， 这一般发生在 <em>substring</em> 产生全部重叠的时候， 这能确保当前保存的 <em>substring</em> 的正确性。 更新迭代器时需要更新为 <code class="language-plaintext highlighter-rouge">map::lower_bound(rear_index + rear_data.size() - 1)</code>， 才能跨过当前的 <code class="language-plaintext highlighter-rouge">rear</code> 找到 <code class="language-plaintext highlighter-rouge">next_rear</code> 继续进行处理， <code class="language-plaintext highlighter-rouge">next_rear</code> 也可能还在当前的 <em>data</em> 的覆盖范围。</p>
+      </li>
+    </ul>
+
+    <pre><code class="language-txt">             first_index  rear_index
+                 v           v
+ ----------------+-----------+-------+------------+---+------+-------------
+                 |&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|=======|&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;?????&gt;&gt;&gt;&gt;&gt;&gt;|    ...
+ ----------------+-----------+-------+------------+---+------+-------------
+                                     ^                       ^
+                         rear_index + rear_data.size() - 1  first_index + data.size() - 1
+</code></pre>
+  </li>
+  <li>
+    <p>讨论当前传入数据与保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中 <em>first_index</em> 比当前数据的 <em>first_index</em> 小的最邻近那部分数据的关系。 可将 <em>index</em> 较小段的数据称为 <em>front_index</em>， 当前数据的 <em>index</em> 仍称作 <code class="language-plaintext highlighter-rouge">first_index</code>。 与 <code class="language-plaintext highlighter-rouge">rear</code> 不同的是， 最多只有一个 <code class="language-plaintext highlighter-rouge">front</code> 数据存在。 若 <code class="language-plaintext highlighter-rouge">map::lower_bound(first_index)</code> 得到的迭代器不是 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 的头部， 说明存在 <code class="language-plaintext highlighter-rouge">front</code>， 只需要将该位置所在的迭代器向前更新一步即可。 相较从头向后扫描查找与 <code class="language-plaintext highlighter-rouge">front</code> 重叠， 这种办法仅需一次操作即可完成。</p>
+
+    <ul>
+      <li>
+        <p>没有重叠</p>
+
+        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理。</p>
+
+        <pre><code class="language-txt">  unassembled_index_  front_index   first_index
+          v              v            v
+  --------+--------------+----+-------+-------------------+-----------------
+          |              |FFFF|       |&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|       ...
+  --------+--------------+----+-------+-------------------+-----------------
+                              ^                           ^
+                  front_index + front_data.size() - 1    first_index + data.size() - 1
+</code></pre>
+      </li>
+      <li>
+        <p>部分重叠</p>
+
+        <p>与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 只需要截断当前的 <em>substring</em> 重复的部分即可， 也可以截断 <code class="language-plaintext highlighter-rouge">front</code> 重复的部分。</p>
+
+        <pre><code class="language-txt">  unassembled_index_  front_index  first_index  
+          v              v            v
+  --------+--------------+------------+---+---------------+-----------------
+          |              |FFFFFFFFFFFF|===|&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;|       ...
+  --------+--------------+------------+---+---------------+-----------------
+                                          ^               ^
+                                              first_index + data.size() - 1
+                              front_index + front_data.size() - 1
+</code></pre>
+      </li>
+      <li>
+        <p>全部重叠</p>
+
+        <p>此时的处理会和 <code class="language-plaintext highlighter-rouge">rear</code> 部分有所区别， 调用 <code class="language-plaintext highlighter-rouge">erase</code> 处理 <em>data</em> 时是从前向后， 而 <code class="language-plaintext highlighter-rouge">rear</code> 是从后向前。</p>
+
+        <pre><code class="language-txt">              front_index  first_index
+                  v           v
+  ----------------+-----------+-------+-----------------------+-------------
+                  |FFFFFFFFFFF|=======|FFFFFFFFFFFFFFFFFFFFFFF|    ...
+  ----------------+-----------+-------+-----------------------+-------------
+                                      ^                       ^
+                          first_index + data.size() - 1  front_index + front_data.size() - 1
+</code></pre>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="33-补充">3.3 补充</h3>
+
+<p>最后将数据加入 <code class="language-plaintext highlighter-rouge">map</code> 缓存的时候需要特别判断 <code class="language-plaintext highlighter-rouge">data.size() &gt; 0</code>， 因为在之前的处理中很可能 <em>data</em> 已经没有实际数据存在了， 这样就不需要将这部分数据放到 <code class="language-plaintext highlighter-rouge">map</code> 结构中。 除此之外， 在调用 <code class="language-plaintext highlighter-rouge">output.push</code> 的时候需要判断前后的 <code class="language-plaintext highlighter-rouge">output.bytes_pushed</code> 的情况， 很可能有一部分数据并没有被传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中， 需要我们手动将这部分数据再保存在 <code class="language-plaintext highlighter-rouge">map</code> 中， 但不要忘了调用 <code class="language-plaintext highlighter-rouge">erase</code> 将之前的 push 不完整的那段数据从 <code class="language-plaintext highlighter-rouge">map</code> 中删除。 在遍历 <code class="language-plaintext highlighter-rouge">map</code> 查找可以传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的数据的时候， 一旦发现 <em>unassembled_index</em> 和获取的 <code class="language-plaintext highlighter-rouge">sub_index</code> 不一致了， 就可以直接跳出循环， 这意味着数据已经不连续了， 没有必要继续数据传递的进程了。</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">reassembler_win.cc</code> 测试不通过， 可能是迭代器更新不对， 以及 <code class="language-plaintext highlighter-rouge">lower_bound</code> 可能用了 <code class="language-plaintext highlighter-rouge">upper_bound</code> 没找到对应的位置。</p>
+
+  <p><code class="language-plaintext highlighter-rouge">reassembler_speed_test.cc</code> 测试发现读取和写入数据不一致， 可能就是没有考虑 push 时仅有一部分数据被传入了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 而导致数据丢失。</p>
+</blockquote>
+
+<h2 id="4-测试结果">4. 测试结果</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/cs144-sp23/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check1
+Test project /home/cs144/cs144-sp23/minnow/build
+      Start  1: compile with bug-checkers
+ 1/17 Test  <span class="c">#1: compile with bug-checkers ........   Passed    4.03 sec</span>
+      Start  3: byte_stream_basics
+ 2/17 Test  <span class="c">#3: byte_stream_basics ...............   Passed    0.02 sec</span>
+      Start  4: byte_stream_capacity
+ 3/17 Test  <span class="c">#4: byte_stream_capacity .............   Passed    0.03 sec</span>
+      Start  5: byte_stream_one_write
+ 4/17 Test  <span class="c">#5: byte_stream_one_write ............   Passed    0.03 sec</span>
+      Start  6: byte_stream_two_writes
+ 5/17 Test  <span class="c">#6: byte_stream_two_writes ...........   Passed    0.02 sec</span>
+      Start  7: byte_stream_many_writes
+ 6/17 Test  <span class="c">#7: byte_stream_many_writes ..........   Passed    0.06 sec</span>
+      Start  8: byte_stream_stress_test
+ 7/17 Test  <span class="c">#8: byte_stream_stress_test ..........   Passed    0.03 sec</span>
+      Start  9: reassembler_single
+ 8/17 Test  <span class="c">#9: reassembler_single ...............   Passed    0.02 sec</span>
+      Start 10: reassembler_cap
+ 9/17 Test <span class="c">#10: reassembler_cap ..................   Passed    0.02 sec</span>
+      Start 11: reassembler_seq
+10/17 Test <span class="c">#11: reassembler_seq ..................   Passed    0.03 sec</span>
+      Start 12: reassembler_dup
+11/17 Test <span class="c">#12: reassembler_dup ..................   Passed    0.04 sec</span>
+      Start 13: reassembler_holes
+12/17 Test <span class="c">#13: reassembler_holes ................   Passed    0.02 sec</span>
+      Start 14: reassembler_overlapping
+13/17 Test <span class="c">#14: reassembler_overlapping ..........   Passed    0.02 sec</span>
+      Start 15: reassembler_win
+14/17 Test <span class="c">#15: reassembler_win ..................   Passed    0.30 sec</span>
+      Start 16: compile with optimization
+15/17 Test <span class="c">#16: compile with optimization ........   Passed    1.57 sec</span>
+      Start 17: byte_stream_speed_test
+             ByteStream throughput: 2.26 Gbit/s
+16/17 Test <span class="c">#17: byte_stream_speed_test ...........   Passed    0.25 sec</span>
+      Start 18: reassembler_speed_test
+             Reassembler throughput: 8.10 Gbit/s
+17/17 Test <span class="c">#18: reassembler_speed_test ...........   Passed    0.36 sec</span>
+
+100% tests passed, 0 tests failed out of 17
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>   6.87 sec
+Built target check1
+</code></pre></div></div>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-05-14T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/03/14/vsvim-keyborad-setting.html">vscode(win): vim keyboard mapping</a></div><div class="next"><span>NEXT</span><a href="/2023/05/18/Jekyll-TeXt-config.html">关于 Jekyll TeXt 博客搭建</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/05/14/cs144-lab1',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying."><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline"><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" />
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s05s14scs144-lab1.html';
+      var title = "cs144-sp23, Lab Checkpoint 1";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s05s14scs144-lab1.html']").text(view);
+      });
+    });
+  </script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        var copyright = '\n\n'
+        + '\nAuthor: HangX-Ma(一只豆腐)'
+        + '\nEmail: m-contour@qq.com'
+        + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+        + '\nCopyright Notice: '
+        + 'The copyright belongs to the author. '
+        + 'For commercial reproduction, please contact the author for authorization. '
+        + 'For non-commercial reproduction, please indicate the source.'
+
+        clipboardData.setData('text/plain', text + copyright);
+
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+

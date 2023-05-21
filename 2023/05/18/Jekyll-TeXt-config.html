@@ -1,0 +1,1799 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>关于 Jekyll TeXt 博客搭建 - 一只豆腐</title>
+
+<meta name="description" content="在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA">
+<meta name="baidu-site-verification" content="codeva-vnhfGS2fxL" /><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root">
+<div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner">
+<div class="page__header d-print-none">
+<header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewbox="0 0 342 342">
+  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"></image>
+  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,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"></image>
+</svg>
+<a title="Code, life and embedded system...
+" href="/">一只豆腐</a>
+</div>
+<button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
+</div>
+<nav class="navigation">
+        <ul>
+<li class="navigation__item"><a href="/archive.html">Archive</a></li>
+<li class="navigation__item"><a href="/about.html">About</a></li>
+<li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
+</ul>
+      </nav>
+</div>
+  </header>
+</div>
+<div class="page__content"><div class="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto">
+<!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header">
+<header><h1>关于 Jekyll TeXt 博客搭建</h1></header><span class="split-space"> </span>
+          <a class="edit-on-github" title="Edit on Github" href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-18-Jekyll-TeXt-config.md">
+            <i class="far fa-edit"></i></a>
+</div>
+<meta itemprop="headline" content="关于 Jekyll TeXt 博客搭建">
+<div class="article__info clearfix">
+<ul class="left-col menu">
+<li>
+              <a class="button button--secondary button--pill button--sm" href="/archive.html?tag=Tool">Tool</a>
+            </li>
+<li>
+              <a class="button button--secondary button--pill button--sm" href="/archive.html?tag=TeXt">TeXt</a>
+            </li>
+</ul>
+<ul class="right-col menu">
+<li>
+<i class="fas fa-user"></i> <span>HangX-Ma</span>
+</li>
+<li>
+<i class="far fa-calendar-alt"></i> <span>May 18, 2023</span>
+            </li>
+<li>
+<i class="far fa-edit"></i> <span>May 21, 2023</span>
+            </li>
+<li>
+<i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li>
+</ul>
+</div>
+<meta itemprop="author" content="HangX-Ma">
+<meta itemprop="datePublished" content="2023-05-18T00:00:00+08:00">
+    <meta itemprop="keywords" content="Tool,TeXt">
+<div class="js-article-content">
+<div class="layout--article">
+<!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody">
+<p>之前用 Hexo 搭 Git Pages 的经历实在是惨痛， 个人对前端没什么研究配置非常痛苦， 尤其是还需要装大量的依赖库尝试解决 <strong>图片显示</strong>、 <strong>Markdown显示</strong>， <strong>数学公式显示</strong> 等问题， Node.js 也非常不省心， 库版本冲突也很严重。 咬咬牙用了一段时间博客园， 不简洁， 不优雅， 不顺我心。 偶然间在知乎上看到了一些关于 Hugo， Jekyll， Hexo 相关的比较， Jekyll 虽然用 Ruby 构建速度稍慢 （实际感觉还挺快）， 但关键是 Github 的支持非常友好， 能自动编译并部署网站， 而且相关的社区建设也很不错， 对于只想专注记录并做点代码微调的人而言显得非常良心。 偶然间发现了 <code class="language-plaintext highlighter-rouge">TeXt</code> 这款主题， 文档很新而且很全面， 样式也吸引人， 就此入坑了。 前后花了两天去踩坑配自己心仪的样式， 在此记录一些配置细节， 不定期更新。</p>
+
+<p class="info"><code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 中的配置对 <code class="language-plaintext highlighter-rouge">_config.yml</code> 会进行覆写有更高的优先级。</p>
+
+<h2 id="logo">logo</h2>
+
+<p>给自己的网站增加一个独一无二的 logo 是很多人第一件要做的事， 但这个 logo 尺寸也是有要求的， 例如 Bing 网页抓取的页面不能超过 125 KB。 因而 <code class="language-plaintext highlighter-rouge">logo.svg</code> 尺寸尽可能要小， 否则会导致页面尺寸过大出现网页抓取的 SEO 问题。</p>
+
+<h2 id="bootcdn">bootcdn</h2>
+
+<p>BootCDN 域名已经迁移到 <code class="language-plaintext highlighter-rouge">https://cdn.bootcdn.net/</code>， 以 <code class="language-plaintext highlighter-rouge">https://cdn.bootcss.com/</code> 开头的链接已经全部不可用， 需要在新的 BootCDN 往网站中找到相应的 js 文件进行更新。 需要在 <code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 更新这些链接并适当更新版本， 老旧版本可能会造成一些问题。</p>
+
+<p class="warning">需要注意的是， <code class="language-plaintext highlighter-rouge">mathjax</code> 需要更换为 <code class="language-plaintext highlighter-rouge">https://unpkg.com/</code> 源， BootCDN 源出现 <code class="language-plaintext highlighter-rouge">Uncaught ReferenceError: MathJax is not defined</code>。</p>
+
+<h2 id="leancloud">leancloud</h2>
+
+<p>使用 leancloud 国际版需要更新 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud.js</code> 的 <code class="language-plaintext highlighter-rouge">serverURLs</code> 为如下形式。</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">serverURLs</span><span class="pi">:</span> <span class="s">https://xxxxxxxx.api.lncldglobal.com</span> <span class="c1"># 把xxxxxxxx替换成你自己AppID的前8位字符</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>这个问题是在 valine 的 issue 版面找到的 <a href="https://github.com/xCss/Valine/issues/340">国际版域名问题 #340</a>。</p>
+</blockquote>
+
+<h2 id="pageview">pageview</h2>
+
+<h3 id="1-自动生成文章标识-key">1. 自动生成文章标识 <em>key</em>
+</h3>
+
+<p>按照文档配置好 leancloud 之后发现文章的 views 一直都没有变化， 后检查文档说明发现需要给每篇文章增加一个 <em>unique key</em> 才能进行阅读量的统计。 找到 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud/post.html</code> 发现几个 <code class="language-plaintext highlighter-rouge">page.key</code> 的变量， 以及 <code class="language-plaintext highlighter-rouge">_includes/article-info.html</code> 中有这么一句代码给 <code class="language-plaintext highlighter-rouge">data-page-key</code> 进行了赋值。 <code class="language-plaintext highlighter-rouge">data-page-key</code> 是 <code class="language-plaintext highlighter-rouge">post.html</code> 用以判断是否对 pageview 进行增加的依据。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.key }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
+</code></pre></div></div>
+
+<p>对于 Jekyll 而言， <code class="language-plaintext highlighter-rouge">page.id</code> 以及 <code class="language-plaintext highlighter-rouge">page.url</code> 都是内置的变量， 且对于一个网页而言， 这两个值都可以作为唯一标识， 其作用与 <em>unique key</em> 的作用别无二致。 那么可以选择其中一个对原有的 <code class="language-plaintext highlighter-rouge">page.key</code> 进行替代。 但是， <code class="language-plaintext highlighter-rouge">page.id</code> 当时产生了一个问题， 虽然文章中的 views 部分会增加了， 但文章列表中仍然显示为 0， 我怀疑当时将 <code class="language-plaintext highlighter-rouge">data-page-key</code> 直接改为 <code class="language-plaintext highlighter-rouge">page.id</code>， 并且没有对 <code class="language-plaintext highlighter-rouge">/</code> 进行处理有关系。 实际的更改如下所示：</p>
+
+<ul>
+  <li>
+    <p>post.html</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  { page.key } -&gt;  { page.url }
+  {{ page.key }} -&gt; {{ page.url | replace:'/', 's' }}
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>article.html</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  {{ include.article.key }} -&gt; {{ include.article.url | replace: '/', 's' }}
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<blockquote>
+  <p>该部分有两条在 TeXt theme 的 <em>issues</em> 均有提及</p>
+
+  <ul>
+    <li>原文链接 <a href="https://github.com/Real-king-Ph/Real-king-Ph.GitHub.io/blob/master/_posts/2022-04-06M/2022-04-05-TeXt%E4%B8%BB%E9%A2%98%E4%B8%8B-key%E7%9A%84%E9%87%8D%E8%AE%BE-leancloud%E8%BD%AC%E5%9B%BD%E9%99%85%E7%89%88.md">Key 的重设</a>
+</li>
+    <li><a href="https://github.com/kitian616/jekyll-TeXt-theme/issues/321">Feature request: support post.id for comments</a></li>
+  </ul>
+</blockquote>
+
+<h3 id="2-home-界面的多余的-views">2. Home 界面的多余的 views</h3>
+
+<p>开启 pageview 之后在 Home/Archive/About 界面的右上角也能看到 views 这个字样， 感觉非常多余， 其实只需要在上述的那句 <code class="language-plaintext highlighter-rouge">data-page-key</code> 的代码前加一些判断， 让这个字样在 Home/Archive/About 界面不显示即可。 对于 Archive 以及 About 两个界面， 需要判断 <code class="language-plaintext highlighter-rouge">page.url != '/archive.html'</code> 以及 <code class="language-plaintext highlighter-rouge">page.url != '/about.html'</code>， 但对于 Home 界面就有些麻烦， 这些 views 在 Home 界面是全关联的， 如果右上角的 views 消失了， 后面的 article list 中的也会跟着消失， 所以需要区分 Home 界面本身的 article 和我们的在 <code class="language-plaintext highlighter-rouge">_posts</code> 文件夹下的 article。</p>
+
+<p>发现 <code class="language-plaintext highlighter-rouge">home.html</code> 实际也是一种特殊的 post， 只是它的 title 被认为设置隐藏了。 所以， 只需要给这篇特殊的文章设定 <code class="language-plaintext highlighter-rouge">pageview: false</code> 就能让它的 pageview 字样消失而不影响 Home 界面其他文章的 pageview 字样的显示。</p>
+
+<blockquote>
+  <p>后来想想对于 Archive 和 About 这两个界面而言也是同样的道理， 都应该能用 <code class="language-plaintext highlighter-rouge">pageview: false</code> 将 pageview 字样去除。 实践证明确实可行！</p>
+</blockquote>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--  article-info.html --&gt;</span>
+{%- if page.layout != "404" -%}
+    {%- if page.url != '/about.html' and page.url != '/archive.html' -%}
+        <span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.url | replace: '/', 's' }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
+    {%- endif -%}
+{%- else -%}
+    <span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> 404 {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
+{%- endif -%}
+</code></pre></div></div>
+
+<h2 id="gitalk">gitalk</h2>
+
+<p>从博客园换成 Git Pages 的另外一个原因是评论系统的便利性， Github 账号登陆省去了评论需要重新创建账号的麻烦。 尝试过使用 valine 作为评论系统， 虽然可以和 leancloud 公用 key， 但界面有些复杂不简洁不如 gitalk 赏心悦目。</p>
+
+<p class="info">gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-plaintext highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
+
+<h3 id="1-让-gitalk-摆脱-pagekey">1. 让 gitalk 摆脱 page.key</h3>
+
+<p>这里就不能直接改成把 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中的 <code class="language-plaintext highlighter-rouge">page.key</code> 直接改成 <code class="language-plaintext highlighter-rouge">page.url</code>， 不然在 Home 和 About 这两个界面也会出现评论框， 我改成了 <code class="language-plaintext highlighter-rouge">page.id</code> 就神奇的解决了问题。</p>
+
+<p>另外在 issue 版面我看到一条 <a href="https://github.com/mzlogin/mzlogin.github.io/issues/63">发布的新文章提示“未找到相关的 Issues 进行评论，请联系xxx初始化创建” #63</a> 的问题， 如果自己是管理员的话登陆一下就能自动创建评论区解决问题。 关键的是这一句， 文章链接过长 （超过 50 个字符） 也会导致创建失败出现 <code class="language-plaintext highlighter-rouge">Error: Validation Failed.</code>， 按照 <a href="https://github.com/mzlogin/mzlogin.github.io/commit/5ef353c011b21c04193df19096bc67a7b7140bec">Prevent comments initialize issue</a> 中的记录， 只需要将 <code class="language-plaintext highlighter-rouge">page.id</code> 改为 <code class="language-plaintext highlighter-rouge">page.id | truncate: 50, ''</code> 即可解决问题。</p>
+
+<h3 id="2-error-request-failed-with-status-code-403">2. Error: Request failed with status code 403</h3>
+
+<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-plaintext highlighter-rouge">proxy</code> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-plaintext highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-plaintext highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-plaintext highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <a href="https://xxxx.netlify.app">https://xxxx.netlify.app</a> 的 site 地址， 如果在网页中输入 <a href="https://xxxx.netlify.app/github_access_token">https://xxxx.netlify.app/github_access_token</a> 会出现 <code class="language-plaintext highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-plaintext highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <em>github_access_token</em> 也是可以的。</p>
+
+<blockquote>
+  <p><strong>vercel</strong>: <a href="https://vercel.prohibitorum.top/github_access_token">https://vercel.prohibitorum.top/github_access_token</a><br>
+<strong>netlify</strong>: <a href="https://strong-caramel-969805.netlify.app/github_access_token">https://strong-caramel-969805.netlify.app/github_access_token</a></p>
+</blockquote>
+
+<h3 id="3-error-uconcatjoin-is-not-a-function">3. Error: u.concat(…).join is not a function</h3>
+
+<p>在 gitalk repository 的 issue 界面就可以找到这条问题的处理办法， <a href="https://github.com/gitalk/gitalk/issues/114">Error: u.concat(…).join is not a function! #114</a> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 配置界面给 gitalk 加上如下代码。</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gitalk</span><span class="pi">:</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">gitalk</span>
+</code></pre></div></div>
+
+<p>另外在 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中进行修改。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const gitalk = new Gitalk({
+    // ...
+    labels: '{{ theme.gitalk.labels }}'.split(',').filter(l =&gt; l),
+    //...
+});
+gitalk.render('gitalk-container');
+</code></pre></div></div>
+
+<h2 id="site-exposure">site exposure</h2>
+
+<p>注册 google analytics 并且配置好 <code class="language-plaintext highlighter-rouge">_config.yml</code> 文件中的 <code class="language-plaintext highlighter-rouge">analytics</code> 部分的信息， 会发现 <a href="https://analytics.google.com/">google analytics</a> 好像并没有开始工作。 实际上是 google 并没有将网站纳入搜索索引中， 在 google 搜索中输入 <code class="language-plaintext highlighter-rouge">site:YOUR_GIT_PAGES_ADDRESS</code> 会发现没有任何内容。 要么等着 google 的搜索引擎来抓网页， 要么就自己主动先进行配置申请。</p>
+
+<blockquote>
+  <p><a href="https://evanli.github.io/blog/2018/10/25/let-jekyll-github-pages-be-searched-by-google/">让Google搜索到用Jekyll搭建在Github Pages上的博客</a><br>
+<a href="https://blog.naibabiji.com/tutorial/google-analytics.html">自己建网站怎么添加Google Analytics统计代码查看每日流量</a></p>
+</blockquote>
+
+<h3 id="1-sitemap">1. sitemap</h3>
+
+<p>站点地图(Site Map)是用来注明网站结构的文件，我们希望搜索引擎的爬虫了解我们的网站结构,以便于高效爬取内容，快速建立索引。 使用 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 生成我们的 Git Pages 的 sitemap.xml 文件， 然后将其放在自己网站文件的根目录。 之后就需要在对应的 Google Search Console 中增加 sitemap URL 进行验证。 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 需要在我们增添新的博文或内容后手动进行更新， 以使得搜索引擎能够获取网站的最新内容。 或者通过 jekyll-sitemap 插件自动生成更新。</p>
+
+<h3 id="2-google-search-console">2. Google Search Console</h3>
+
+<p>资源类型选择 “网站前缀”， 提交我们的 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 并对需要的网址进行网站检查， 然后申请编入索引。</p>
+
+<h3 id="3-bing-webmasters">3. Bing Webmasters</h3>
+
+<p>如果想要在 Bing 中增加自己的网站索引也是类似的操作， 只是我们需要用到 <a href="https://www.bing.com/webmasters/">Bing Webmaster Tools</a>。 如果用 Google Search Console 顺利的话， 可以用同一个 Google 账号导入相关的信息， 但 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 验证好像还是需要自己添加。</p>
+
+<h3 id="4-url-上传搜索引擎索引">4. URL 上传搜索引擎索引</h3>
+
+<p>这篇 <a href="https://www.cnblogs.com/duanguyuan/p/16205184.html">文章</a> 介绍了如何通过 API 接口提交 URL 申请， 以加快文章列表被搜索引擎的收录。</p>
+
+<ul>
+  <li>
+    <p>生成 URL 列表手动递交</p>
+
+    <p>在提交 URL 之前需要准备好 URL 列表， 形如</p>
+
+    <div class="language-markdown highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  http://www.your-site.com/1.html
+  http://www.your-site.com/2.html
+</code></pre></div>    </div>
+
+    <p>我们可以手动通过 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 网站生成 sitemap， 或者通过 Github 支持的 <code class="language-plaintext highlighter-rouge">jekyll-sitemap</code> 插件在部署后自动生成， 这个插件可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中看到是已经被添加了的。 那么之后就可以用以下 Linux 命令提取 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 文件中的 URL， 筛选我们最新添加的部分。</p>
+
+    <blockquote>
+      <p>可以使用诸如 compareit 这类插件进行更高效的对比筛选</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>API 推送递交</p>
+
+    <p>Bing 以及 Baidu 都提供了 API 接口进行提交。 根据 <a href="https://www.bing.com/webmasters/">Bing Webmasters</a> 以及 <a href="https://ziyuan.baidu.com/linksubmit/">Baidu linksubmit</a> 提供的 API 结构， 可以更改如下 <code class="language-plaintext highlighter-rouge">commit_urls.py</code> 的相应信息， 使用 <code class="language-plaintext highlighter-rouge">python commit_urls.py</code> 提交网站， 该办法是通过 Git Log 获取最新一条更改信息， 并将其中与 URL 对应部分进行裁剪组合获取所需的 URLs。</p>
+
+    <details>
+      <summary> <code class="language-plaintext highlighter-rouge">commit_urls.py</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
+
+      <div class="language-python highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="kn">import</span> <span class="n">os</span>
+  <span class="kn">import</span> <span class="n">subprocess</span>
+  <span class="kn">import</span> <span class="n">requests</span>
+  <span class="kn">import</span> <span class="n">json</span>
+
+  <span class="k">def</span> <span class="nf">commit_urls</span><span class="p">():</span>
+      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Submit newest URLs to Baidu and Bing</span><span class="sh">"</span><span class="p">)</span>
+      <span class="n">os</span><span class="p">.</span><span class="nf">system</span><span class="p">(</span><span class="sh">"</span><span class="s">git checkout master</span><span class="sh">"</span><span class="p">)</span>
+      <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="c1"># 生成url列表
+</span>      <span class="n">ret</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
+          <span class="sh">"</span><span class="s">git rev-parse --short HEAD</span><span class="sh">"</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span>
+      <span class="p">)</span>
+      <span class="k">if</span> <span class="n">ret</span><span class="p">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">commit_id</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stdout</span><span class="p">,</span> <span class="sh">"</span><span class="s">utf_8</span><span class="sh">"</span><span class="p">).</span><span class="nf">strip</span><span class="p">()</span>
+          <span class="n">ret</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
+              <span class="sh">"</span><span class="s">git show --pretty=</span><span class="sh">"</span> <span class="sh">"</span><span class="s"> --name-only </span><span class="sh">"</span> <span class="o">+</span> <span class="n">commit_id</span><span class="p">,</span>
+              <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span>
+              <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span>
+          <span class="p">)</span>
+          <span class="k">if</span> <span class="n">ret</span><span class="p">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">changes</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stdout</span><span class="p">,</span> <span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+                  <span class="sh">'''</span><span class="s"> 使用 Jekyll 主题直接上传源码至 Git Pages 版本
+                  # change[7:] 去掉最前面的 _post/
+                  change = change[7:]
+                  post_name = change.split(</span><span class="sh">"</span><span class="s">-</span><span class="sh">"</span><span class="s">)
+                  if len(post_name) &gt; 3:
+                      year = str(post_name.__getitem__(0))
+                      month = str(post_name.__getitem__(1))
+                      day = str(post_name.__getitem__(2))
+                      if len(year) == 4 and int(year) &gt;= 2023:
+                          if len(month) == 2 and int(month) &gt;= 1 and int(month) &lt;= 12:
+                              if len(day) == 2 and int(day) &gt;= 1 and int(day) &lt;= 31:
+                                  if change.endswith(</span><span class="sh">"</span><span class="s">.md</span><span class="sh">"</span><span class="s">):
+                                      # change[:-3] 是为了去掉末尾的 .md
+                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(change[:-3]))
+                  </span><span class="sh">'''</span>
+                  <span class="c1"># 文章为 .html 结尾的编译后的静态网站， 自行更改相关配置
+</span>                  <span class="k">if</span> <span class="n">change</span><span class="p">.</span><span class="nf">endswith</span><span class="p">(</span><span class="sh">"</span><span class="s">.html</span><span class="sh">"</span><span class="p">):</span>
+                      <span class="c1"># change[:-5] 是为了去掉末尾的 .html
+</span>                      <span class="n">urls</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">change</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]))</span>
+          <span class="k">else</span><span class="p">:</span>
+              <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">subprocess run error:{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stderr</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">subprocess run error:{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stderr</span><span class="p">))</span>
+
+      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Current submitted URLs:</span><span class="sh">"</span><span class="p">,</span> <span class="n">urls</span><span class="p">)</span>
+
+      <span class="c1"># 提交到 Bing
+</span>      <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">application/json; charset=utf-8</span><span class="sh">"</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">Host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ssl.bing.com</span><span class="sh">"</span><span class="p">,</span>
+      <span class="p">}</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">siteUrl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">https://your-site.com</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">urlList</span><span class="sh">"</span><span class="p">:</span> <span class="n">urls</span><span class="p">}</span>
+      <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+          <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">https://www.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=your-apikey</span><span class="sh">"</span><span class="p">,</span>
+          <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+          <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+      <span class="p">)</span>
+      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Bing</span><span class="sh">'</span><span class="s">s response: </span><span class="sh">"</span><span class="p">,</span> <span class="n">response</span><span class="p">.</span><span class="n">content</span><span class="p">)</span>
+
+      <span class="c1"># 提交到百度
+</span>      <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="sh">"</span><span class="s">User-Agent</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">curl/7.12.1</span><span class="sh">"</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">Host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">data.zz.baidu.com</span><span class="sh">"</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">text/plain</span><span class="sh">"</span>
+      <span class="p">}</span>
+      <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+          <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://data.zz.baidu.com/urls?site=your-site.com&amp;token=your-token</span><span class="sh">"</span><span class="p">,</span>
+          <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+          <span class="n">data</span><span class="o">=</span><span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
+      <span class="p">)</span>
+      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Baidu</span><span class="sh">'</span><span class="s">s response: </span><span class="sh">"</span><span class="p">,</span> <span class="n">response</span><span class="p">.</span><span class="n">content</span><span class="p">)</span>
+</code></pre></div>      </div>
+
+    </details>
+
+    <p>如果成功则会有类似如下的打印</p>
+
+    <div class="language-markdown highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  Submit newest URLs to Baidu and Bing
+  Switched to branch 'master'
+  Your branch is up to date with 'origin/master'.
+  Current submitted URLs: ['https://hangx-ma.github.io/2023-05-18-Jekyll-TeXt-config']
+  Bing's response:  b'{"d":null}'
+  Baidu's response:  b'{"remain":99,"success":1}'
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="copyright">Copyright</h2>
+
+<p>复制博客内容的时候增加版权信息感觉也是挺有用的， 需要确认版权声明的位置， 对于文章而言， 主题内容肯定在 <code class="language-plaintext highlighter-rouge">content</code> 中。 F12 使用开发者工具可以确定 TeXt 主题的文章主题内容是在 <code class="language-plaintext highlighter-rouge">&lt;div class="page__content"&gt;</code> 中。 我在 <code class="language-plaintext highlighter-rouge">_includes/custom</code> 中创建了一个 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听版权声明， 之后只需要在 <code class="language-plaintext highlighter-rouge">_layouts/page.html</code> 中引用该 js 文件即可。 当然为了灵活处理， 可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 增加 copyright 的开关并在引用时加入条件语句。</p>
+
+<details>
+  <summary> <code class="language-plaintext highlighter-rouge">copyright.js</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
+
+  <div class="language-javascript highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
+    <span class="c1">// clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容</span>
+    <span class="kd">let</span> <span class="nx">clipboardData</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">clipboardData</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">clipboardData</span><span class="p">;</span>
+    <span class="c1">// 如果未复制或者未剪切，则return出去</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">clipboardData</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nx">event</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
+    <span class="c1">// Selection 对象，表示用户选择的文本范围或光标的当前位置。</span>
+    <span class="c1">//     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串</span>
+    <span class="kd">let</span> <span class="nx">text</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nf">getSelection</span><span class="p">().</span><span class="nf">toString</span><span class="p">();</span>
+
+    <span class="k">if </span><span class="p">(</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 如果文本存在则先取消文本默认事件</span>
+        <span class="nx">event</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
+        <span class="c1">// 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本</span>
+        <span class="c1">// format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。</span>
+        <span class="c1">// data: 一个 DOMString表示要添加到 drag object的数据。</span>
+        <span class="kd">var</span> <span class="nx">copyright</span> <span class="o">=</span> <span class="dl">'</span><span class="se">\n\n</span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Author: HangX-Ma(一只豆腐)</span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Email: m-contour@qq.com</span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Article Address: </span><span class="dl">'</span> <span class="o">+</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">hostname</span> <span class="o">+</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Copyright Notice: </span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="s1">The copyright belongs to the author. </span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="s1">For commercial reproduction, please contact the author for authorization. </span><span class="dl">'</span>
+        <span class="o">+</span> <span class="dl">'</span><span class="s1">For non-commercial reproduction, please indicate the source.</span><span class="dl">'</span>
+
+        <span class="nx">clipboardData</span><span class="p">.</span><span class="nf">setData</span><span class="p">(</span><span class="dl">'</span><span class="s1">text/plain</span><span class="dl">'</span><span class="p">,</span> <span class="nx">text</span> <span class="o">+</span> <span class="nx">copyright</span><span class="p">);</span>
+
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="kd">var</span> <span class="nx">contents</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementsByClassName</span><span class="p">(</span><span class="dl">"</span><span class="s2">page__content</span><span class="dl">"</span><span class="p">);</span>
+<span class="c1">// 监听文章内容的copy事件</span>
+<span class="nx">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">copy</span><span class="dl">'</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+    <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>  </div>
+
+</details>
+
+<ul>
+  <li>
+    <p>通过 F12 开发者工具查阅自己的网站主题内容所属位置。</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- F12 查阅地址 --&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"root"</span> <span class="na">data-is-touch=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"layout--page js-page-root"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__main js-page-main page__viewport cell cell--auto"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__main-inner"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__header d-print-none"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__content"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__header d-print-none"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>将 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听 javascript 文件在 head 中引用。</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- _layouts/page.html 底部增添 copyright.js --&gt;</span>
+  ...
+  {%- if page.copyright -%}
+  <span class="nt">&lt;script&gt;</span>
+  <span class="p">{</span><span class="o">%-</span> <span class="nx">include</span> <span class="nx">custom</span><span class="o">/</span><span class="nx">copyright</span><span class="p">.</span><span class="nx">js</span> <span class="o">-%</span><span class="p">}</span>
+  <span class="nt">&lt;/script&gt;</span>
+  {%- endif -%}
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/qq_33430083/article/details/105626840">新手如何给Hexo博客在复制时添加版权声明</a></p>
+</blockquote>
+
+<h2 id="markdown">markdown</h2>
+
+<h3 id="1-代码块-liquid-代码误解析">1. 代码块 Liquid 代码误解析</h3>
+
+<p>如果页面是通过Jekyll引擎进行渲染的, 那么在文章中写了 Liquid 代码, 引擎也会将其解析。 找了一圈发现最方便的是针对块内容进行特殊的解释。 这样在 <code class="language-plaintext highlighter-rouge">{% raw %}</code> 以及 <code class="language-plaintext highlighter-rouge">{% endraw %}</code> 之间的代码就不会被解析了， 但也需要注意空白符此时也会被作为 raw 的一部分显示在代码块中。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% raw %}
+{% this %}
+{% endraw %}
+</code></pre></div></div>
+
+<p>作为替代，如果 Jekyll 的版本在 4.0 及以上，也可以在 post 顶部的 YAML 区域指定：</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">render_with_liquid</span><span class="pi">:</span> <span class="kc">false</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/qq_41437512/article/details/123031890">设置Markdown中展示Liquid(Jekyll)但不解析的方式</a><br>
+<a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
+</blockquote>
+
+<h3 id="2-代码块折叠">2. 代码块折叠</h3>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{::options parse_block_html="true" /}
+
+<span class="nt">&lt;details&gt;&lt;summary</span> <span class="na">markdown=</span><span class="s">"span"</span><span class="nt">&gt;</span> `commit_urls.py` <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"fas fa-file-code"</span> <span class="na">style=</span><span class="s">"color: #ff4040;"</span><span class="nt">&gt;&lt;/i&gt;&lt;/summary&gt;</span>
+
+YOUR_CODE_HERE
+
+<span class="nt">&lt;/details&gt;</span>
+
+{::options parse_block_html="false" /}
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://www.endtoend.ai/tutorial/collapsible-code-blocks/">Collapsible Code Blocks in GitHub Pages</a></p>
+</blockquote>
+
+<h2 id="个性化配置">个性化配置</h2>
+
+<h3 id="1-back-to-top">1. Back To Top</h3>
+
+<p>给网页增加返回顶部的功能能提供阅读的便利， 尝试过很多自己添加 js 代码的方式都没成功， 或者是中间没有过渡动画。 Github 上的一个开源的库倒是非常好用， 配置也很简单。 我在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 的 body 部分增加了配置代码， 毕竟所有的页面都是继承自 base， 这样这个 Back-To-Top 按钮就能全局可见了。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- _layouts/base.html --&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    ...
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script&gt;</span><span class="nf">addBackToTop</span><span class="p">({</span>
+        <span class="na">diameter</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="na">backgroundColor</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#FF4040</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">textColor</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#FFFFF0</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span><span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://github.com/vfeskov/vanilla-back-to-top">vfeskov/vanilla-back-to-top</a>: Simple and tiny Back To Top button with no dependencies.</p>
+</blockquote>
+
+<h3 id="2-隐藏-addtoany-悬浮按钮">2. 隐藏 AddToAny 悬浮按钮</h3>
+
+<p>摸索了有一阵子， 发现 AddToAny 的按钮实际上是通过 <code class="language-plaintext highlighter-rouge">&lt;a class="a2a_button_copy_link"&gt;&lt;/a&gt;</code> 这样的语句添加的， 那我们只需要对这些语句段进行控制就能控制 AddToAny 的按钮的隐藏和显示了。 这对于手机阅读非常重要， 读者也不希望一个特占位置的分享按钮影响阅读体验， 把它缩小成一个小三角就很优雅了。</p>
+
+<blockquote>
+  <p>主要通过切换 <code class="language-plaintext highlighter-rouge">display: block</code> 和 <code class="language-plaintext highlighter-rouge">display: none</code> 两种状态完成显示和隐藏。</p>
+</blockquote>
+
+<h3 id="3-访客与阅读统计">3. 访客与阅读统计</h3>
+
+<p>用 “不蒜子”， 非常简易！ 只需要在 <code class="language-plaintext highlighter-rouge">_includes/footer.html</code> 中加入如下代码， 就能获得和咱一样的显示效果了。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"site-info mt-2"</span><span class="nt">&gt;</span>
+      ...
+      <span class="nt">&lt;div</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;script </span><span class="na">async</span> <span class="na">src=</span><span class="s">"//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+        <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_container_site_pv"</span><span class="nt">&gt;</span>
+            Total <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_value_site_pv"</span><span class="nt">&gt;&lt;i</span> <span class="na">class=</span><span class="s">"fa fa-spinner fa-pulse"</span><span class="nt">&gt;&lt;/i&gt;&lt;/span&gt;</span> views,
+        <span class="nt">&lt;/span&gt;</span>
+        <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_container_site_uv"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_value_site_uv"</span><span class="nt">&gt;&lt;i</span> <span class="na">class=</span><span class="s">"fa fa-spinner fa-pulse"</span><span class="nt">&gt;&lt;/i&gt;&lt;/span&gt;</span> visitors.
+        <span class="nt">&lt;/span&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="4-个性化页签">4. 个性化页签</h3>
+
+<p>个性化 Tab 标签。 相信很多人都看过 Tab 标签显示突然崩溃， 然后点回去又是好的。 我创建了 <code class="language-plaintext highlighter-rouge">_include/custom/funny-title.js</code> 文件， 并在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 中以 script 的形式引用了该文件。 这样我的网站的 Tab 也能跟读者开个小小的玩笑了 <img class="emoji" title=":stuck_out_tongue_closed_eyes:" alt=":stuck_out_tongue_closed_eyes:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f61d.png" height="20" width="20">。</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// funny-title.js</span>
+<span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">OriginTitle</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">title</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">titleTime</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">visibilitychange</span><span class="dl">'</span><span class="p">,</span> <span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">hidden</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nf">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">[rel="icon"]</span><span class="dl">'</span><span class="p">).</span><span class="nf">attr</span><span class="p">(</span><span class="dl">'</span><span class="s1">href</span><span class="dl">'</span><span class="p">,</span> <span class="dl">"</span><span class="s2">/favicon.ico</span><span class="dl">"</span><span class="p">);</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">╭(°A°`)╮ 页面崩溃啦 ~</span><span class="dl">'</span><span class="p">;</span>
+            <span class="nf">clearTimeout</span><span class="p">(</span><span class="nx">titleTime</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">[rel="icon"]</span><span class="dl">'</span><span class="p">).</span><span class="nf">attr</span><span class="p">(</span><span class="dl">'</span><span class="s1">href</span><span class="dl">'</span><span class="p">,</span> <span class="dl">"</span><span class="s2">/favicon.ico</span><span class="dl">"</span><span class="p">);</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">(ฅ&gt;ω&lt;*ฅ) 噫又好啦 ~</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">OriginTitle</span><span class="p">;</span>
+            <span class="nx">titleTime</span> <span class="o">=</span> <span class="nf">setTimeout</span><span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+                <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">OriginTitle</span><span class="p">;</span>
+            <span class="p">},</span> <span class="mi">2000</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">})();</span>
+</code></pre></div></div>
+
+<h3 id="5-增加-last_modified-标签">5. 增加 last_modified 标签</h3>
+
+<p>想给有些文章加上 <strong>最后的修改日期</strong> 以方便标识和记忆， 但这个主题的 <code class="language-plaintext highlighter-rouge">last_date</code> 的功能是在文章末尾添加一句最后修改日期， 我想自己加一个和文章日期非常像的样式， 也在文章列表中显示出来的那种。 既然之前操作过 pageview， 已经知道是在 <code class="language-plaintext highlighter-rouge">article-info.html</code> 修改文章样式， 那就模仿已有格式增加。</p>
+
+<ul>
+  <li>
+    <p>增加 <code class="language-plaintext highlighter-rouge">_show_last_modified</code> 标识以判断是否显示最后修改日期。</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  {%- assign _show_last_modified = include.article.last_modified -%}
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>增加新的文章信息。</p>
+
+    <div class="language-html highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>
+  {%- if _show_author or _show_date or _pageview or _show_last_modified -%}
+    {%- if _show_last_modified -%}
+      <span class="nt">&lt;li&gt;</span>
+      {%- include snippets/get-locale-string.html key='ARTICLE_DATE_FORMAT' -%}
+      <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"far fa-edit"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span&gt;</span>{{ include.article.last_modified | date: __return }}<span class="nt">&lt;/span&gt;</span>
+      <span class="nt">&lt;/li&gt;</span>
+    {%- endif -%}
+  {%- endif -%}
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>最后只要在想增加该信息的文章的头部增加如下样式信息就能显示了。</p>
+
+    <div class="language-yml highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">last_modified</span><span class="pi">:</span> <span class="s">2023-05-20</span> <span class="c1"># 需要和日期的格式一致</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+</div>
+<section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none">
+<footer class="article__footer"><meta itemprop="dateModified" content="2023-05-18T00:00:00+08:00">
+<!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe">
+<div class="subscribe">
+<i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a>
+</div>
+</div>
+<div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png">
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix">
+<div class="previous">
+<span>PREVIOUS</span><a href="/2023/05/14/cs144-lab1.html">cs144-sp23, Lab Checkpoint 1</a>
+</div>
+<div class="next">
+<span>NEXT</span><a href="/2023/05/21/protect-source-data.html">私有化 Git Pages 源码仓库</a>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div>
+<section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style>
+<div class="gitalk-wrapper" id="js-gitalk-container"></div>
+<script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/05/18/Jekyll-TeXt-config',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div>
+<div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main">
+<div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma">
+<meta itemprop="url" content="https://HangX-Ma.github.io">
+<meta itemprop="description" content="Never stop studying.">
+<div class="footer__author-links">
+<div class="author-links">
+  <ul class="menu menu--nowrap menu--inline">
+<link itemprop="url" href="https://HangX-Ma.github.io">
+<li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a>
+</li>
+<li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon">
+<svg fill="#000000" width="24px" height="24px" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z"></path>
+</svg>
+</div>
+        </a>
+      </li>
+</ul>
+</div>
+</div>
+    </div>
+<div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> &amp; <a title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+</div>
+    </div>
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal">
+<script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text">
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div>
+</div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s05s18sJekyll-TeXt-config.html';
+      var title = "关于 Jekyll TeXt 博客搭建";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s05s18sJekyll-TeXt-config.html']").text(view);
+      });
+    });
+  </script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        var copyright = '\n\n'
+        + '\nAuthor: HangX-Ma(一只豆腐)'
+        + '\nEmail: m-contour@qq.com'
+        + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+        + '\nCopyright Notice: '
+        + 'The copyright belongs to the author. '
+        + 'For commercial reproduction, please contact the author for authorization. '
+        + 'For non-commercial reproduction, please indicate the source.'
+
+        clipboardData.setData('text/plain', text + copyright);
+
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+

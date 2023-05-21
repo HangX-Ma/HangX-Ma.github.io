@@ -1,0 +1,1723 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>U-Boot 基础概念与学习分享 - 一只豆腐</title>
+
+<meta name="description" content="学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/02/27/uboot-concept.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA">
+<meta name="baidu-site-verification" content="codeva-vnhfGS2fxL" /><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewBox="0 0 342 342">
+  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"/>
+  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,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"/>
+</svg>
+<a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>U-Boot 基础概念与学习分享</h1></header><span class="split-space">&nbsp;</span>
+          <a class="edit-on-github"
+            title="Edit on Github"
+            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-02-27-uboot-concept.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="U-Boot 基础概念与学习分享"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=u-boot">u-boot</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Linux">Linux</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Feb 27, 2023</span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s02s27suboot-concept.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-02-27T00:00:00+08:00">
+    <meta itemprop="keywords" content="u-boot,Linux"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><ul>
+  <li>Board: rockchip-px30, armv8, Cortex-A35</li>
+  <li>U-Boot: <a href="https://github.com/rockchip-linux/u-boot">rockchip-linux/u-boot</a>, branch next-dev</li>
+  <li>Tools: VScode, Exuberant CTags</li>
+</ul>
+
+<h2 id="1-前言">1. 前言</h2>
+
+<p>学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。</p>
+
+<h2 id="2-学习路线">2. 学习路线</h2>
+
+<p>一般来说芯片公司会提供相关的手册介绍各个组件， 这对了解特定型号的开发板是很有效的， 但不适合初学者进行系统的学习， 建立全局概念应当是第一位的。 学习 u-boot 应当对以下几个方面有所了解：</p>
+
+<ul>
+  <li>ARM Assembly， 推荐 <em>Kyle Baldwin</em> 的 <em>ARM Assembly By Example</em>， 我自己在 <a href="https://github.com/HangX-Ma/ARM-Assembly-By-Example">github</a> 上也实现了相关的 lab。</li>
+  <li>Device Tree， <a href="http://devicetree.org/">The DeviceTree Specification</a> 结合具体的 dts/dtsi 文件阅读学习。</li>
+  <li>Linker Script， <a href="https://www.gnu.org/software/binutils/">GNU Binutils</a> 官方的ld文档合具体的lds文件进行阅读学习， 结合 <em>程序员的自我修养–链接装载与库</em> 这本书建立相关概念。</li>
+  <li>Kconfig, <a href="https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html">Kconfig Language</a> 同样用在了 u-boot 中需要对其有一定的了解。</li>
+</ul>
+
+<p>如果对 DM(Driver Model) 有兴趣， 可以阅读 <a href="https://lwn.net/Kernel/LDD3/">Linux Device Driver, Third Edition</a>，但具备以上几块知识已经足够理解 u-boot 启动流程。 Das U-Boot 提供的文档以及 u-boot 源码中提供的 <code class="language-plaintext highlighter-rouge">README</code> 这类文档不需要仔细读完， 这些仅供学习参考， 但 <a href="https://elinux.org/Boot_Loaders#U-Boot">elinux_talks</a> 这部分资源也值得查阅。</p>
+
+<p>全局概念非常重要， 先啃源码建立相关概念， 带着问题探究细节会事半功倍。</p>
+
+<h2 id="3-u-boot-框架与启动阶段">3. U-Boot 框架与启动阶段</h2>
+
+<h3 id="31-u-boot-架构分析">3.1 U-Boot 架构分析</h3>
+
+<p>u-boot 的开发者在<a href="https://github.com/rockchip-linux/u-boot/blob/next-dev/README#L132-L167">开发文档</a>中描述目录的层次结构， 但缺少更为宏观的概括。 以 rockchip-px30 为例， 其在 u-boot 中的文件可被划归为以下几类。以CPU，ARCH，Board 三级对文件进行划分可以帮助我们在配置新板时有更清晰的规划。 <em>Quentin Schulz</em> 在 2017 年的嵌入式 linux 欧洲会议上的演讲 <em><a href="https://elinux.org/images/2/2a/Schulz-how-to-support-new-board-u-boot-linux.pdf">Porting U-Boot and Linux on new ARM boards: a step-by-step guide</a></em> 则具体介绍了详细的实施步骤。</p>
+
+<blockquote>
+  <p>CPU (armv8), ARCH (arm), Board(px30)</p>
+</blockquote>
+
+<ul>
+  <li>CPU 层级依赖文件
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8/*c;*S;*lds</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/armv8/*h</code></li>
+    </ul>
+  </li>
+  <li>ARCH(arm) 层级依赖文件
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/lib/*c;*S;*lds</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/*h;*S</code></li>
+    </ul>
+  </li>
+  <li>Board 层级依赖文件
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/*c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/*c</code></li>
+    </ul>
+  </li>
+  <li>Board 层级配置文件
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/arch-rockchip/*h;*S</code></li>
+      <li><code class="language-plaintext highlighter-rouge">include/rockchip/*h</code></li>
+      <li><code class="language-plaintext highlighter-rouge">include/px30_common.h;evb_px30.h</code></li>
+    </ul>
+  </li>
+  <li>Board 层级非依赖文件
+    <ul>
+      <li>common(cmd, flash, env, usb, …), disk(partition)</li>
+      <li>drivers, fs, net, lib</li>
+    </ul>
+  </li>
+</ul>
+
+<div align="center">
+    <img src="/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>U-Boot Hierarchy, HangX-Ma</u></font>
+</div>
+
+<p>u-boot 的初始化过程就是 CPU $\rightarrow$ ARCH $\rightarrow$ Board 的过程， 但并不严格划归， ARCH部分的通用代码会调用 Board 相关的接口。 在 <a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">wowo</a> 的文章中提到曾经存在于 ARCH 和 Board 之间的 machine 层级由于最新的ARM64架构引入了 device tree 的缘故， 已经将 machine 概念删除了， 在当前 u-boot 中看到的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 的目录或文件就属于 machine 层级， 虽然 u-boot 还未更新相关的架构概念， 但在开发层面 u-boot 和 linux 内核几乎同时适用了 device tree， 这意味着 u-boot 也很可能在之后的更新中删除类似的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 文件。</p>
+
+<h4 id="311-举例从-kconfig-自底向上">3.1.1 举例——从 Kconfig 自底向上</h4>
+
+<p>从 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中自底向上梳理整个编译框架， 假设我们使用的目标板是 rockchip-px30 系列的 evb-px30， 那么 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30</code> 文件夹中定义了目标板的一些依赖代码， 在 <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code> 会有该目标板的配置信息， 类似的配置信息和编译是息息相关的需要格外留意。</p>
+
+<p>从顶层的 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/Kconfig</code> 查看， 可以找到 <code class="language-plaintext highlighter-rouge">TARGET_EVB_PX30</code> 整个关键量以及定义的 <code class="language-plaintext highlighter-rouge">BORAD</code>， <code class="language-plaintext highlighter-rouge">VENDOR</code> 等编译相关的变量。</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># board/rockchip/evb_px30/Kconfig</span>
+if TARGET_EVB_PX30
+
+config SYS_BOARD
+    default <span class="s2">"evb_px30"</span>
+
+config SYS_VENDOR
+    default <span class="s2">"rockchip"</span>
+
+config SYS_CONFIG_NAME
+    default <span class="s2">"evb_px30"</span>
+
+config BOARD_SPECIFIC_OPTIONS <span class="c1"># dummy</span>
+    def_bool y
+
+endif
+</code></pre></div></div>
+
+<p>顺着前述所提及的关键量， 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/Kconfig</code> 中能找到引用信息（尤其是 source 了前述的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件）， 由于当前使用的就是 evb-px30 板， <code class="language-plaintext highlighter-rouge">EVB_PX30</code> 该 <code class="language-plaintext highlighter-rouge">bool</code> 变量是 <code class="language-plaintext highlighter-rouge">true</code>。 可以看到该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件在框架中属于亟待更新的 machine 层级， 所以在该部分可以看到 <code class="language-plaintext highlighter-rouge">SYS_SOC</code> 这个配置变量。 在该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件中还覆盖定义了 <code class="language-plaintext highlighter-rouge">SYS_MALLOC_F_LEN</code> 和 <code class="language-plaintext highlighter-rouge">SPL_SERIAL_SUPPORT</code>。</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/px30/Kconfig</span>
+if ROCKCHIP_PX30
+
+config TARGET_EVB_PX30
+    bool <span class="s2">"EVB_PX30"</span>
+    select BOARD_LATE_INIT
+
+config SYS_SOC
+    default <span class="s2">"rockchip"</span>
+
+config SYS_MALLOC_F_LEN
+    default 0x400
+
+config SPL_SERIAL_SUPPORT
+    default y
+
+source <span class="s2">"board/rockchip/evb_px30/Kconfig"</span>
+
+endif
+</code></pre></div></div>
+
+<p>在更上一级目录则看到更为通用的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件会配置 <code class="language-plaintext highlighter-rouge">ROCKCHIP_PX30</code> 这个定义量。 可以看到在该目录下配置了 px30 系列使用默认配置。 我们再向上一级的查找 <code class="language-plaintext highlighter-rouge">ARCH_ROCKCHIP</code> 变量以其找到顶层的 <code class="language-plaintext highlighter-rouge">xxx_defconfig</code> 配置文件。</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/Kconfig</span>
+if ARCH_ROCKCHIP
+
+config ROCKCHIP_PX30
+    bool <span class="s2">"Support Rockchip PX30"</span>
+    select ARM64 if !ARM64_BOOT_AARCH32
+    select GICV2
+    select ARM_SMCCC
+    select SUPPORT_SPL
+    select SUPPORT_TPL
+    select SPL if !ARM64_BOOT_AARCH32
+    select TPL if !ARM64_BOOT_AARCH32
+    select TPL_TINY_FRAMEWORK if TPL
+
+    imply SPL_SEPARATE_BSS
+    imply SPL_SERIAL_SUPPORT
+    imply TPL_SERIAL_SUPPORT
+    help
+      The Rockchip PX30 is a ARM-based SoC with a quad-core Cortex-A35
+      including NEON and GPU, Mali-400 graphics, several DDR3 options
+      and video codec support. Peripherals include Gigabit Ethernet,
+      USB2 host and OTG, SDIO, I2S, UART, SPI, I2C and PWMs.
+
+if ROCKCHIP_PX30
+
+config TPL_LDSCRIPT
+    default <span class="s2">"arch/arm/mach-rockchip/u-boot-tpl-v8.lds"</span>
+
+config TPL_TEXT_BASE
+    default 0xff0e1000
+
+config TPL_MAX_SIZE
+    default 10240
+
+config ROCKCHIP_RK3326
+    bool <span class="s2">"Support Rockchip RK3326 "</span>
+    help
+      RK3326 can use most code from PX30, but at some situations we have
+      to distinguish between RK3326 and PX30, so this macro gives help.
+      It is usually selected in rk3326 board defconfig.
+endif
+...
+</code></pre></div></div>
+
+<p>在更上一级， 我们先找到了 <code class="language-plaintext highlighter-rouge">arch/arm/Kconfig</code>， ARCH 层级的默认配置。</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/Kconfig</span>
+...
+config ARCH_ROCKCHIP
+    bool <span class="s2">"Support Rockchip SoCs"</span>
+    select OF_CONTROL
+    select BLK
+    select DM
+    select SPL_DM if SPL
+    select SYS_MALLOC_F
+    select SYS_THUMB_BUILD if !ARM64
+    select SPL_SYS_MALLOC_SIMPLE if SPL
+    imply DM_GPIO
+    select DM_SERIAL
+    select DM_SPI
+    select DM_SPI_FLASH
+    select DM_USB if USB
+    select CMD_ROCKUSB if USB_GADGET_DOWNLOAD
+    select ENABLE_ARM_SOC_BOOT0_HOOK
+    select SYS_NS16550
+    select SPI
+    select DEBUG_UART_BOARD_INIT
+    select PANIC_HANG
+    imply DM_MMC
+    imply DM_I2C
+    imply DM_PWM
+    imply DM_REGULATOR
+    imply CMD_FASTBOOT
+    imply FASTBOOT
+    imply FAT_WRITE
+    imply USB_FUNCTION_FASTBOOT
+    imply USB_FUNCTION_ROCKUSB
+    imply SPL_SYSRESET
+    imply TPL_SYSRESET
+    imply ADC
+    imply SARADC_ROCKCHIP
+...
+</code></pre></div></div>
+
+<p>最终我们能在 <code class="language-plaintext highlighter-rouge">configs/evb-px30_defconfig</code><strong>(Target)</strong> 中找到用户自定义的基本宏信息， 另外一些信息则在前述提及的配置文件中。 例如 <code class="language-plaintext highlighter-rouge">include/configs/px30_common.h</code>， <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code>， 以及 <code class="language-plaintext highlighter-rouge">include/configs/rockchip-common.h</code>。 我们自底向上， 特定的板级文件开始溯源， 找到了最终顶层的配置文件。 根据顶层的配置文件以及每个层级的配置文件可以梳理出编译特定板所需的功能。 另外， 在底层的 TARGET 的配置中可以看到诸如 <code class="language-plaintext highlighter-rouge">SYS_xxx</code> 的一系列配置， 这些配置会在更上层的 <code class="language-plaintext highlighter-rouge">arch/Kconfig</code> 中定义。 所以综上可以总结出如下配置关系图。</p>
+
+<div class="mermaid" align="center">
+flowchart
+    subgraph Target
+        evb-px30_defconfig
+    end
+    subgraph arch
+        subgraph arm
+            subgraph mach-rockchip
+                subgraph px30
+                Board/evb-px30
+                end
+            end
+        end
+    end
+    style Target fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style evb-px30_defconfig fill:#F5F5DC,color:#8B8378
+    style arch fill:#4A708B,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style arm fill:#838B8B,stroke:#363636,color:#F5F5F5
+    style mach-rockchip fill:#6CA6CD,stroke:#363636,color:#F5F5F5
+    style px30 fill:#4A708B,stroke:#363636,color:#F5F5F5
+    style Board/evb-px30 fill:#F5F5DC,color:#8B8378
+    Target -.-&gt; arch
+</div>
+
+<h3 id="32-boot-loader-stage">3.2 Boot Loader Stage</h3>
+
+<p>BLx(Boot Loader Stage) 指代 Boot Loader 的各个阶段， 具体的划分根据 u-boot 初始化时所在存储设备略有不同， 一般将 u-boot 启动划分为 4 个阶段， BL0， BL1， BL2， BL3。值得注意的是这与 ARM TrustZone 的划分非属同源， 在 ARM TrustZone 的划分中， u-boot 属于 BL33 Non-secure 部分。</p>
+
+<ul>
+  <li><strong>BL0</strong>， SOC 生产厂家固化在 iROM(Internal ROM) 中的启动代码， 主要负责加载 BL1 的程序， 该部分被称作 Initial Program Loader (IPL) 或者 Primary Program Loader (PPL)。</li>
+  <li><strong>BL1</strong>， 该部分被称为 SPL(Secondary Program Loader)， 若 SPL 部分仍超过了 flash 存储限制， 首先会通过 TPL(Trinary Program Loader) 进行更简洁的初始化如 DDR 部分的初始化，以保证代码体积极小， 之后再从指定位置加载 SPL 继续执行初始化。</li>
+  <li><strong>BL2</strong>， 该阶段 u-boot 运行程序重定位之前的部分， 主要负责一系列初始化操作以及构建 C 语言的运行环境， 最为关键的是将 u-boot 重定位至 DRAM/SDRAM 中继续执行 BL3 阶段的程序。</li>
+  <li><strong>BL3</strong>， 在该阶段实质上加载了u-boot， 当然通过 ATF(Architecture Trusted Firmware) 加载也是可以的。 该阶段在负责初始化 SOC 的外设， 准备内核启动参数以及加载运行内核等操作。</li>
+</ul>
+
+<div align="center">
+    <img src="/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Boot loader sequences, HouchengLin</u></font>
+</div>
+
+<p>根据以上描述， 以图例形式表述 u-boot 的启动流程应当如下所示。</p>
+
+<div class="mermaid" align="center">
+flowchart LR
+    p1(BootROM)
+    p2(TPL, optional)
+    p3(SPL)
+    p4(ATF, optional)
+    p5(U-Boot)
+    p6(Kernel)
+    style p1 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style p2 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
+    style p3 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
+    style p4 fill:#8B1A1A,stroke:#363636,color:#F5F5F5
+    style p5 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style p6 fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    p1 --&gt; p2 --&gt; p3 --&gt; p4 --&gt; p5 --&gt; p6
+    p1 -.-&gt; p3
+    p3 -.-&gt; p5
+    p1 ==&gt; p5
+</div>
+
+<h2 id="4-浅析-tpl">4. 浅析 TPL</h2>
+
+<p>嵌入式的代码铁定有个名为 <code class="language-plaintext highlighter-rouge">start.S</code> 的入口汇编代码， 但在进行源码分析之前， 我比较喜欢阅读链接脚本以此获悉 u-boot 的构成以及分析启动过程中的一些工作。 在 <code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8</code> 目录下有两个 <code class="language-plaintext highlighter-rouge">lds</code> 文件， armv8 的 BootROM $\rightarrow$ u-boot 的引导使用 <code class="language-plaintext highlighter-rouge">u-boot.lds</code> 进行链接， 而在 u-boot 之前存在 SPL/TPL 阶段则会使用 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 或 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/u-boot-tpl-v8.lds</code> 进行链接。</p>
+
+<p>在上述流程中提及 TPL 的存在， 这也是让我比较困惑的， TPL 如何 与 SPL 进行配合实现对 bootloader 的引导启动， 这一块内容值得深入探究。 不妨先从 TPL 的链接脚本入手， 厘清 TPL 阶段的相关逻辑。</p>
+
+<blockquote>
+  <p>这两篇文章关于 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 有着不同详略的解析， 可以用以了解 u-boot 相关的链接脚本的 section 的基本功能以及了解链接脚本的基本概念， 这些内容已有前人做了充分的解析不再赘述。</p>
+
+  <ul>
+    <li><a href="https://blog.csdn.net/u013440753/article/details/105879835">Armv8架构UBOOT 启动篇——SPL(u-boot-spl.lds链接脚本), Kernel_Nuts</a></li>
+    <li><a href="https://blog.csdn.net/maybeYoc/article/details/122937844">ARMv8架构u-boot启动流程详细分析(一), 内核新视界</a></li>
+  </ul>
+</blockquote>
+
+<h3 id="41-tpl-configurations">4.1 TPL Configurations</h3>
+
+<p>根据前述配置， evb-px30 在启动时会经由 TPL 以及 SPL 引导 u-boot。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中可以看到与 TPL 相关的一些定义：<code class="language-plaintext highlighter-rouge">TPL</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_LDSCRIPT</code>， <code class="language-plaintext highlighter-rouge">TPL_TEXT_BASE</code>， <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， <code class="language-plaintext highlighter-rouge">SUPPORT_TPL</code>, 这些宏定义会影响后续编译的过程。</p>
+
+<p>其中， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这个宏定义非常重要。 网上很多博客提及相关内容仅说明在定义 <code class="language-plaintext highlighter-rouge">CONFIG_TPL</code> 之后 <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 会自动定义， 但没有详细说明具体位置。 在 <code class="language-plaintext highlighter-rouge">scripts/Makefile.autoconf</code> 文件的 85-87 行可以看到几行规则， 实际上向 <code class="language-plaintext highlighter-rouge">tpl/u-boot.cfg</code> 传递了 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这两个量。 在其他任何 <code class="language-plaintext highlighter-rouge">config.mk</code>，<code class="language-plaintext highlighter-rouge">Kconfig</code>， <code class="language-plaintext highlighter-rouge">Kbuild</code> 这样的文件中都不会找到这两个量的定义。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># scripts/Makefile.autoconf
+</span><span class="nl">tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
+    <span class="err">$(Q)mkdir</span> <span class="err">-p</span> <span class="nf">$(</span><span class="nb">dir</span> <span class="nv">$@</span><span class="p">)</span>
+    <span class="nf">$(</span><span class="nb">call</span> cmd,u_boot_cfg,-DCONFIG_SPL_BUILD <span class="nt">-DCONFIG_TPL_BUILD</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>另外在顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件我们可以找到这样一则规则， 是 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 的上一级引用。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Makefile
+</span><span class="nl">u-boot.cfg spl/u-boot.cfg tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
+    <span class="err">$(Q)$(MAKE)</span> <span class="err">-f</span> <span class="err">$(srctree)/scripts/Makefile.autoconf</span> <span class="err">$(@)</span>
+</code></pre></div></div>
+
+<p>而当我们查看 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 所描述的功能时， 可以看到前述的 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 以及其他生成的宏定义最终会被转移到 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中以完成全局性的定义。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># This helper makefile is used for creating
+#  - symbolic links (arch/$ARCH/include/asm/arch
+#  - include/autoconf.mk, {spl,tpl}/include/autoconf.mk
+#  - include/config.h
+#
+# When our migration to Kconfig is done
+# (= When we move all CONFIGs from header files to Kconfig)
+# this makefile can be deleted.
+</span></code></pre></div></div>
+
+<h3 id="42-tpl-linker-script">4.2 TPL Linker Script</h3>
+
+<p>BootROM 完成基本的初始化后首先会在 iRAM 中载入 TPL 段的运行代码。</p>
+
+<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">OUTPUT_FORMAT(</span><span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">)</span>
+<span class="err">OUTPUT_ARCH(aarch64)</span>
+<span class="err">ENTRY(_start)</span>
+<span class="err">SECTIONS</span>
+<span class="err">{</span>
+    <span class="nv">.</span> <span class="o">=</span> 0x00000000<span class="p">;</span>
+
+    <span class="nl">.text </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">*(.__image_copy_start)</span>
+        <span class="err">CPUDIR/start.o</span> <span class="err">(.text*)</span>
+        <span class="err">*(.text*)</span>
+    <span class="err">}</span>
+
+    <span class="nl">.rodata </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))</span>
+    <span class="err">}</span>
+
+    <span class="nl">.data </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">*(.data*)</span>
+    <span class="err">}</span>
+
+    <span class="nl">.u_boot_list </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">KEEP(*(SORT(.u_boot_list*)));</span>
+    <span class="err">}</span>
+
+    <span class="nl">.image_copy_end </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">*(.__image_copy_end)</span>
+    <span class="err">}</span>
+
+    <span class="nl">.end </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">*(.__end)</span>
+    <span class="err">}</span>
+
+    <span class="nv">_image_binary_end</span> <span class="o">=</span> .<span class="p">;</span>
+
+    <span class="nl">.bss_start (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+        <span class="err">KEEP(*(.__bss_start));</span>
+    <span class="err">}</span>
+
+    <span class="nl">.bss (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="err">*(.bss*)</span>
+         <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
+    <span class="err">}</span>
+
+    <span class="nl">.bss_end (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
+        <span class="err">KEEP(*(.__bss_end));</span>
+    <span class="err">}</span>
+
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynsym) }</span>
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynstr*) }</span>
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynamic*) }</span>
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.plt*) }</span>
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.interp*) }</span>
+    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.gnu*) }</span>
+<span class="err">}</span>
+
+<span class="c">#if defined(CONFIG_TPL_MAX_SIZE)
+</span><span class="err">ASSERT(__image_copy_end</span> <span class="err">-</span> <span class="err">__image_copy_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_SIZE),</span> <span class="err">\</span>
+ <span class="s2">"TPL image too big"</span><span class="err">);</span>
+<span class="c">#endif
+</span>
+<span class="c">#if defined(CONFIG_TPL_BSS_MAX_SIZE)
+</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">__bss_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_BSS_MAX_SIZE),</span> <span class="err">\</span>
+ <span class="s2">"TPL image BSS too big"</span><span class="err">);</span>
+<span class="c">#endif
+</span>
+<span class="c">#if defined(CONFIG_TPL_MAX_FOOTPRINT)
+</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_FOOTPRINT),</span> <span class="err">\</span>
+ <span class="s2">"TPL image plus BSS too big"</span><span class="err">);</span>
+<span class="c">#endif
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-plaintext highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-plaintext highlighter-rouge">__image_copy_start</code> 和 <code class="language-plaintext highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-plaintext highlighter-rouge">bss</code> 段都被声明了 <code class="language-plaintext highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-plaintext highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
+
+<div align="center">
+    <img src="/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
+    <br />
+    <font size="2" color="#999"><u>TPL Loading Memory, HangX-Ma</u></font>
+</div>
+
+<p>另外可以从 <code class="language-plaintext highlighter-rouge">ld</code> 文件中看到， 入口程序是 <code class="language-plaintext highlighter-rouge">CPUDIR/start.o</code>, <code class="language-plaintext highlighter-rouge">CPUDIR</code> 可以依据层级划分从各个较为顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件中找到具体定义。 但根据架构分析中的概念， 不难得出此处的 <code class="language-plaintext highlighter-rouge">CPUDIR</code> 是 <code class="language-plaintext highlighter-rouge">arch/arm/armv8</code>。 <code class="language-plaintext highlighter-rouge">start.S</code> 最终会定位到 <code class="language-plaintext highlighter-rouge">_main</code> 程序入口继续执行流程。（关于 <code class="language-plaintext highlighter-rouge">start.S</code> 的详细流程可以参考  <a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a> 由于我们的编译是 AArch64 架构， 那么 C Runtime Environment 的建立也应当是 <code class="language-plaintext highlighter-rouge">crt0_64.S</code>， 可以在这个文件中看到， <code class="language-plaintext highlighter-rouge">board_init_f_alloc_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_init_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_boot_flags</code> 几个函数通过在栈顶预留内存来达到给 <code class="language-plaintext highlighter-rouge">GD(Global Data)</code> 开辟内存空间， 在 AArch64 架构中 <code class="language-plaintext highlighter-rouge">GD</code> 指针地址会被保留在 <code class="language-plaintext highlighter-rouge">x18</code> 寄存器中供全局使用， 之后跳转到 <code class="language-plaintext highlighter-rouge">board_init_f</code>。 这是一个分水岭， TPL， SPL 以及 u-boot 都会执行这个函数。</p>
+
+<p>一般来说可以将 u-boot 的启动过程划分为两个阶段， 也就是前述的 BL2 和 BL3 的区分。 Pre-relocation(<code class="language-plaintext highlighter-rouge">common/board_f.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">f</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">flash</code>， 以及 After-relocation(<code class="language-plaintext highlighter-rouge">common/board_r.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">r</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">RAM</code>。</p>
+
+<p>我们知道 TPL 只完成一些很基本的初始化流程， 对于 TPL 而言实际上不存在重定位的需求， 所以关键就在 <code class="language-plaintext highlighter-rouge">board_init_f</code> 这个函数。</p>
+
+<ul>
+  <li>SPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/spl.c</code></li>
+  <li>TPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/tpl.c</code></li>
+  <li>U-Boot： <code class="language-plaintext highlighter-rouge">common/board_f.c</code></li>
+</ul>
+
+<p>在编译链接时， 编译组件就会对这几个文件进行区分， 以保证绑定正确的可执行文件。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Makefile</code> 中就巧妙的在编译 TPL 文件时取消了 SPL 相关文件的生成， 而在编译 SPL 文件时则不受 TPL 的相关定义影响。</p>
+
+<p>根据之前的宏定义梳理的在 TPL 阶段的 <code class="language-plaintext highlighter-rouge">board_init_f</code> 所做的工作如下， 时钟初始化， CPU 部分初始化， UART 串口初始化， SDRAM 初始化。 这些工作都完成之后会通过 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 默认定义的 <code class="language-plaintext highlighter-rouge">TPL_ROCKCHIP_BACK_TO_BROM</code> 宏引导的 <code class="language-plaintext highlighter-rouge">back_to_bootrom</code> 返回 BootROM 阶段再进行下一阶段的 SPL。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>board_init_f
+    rockchip_stimer_init
+    arch_cpu_init
+    debug_uart_init
+    timer_init
+    sdram_init
+    back_to_bootrom
+</code></pre></div></div>
+
+<div class="mermaid" align="center">
+flowchart LR
+    p1(BootROM)
+    p2(TPL)
+    p3(SPL)
+    p4(U-Boot)
+    p5(Kernel)
+    style p1 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style p2 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
+    style p3 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
+    style p4 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    style p5 fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
+    p1 -.-&gt;|stage 1 'init'| p2
+    p2 -.-&gt;|stage 2 'back to rom'| p1
+    p1 --&gt;|stage 3| p3
+    p3 --&gt; p4
+    p4 --&gt; p5
+</div>
+
+<p>至于 SPL 的具体流程可以参考 TPL 的流程进行推导相关的资料也非常详细， 在<a href="#6-参考">参考</a>部分的 <a href="#61-u-boot">U-Boot</a> 部分已经列举了筛选过的较好的资料可供选读。</p>
+
+<h2 id="5-总结">5. 总结</h2>
+
+<p>文章对 u-boot 学习路线进行了简单介绍， 并从 u-boot 构建框架着手解构 u-boot， 以 Kconfig 为索引文件自底向上分析框架。 除此之外还介绍了 Boot Loader 的几个基本流程， 对其中的 TPL 过程进行了剖析。后续会在此篇博文的基础上进行增改扩充基础概念部分， 而其他需要仔细剖析的部分则另建博文进行阐述。</p>
+
+<h2 id="6-参考">6. 参考</h2>
+
+<h3 id="61-u-boot">6.1 U-Boot</h3>
+
+<ul>
+  <li><a href="https://www.cnblogs.com/xiaojiang1025/p/6496704.html">从0移植uboot (二) _uboot启动流程分析, Abnor</a></li>
+  <li><a href="http://www.wowotech.net/sort/u-boot">u-boot分析(文章类), wowo</a></li>
+  <li><a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">X-003-UBOOT-基于Bubblegum-96平台的u-boot移植说明, wowo</a></li>
+  <li><a href="https://wowothink.com/146db8db/">u-boot启动流程, wowothink</a></li>
+  <li><a href="https://blog.csdn.net/maybeYoc/article/details/122937844">ARMv8架构u-boot启动流程详细分析(一), 内核新视界</a></li>
+  <li><a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a></li>
+  <li><a href="https://blog.csdn.net/u013440753/article/details/105897679">Armv8架构UBOOT 启动篇——SPL(start.S), Kernel_Nuts</a></li>
+  <li><a href="https://blog.csdn.net/u013440753/article/details/105879835">Armv8架构UBOOT 启动篇——SPL(u-boot-spl.lds链接脚本), Kernel_Nuts</a></li>
+  <li><a href="https://elinux.org/images/d/d6/U-Boot-Bootloader-for-IoT-Platform-Alexey-Brodkin-Synopsys-2.pdf">U-Boot - Bootloader for IoT Platform? [ELCE 2018], Alexey Brodkin, Synopsys</a></li>
+  <li><a href="https://www.slideshare.net/HouchengLin/uboot-startup-sequence">U-boot startup sequence, HouchengLin</a></li>
+</ul>
+
+<h3 id="62-arm-参考手册">6.2 ARM 参考手册</h3>
+
+<ul>
+  <li><a href="https://developer.arm.com/documentation/100076/0100/">Arm® Instruction Set Reference Guide</a></li>
+  <li><a href="https://developer.arm.com/documentation/dui0068/b/ARM-Instruction-Reference">ARM Developer Suite Assembler Guide</a></li>
+  <li><a href="https://developer.arm.com/documentation/ddi0487/ia/">Arm Architecture Reference Manual for A-profile architecture</a></li>
+  <li><a href="https://developer.arm.com/documentation/100236/0100/">Arm Cortex-A35 Processor Technical Reference Manual</a></li>
+  <li><a href="https://developer.arm.com/documentation/espc0003/1-0/?lang=en">ARM ELF Specification</a></li>
+</ul>
+
+<h3 id="63-aarch64-架构">6.3 AArch64 架构</h3>
+
+<ul>
+  <li><a href="https://developer.arm.com/documentation/101811/latest">Learn the architecture - AArch64 memory management</a></li>
+  <li><a href="https://developer.arm.com/documentation/102406/latest/">Learn the architecture - Introduction to security</a></li>
+  <li><a href="https://developer.arm.com/documentation/102412/latest">Learn the architecture - AArch64 Exception Model</a></li>
+  <li><a href="https://developer.arm.com/documentation/102418/latest/">Learn the architecture - TrustZone for AArch64</a></li>
+</ul>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-02-27T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="next"><span>NEXT</span><a href="/2023/03/07/csapp-datalab.html">CSAPP - Data Lab</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/02/27/uboot-concept',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying."><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline"><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" />
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s02s27suboot-concept.html';
+      var title = "U-Boot 基础概念与学习分享";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s02s27suboot-concept.html']").text(view);
+      });
+    });
+  </script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        var copyright = '\n\n'
+        + '\nAuthor: HangX-Ma(一只豆腐)'
+        + '\nEmail: m-contour@qq.com'
+        + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+        + '\nCopyright Notice: '
+        + 'The copyright belongs to the author. '
+        + 'For commercial reproduction, please contact the author for authorization. '
+        + 'For non-commercial reproduction, please indicate the source.'
+
+        clipboardData.setData('text/plain', text + copyright);
+
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+
