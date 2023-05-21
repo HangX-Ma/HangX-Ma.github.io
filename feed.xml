@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-21T21:21:58+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-21T21:50:08+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
 
 <p>被一件事儿恶心到了， 发现最开始发在博客园上的文章被爬到了一个不知名的小网站， 没有署名， 没有注明来源。 真的对这种侵犯个人权利的事情感到恶心， 至少引用和转载文章需要注明来源。 国内互联网的内容同质化严重， 优质内容也逐渐减少不是没有道理的。</p>
@@ -106,8 +106,8 @@ flowchart LR
         <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span> 
           <span class="s">git clone -b PUBLIC_REPOSITORY_BRANCH git@github.com:YOUR_USER_NAME/YOUR_USER_NAME.github.io.git gitpage_repo</span>
           <span class="s">cd gitpage_repo</span>
-          <span class="s">shopt -s extglob</span>
-          <span class="s">rm -rf !(robots.txt)</span>
+          <span class="s">cp robots.txt ../_site/robots.txt</span>
+          <span class="s">rm -rf *</span>
           <span class="s">cp -r ../_site/* .</span>
           <span class="s">git add -A</span>
           <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "Site Updated: `date +'%Y-%m-%d %H:%M:%S'`" </span>
@@ -145,8 +145,8 @@ flowchart LR
 
 <p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
 
-<pre><code class="language-gemfile">gem "jekyll-redirect-from"
-</code></pre>
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem "jekyll-redirect-from"
+</code></pre></div></div>
 
 <p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
 

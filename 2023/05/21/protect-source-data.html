@@ -409,8 +409,8 @@ flowchart LR
         <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span> 
           <span class="s">git clone -b PUBLIC_REPOSITORY_BRANCH git@github.com:YOUR_USER_NAME/YOUR_USER_NAME.github.io.git gitpage_repo</span>
           <span class="s">cd gitpage_repo</span>
-          <span class="s">shopt -s extglob</span>
-          <span class="s">rm -rf !(robots.txt)</span>
+          <span class="s">cp robots.txt ../_site/robots.txt</span>
+          <span class="s">rm -rf *</span>
           <span class="s">cp -r ../_site/* .</span>
           <span class="s">git add -A</span>
           <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "Site Updated: `date +'%Y-%m-%d %H:%M:%S'`" </span>
@@ -448,8 +448,8 @@ flowchart LR
 
 <p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
 
-<pre><code class="language-gemfile">gem "jekyll-redirect-from"
-</code></pre>
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem "jekyll-redirect-from"
+</code></pre></div></div>
 
 <p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
 
