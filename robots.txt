@@ -1,1 +1,10 @@
-Sitemap: https://hangx-ma.github.io/sitemap.xml
+---
+layout: null
+---
+
+User-agent: *
+
+Disallow: /assets/
+Disallow: /norobots/
+
+Sitemap: {{ site.url }}/sitemap.xml
