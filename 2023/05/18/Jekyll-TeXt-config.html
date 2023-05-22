@@ -553,7 +553,9 @@ gitalk.render('gitalk-container');
                               if len(day) == 2 and int(day) &gt;= 1 and int(day) &lt;= 31:
                                   if change.endswith(</span><span class="sh">"</span><span class="s">.md</span><span class="sh">"</span><span class="s">):
                                       # change[:-3] 是为了去掉末尾的 .md
-                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(change[:-3]))
+                                      prefix = year + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + month + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + day + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s">
+                                      article_path = prefix + change[len(prefix):-3]
+                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(article_path))
                   </span><span class="sh">'''</span>
                   <span class="c1"># 文章为 .html 结尾的编译后的静态网站， 自行更改相关配置
 </span>                  <span class="k">if</span> <span class="n">change</span><span class="p">.</span><span class="nf">endswith</span><span class="p">(</span><span class="sh">"</span><span class="s">.html</span><span class="sh">"</span><span class="p">):</span>
@@ -601,7 +603,7 @@ gitalk.render('gitalk-container');
 <div class="highlight"><pre class="highlight"><code>  Submit newest URLs to Baidu and Bing
   Switched to branch 'master'
   Your branch is up to date with 'origin/master'.
-  Current submitted URLs: ['https://hangx-ma.github.io/2023-05-18-Jekyll-TeXt-config']
+  Current submitted URLs: ['https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config']
   Bing's response:  b'{"d":null}'
   Baidu's response:  b'{"remain":99,"success":1}'
 </code></pre></div>    </div>

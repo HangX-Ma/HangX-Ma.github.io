@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-21T21:50:08+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-22T18:50:22+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
 
 <p>被一件事儿恶心到了， 发现最开始发在博客园上的文章被爬到了一个不知名的小网站， 没有署名， 没有注明来源。 真的对这种侵犯个人权利的事情感到恶心， 至少引用和转载文章需要注明来源。 国内互联网的内容同质化严重， 优质内容也逐渐减少不是没有道理的。</p>
@@ -367,7 +367,9 @@ gitalk.render('gitalk-container');
                               if len(day) == 2 and int(day) &gt;= 1 and int(day) &lt;= 31:
                                   if change.endswith(</span><span class="sh">"</span><span class="s">.md</span><span class="sh">"</span><span class="s">):
                                       # change[:-3] 是为了去掉末尾的 .md
-                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(change[:-3]))
+                                      prefix = year + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + month + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + day + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s">
+                                      article_path = prefix + change[len(prefix):-3]
+                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(article_path))
                   </span><span class="sh">'''</span>
                   <span class="c1"># 文章为 .html 结尾的编译后的静态网站， 自行更改相关配置
 </span>                  <span class="k">if</span> <span class="n">change</span><span class="p">.</span><span class="nf">endswith</span><span class="p">(</span><span class="sh">"</span><span class="s">.html</span><span class="sh">"</span><span class="p">):</span>
@@ -414,7 +416,7 @@ gitalk.render('gitalk-container');
     <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Submit newest URLs to Baidu and Bing
   Switched to branch 'master'
   Your branch is up to date with 'origin/master'.
-  Current submitted URLs: ['https://hangx-ma.github.io/2023-05-18-Jekyll-TeXt-config']
+  Current submitted URLs: ['https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config']
   Bing's response:  b'{"d":null}'
   Baidu's response:  b'{"remain":99,"success":1}'
 </code></pre></div>    </div>
