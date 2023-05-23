@@ -6196,6 +6196,7 @@ html,
 }
 
 /* start custom scss snippet */
+/* start back to top scss snippet */
 .backtop { /* back to top button */
   text-align: center;
   line-height: 40px;
@@ -6240,6 +6241,7 @@ html,
   display: block;
 }
 
+/* end back to top scss snippet */
 /* end custom scss snippet */
 
 /*# sourceMappingURL=main.css.map */

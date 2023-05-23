@@ -1,5 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-23T15:28:20+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-23T20:57:56+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</title><link href="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 2: the TCP receiver" /><published>2023-05-23T00:00:00+08:00</published><updated>2023-05-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/23/cs144-lab2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html"><![CDATA[<p>记录对 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。
+<!--more--></p>
+<ul>
+  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
+  <li>CS144 Spring 2023 Lab2 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check2.pdf">Lab Checkpoint 2: the TCP receiver</a>。</li>
+  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录对 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。]]></summary></entry><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
 
 <p>被一件事儿恶心到了， 发现最开始发在博客园上的文章被爬到了一个不知名的小网站， 没有署名， 没有注明来源。 真的对这种侵犯个人权利的事情感到恶心， 至少引用和转载文章需要注明来源。 国内互联网的内容同质化严重， 优质内容也逐渐减少不是没有道理的。</p>
 
@@ -2295,7 +2301,7 @@ Total points: 36/36
 
 <h2 id="1-前言">1. 前言</h2>
 
-<p>学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。</p>
+<p>学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。</p>
 
 <h2 id="2-学习路线">2. 学习路线</h2>
 
@@ -2783,4 +2789,4 @@ flowchart LR
   <li><a href="https://developer.arm.com/documentation/102406/latest/">Learn the architecture - Introduction to security</a></li>
   <li><a href="https://developer.arm.com/documentation/102412/latest">Learn the architecture - AArch64 Exception Model</a></li>
   <li><a href="https://developer.arm.com/documentation/102418/latest/">Learn the architecture - TrustZone for AArch64</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="u-boot" /><category term="Linux" /><summary type="html"><![CDATA[学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="u-boot" /><category term="Linux" /><summary type="html"><![CDATA[学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。]]></summary></entry></feed>
