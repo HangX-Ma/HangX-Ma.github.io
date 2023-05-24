@@ -263,7 +263,26 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>cs144-sp23, Lab Checkpoint 3: the TCP sender | 一只豆腐</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="cs144-sp23, Lab Checkpoint 3: the TCP sender" />
+<meta name="author" content="HangX-Ma" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。" />
+<meta property="og:description" content="记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。" />
+<link rel="canonical" href="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" />
+<meta property="og:url" content="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" />
+<meta property="og:site_name" content="一只豆腐" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-05-24T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="cs144-sp23, Lab Checkpoint 3: the TCP sender" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-24T00:00:00+08:00","datePublished":"2023-05-24T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。","headline":"cs144-sp23, Lab Checkpoint 3: the TCP sender","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"},"url":"https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -299,7 +318,7 @@
                 href="/archive.html?tag=cs144">cs144</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 24, 2023</span>
             </li><li><i class="fas fa-file-word" style="color: #888888;"></i>
-                <span> Total 2775 words </span>
+                <span> Total 2823 words </span>
             </li>
             <li>
                 <i class="fas fa-clock" style="color: #888888;"></i>
@@ -409,6 +428,10 @@
 </code></pre></div>    </div>
   </li>
 </ul>
+
+<blockquote>
+  <p><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供阶梯思路的 hints。</p>
+</blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">

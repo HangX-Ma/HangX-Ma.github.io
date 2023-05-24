@@ -1,97 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-  <loc>https://hangx-ma.github.io/</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>1.00</priority>
+<loc>https://hangx-ma.github.io/2023/02/27/uboot-concept.html</loc>
+<lastmod>2023-02-27T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/03/07/csapp-datalab.html</loc>
+<lastmod>2023-03-07T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/about.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/03/14/vsvim-keyborad-setting.html</loc>
+<lastmod>2023-03-14T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/05/14/cs144-lab1.html</loc>
+<lastmod>2023-05-14T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=tool</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html</loc>
+<lastmod>2023-05-18T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=TeXt</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/05/21/protect-source-data.html</loc>
+<lastmod>2023-05-21T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/2023/05/14/cs144-lab1.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/05/23/cs144-lab2.html</loc>
+<lastmod>2023-05-23T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=course</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/2023/05/24/cs144-lab3.html</loc>
+<lastmod>2023-05-24T00:00:00+08:00</lastmod>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=cs144</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/about.html</loc>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/2023/03/14/vsvim-keyborad-setting.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/archive.html</loc>
 </url>
 <url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=vscode</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://hangx-ma.github.io/</loc>
 </url>
-<url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=vim</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://hangx-ma.github.io/2023/03/07/csapp-datalab.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=CSAPP</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://hangx-ma.github.io/2023/02/27/uboot-concept.html</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=u-boot</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://hangx-ma.github.io/archive.html?tag=Linux</loc>
-  <lastmod>2023-05-21T01:40:22+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
-
 </urlset>
