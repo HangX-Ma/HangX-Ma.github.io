@@ -299,11 +299,11 @@
                 href="/archive.html?tag=cs144">cs144</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 14, 2023</span>
             </li><li><i class="fas fa-file-word" style="color: #888888;"></i>
-                <span> Total 10059 words </span>
+                <span> Total 10157 words </span>
             </li>
             <li>
                 <i class="fas fa-clock" style="color: #888888;"></i>
-                <span> About 28 mins </span>
+                <span> About 29 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s14scs144-lab1.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-14T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -478,7 +478,7 @@
 
 <h3 id="32-unassembled_index_--first_index">3.2 unassembled_index_ &lt; first_index</h3>
 
-<p>在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的数据有些是连续的， 有些则不是连续的， 我们在保存数据的时候是以当前要保存的 <em>data</em> 与该 <em>data</em> 的 <em>first_index</em> 值进行映射的。 那么， 最复杂的情况是， 当前的这段数据正好恰在两段已缓存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 之间。</p>
+<p>在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的数据有些是连续的， 有些则不是连续的， 我们在保存数据的时候是以当前要保存的 <em>data</em> 与该 <em>data</em> 的 <em>first_index</em> 值进行映射的。 那么， 最复杂的情况是， 当前的这段数据正好恰在两段已缓存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 之间。 这种情况也是需要进行数据截断的， 当前数据可能会超出最大索引值的范围， 这种情况发生在 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &gt; unassembled_index_ + cap - 1</code> 的时候。</p>
 
 <ol>
   <li>
