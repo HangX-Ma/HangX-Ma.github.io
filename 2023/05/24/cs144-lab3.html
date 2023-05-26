@@ -285,49 +285,86 @@
   </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+      <div class="layout--page js-page-root">
+<div class="page__main js-page-main page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="page__main-inner">
+<div class="page__header d-print-none">
+<header class="header"><div class="main">
       <div class="header__title">
-        <div class="header__brand"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewBox="0 0 342 342">
-  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"/>
-  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,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"/>
+        <div class="header__brand">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewbox="0 0 342 342">
+  <image id="图层_1" data-name="图层 1" x="9" width="325" height="340" xlink:href="data:img/png;base64,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"></image>
+  <image id="图层_3" data-name="图层 3" x="9" width="324" height="340" xlink:href="data:img/png;base64,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"></image>
 </svg>
 <a title="Code, life and embedded system...
-" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
-        <ul><li class="navigation__item"><a href="/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
-      </nav></div>
+" href="/">一只豆腐</a>
+</div>
+<button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
+</div>
+<nav class="navigation">
+        <ul>
+<li class="navigation__item"><a href="/archive.html">Archive</a></li>
+<li class="navigation__item"><a href="/about.html">About</a></li>
+<li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
+</ul>
+      </nav>
+</div>
   </header>
-</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+</div>
+<div class="page__content"><div class="main"><div class="grid grid--reverse">
 
               <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
 </aside></div>
 
-              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+              <div class="col-main cell cell--auto">
+<!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>cs144-sp23, Lab Checkpoint 3: the TCP sender</h1></header><span class="split-space">&nbsp;</span>
-          <a class="edit-on-github"
-            title="Edit on Github"
-            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-24-cs144-lab3.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 3: the TCP sender"><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=cs144">cs144</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 24, 2023</span>
-            </li><li><i class="fas fa-file-word" style="color: #888888;"></i>
-                <span> Total 2823 words </span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header">
+<header><h1>cs144-sp23, Lab Checkpoint 3: the TCP sender</h1></header><span class="split-space"> </span>
+          <a class="edit-on-github" title="Edit on Github" href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-24-cs144-lab3.md">
+            <i class="far fa-edit"></i></a>
+</div>
+<meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 3: the TCP sender">
+<div class="article__info clearfix">
+<ul class="left-col menu">
+<li>
+              <a class="button button--secondary button--pill button--sm" href="/archive.html?tag=Course">Course</a>
+            </li>
+<li>
+              <a class="button button--secondary button--pill button--sm" href="/archive.html?tag=cs144">cs144</a>
+            </li>
+</ul>
+<ul class="right-col menu">
+<li>
+<i class="fas fa-user"></i> <span>HangX-Ma</span>
+</li>
+<li>
+<i class="far fa-calendar-alt"></i> <span>May 24, 2023</span>
+            </li>
+<li>
+<i class="fas fa-file-word" style="color: #888888;"></i>
+                <span> Total 5494 words </span>
             </li>
             <li>
                 <i class="fas fa-clock" style="color: #888888;"></i>
-                <span> About 8 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s24scs144-lab3.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-24T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+                <span> About 16 mins </span>
+            </li>
+<li>
+<i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s24scs144-lab3.html">0</span> views</li>
+</ul>
+</div>
+<meta itemprop="author" content="HangX-Ma">
+<meta itemprop="datePublished" content="2023-05-24T00:00:00+08:00">
+    <meta itemprop="keywords" content="Course,cs144">
+<div class="js-article-content">
+<div class="layout--article">
+<!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。
+<div class="article__content" itemprop="articleBody">
+<p>记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
@@ -340,8 +377,8 @@
 <p>Lab3 将实现 TCP 中的 <em><strong>TCPSender</strong></em>， 其需要完成的功能有：</p>
 
 <ul>
-  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以的 TCP Segments 不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
-  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据成为 “outstanding segments”。</li>
+  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以 TCP Segments 的格式不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
+  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据被称为 “outstanding segments”。</li>
   <li>若是这些 segments 在足够长的时间后没有没接收， 则重传这些 segments 数据。</li>
 </ul>
 
@@ -354,12 +391,18 @@
 <p>那么如何界定 <strong>已发出但经过时间太久</strong> 这个定义就尤为重要， 太长的等待时间会增加通信延时， 而太短的等待时间则会浪费网络存储空间以及增大开销。 需要注意如下几点：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
-  <li><strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变以记录 outstanding segments 在超时重传前所经过的时间。</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类与操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
+  <li>
+<strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变 （可能为初值的两倍， 或者等于初值） 以记录 outstanding segments 在超时重传前所经过的时间。</li>
   <li>重传定时器 timer 以 tick 为时间单位， timer 会在某个时间启动， 在经过 RTO 时间后失效。</li>
   <li>包含数据的 segment 被传输后 timer 会被启动， 直到经过 RTO 毫秒后 timer 会失效。</li>
   <li>当所有的 outstanding 数据都被接收后， 服务于重传机制的 timer 将会被停止。</li>
-  <li>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：
+  <li>
+    <p><a href="#func_tick">以下信息与 <em>tick</em> 函数的实现密切相关</a></p>
+
+    <p>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：</p>
+
     <ol>
       <li>将时间最早的未被接收的 segment 进行重传 （<code class="language-plaintext highlighter-rouge">seqno</code> 最小的那个）。</li>
       <li>若此时 window size 非零：
@@ -371,7 +414,11 @@
       <li>重置 timer 并启动， 使其在 RTO 毫秒之后失效 （需要考虑 RTO 已经翻倍）。</li>
     </ol>
   </li>
-  <li>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）
+  <li>
+    <p><a href="#func_receive">以下信息与 <em>receive</em> 函数的实现密切相关</a></p>
+
+    <p>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）:</p>
+
     <ol>
       <li>需要将 RTO 设置为其初始值。</li>
       <li>如果发送方仍有 outstanding 的数据， timer 需要重启并将会在 RTO 毫秒后失效。</li>
@@ -382,57 +429,158 @@
 
 <h2 id="3-tcp-sender-实现">3. TCP Sender 实现</h2>
 
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>TODO</strong>: 在写代码的时候补充更多的细节。</li>
-</ul>
+<div align="center">
+    <img src="/norobots/images/2023-05-23-cs144-lab3/space-structure.png" alt="space structure" width="600">
+    <br>
+    <font size="2" color="#999"><u>space structure, HangX-Ma</u></font>
+</div>
 
-<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。</p>
+<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。 上图是 Sender 端所看到的内存结构以及 <code class="language-plaintext highlighter-rouge">seqno</code> 的分布。</p>
 
 <ul>
   <li>
     <p><em><strong>push:</strong></em> 不断读取新的字节， 并组装生成 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。 需要使满足 window 尺寸的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 尽可能大， 但上限是 <code class="language-plaintext highlighter-rouge">TCPConfig::MAX PAYLOAD SIZE (1452 bytes)</code>。 <code class="language-plaintext highlighter-rouge">TCPSenderMessage::sequence length()</code> 会用以计量该 segment 占用的 <code class="language-plaintext highlighter-rouge">seqno</code> 的尺寸， SYN 和 FIN 都需要计算在内。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Push bytes from the outbound stream */</span>
+    <div class="language-cpp highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Push bytes from the outbound stream */</span>
   <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="n">Reader</span> <span class="o">&amp;</span><span class="n">outbound_stream</span><span class="p">);</span>
 </code></pre></div>    </div>
 
     <blockquote>
-      <p>cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
+      <p>这里也是需要注意 window size 最小应当为 1。 另外我们需要两个布尔变量来记录是否需要给传输的 <em><strong>TCPSenderMessage</strong></em> 增加 SYN 标志或者 FIN 标志。 我们以如下顺序对 msg 进行组装： SYN， payload， FIN。 需要注意的是， FIN 标志设定有一定的条件限制：</p>
+
+      <ul>
+        <li>FIN 之前没设定过；</li>
+        <li>Reader 已经没有数据了；</li>
+        <li>塞完 SYN 和 payload 之后我们的 window size 还能容纳一个 FIN 的位置
+如果本次 FIN 没有传输， 就下次传输， 不会有什么影响。</li>
+      </ul>
+
+      <p>另外， 只有在 outstanding segments 清空后我们才需要在传输新的 <em><strong>TCPSenderMessage</strong></em> 时重置 timer， 否则 timer 将在很大程度上失去其基本作用。 每次传输都需要更新 outstanding segments 集合以及发送的 <code class="language-plaintext highlighter-rouge">seqno</code> 数量， <code class="language-plaintext highlighter-rouge">next_seqno</code> 等信息。</p>
     </blockquote>
+
+    <p class="info">cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
   </li>
   <li>
     <p><em><strong>maybe_send:</strong></em> 必要时发送 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 或者为空。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
+    <div class="language-cpp highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>我们需要额外创建一个队列变量 <code class="language-plaintext highlighter-rouge">segments_out_</code> 来管理需要发送的 segments， 使用队列可以保证传输的先后顺序。 仅在这个队列的元素数量不为零且收到 SYN 信号才返回队列头部的那个数据， 并将其从队列头部移除。</p>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>receive:</strong></em> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
+    <p><em><strong>receive:</strong></em> <a id="func_receive"></a> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
+    <div class="language-cpp highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
   <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>我们只需要按照 <a href="#2-tcpsender-%E5%A6%82%E4%BD%95%E7%9B%91%E6%B5%8B%E4%B8%A2%E5%8C%85">2.TCPSender 如何监测丢包</a> 中的最后一条逻辑写代码就行。</p>
+
+      <p>这里需要注意， 接收的 <code class="language-plaintext highlighter-rouge">TCPReceiveMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 可能为空， 这时候不能直接返回， 有可能是我们传输了一个 <em><strong>empty message</strong></em> 去获取 window size 而返回的一个包。 因此， 我们需要更新 <code class="language-plaintext highlighter-rouge">window_size_</code> 变量， 除此之外就什么都不做了。</p>
+
+      <p>或者收到的这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比我们当前保存的 <code class="language-plaintext highlighter-rouge">next_seqno</code> 都要大， 这可能是一个错误信息需要丢弃这段数据。</p>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>tick:</strong></em> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
+    <p><em><strong>tick:</strong></em> <a id="func_tick"></a> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
+    <div class="language-cpp highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
   <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>除了要创建一个 <code class="language-plaintext highlighter-rouge">timer_</code> 变量存储时间外， 在 tick 中还需要做 <a href="#2-tcpsender-%E5%A6%82%E4%BD%95%E7%9B%91%E6%B5%8B%E4%B8%A2%E5%8C%85">2.TCPSender 如何监测丢包</a> 中的几件事：</p>
+
+      <ol>
+        <li>若 outstanding segments 存在且 timer 失效， 重传时间最早的那个 segments。</li>
+        <li>window size 非零时累加连续重传数量， 并进行 “exponential backoff”。</li>
+        <li>重置 timer 的值为 0， 为下一次重传准备。</li>
+      </ol>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。 并且， 这种长度为 0 的 segment 不需要被监测并纳入 outstanding segments 用以重传。</p>
+    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Generate an empty TCPSenderMessage */</span>
+    <div class="language-cpp highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Generate an empty TCPSenderMessage */</span>
   <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>这种长度为 0 的 segments 不需要被监测并纳入 outstanding segments 用以重传。 我们只需要返回一个仅有 <code class="language-plaintext highlighter-rouge">ackno</code> 被赋值为下一个需要接收的字节的 <code class="language-plaintext highlighter-rouge">seqno</code> 的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。</p>
+    </blockquote>
   </li>
 </ul>
 
-<blockquote>
-  <p><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供阶梯思路的 hints。</p>
-</blockquote>
-</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
+
+<h3 id="helper-functions">Helper Functions</h3>
+
+<p>简化 <code class="language-plaintext highlighter-rouge">seqno</code> 与 <code class="language-plaintext highlighter-rouge">abs_seqno</code> 转换， 使用如下两个 helper functions 即可满足需求。 之后在给 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 赋值就很方便了。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint64_t</span> <span class="n">get_next_abs_seqno_</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
+<span class="n">Wrap32</span> <span class="n">get_next_seqno</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isn_</span> <span class="o">+</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="4-坑点记录">4. 坑点记录</h2>
+
+<h3 id="41-the-test-retx-syn-twice-at-the-right-times-then-ack-failed">4.1 <em>The test “Retx SYN twice at the right times, then ack” failed.</em>
+</h3>
+
+<p>这个问题是初始化 window size 不正确导致的， 在文档里的 FAQs 部分有这么一段：</p>
+
+<p>Q: <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
+<br>
+A: One.</p>
+
+<p>当时我将 <code class="language-plaintext highlighter-rouge">window_size_</code> 初始化为 0， 结果在调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数后 <code class="language-plaintext highlighter-rouge">window_size_ &gt; 0</code> 这条条件判断语句永远不满足， <code class="language-plaintext highlighter-rouge">RTO_timeout_</code> 永远无法进行翻倍。 正确的做法是将 window size 初始化为 1。</p>
+
+<h3 id="42-the-test-retx-syn-until-too-many-retransmissions-failed">4.2 <em>The test “Retx SYN until too many retransmissions” failed.</em>
+</h3>
+
+<p><code class="language-plaintext highlighter-rouge">RTO_timeout</code> 翻倍， 但我以为是初始值翻倍就直接设定成了 <code class="language-plaintext highlighter-rouge">RTO_timeout = 2 * initial_RTO_ms_</code>， 实际上指导书就是说 <em><strong>Double the value of RTO</strong></em> 并且说明是 <em><strong>exponential backoff</strong></em> （给的提示很明显 <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">）。</p>
+
+<h3 id="5-测试结果">5. 测试结果</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+      Start 28: send_connect
+27/36 Test <span class="c">#28: send_connect .....................   Passed    0.09 sec</span>
+      Start 29: send_transmit
+28/36 Test <span class="c">#29: send_transmit ....................   Passed    1.11 sec</span>
+      Start 30: send_retx
+29/36 Test <span class="c">#30: send_retx ........................   Passed    0.08 sec</span>
+      Start 31: send_window
+30/36 Test <span class="c">#31: send_window ......................   Passed    0.35 sec</span>
+      Start 32: send_ack
+31/36 Test <span class="c">#32: send_ack .........................   Passed    0.08 sec</span>
+      Start 33: send_close
+32/36 Test <span class="c">#33: send_close .......................   Passed    0.09 sec</span>
+      Start 34: send_extra
+33/36 Test <span class="c">#34: send_extra .......................   Passed    0.16 sec</span>
+      Start 36: compile with optimization
+34/36 Test <span class="c">#36: compile with optimization ........   Passed   18.01 sec</span>
+      Start 37: byte_stream_speed_test
+             ByteStream throughput: 1.02 Gbit/s
+35/36 Test <span class="c">#37: byte_stream_speed_test ...........   Passed    0.45 sec</span>
+      Start 38: reassembler_speed_test
+             Reassembler throughput: 1.83 Gbit/s
+36/36 Test <span class="c">#38: reassembler_speed_test ...........   Passed    0.85 sec</span>
+
+100% tests passed, 0 tests failed out of 36
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span> 170.63 sec
+Built target check3
+</code></pre></div></div>
+</div>
+<section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
         <a class="a2a_button_copy_link"></a>
@@ -491,18 +639,27 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-05-24T00:00:00+08:00"><!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none">
+<footer class="article__footer"><meta itemprop="dateModified" content="2023-05-24T00:00:00+08:00">
+<!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
-<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
-</div><div class="article__license"><div class="license">
+<div class="article__subscribe">
+<div class="subscribe">
+<i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a>
+</div>
+</div>
+<div class="article__license"><div class="license">
     <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
       <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
-        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png">
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/05/23/cs144-lab2.html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous">
+<span>PREVIOUS</span><a href="/2023/05/23/cs144-lab2.html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</a>
+</div></div>
+</div>
 
 </div>
 
@@ -531,12 +688,15 @@ function toggle() {
   });
 })();
 </script>
-</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+</div>
+<section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
 	<style type="text/css">
 		.gitalk-wrapper .gt-header-textarea {
 			color: #333 !important;
 		}
-	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+	</style>
+<div class="gitalk-wrapper" id="js-gitalk-container"></div>
+<script>
 		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
 		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
 			var gitalk = new Gitalk({
@@ -556,27 +716,39 @@ function toggle() {
 
 <!-- end custom main bottom snippet -->
 </div>
-            </div></div></div><div class="page__footer d-print-none">
+            </div></div></div>
+<div class="page__footer d-print-none">
 <footer class="footer py-4 js-page-footer">
-  <div class="main"><div itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying."><div class="footer__author-links"><div class="author-links">
-  <ul class="menu menu--nowrap menu--inline"><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+  <div class="main">
+<div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma">
+<meta itemprop="url" content="https://HangX-Ma.github.io">
+<meta itemprop="description" content="Never stop studying.">
+<div class="footer__author-links">
+<div class="author-links">
+  <ul class="menu menu--nowrap menu--inline">
+<link itemprop="url" href="https://HangX-Ma.github.io">
+<li title="Send me an Email.">
       <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
         <i class="fas fa-envelope"></i>
-      </a><li title="Follow me on Github.">
+      </a>
+</li>
+<li title="Follow me on Github.">
         <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
-          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+          <div class="icon">
+<svg fill="#000000" width="24px" height="24px" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z"></path>
 </svg>
 </div>
         </a>
-      </li></ul>
+      </li>
+</ul>
 </div>
 </div>
-    </div><div class="site-info mt-2">
+    </div>
+<div class="site-info mt-2">
       <div>© 一只豆腐 2021,
-        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
-        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> &amp; <a title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
       </div>
       <div align="center">
         <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -590,8 +762,10 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
-    </div><script>(function() {
+</div>
+</div>
+    </div>
+<script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {
     var $body = $('body'), $window = $(window);
@@ -655,7 +829,8 @@ function toggle() {
     $.fn.modal = modal;
   });
 })();
-</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal">
+<script>
 (function () {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {
@@ -747,7 +922,7 @@ function toggle() {
     <div class="search-bar">
       <div class="search-box js-search-box">
         <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
-        <input type="text" />
+        <input type="text">
         <div class="search-box__icon-clear js-icon-clear">
           <a><i class="fas fa-times"></i></a>
         </div>
@@ -871,7 +1046,8 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
   });
 });
 </script>
-</div></div>
+</div>
+</div>
 
 
 <script>(function() {

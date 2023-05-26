@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-24T23:35:45+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-26T11:14:03+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 3: the TCP sender</title><link href="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 3: the TCP sender" /><published>2023-05-24T00:00:00+08:00</published><updated>2023-05-24T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/24/cs144-lab3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"><![CDATA[<p>记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。
 <!--more--></p>
 <ul>
@@ -12,8 +12,8 @@
 <p>Lab3 将实现 TCP 中的 <em><strong>TCPSender</strong></em>， 其需要完成的功能有：</p>
 
 <ul>
-  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以的 TCP Segments 不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
-  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据成为 “outstanding segments”。</li>
+  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以 TCP Segments 的格式不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
+  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据被称为 “outstanding segments”。</li>
   <li>若是这些 segments 在足够长的时间后没有没接收， 则重传这些 segments 数据。</li>
 </ul>
 
@@ -26,12 +26,16 @@
 <p>那么如何界定 <strong>已发出但经过时间太久</strong> 这个定义就尤为重要， 太长的等待时间会增加通信延时， 而太短的等待时间则会浪费网络存储空间以及增大开销。 需要注意如下几点：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
-  <li><strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变以记录 outstanding segments 在超时重传前所经过的时间。</li>
+  <li><code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类与操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
+  <li><strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变 （可能为初值的两倍， 或者等于初值） 以记录 outstanding segments 在超时重传前所经过的时间。</li>
   <li>重传定时器 timer 以 tick 为时间单位， timer 会在某个时间启动， 在经过 RTO 时间后失效。</li>
   <li>包含数据的 segment 被传输后 timer 会被启动， 直到经过 RTO 毫秒后 timer 会失效。</li>
   <li>当所有的 outstanding 数据都被接收后， 服务于重传机制的 timer 将会被停止。</li>
-  <li>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：
+  <li>
+    <p><a href="#func_tick">以下信息与 <em>tick</em> 函数的实现密切相关</a></p>
+
+    <p>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：</p>
+
     <ol>
       <li>将时间最早的未被接收的 segment 进行重传 （<code class="language-plaintext highlighter-rouge">seqno</code> 最小的那个）。</li>
       <li>若此时 window size 非零：
@@ -43,7 +47,11 @@
       <li>重置 timer 并启动， 使其在 RTO 毫秒之后失效 （需要考虑 RTO 已经翻倍）。</li>
     </ol>
   </li>
-  <li>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）
+  <li>
+    <p><a href="#func_receive">以下信息与 <em>receive</em> 函数的实现密切相关</a></p>
+
+    <p>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）:</p>
+
     <ol>
       <li>需要将 RTO 设置为其初始值。</li>
       <li>如果发送方仍有 outstanding 的数据， timer 需要重启并将会在 RTO 毫秒后失效。</li>
@@ -54,11 +62,13 @@
 
 <h2 id="3-tcp-sender-实现">3. TCP Sender 实现</h2>
 
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>TODO</strong>: 在写代码的时候补充更多的细节。</li>
-</ul>
+<div align="center">
+    <img src="/norobots/images/2023-05-23-cs144-lab3/space-structure.png" alt="space structure" width="600" />
+    <br />
+    <font size="2" color="#999"><u>space structure, HangX-Ma</u></font>
+</div>
 
-<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。</p>
+<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。 上图是 Sender 端所看到的内存结构以及 <code class="language-plaintext highlighter-rouge">seqno</code> 的分布。</p>
 
 <ul>
   <li>
@@ -69,41 +79,132 @@
 </code></pre></div>    </div>
 
     <blockquote>
-      <p>cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
+      <p>这里也是需要注意 window size 最小应当为 1。 另外我们需要两个布尔变量来记录是否需要给传输的 <em><strong>TCPSenderMessage</strong></em> 增加 SYN 标志或者 FIN 标志。 我们以如下顺序对 msg 进行组装： SYN， payload， FIN。 需要注意的是， FIN 标志设定有一定的条件限制：</p>
+
+      <ul>
+        <li>FIN 之前没设定过；</li>
+        <li>Reader 已经没有数据了；</li>
+        <li>塞完 SYN 和 payload 之后我们的 window size 还能容纳一个 FIN 的位置
+如果本次 FIN 没有传输， 就下次传输， 不会有什么影响。</li>
+      </ul>
+
+      <p>另外， 只有在 outstanding segments 清空后我们才需要在传输新的 <em><strong>TCPSenderMessage</strong></em> 时重置 timer， 否则 timer 将在很大程度上失去其基本作用。 每次传输都需要更新 outstanding segments 集合以及发送的 <code class="language-plaintext highlighter-rouge">seqno</code> 数量， <code class="language-plaintext highlighter-rouge">next_seqno</code> 等信息。</p>
     </blockquote>
+
+    <p class="info">cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
   </li>
   <li>
     <p><em><strong>maybe_send:</strong></em> 必要时发送 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 或者为空。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>我们需要额外创建一个队列变量 <code class="language-plaintext highlighter-rouge">segments_out_</code> 来管理需要发送的 segments， 使用队列可以保证传输的先后顺序。 仅在这个队列的元素数量不为零且收到 SYN 信号才返回队列头部的那个数据， 并将其从队列头部移除。</p>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>receive:</strong></em> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
+    <p><em><strong>receive:</strong></em> <a id="func_receive"></a> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
   <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>我们只需要按照 <a href="#2-tcpsender-如何监测丢包">2.TCPSender 如何监测丢包</a> 中的最后一条逻辑写代码就行。</p>
+
+      <p>这里需要注意， 接收的 <code class="language-plaintext highlighter-rouge">TCPReceiveMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 可能为空， 这时候不能直接返回， 有可能是我们传输了一个 <em><strong>empty message</strong></em> 去获取 window size 而返回的一个包。 因此， 我们需要更新 <code class="language-plaintext highlighter-rouge">window_size_</code> 变量， 除此之外就什么都不做了。</p>
+
+      <p>或者收到的这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比我们当前保存的 <code class="language-plaintext highlighter-rouge">next_seqno</code> 都要大， 这可能是一个错误信息需要丢弃这段数据。</p>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>tick:</strong></em> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
+    <p><em><strong>tick:</strong></em> <a id="func_tick"></a> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
   <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>除了要创建一个 <code class="language-plaintext highlighter-rouge">timer_</code> 变量存储时间外， 在 tick 中还需要做 <a href="#2-tcpsender-如何监测丢包">2.TCPSender 如何监测丢包</a> 中的几件事：</p>
+
+      <ol>
+        <li>若 outstanding segments 存在且 timer 失效， 重传时间最早的那个 segments。</li>
+        <li>window size 非零时累加连续重传数量， 并进行 “exponential backoff”。</li>
+        <li>重置 timer 的值为 0， 为下一次重传准备。</li>
+      </ol>
+    </blockquote>
   </li>
   <li>
-    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。 并且， 这种长度为 0 的 segment 不需要被监测并纳入 outstanding segments 用以重传。</p>
+    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Generate an empty TCPSenderMessage */</span>
   <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p>这种长度为 0 的 segments 不需要被监测并纳入 outstanding segments 用以重传。 我们只需要返回一个仅有 <code class="language-plaintext highlighter-rouge">ackno</code> 被赋值为下一个需要接收的字节的 <code class="language-plaintext highlighter-rouge">seqno</code> 的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。</p>
+    </blockquote>
   </li>
 </ul>
 
-<blockquote>
-  <p><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供阶梯思路的 hints。</p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</title><link href="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 2: the TCP receiver" /><published>2023-05-23T00:00:00+08:00</published><updated>2023-05-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/23/cs144-lab2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html"><![CDATA[<p>记录 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。
+<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
+
+<h3 id="helper-functions">Helper Functions</h3>
+
+<p>简化 <code class="language-plaintext highlighter-rouge">seqno</code> 与 <code class="language-plaintext highlighter-rouge">abs_seqno</code> 转换， 使用如下两个 helper functions 即可满足需求。 之后在给 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 赋值就很方便了。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint64_t</span> <span class="n">get_next_abs_seqno_</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
+<span class="n">Wrap32</span> <span class="n">get_next_seqno</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isn_</span> <span class="o">+</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="4-坑点记录">4. 坑点记录</h2>
+
+<h3 id="41-the-test-retx-syn-twice-at-the-right-times-then-ack-failed">4.1 <em>The test “Retx SYN twice at the right times, then ack” failed.</em></h3>
+
+<p>这个问题是初始化 window size 不正确导致的， 在文档里的 FAQs 部分有这么一段：</p>
+
+<p>Q: <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
+<br />
+A: One.</p>
+
+<p>当时我将 <code class="language-plaintext highlighter-rouge">window_size_</code> 初始化为 0， 结果在调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数后 <code class="language-plaintext highlighter-rouge">window_size_ &gt; 0</code> 这条条件判断语句永远不满足， <code class="language-plaintext highlighter-rouge">RTO_timeout_</code> 永远无法进行翻倍。 正确的做法是将 window size 初始化为 1。</p>
+
+<h3 id="42-the-test-retx-syn-until-too-many-retransmissions-failed">4.2 <em>The test “Retx SYN until too many retransmissions” failed.</em></h3>
+
+<p><code class="language-plaintext highlighter-rouge">RTO_timeout</code> 翻倍， 但我以为是初始值翻倍就直接设定成了 <code class="language-plaintext highlighter-rouge">RTO_timeout = 2 * initial_RTO_ms_</code>， 实际上指导书就是说 <em><strong>Double the value of RTO</strong></em> 并且说明是 <em><strong>exponential backoff</strong></em> （给的提示很明显 :joy:）。</p>
+
+<h3 id="5-测试结果">5. 测试结果</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+      Start 28: send_connect
+27/36 Test <span class="c">#28: send_connect .....................   Passed    0.09 sec</span>
+      Start 29: send_transmit
+28/36 Test <span class="c">#29: send_transmit ....................   Passed    1.11 sec</span>
+      Start 30: send_retx
+29/36 Test <span class="c">#30: send_retx ........................   Passed    0.08 sec</span>
+      Start 31: send_window
+30/36 Test <span class="c">#31: send_window ......................   Passed    0.35 sec</span>
+      Start 32: send_ack
+31/36 Test <span class="c">#32: send_ack .........................   Passed    0.08 sec</span>
+      Start 33: send_close
+32/36 Test <span class="c">#33: send_close .......................   Passed    0.09 sec</span>
+      Start 34: send_extra
+33/36 Test <span class="c">#34: send_extra .......................   Passed    0.16 sec</span>
+      Start 36: compile with optimization
+34/36 Test <span class="c">#36: compile with optimization ........   Passed   18.01 sec</span>
+      Start 37: byte_stream_speed_test
+             ByteStream throughput: 1.02 Gbit/s
+35/36 Test <span class="c">#37: byte_stream_speed_test ...........   Passed    0.45 sec</span>
+      Start 38: reassembler_speed_test
+             Reassembler throughput: 1.83 Gbit/s
+36/36 Test <span class="c">#38: reassembler_speed_test ...........   Passed    0.85 sec</span>
+
+100% tests passed, 0 tests failed out of 36
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span> 170.63 sec
+Built target check3
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</title><link href="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 2: the TCP receiver" /><published>2023-05-23T00:00:00+08:00</published><updated>2023-05-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/23/cs144-lab2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/23/cs144-lab2.html"><![CDATA[<p>记录 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
