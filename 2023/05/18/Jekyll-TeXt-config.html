@@ -286,11 +286,11 @@
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root">
-<div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+<div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
 
       <div class="page__main-inner">
 <div class="page__header d-print-none">
-<header class="header"><div class="main">
+<header class="header header--dark"><div class="main">
       <div class="header__title">
         <div class="header__brand">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.2" height="34.2" viewbox="0 0 342 342">
@@ -312,21 +312,10 @@
 </div>
   </header>
 </div>
-<div class="page__content"><div class="main"><div class="grid grid--reverse">
-
-              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
-</aside></div>
-
-              <div class="col-main cell cell--auto">
-<!-- start custom main top snippet -->
-
-<!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header">
-<header><h1>关于 Jekyll TeXt 博客搭建</h1></header><span class="split-space"> </span>
-          <a class="edit-on-github" title="Edit on Github" href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-18-Jekyll-TeXt-config.md">
-            <i class="far fa-edit"></i></a>
-</div>
-<meta itemprop="headline" content="关于 Jekyll TeXt 博客搭建">
+<div class="page__content">
+<div class="article__header--overlay">
+<div class="hero hero--dark overlay" style="background-image:radial-gradient(circle, rgba(235,86,42,0.15), rgba(244,166,66,0.15)),url(/norobots/images/2023-05-18-Jekyll-TeXt-config/coffee-bar.jpg);background-color:#203028;">
+<div class="hero__content"><div class="main">
 <div class="article__info clearfix">
 <ul class="left-col menu">
 <li>
@@ -347,17 +336,36 @@
 <i class="far fa-edit"></i> <span>May 24, 2023</span>
             </li>
 <li>
-<i class="fas fa-file-word" style="color: #888888;"></i>
+<i class="fas fa-file-word"></i>
                 <span> Total 12808 words </span>
             </li>
             <li>
-                <i class="fas fa-clock" style="color: #888888;"></i>
+                <i class="fas fa-clock"></i>
                 <span> About 36 mins </span>
             </li>
 <li>
 <i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li>
 </ul>
 </div>
+<div class="article__header">
+<header><h1>关于 Jekyll TeXt 博客搭建</h1></header><span class="split-space"> </span>
+          <a class="edit-on-github" title="Edit on Github" href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-18-Jekyll-TeXt-config.md">
+            <i class="far fa-edit"></i></a>
+</div>
+<p class="overlay__excerpt">在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。</p>
+</div></div>
+              </div>
+            </div>
+<div class="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto">
+<!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="关于 Jekyll TeXt 博客搭建">
 <meta itemprop="author" content="HangX-Ma">
 <meta itemprop="datePublished" content="2023-05-18T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,TeXt">
@@ -1016,7 +1024,8 @@ function toggle() {
 
 <!-- end custom main bottom snippet -->
 </div>
-            </div></div></div>
+            </div></div>
+</div>
 <div class="page__footer d-print-none">
 <footer class="footer py-4 js-page-footer">
   <div class="main">
