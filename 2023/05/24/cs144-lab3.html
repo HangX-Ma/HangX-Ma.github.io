@@ -437,13 +437,13 @@
 
 <p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。 上图是 Sender 端所看到的内存结构以及 <code class="language-plaintext highlighter-rouge">seqno</code> 的分布。</p>
 
-<ul>
+<ol>
   <li>
     <p><em><strong>push:</strong></em> 不断读取新的字节， 并组装生成 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。 需要使满足 window 尺寸的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 尽可能大， 但上限是 <code class="language-plaintext highlighter-rouge">TCPConfig::MAX PAYLOAD SIZE (1452 bytes)</code>。 <code class="language-plaintext highlighter-rouge">TCPSenderMessage::sequence length()</code> 会用以计量该 segment 占用的 <code class="language-plaintext highlighter-rouge">seqno</code> 的尺寸， SYN 和 FIN 都需要计算在内。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Push bytes from the outbound stream */</span>
-  <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="n">Reader</span> <span class="o">&amp;</span><span class="n">outbound_stream</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Push bytes from the outbound stream */</span>
+ <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="n">Reader</span> <span class="o">&amp;</span><span class="n">outbound_stream</span><span class="p">);</span>
 </code></pre></div>    </div>
 
     <blockquote>
@@ -465,7 +465,7 @@
     <p><em><strong>maybe_send:</strong></em> 必要时发送 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 或者为空。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
+<div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
 </code></pre></div>    </div>
 
     <blockquote>
@@ -476,8 +476,8 @@
     <p><em><strong>receive:</strong></em> <a id="func_receive"></a> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
-  <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
+ <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
 </code></pre></div>    </div>
 
     <blockquote>
@@ -492,8 +492,8 @@
     <p><em><strong>tick:</strong></em> <a id="func_tick"></a> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
-  <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
+ <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
 </code></pre></div>    </div>
 
     <blockquote>
@@ -510,15 +510,15 @@
     <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="cm">/* Generate an empty TCPSenderMessage */</span>
-  <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Generate an empty TCPSenderMessage */</span>
+ <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
 
     <blockquote>
       <p>这种长度为 0 的 segments 不需要被监测并纳入 outstanding segments 用以重传。 我们只需要返回一个仅有 <code class="language-plaintext highlighter-rouge">ackno</code> 被赋值为下一个需要接收的字节的 <code class="language-plaintext highlighter-rouge">seqno</code> 的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。</p>
     </blockquote>
   </li>
-</ul>
+</ol>
 
 <p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
 

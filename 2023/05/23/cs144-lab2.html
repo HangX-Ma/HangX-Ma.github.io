@@ -444,16 +444,16 @@
 
 <p>cs144 提供了 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 和 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code>, 前者用于 <code class="language-plaintext highlighter-rouge">receive</code> 后者用于 <code class="language-plaintext highlighter-rouge">send</code>。</p>
 
-<ul>
+<ol>
   <li>
 <em><strong>receive：</strong></em> 该部分有两个要求
-    <ol>
+    <ul>
       <li>在必要时， 也就是 message 中包含 SYN 时， 需要保存这个 SYN 的 <code class="language-plaintext highlighter-rouge">seqno</code>。</li>
       <li>将 payload 部分的数据推送给 <em><strong>Reassembler</strong></em>， FIN 作为标识符控制 push 过程的终止。</li>
-    </ol>
+    </ul>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="n">TCPSenderMessage</span> <span class="n">message</span><span class="p">,</span> <span class="n">Reassembler</span> <span class="o">&amp;</span><span class="n">reassembler</span><span class="p">,</span> <span class="n">Writer</span> <span class="o">&amp;</span><span class="n">inbound_stream</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="n">TCPSenderMessage</span> <span class="n">message</span><span class="p">,</span> <span class="n">Reassembler</span> <span class="o">&amp;</span><span class="n">reassembler</span><span class="p">,</span> <span class="n">Writer</span> <span class="o">&amp;</span><span class="n">inbound_stream</span><span class="p">);</span>
 </code></pre></div>    </div>
 
     <p>可以明确的是， 在 <em><strong>TCPReceiver</strong></em> 还没有接收到 SYN 时， 所有的数据都不应当被送入 <em><strong>Reassembler</strong></em>， 因为此时的数据传输还没有开始， 所以我们需要有一个标志位表明数据开始传输。</p>
@@ -463,7 +463,7 @@
     <p><code class="language-plaintext highlighter-rouge">absolute_seqno</code> 转换为 <code class="language-plaintext highlighter-rouge">stream_index</code> 时需要考虑当前的 message 是否有 SYN 部分。 我们给 <code class="language-plaintext highlighter-rouge">unwrap</code> 提供的 <code class="language-plaintext highlighter-rouge">zero_point</code> 是以 SYN 对应的 <code class="language-plaintext highlighter-rouge">seqno</code>， 若 SYN 在当前的 message 中不存在， 则 <code class="language-plaintext highlighter-rouge">zero_point</code> 应当为当前 payload 的第一个字节。 所以有如下转换满足：</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="kt">uint64_t</span> <span class="n">stream_index</span> <span class="o">=</span> <span class="n">abs_seqno</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">message</span><span class="p">.</span><span class="n">SYN</span><span class="p">;</span>
+<div class="highlight"><pre class="highlight"><code> <span class="kt">uint64_t</span> <span class="n">stream_index</span> <span class="o">=</span> <span class="n">abs_seqno</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">message</span><span class="p">.</span><span class="n">SYN</span><span class="p">;</span>
 </code></pre></div>    </div>
 
     <p>之后我们只需要提供 <code class="language-plaintext highlighter-rouge">inbound_stream.insert()</code> 所需要的各个变量即可。</p>
@@ -472,10 +472,10 @@
     <p><em><strong>send：</strong></em> 这里只需要注意只有 <code class="language-plaintext highlighter-rouge">ackno</code> 是 optional 属性， <code class="language-plaintext highlighter-rouge">window_size</code> 是每次都要发送的。 如果已经收到 FIN 那段 message， 满足 <code class="language-plaintext highlighter-rouge">inbound_stream.is_closed() == true</code> 那我们需要增加 FIN 部分的长度。 但也别忘了传输开始后， SYN 也是占有一个 <code class="language-plaintext highlighter-rouge">seqno</code> 位置的。</p>
 
     <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  <span class="n">TCPReceiverMessage</span> <span class="n">send</span><span class="p">(</span><span class="k">const</span> <span class="n">Writer</span> <span class="o">&amp;</span><span class="n">inbound_stream</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight"><pre class="highlight"><code> <span class="n">TCPReceiverMessage</span> <span class="n">send</span><span class="p">(</span><span class="k">const</span> <span class="n">Writer</span> <span class="o">&amp;</span><span class="n">inbound_stream</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
   </li>
-</ul>
+</ol>
 
 <h2 id="4-测试结果">4. 测试结果</h2>
 

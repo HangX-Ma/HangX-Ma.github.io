@@ -14,7 +14,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>cs144-sp23, Lab Checkpoint 4: down the stack (the network interface) - 一只豆腐</title>
 
-<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。">
+<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -269,8 +269,8 @@
 <meta property="og:title" content="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" />
 <meta name="author" content="HangX-Ma" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。" />
-<meta property="og:description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。" />
+<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。" />
+<meta property="og:description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。" />
 <link rel="canonical" href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" />
 <meta property="og:url" content="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" />
 <meta property="og:site_name" content="一只豆腐" />
@@ -279,7 +279,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-27T00:00:00+08:00","datePublished":"2023-05-27T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。","headline":"cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"},"url":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-27T00:00:00+08:00","datePublished":"2023-05-27T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。","headline":"cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"},"url":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"}</script>
 <!-- End Jekyll SEO tag -->
 
   </head>
@@ -318,22 +318,85 @@
                 href="/archive.html?tag=cs144">cs144</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 27, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 214 words </span>
+                <span> Total 1939 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 1 mins </span>
+                <span> About 6 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s27scs144-lab4.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-27T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。
+<div class="article__content" itemprop="articleBody"><p>记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 <em><strong>TCPReceiver</strong></em> 和 <em><strong>TCPSender</strong></em> 结合起来）。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
   <li>CS144 Spring 2023 Lab4 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check4.pdf">Lab Checkpoint 2: down the stack (the network interface)</a>。</li>
   <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
 </ul>
+
+<h2 id="1-内容简述">1. 内容简述</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-05-23-cs144-lab4/check4-structure.png" alt="network interface structure" width="300" />
+    <br />
+    <font size="2" color="#999"><u>network interface structure</u></font>
+</div>
+
+<p>Lab4 要求实现网络接口部分， 打通网络数据报 （Internet datagrams） 和链路层的以太网帧（link-layer Ethernet frames） 之间的桥梁。 之前的实验实现了 TCP segments 在使用 TCP 协议的设备之间的传输， 而 TCP 报文是如何传递的？ TCP报文有三种方式可被传送至远程服务器：</p>
+
+<ul>
+  <li>
+    <p><em><strong>TCP-in-UDP-in-IP：</strong></em> TCP 报文会被置于用户的数据报的 payload 中， 在用户空间下这是最简单的实现方式： Linux 提供接口 （如 <em><strong>UDPSocket</strong></em>）， 而用户侧仅需要提供 payload， 目标地址， Linux 内核会负责将 UDP 报部， IP 报头， 以太网报头组装起来， 将这个网络包发向下一个 hop。 <strong>Linux 内核会保证每个 socket 会有独立的本地与远端地址以及端口号， 并且保证这些数据在应用层的相互隔离</strong>。</p>
+  </li>
+  <li>
+    <p><em><strong>TCP-in-IP：</strong></em> 一般情况下， TCP 报文会直接放在 Internet datagrams 中， 这通常被成为 “TCP/IP”。 Linux 会提供一个 TUN 设备接口， 需要应用层提供整个 Internet datagram， 而 Linux 内核则会处理剩下的部分。 但此时应用层需要自己构建整个 IP 报头以及 payload 部分。</p>
+  </li>
+  <li>
+    <p><em><strong>TCP-in-IP-in-Ethernet：</strong></em> 以上的方法依赖Linux内核来实现的协议栈操作， 每次用户向 TUN 设备写入 IP datagrams 时， Linux 都需要构建正确的带有 IP datagrams 的以太网帧作为 payload。 这意味着 Linux 需要知悉下一个 hop 的以太网目的地址， 给出其 IP 地址。 否则 Linux 会以广播的形式请求这些信息。</p>
+
+    <p>这些功能是由 <em><strong>Network Interface</strong></em> 实现的， 该组件能将 IP 数据报转义成以太网帧等等， 之后会传入 TAP 设备 （类似 TUN 设备但更底层）， 实现对 link-layer 的数据帧的传输。</p>
+  </li>
+</ul>
+
+<p>网络接口的大部分工作是， <strong>为每个下一跳 IP 地址查找(和缓存)以太网地址</strong>。而这种协议被称为 <strong>地址解析协议 ARP （Address Resolution Protocol）</strong>。</p>
+
+<blockquote>
+  <p><a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">Address Resolution Protocol - wiki</a></p>
+</blockquote>
+
+<h2 id="2-network-interface-具体实现">2. Network Interface 具体实现</h2>
+
+<p>在 Lab4 的 <em><strong>Network Interface</strong></em> 中我们需要实现以下几个部分， 维护一个 IP 地址到 Ethernet 地址的映射表。 这个映射类似缓存， 能提高网络栈的传输效率。</p>
+
+<ol>
+  <li><strong>send datagram：</strong> 该方法被 TCPConnection 或者 router 所调用， 这个接口就是将待发送的 Internet(IP) datagrams 转义为以太网帧并最终发送出去。
+    <ul>
+      <li>如果以太网目的地址是已知的就直接发送， 创建以太网帧， 将 payload 设置为串行的数据报文， 并设置源地址和目标地址。</li>
+      <li>如果以太网目的地址未知， 广播下一跳的以太网地址的 ARP 请求， 并将 IP 报文放入队列中待 ARP 回复收到后能将其发送出去。
+        <blockquote>
+          <p>需要间隔 5 秒再发送相同的 ARP 请求， 并且只有在收到目的以太网地址后再将数据报放入队列中。</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li><strong>recv frame：</strong> 该方法接收来自网络的以太网帧， 但需要忽略任何目的地址非网络接口部分的帧 （广播地址或者存储在 <code class="language-plaintext highlighter-rouge">_ethernet_address</code> 中的接口自身的以太网地址）。
+    <ul>
+      <li>若为 IPv4 帧就将其以 <em><strong>InternetDatagramF</strong></em> 进行解析， 若成功的就将结果的 <em><strong>InternetDatagramF</strong></em> 返回给调用者。</li>
+      <li>若为 ARP 帧就将其以 <em><strong>ARPMessage</strong></em>  进行解析， 若成功则缓存发送方 IP 地址与以太网帧的映射 30 秒。 若这个 ARP 请求是询问我们的 IP 地址， 就回复正确的 ARP 答复。
+        <blockquote>
+          <p>根据 FAQs 中的答疑， 我们需要自行创建一个用以存储映射的 <code class="language-plaintext highlighter-rouge">arp_table</code>。</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>maybe send：</strong> 该方法在必要时发送 <em><strong>EthernetFrame</strong></em>。</p>
+  </li>
+  <li><strong>tick：</strong> 记录时间， 以使得任何已经过期的 IP 地址到 Ethernet 地址的映射失效。</li>
+</ol>
+
+<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
