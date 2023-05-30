@@ -537,9 +537,9 @@
 
 <p>这个问题是初始化 window size 不正确导致的， 在文档里的 FAQs 部分有这么一段：</p>
 
-<p>Q: <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
+<p class="info"><strong>Q:</strong> <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
 <br>
-A: One.</p>
+<strong>A:</strong> One.</p>
 
 <p>当时我将 <code class="language-plaintext highlighter-rouge">window_size_</code> 初始化为 0， 结果在调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数后 <code class="language-plaintext highlighter-rouge">window_size_ &gt; 0</code> 这条条件判断语句永远不满足， <code class="language-plaintext highlighter-rouge">RTO_timeout_</code> 永远无法进行翻倍。 正确的做法是将 window size 初始化为 1。</p>
 
