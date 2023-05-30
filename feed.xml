@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-30T11:57:27+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-30T11:58:43+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</title><link href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" /><published>2023-05-27T00:00:00+08:00</published><updated>2023-05-27T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/27/cs144-lab4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"><![CDATA[<p>记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 <em><strong>TCPReceiver</strong></em> 和 <em><strong>TCPSender</strong></em> 结合起来）。
 <!--more--></p>
 <ul>
@@ -110,7 +110,7 @@
 <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">Address</span><span class="p">,</span> <span class="n">InternetDatagram</span><span class="o">&gt;&gt;</span> <span class="n">arp_requests_waiting_list_</span> <span class="p">{};</span>
 </code></pre></div></div>
 
-<h4 id="边界问题">边界问题</h4>
+<h4 id="内存泄漏">内存泄漏</h4>
 
 <p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-plaintext highlighter-rouge">erase</code> 函数之后又用了 <code class="language-plaintext highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-plaintext highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-plaintext highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
 

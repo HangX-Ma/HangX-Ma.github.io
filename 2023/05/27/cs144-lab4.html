@@ -438,7 +438,7 @@
 <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">Address</span><span class="p">,</span> <span class="n">InternetDatagram</span><span class="o">&gt;&gt;</span> <span class="n">arp_requests_waiting_list_</span> <span class="p">{};</span>
 </code></pre></div></div>
 
-<h4 id="边界问题">边界问题</h4>
+<h4 id="内存泄漏">内存泄漏</h4>
 
 <p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-plaintext highlighter-rouge">erase</code> 函数之后又用了 <code class="language-plaintext highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-plaintext highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-plaintext highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
 
