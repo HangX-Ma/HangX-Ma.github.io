@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-31T20:24:08+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-31T20:47:09+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
 <!--more--></p>
 <ul>
@@ -27,46 +27,87 @@
   <li>
     <p>server 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend server cs144.keithw.org 4088</code>， 若顺利的话 server 端会打印如下信息：</p>
 
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> DEBUG: Network interface has Ethernet address 02:00:00:5e:61:17 and IP address 172.16.0.1
- DEBUG: Network interface has Ethernet address 02:00:00:cd:e7:e0 and IP address 10.0.0.172
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend server cs144.keithw.org 4088
+ DEBUG: Network interface has Ethernet address 02:00:00:91:a1:8f and IP address 172.16.0.1
+ DEBUG: Network interface has Ethernet address 02:00:00:bf:ba:0e and IP address 10.0.0.172
  DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
  DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
  DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> 10.0.0.192 on interface 1
- DEBUG: Network interface has Ethernet address 5a:75:4e:8b:20:00 and IP address 172.16.0.100
+ DEBUG: Network interface has Ethernet address 9a:c0:ea:b5:88:82 and IP address 172.16.0.100
  DEBUG: Listening <span class="k">for </span>incoming connection...
 </code></pre></div>    </div>
   </li>
   <li>
     <p>client 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend client cs144.keithw.org 4089</code>， 若顺利的话 client 端会打印如下信息：</p>
 
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> DEBUG: Network interface has Ethernet address 02:00:00:41:c7:5b and IP address 192.168.0.1
- DEBUG: Network interface has Ethernet address 02:00:00:e6:66:d9 and IP address 10.0.0.192
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend client cs144.keithw.org 4089
+ DEBUG: Network interface has Ethernet address 02:00:00:e0:84:14 and IP address 192.168.0.1
+ DEBUG: Network interface has Ethernet address 02:00:00:e8:1a:da and IP address 10.0.0.192
  DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
  DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
  DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> 10.0.0.172 on interface 1
- DEBUG: Network interface has Ethernet address 26:05:12:4a:8a:c9 and IP address 192.168.0.50
- DEBUG: Connecting from 192.168.0.50:57005...
+ DEBUG: Network interface has Ethernet address 7e:fa:65:55:c7:4e and IP address 192.168.0.50
+ DEBUG: Connecting from 192.168.0.50:7907...
  DEBUG: Connecting to 172.16.0.100:1234...
  Successfully connected to 172.16.0.100:1234.
 </code></pre></div>    </div>
 
     <p>并且 server 端会额外打印一条信息：</p>
 
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> New connection from 192.168.0.50:57005.
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> New connection from 192.168.0.50:7907.
 </code></pre></div>    </div>
   </li>
   <li>
     <p>若以上信息都能正确打印， 则意味着 TCP 握手成功， 若有问题则需要在之前的命令后加上 <code class="language-plaintext highlighter-rouge">debug</code> 进入 debug 模式进行调试。</p>
 
     <ul>
-      <li>我们可以在 server 或者 client 任意一端输入数据， 就能在相应的另一端看到数据。</li>
-      <li>可以使用 ctrl-D 关闭链接。 server 或 client 关闭链接后会终止那一端的 ByteStream 的输出， 但仍会持续接收数据直到另一端也关闭了 ByteStream 的输出， 我们需要验证这点。</li>
+      <li>我们可以在 server 或者 client 任意一端输入数据， 就能在相应的另一端看到数据。
+        <blockquote>
+          <p>经过测试发现需要在 Terminal 输入需要发送的数据后按下 Ctrl-D 才能发送数据并在 remote 端看到。</p>
+        </blockquote>
+      </li>
+      <li>可以使用 Ctrl-D 关闭链接。 server 或 client 关闭链接后会终止那一端的 ByteStream 的输出， 但仍会持续接收数据直到另一端也关闭了 ByteStream 的输出， 我们需要验证这点。
+        <blockquote>
+          <p>首先需要确保 Terminal 中已经没有数据了， 此时我们按下 Ctrl-D 才会断开 TCP 的链接。</p>
+        </blockquote>
+        <ul>
+          <li>
+            <p><em><strong>server</strong></em></p>
+
+            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c"># press Ctrl-D at server</span>
+  DEBUG: Outbound stream to 192.168.0.50:36742 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span>
+  <span class="c"># press Ctrl-D at client</span>
+  DEBUG: Inbound stream from 192.168.0.50:36742 finished cleanly.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 192.168.0.50:36742 has been fully acknowledged.
+  DEBUG: TCP connection finished cleanly.
+  <span class="k">done</span><span class="nb">.</span>
+  Exiting... <span class="k">done</span><span class="nb">.</span>
+</code></pre></div>            </div>
+          </li>
+          <li>
+            <p><em><strong>client</strong></em></p>
+
+            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c"># press Ctrl-D at server</span>
+  <span class="c">######## Nothing ########</span>
+  <span class="c"># press Ctrl-D at client</span>
+  DEBUG: Outbound stream to 172.16.0.100:1234 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
+  DEBUG: Inbound stream from 172.16.0.100:1234 finished cleanly.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
+  DEBUG: TCP connection finished cleanly.
+  <span class="k">done</span><span class="nb">.</span>
+  Exiting... <span class="k">done</span><span class="nb">.</span>
+</code></pre></div>            </div>
+          </li>
+        </ul>
+      </li>
       <li>当 server 和 client 都关闭 ByteStream 输出后并且一端又持续存在数秒后， 两边的程序应该会正常退出。</li>
     </ul>
   </li>
 </ol>
 
 <h2 id="3-文件传输">3. 文件传输</h2>
+
+<h3 id="31-操作流程">3.1 操作流程</h3>
 
 <p>当基本的通信功能实现之后就可以通过网络进行文件的传输。</p>
 
@@ -106,7 +147,41 @@
   </li>
 </ul>
 
-<p>如果 SHA-256 哈希值都能匹配上， 那我们就可以确定文件被正确传输了。</p>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 5: building an IP router</title><link href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 5: building an IP router" /><published>2023-05-30T00:00:00+08:00</published><updated>2023-05-30T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/30/cs144-lab5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"><![CDATA[<p>记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。
+<p>如果 SHA-256 哈希值都能匹配上， 那我们就可以确定文件被正确传输了。</p>
+
+<h3 id="32-输出打印">3.2 输出打印</h3>
+
+<ul>
+  <li>
+    <p><em><strong>server</strong></em></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  DEBUG: Inbound stream from 192.168.0.50:27200 finished cleanly.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 192.168.0.50:27200 finished <span class="o">(</span>63000 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
+  DEBUG: Outbound stream to 192.168.0.50:27200 has been fully acknowledged.
+  DEBUG: TCP connection finished cleanly.
+  <span class="k">done</span><span class="nb">.</span>
+  Exiting... <span class="k">done</span><span class="nb">.</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><em><strong>client</strong></em></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  DEBUG: Outbound stream to 172.16.0.100:1234 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
+  DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
+  DEBUG: Inbound stream from 172.16.0.100:1234 finished cleanly.
+  DEBUG: TCP connection finished cleanly.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown... <span class="k">done</span><span class="nb">.</span>
+  Exiting... <span class="k">done</span><span class="nb">.</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><em><strong>SHA-256</strong></em></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  e0462e19b156c6a02c9f89f4069b624b4eefd1a4837c5d71397db3253d469ce1  /tmp/big.txt
+  e0462e19b156c6a02c9f89f4069b624b4eefd1a4837c5d71397db3253d469ce1  /tmp/big-received.txt
+</code></pre></div>    </div>
+  </li>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 5: building an IP router</title><link href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 5: building an IP router" /><published>2023-05-30T00:00:00+08:00</published><updated>2023-05-30T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/30/cs144-lab5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"><![CDATA[<p>记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
