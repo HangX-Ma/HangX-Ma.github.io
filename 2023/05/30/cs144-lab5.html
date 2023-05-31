@@ -12,10 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>cs144-sp23, Lab Checkpoint 4: down the stack (the network interface) - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>cs144-sp23, Lab Checkpoint 5: building an IP router - 一只豆腐</title>
 
-<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。">
-<link rel="canonical" href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -264,22 +264,22 @@
   })();
 </script>
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>cs144-sp23, Lab Checkpoint 4: down the stack (the network interface) | 一只豆腐</title>
+<title>cs144-sp23, Lab Checkpoint 5: building an IP router | 一只豆腐</title>
 <meta name="generator" content="Jekyll v4.3.2" />
-<meta property="og:title" content="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" />
+<meta property="og:title" content="cs144-sp23, Lab Checkpoint 5: building an IP router" />
 <meta name="author" content="HangX-Ma" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。" />
-<meta property="og:description" content="记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。" />
-<link rel="canonical" href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" />
-<meta property="og:url" content="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" />
+<meta name="description" content="记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。" />
+<meta property="og:description" content="记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。" />
+<link rel="canonical" href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" />
+<meta property="og:url" content="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" />
 <meta property="og:site_name" content="一只豆腐" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2023-05-27T00:00:00+08:00" />
+<meta property="article:published_time" content="2023-05-30T00:00:00+08:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" />
+<meta property="twitter:title" content="cs144-sp23, Lab Checkpoint 5: building an IP router" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-27T00:00:00+08:00","datePublished":"2023-05-27T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。","headline":"cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"},"url":"https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-30T00:00:00+08:00","datePublished":"2023-05-30T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。","headline":"cs144-sp23, Lab Checkpoint 5: building an IP router","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"},"url":"https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"}</script>
 <!-- End Jekyll SEO tag -->
 
   </head>
@@ -306,169 +306,143 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</h1></header><span class="split-space">&nbsp;</span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>cs144-sp23, Lab Checkpoint 5: building an IP router</h1></header><span class="split-space">&nbsp;</span>
           <a class="edit-on-github"
             title="Edit on Github"
-            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-27-cs144-lab4.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)"><div class="article__info clearfix"><ul class="left-col menu"><li>
+            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-05-30-cs144-lab5.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 5: building an IP router"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Course">Course</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=cs144">cs144</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 27, 2023</span>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 30, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 4333 words </span>
+                <span> Total 3884 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 13 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s27scs144-lab4.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-27T00:00:00+08:00">
+                <span> About 11 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s30scs144-lab5.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-30T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 <em><strong>TCPReceiver</strong></em> 和 <em><strong>TCPSender</strong></em> 结合起来）。
+<div class="article__content" itemprop="articleBody"><p>记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
-  <li>CS144 Spring 2023 Lab4 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check4.pdf">Lab Checkpoint 4: down the stack (the network interface)</a>。</li>
+  <li>CS144 Spring 2023 Lab5 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check5.pdf">Lab Checkpoint 5: building an IP router</a>。</li>
   <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
 </ul>
 
 <h2 id="1-内容简述">1. 内容简述</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-23-cs144-lab4/check4-structure.png" alt="network interface structure" width="300" />
+    <img src="/norobots/images/2023-05-23-cs144-lab5/check5-structure.png" alt="IP router structure" width="500" />
     <br />
-    <font size="2" color="#999"><u>network interface structure</u></font>
+    <font size="2" color="#999"><u>IP router structure</u></font>
 </div>
 
-<p>Lab4 要求实现网络接口部分， 打通网络数据报 （Internet datagrams） 和链路层的以太网帧（link-layer Ethernet frames） 之间的桥梁。 之前的实验实现了 TCP segments 在使用 TCP 协议的设备之间的传输， 而 TCP 报文是如何传递的？ TCP报文有三种方式可被传送至远程服务器：</p>
+<p>Lab5 要求实现一个简易的路由器， 通常路由器会有多个网络接口， 能够从任意一个接口接收网络数据报。 路由器的作用就是将 datagrams 依据 <strong>路由表</strong> 进行转发， 路由表定义了路由转发的一些规则：</p>
 
 <ul>
-  <li>
-    <p><em><strong>TCP-in-UDP-in-IP：</strong></em> TCP 报文会被置于用户的数据报的 payload 中， 在用户空间下这是最简单的实现方式： Linux 提供接口 （如 <em><strong>UDPSocket</strong></em>）， 而用户侧仅需要提供 payload， 目标地址， Linux 内核会负责将 UDP 报部， IP 报头， 以太网报头组装起来， 将这个网络包发向下一个 hop。 <strong>Linux 内核会保证每个 socket 会有独立的本地与远端地址以及端口号， 并且保证这些数据在应用层的相互隔离</strong>。</p>
-  </li>
-  <li>
-    <p><em><strong>TCP-in-IP：</strong></em> 一般情况下， TCP 报文会直接放在 Internet datagrams 中， 这通常被成为 “TCP/IP”。 Linux 会提供一个 TUN 设备接口， 需要应用层提供整个 Internet datagram， 而 Linux 内核则会处理剩下的部分。 但此时应用层需要自己构建整个 IP 报头以及 payload 部分。</p>
-  </li>
-  <li>
-    <p><em><strong>TCP-in-IP-in-Ethernet：</strong></em> 以上的方法依赖Linux内核来实现的协议栈操作， 每次用户向 TUN 设备写入 IP datagrams 时， Linux 都需要构建正确的带有 IP datagrams 的以太网帧作为 payload。 这意味着 Linux 需要知悉下一个 hop 的以太网目的地址， 给出其 IP 地址。 否则 Linux 会以广播的形式请求这些信息。</p>
-
-    <p>这些功能是由 <em><strong>Network Interface</strong></em> 实现的， 该组件能将 IP 数据报转义成以太网帧等等， 之后会传入 TAP 设备 （类似 TUN 设备但更底层）， 实现对 link-layer 的数据帧的传输。</p>
-  </li>
+  <li>确定转发的接口</li>
+  <li>确定下一跳的 IP 地址</li>
 </ul>
 
-<p>网络接口的大部分工作是， <strong>为每个下一跳 IP 地址查找(和缓存)以太网地址</strong>。而这种协议被称为 <strong>地址解析协议 ARP （Address Resolution Protocol）</strong>。</p>
+<p>在 Lab5 中需要实现一个新的 <code class="language-plaintext highlighter-rouge">Router</code> 类， 该类能够 <em>跟踪路由表信息</em> 并且 <em>将接收到的每个 datagram 通过正确的输出端 <strong>NetworkInterface</strong> 正确转发到下一跳 （hop）</em>。 在项目指导书中明确解释了 <em><strong>route</strong></em> 的相关含义， 后续需要通过 IP 的最长前缀匹配来实现路由的功能， 这也是实验中最为棘手的部分。</p>
 
-<blockquote>
-  <p><a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">Address Resolution Protocol - wiki</a></p>
-</blockquote>
-
-<h2 id="2-network-interface-实现">2. Network Interface 实现</h2>
-
-<h3 id="21-默认接口">2.1 默认接口</h3>
-
-<p>在 Lab4 的 <em><strong>Network Interface</strong></em> 中我们需要实现以下几个部分， 维护一个 IP 地址到 Ethernet 地址的映射表。 这个映射类似缓存， 能提高网络栈的传输效率。</p>
+<h2 id="2-ip-router-实现">2. IP Router 实现</h2>
 
 <ol>
-  <li><strong>send datagram：</strong> 该方法被 TCPConnection 或者 router 所调用， 这个接口就是将待发送的 Internet(IP) datagrams 转义为以太网帧并最终发送出去。
-    <ul>
-      <li>如果以太网目的地址是已知的就直接发送， 创建以太网帧 （<code class="language-plaintext highlighter-rouge">type = EthernetHeader::TYPE IPv4</code>）， 将 payload 设置为串行的数据报文， 并设置源地址和目标地址。</li>
-      <li>如果以太网目的地址未知， 广播下一跳的以太网地址的 ARP 请求， 并将 IP 报文放入队列中待 ARP 回复收到后能将其发送出去。
-        <blockquote>
-          <p>需要间隔 5 秒再发送相同的 ARP 请求， 并且只有在收到目的以太网地址后再将数据报放入队列中。 若没有收到目的以太网地址， 我们需要将 dgrams 以及其对应的 Address 都暂存在列表中， 以供之后收到 ARP reply 后再进行发送， 否则这部分数据就会丢失了。</p>
-        </blockquote>
-      </li>
-    </ul>
+  <li>
+    <p><strong>add_route：</strong> 调用该方法将路由信息添加到路由表中， 我们需要自己添加存储相关信息的数据结构。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">send_datagram</span><span class="p">(</span><span class="k">const</span> <span class="n">InternetDatagram</span> <span class="o">&amp;</span><span class="n">dgram</span><span class="p">,</span> <span class="k">const</span> <span class="n">Address</span> <span class="o">&amp;</span><span class="n">next_hop</span><span class="p">);</span>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">add_route</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">route_prefix</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">prefix_length</span><span class="p">,</span> 
+                 <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">next_hop</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">interface_num</span><span class="p">);</span>
 </code></pre></div>    </div>
-  </li>
-  <li><strong>recv frame：</strong> 该方法接收来自网络的以太网帧， 但需要忽略任何目的地址非网络接口部分的帧 （广播地址或者存储在 <code class="language-plaintext highlighter-rouge">_ethernet_address</code> 中的接口自身的以太网地址）。
-    <ul>
-      <li>若为 IPv4 帧就将其以 <em><strong>InternetDatagramF</strong></em> 进行解析， 若成功的就将结果的 <em><strong>InternetDatagramF</strong></em> 返回给调用者。</li>
-      <li>若为 ARP 帧就将其以 <em><strong>ARPMessage</strong></em>  进行解析， 若成功则缓存发送方 IP 地址与以太网帧的映射 30 秒。 若这个 ARP 请求是询问我们的 IP 地址， 就回复正确的 ARP 答复。
-        <blockquote>
-          <p>根据 FAQs 中的答疑， 我们需要自行创建一个用以存储映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>。</p>
-        </blockquote>
-      </li>
-    </ul>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">InternetDatagram</span><span class="o">&gt;</span> <span class="n">recv_frame</span><span class="p">(</span><span class="k">const</span> <span class="n">EthernetFrame</span> <span class="o">&amp;</span><span class="n">frame</span><span class="p">);</span>
+    <p>根据 <code class="language-plaintext highlighter-rouge">add_route</code> 所给的参数以及 <a href="https://en.wikipedia.org/wiki/Routing_table">wiki</a> 中对 routing table 内容的描述， 我们需要自己创建如下的数据结构。</p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// Routing table data structure</span>
+ <span class="k">using</span> <span class="n">route_t</span> <span class="o">=</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="kt">uint32_t</span> <span class="n">route_prefix</span><span class="p">;</span>
+     <span class="kt">uint8_t</span> <span class="n">prefix_length</span><span class="p">;</span>
+     <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">next_hop</span><span class="p">;</span>
+     <span class="kt">size_t</span> <span class="n">interface_id</span><span class="p">;</span>
+ <span class="p">};</span>
+ <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">route_t</span><span class="o">&gt;</span> <span class="n">routing_table_</span> <span class="p">{};</span>
 </code></pre></div>    </div>
+
+    <blockquote>
+      <p><a href="https://en.wikipedia.org/wiki/Routing_table">wikipedia - Routing table</a></p>
+    </blockquote>
   </li>
   <li>
-    <p><strong>maybe send：</strong> 该方法在必要时发送 <em><strong>EthernetFrame</strong></em>。</p>
+    <p><strong>route：</strong> 该方法需要对输入的 datagrams 进行路由， 将其通过正确的网络接口转发到下一跳， 这需要实现 <strong>“最长前缀匹配 （longest-prefix match）”</strong> 以找到最合适的路由方案， 该方法有如下细节需要实现：</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">EthernetFrame</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><strong>tick：</strong> 记录时间， 以使得任何已经过期的 IP 地址到 Ethernet 地址的映射失效。</p>
+    <ul>
+      <li>路由器需要搜索路由表找到匹配 datagrams 中的目的地址的那个路由。 这意味着目的地址的 <em>prefix_length</em> 需要与 <em>route_prefix</em> 的 <em>prefix_length</em> 完全一致。</li>
+      <li>在匹配的路由方案中路由器选择 <em>prefix_length</em> 值最大的那个， 选中的就是满足 “最长前缀匹配” 的路由。</li>
+      <li>如果没有匹配的路由信息， 则丢弃该项 datagram。</li>
+      <li>每一跳的路由器都需要减少 datagrams 的 ttl。 如果 ttl 已经归零或者在本次减除后触及零的下界， 路由器同样需要丢弃该项 datagram。</li>
+      <li>最终， 路由器需要将修改过的 datagram 通过合适的网络接口 （<code class="language-plaintext highlighter-rouge">interface(interface num).send datagram()</code>） 发送到下一跳。</li>
+    </ul>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
+    <p>整个过程中， 路由器仅需要和 datagram 以及链接层的网络接口抽象进行交互， 完全不需要考虑 TCP， ARP 以及以太网帧， 较好实现了分层隔离， 降低了路由器的处理负担。</p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">route</span><span class="p">();</span>
 </code></pre></div>    </div>
   </li>
 </ol>
 
-<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
+<h2 id="3-网络拓扑">3. 网络拓扑</h2>
 
-<h3 id="22-额外说明">2.2 额外说明</h3>
+<div align="center">
+    <img src="/norobots/images/2023-05-23-cs144-lab5/simulated-router-and-interfaces.png" alt="Simulated router and interfaces topology" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Simulated router and interfaces topology</u></font>
+</div>
 
-<h4 id="ethernet-frames">Ethernet Frames</h4>
+<h2 id="4-坑点记录">4. 坑点记录</h2>
 
-<p><em><strong>EthernetFrame</strong></em> 是我们需要传输给 TAP 设备的数据， 根据已有信息， 我们只需要将组装好的 <em><strong>EthernetFrame</strong></em> 用 <code class="language-plaintext highlighter-rouge">queue</code> 数据结构封装即可。</p>
+<p>测试的时候有这样一条记录（就是第一个测试都没过啦）， 当时觉得很奇怪怎么会有 <code class="language-plaintext highlighter-rouge">bad IPv4 datagram</code> 的打印， 查看后是 <code class="language-plaintext highlighter-rouge">InternetDatagram</code> 的 <code class="language-plaintext highlighter-rouge">parse</code> 返回了错误。 于是我给 <code class="language-plaintext highlighter-rouge">set_error</code> 的部分都加上了打印才发现是 <strong>checksum</strong> 未匹配。 我还以为是 <em><strong>NetworkInterface</strong></em> 部分的接收部分没有写好， 调试了半天就想着要不要用 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 在 <code class="language-plaintext highlighter-rouge">recv_frame</code> 中重新把 checksum 计算一下， 这时候突然发现这个函数的接口都是 <code class="language-plaintext highlighter-rouge">const</code> 类型， 并且结合 <em><strong>NetworkInterface</strong></em> 在 <em>link layer</em> 与 <em>application</em> 之间的情况， 以及错误是出现在以太网帧传输到 router 再转发出去的， 唯一有嫌疑的应当还是刚刚写的 <em><strong>Router</strong></em> 类。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// outbound Ethernet frames which will be sent by the Network Interface</span>
-<span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">EthernetFrame</span><span class="o">&gt;</span> <span class="n">outbound_frames_</span> <span class="p">{};</span>
+<p>在读 <code class="language-plaintext highlighter-rouge">router.cc</code> 代码考虑把 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 加在哪里的时候我突然看到 ttl 的值被我更改了。 这不就是问题根源嘛， 我们更新了 <em><strong>InternetDatagram</strong></em> 的内容， 那么 checksum 也需要重新计算。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Testing traffic between two ordinary hosts <span class="o">(</span>applesauce to cherrypie<span class="o">)</span>...
+
+Host applesauce trying to send datagram <span class="o">(</span>with next hop <span class="o">=</span> 10.0.0.1<span class="o">)</span>: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+Transferring frame from applesauce to router.eth0: <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, <span class="nv">sender</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/10.0.0.1
+Transferring frame from router.eth0 to applesauce: <span class="nv">dst</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nv">src</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, <span class="nv">sender</span><span class="o">=</span>02:00:00:dd:27:73/10.0.0.1, <span class="nv">target</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2
+Transferring frame from applesauce to router.eth0: <span class="nv">dst</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nb">type</span><span class="o">=</span>IPv4, payload: IPv4: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+Transferring frame from router.eth2 to cherrypie: <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, <span class="nv">sender</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/192.168.0.2
+Transferring frame from cherrypie to router.eth2: <span class="nv">dst</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nv">src</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, <span class="nv">sender</span><span class="o">=</span>ea:80:f1:26:53:c8/192.168.0.2, <span class="nv">target</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1
+Transferring frame from router.eth2 to cherrypie: <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
+<span class="nv">dst</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>IPv4, payload: bad IPv4 datagram
+<span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
+<span class="o">[</span>NetworkInterface ERROR]: <span class="s1">'recv_frame'</span> IPV4 parse error
+
+
+
+Error: Host cherrypie did NOT receive an expected Internet datagram: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2
 </code></pre></div></div>
 
-<h4 id="arp-table">ARP Table</h4>
+<h2 id="5-测试结果">5. 测试结果</h2>
 
-<p>从以上接口的描述可以看出， 我们需要建立一个存储 ARP 映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>， IP-To-Ethernet。 根据 <a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">wiki</a> 关于 ARP 原理章节的阐述， 这个表中的 ARP 数据需要有一个变量存储 <em><strong>EthernetFrame</strong></em> 表示映射目标， 以及 <em><strong>ttl (time-to-live)</strong></em> 表示该条 ARP 信息的生命周期 （默认是 30s）。 另外，在 FAQs 中有这么一句：</p>
-
-<p class="info"><strong>Q:</strong> <em>How do I convert an IP address that comes in the form of an Address object, into a raw 32-bit integer that I can write into the ARP message?</em>
-<br />
-<strong>A:</strong> Use the <code class="language-plaintext highlighter-rouge">Address::ipv4 numeric()</code> method.</p>
-
-<p>这说明 ARP 的映射应当是 <code class="language-plaintext highlighter-rouge">uint32_t</code> 类型到 <code class="language-plaintext highlighter-rouge">arp_t</code> 类型， 我们可以用一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储映射信息。 除此之外我们还注意到， 同一个 ARP 的 ARP 请求的间隔需要 5s， 那么除了映射信息外， 我们还需要一个 <code class="language-plaintext highlighter-rouge">list</code> 结构用以存储绑定 <em><strong>InternetDatagram</strong></em> 和 <em><strong>Address</strong></em> 的等待列表 <code class="language-plaintext highlighter-rouge">arp_datagrams_waiting_list_</code>。 另外， 为了记录 ARP 请求的声明周期， 我们还需要一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储 <em><strong>numeric IP</strong></em> 与该条 ARP 请求的声明周期的映射 <code class="language-plaintext highlighter-rouge">arp_requests_lifetime_</code>。</p>
-
-<blockquote>
-  <p>这里使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构是头文件中已经包含了相关的库文件， 另外这部分信息具有时效的不确定性， 我们并不清楚 ARP 请求究竟哪一个会在下一刻返回， 所以在这部分信息我们需要逐个遍历， 将已经获取目标以太网地址的数据包组装后放入发送队列中， 并从 <code class="language-plaintext highlighter-rouge">list</code> 中移除。 故而使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构能够利用链表插入/移除数据的快速性的优势， 而不用考虑查询带来的负面影响。</p>
-</blockquote>
-
-<p>这样关于 ARP Table 的数据结构就可以按如下格式创建。 需要注意的是 TTL 的时间单位是 ‘毫秒’， 而我们设定的边界值都是以 ‘秒’ 为单位。</p>
-
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ARP will be stored for 30s at most, which can reduce the length of ARP table,</span>
-<span class="c1">// increasing the enquiry speed. What's more, </span>
-<span class="k">const</span> <span class="kt">size_t</span> <span class="n">ARP_DEFAULT_TTL</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
-<span class="k">const</span> <span class="kt">size_t</span> <span class="n">ARP_REQUEST_DEFAULT_TTL</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">arp</span> <span class="p">{</span>
-    <span class="n">EthernetAddress</span> <span class="n">eth_addr</span><span class="p">;</span> <span class="c1">// mac address</span>
-    <span class="kt">size_t</span> <span class="n">ttl</span><span class="p">;</span> <span class="c1">// time to live</span>
-<span class="p">}</span> <span class="n">arp_t</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="cm">/* ipv4 numeric */</span><span class="p">,</span> <span class="n">arp_t</span><span class="o">&gt;</span> <span class="n">arp_table_</span> <span class="p">{};</span>
-<span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">Address</span><span class="p">,</span> <span class="n">InternetDatagram</span><span class="o">&gt;&gt;</span> <span class="n">arp_requests_waiting_list_</span> <span class="p">{};</span>
-</code></pre></div></div>
-
-<h4 id="内存泄漏">内存泄漏</h4>
-
-<p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-plaintext highlighter-rouge">erase</code> 函数之后又用了 <code class="language-plaintext highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-plaintext highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-plaintext highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
-
-<h2 id="3-测试结果">3. 测试结果</h2>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check4
-<span class="o">[</span>1/1] <span class="nb">cd</span> /home/cs144/minnow/build <span class="o">&amp;&amp;</span> /usr/bin/ctest <span class="nt">--output-on-failure</span> <span class="nt">--stop-on-failure</span> <span class="nt">--timeout</span> 12 <span class="nt">-R</span> <span class="s1">'^net_interface'</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check5
 Test project /home/cs144/minnow/build
     Start  1: compile with bug-checkers
-1/2 Test  <span class="c">#1: compile with bug-checkers ........   Passed   20.14 sec</span>
+1/3 Test  <span class="c">#1: compile with bug-checkers ........   Passed   44.90 sec</span>
     Start 35: net_interface
-2/2 Test <span class="c">#35: net_interface ....................   Passed    0.15 sec</span>
+2/3 Test <span class="c">#35: net_interface ....................   Passed    0.20 sec</span>
+    Start 36: router
+3/3 Test <span class="c">#36: router ...........................   Passed    0.17 sec</span>
 
-100% tests passed, 0 tests failed out of 2
+100% tests passed, 0 tests failed out of 3
 
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  20.29 sec
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  45.41 sec
+Built target check5
 </code></pre></div></div>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -529,7 +503,7 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-05-27T00:00:00+08:00"><!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-05-30T00:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -540,7 +514,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/05/24/cs144-lab3.html">cs144-sp23, Lab Checkpoint 3: the TCP sender</a></div><div class="next"><span>NEXT</span><a href="/2023/05/30/cs144-lab5.html">cs144-sp23, Lab Checkpoint 5: building an IP router</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/05/27/cs144-lab4.html">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</a></div></div></div>
 
 </div>
 
@@ -583,7 +557,7 @@ function toggle() {
 				repo: 'HangX-Ma.github.io',
 				owner: 'HangX-Ma',
 				admin: ['HangX-Ma'],
-				id: '/2023/05/27/cs144-lab4',
+				id: '/2023/05/30/cs144-lab5',
                 labels: 'gitalk'.split(',').filter(l => l),
                 perPage: '15',
                 proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
@@ -1315,10 +1289,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      var key =   's2023s05s27scs144-lab4.html';
-      var title = "cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)";
+      var key =   's2023s05s30scs144-lab5.html';
+      var title = "cs144-sp23, Lab Checkpoint 5: building an IP router";
       pageview.increase(key, title, function(view) {
-        $("[data-page-key='s2023s05s27scs144-lab4.html']").text(view);
+        $("[data-page-key='s2023s05s30scs144-lab5.html']").text(view);
       });
     });
   </script><script>function setClipboardText(event){
