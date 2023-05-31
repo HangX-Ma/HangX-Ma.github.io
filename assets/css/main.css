@@ -5837,6 +5837,102 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
   border-radius: 50%;
 }
 
+/*styles related to tooltips, borrowed from https://clipboardjs.com/bower_components/primer-css/css/primer.css*/
+.tooltipped {
+  position: relative;
+}
+
+.tooltipped:after {
+  position: absolute;
+  z-index: 1000000;
+  display: none;
+  padding: 5px 8px;
+  font: arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 0.85rem;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: break-word;
+  white-space: pre;
+  pointer-events: none;
+  content: attr(aria-label);
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 3px;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.tooltipped:before {
+  position: absolute;
+  z-index: 1000001;
+  display: none;
+  width: 0;
+  height: 0;
+  color: rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  content: "";
+  border: 5px solid transparent;
+}
+
+.tooltipped:hover:before, .tooltipped:hover:after, .tooltipped:active:before, .tooltipped:active:after, .tooltipped:focus:before, .tooltipped:focus:after {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.tooltipped-s:after {
+  top: 100%;
+  right: 50%;
+  margin-top: 5px;
+}
+
+.tooltipped-s:before {
+  top: auto;
+  right: 50%;
+  bottom: -5px;
+  margin-right: -5px;
+  border-bottom-color: rgba(0, 0, 0, 0.8);
+}
+
+.tooltipped-s:after {
+  -webkit-transform: translateX(50%);
+  -ms-transform: translateX(50%);
+  transform: translateX(50%);
+}
+
+/*styles related to snippet copy to clipboard, borrowed from https://clipboardjs.com/assets/styles/main.css*/
+.fa-copy {
+  margin-top: -3px;
+  position: relative;
+  top: 3px;
+}
+
+.btn[disabled] .fa-copy {
+  opacity: 0.3;
+}
+
+.copyable {
+  position: relative;
+  overflow: visible;
+}
+
+.copyable .btn {
+  -webkit-transition: opacity 0.3s ease-in-out;
+  -o-transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+  padding: 2px 6px;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  color: #000;
+}
+
+.copyable:hover .btn, .snippet .btn:focus {
+  opacity: 1;
+}
+
 .icon {
   display: block;
 }

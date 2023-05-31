@@ -1,5 +1,112 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-31T15:42:03+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 5: building an IP router</title><link href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 5: building an IP router" /><published>2023-05-30T00:00:00+08:00</published><updated>2023-05-30T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/30/cs144-lab5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"><![CDATA[<p>记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-05-31T20:24:08+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
+<!--more--></p>
+<ul>
+  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
+  <li>CS144 Spring 2023 Lab6 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check6.pdf">Lab Checkpoint 6: putting it all together</a>。</li>
+  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
+</ul>
+
+<h2 id="1-内容简介">1. 内容简介</h2>
+
+<p>Lab6 是一个选择性的实验， 在前 6 个实验中我们已经完成了网络的框架， Checkpoint 0 (a reliable byte stream), Checkpoints 1–3 (the Transmission Control Protocol), Checkpoint 4 (an IP/Ethernet network interface) 以及 Checkpoint 5 (an IP router)， 该实验的目的是使用前述的网络栈实现真实的网络通信， 这需要我们有个 partner， 一人分饰两角也是可以的。</p>
+
+<h2 id="2-the-network">2. The Network</h2>
+
+<p>在该实验中需要一对可行的网络栈组合成一个真实的网络通信环境， 两方都需要构建 host 和 router， 网络拓扑如下图所示：</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-05-31-cs144-lab6/the-network.png" alt="The Network" width="600" />
+    <br />
+    <font size="2" color="#999"><u>The Network</u></font>
+</div>
+
+<ol>
+  <li>对于个人而言， 需要使用同一套代码在不同的终端中启用 server 以及 client。</li>
+  <li>为了使用 relay， 我们需要选择任意的一个 1024 到 64000 之间的偶数以区分不同的 group。 我们可以选择 “4088”。</li>
+  <li>
+    <p>server 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend server cs144.keithw.org 4088</code>， 若顺利的话 server 端会打印如下信息：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> DEBUG: Network interface has Ethernet address 02:00:00:5e:61:17 and IP address 172.16.0.1
+ DEBUG: Network interface has Ethernet address 02:00:00:cd:e7:e0 and IP address 10.0.0.172
+ DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
+ DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
+ DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> 10.0.0.192 on interface 1
+ DEBUG: Network interface has Ethernet address 5a:75:4e:8b:20:00 and IP address 172.16.0.100
+ DEBUG: Listening <span class="k">for </span>incoming connection...
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>client 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend client cs144.keithw.org 4089</code>， 若顺利的话 client 端会打印如下信息：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> DEBUG: Network interface has Ethernet address 02:00:00:41:c7:5b and IP address 192.168.0.1
+ DEBUG: Network interface has Ethernet address 02:00:00:e6:66:d9 and IP address 10.0.0.192
+ DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
+ DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
+ DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> 10.0.0.172 on interface 1
+ DEBUG: Network interface has Ethernet address 26:05:12:4a:8a:c9 and IP address 192.168.0.50
+ DEBUG: Connecting from 192.168.0.50:57005...
+ DEBUG: Connecting to 172.16.0.100:1234...
+ Successfully connected to 172.16.0.100:1234.
+</code></pre></div>    </div>
+
+    <p>并且 server 端会额外打印一条信息：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> New connection from 192.168.0.50:57005.
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>若以上信息都能正确打印， 则意味着 TCP 握手成功， 若有问题则需要在之前的命令后加上 <code class="language-plaintext highlighter-rouge">debug</code> 进入 debug 模式进行调试。</p>
+
+    <ul>
+      <li>我们可以在 server 或者 client 任意一端输入数据， 就能在相应的另一端看到数据。</li>
+      <li>可以使用 ctrl-D 关闭链接。 server 或 client 关闭链接后会终止那一端的 ByteStream 的输出， 但仍会持续接收数据直到另一端也关闭了 ByteStream 的输出， 我们需要验证这点。</li>
+      <li>当 server 和 client 都关闭 ByteStream 输出后并且一端又持续存在数秒后， 两边的程序应该会正常退出。</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="3-文件传输">3. 文件传输</h2>
+
+<p>当基本的通信功能实现之后就可以通过网络进行文件的传输。</p>
+
+<ul>
+  <li>
+    <p>将 1M 大小的随机数写入文件 <code class="language-plaintext highlighter-rouge">/tmp/big.txt</code>。</p>
+
+    <div class="snippet">
+      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">dd </span><span class="k">if</span><span class="o">=</span>/dev/urandom <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span>1 <span class="nv">of</span><span class="o">=</span>/tmp/big.txt
+</code></pre></div>      </div>
+    </div>
+  </li>
+  <li>
+    <p>让 server 端在接受连接后立刻发送文件。</p>
+
+    <div class="snippet">
+      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./apps/endtoend server cs144.keithw.org 4088 &lt; /tmp/big.txt
+</code></pre></div>      </div>
+    </div>
+  </li>
+  <li>
+    <p>让 client 端关闭输出数据流并下载文件。</p>
+
+    <div class="snippet">
+      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  &lt;/dev/null ./apps/endtoend client cs144.keithw.org 4089 <span class="o">&gt;</span> /tmp/big-received.txt
+</code></pre></div>      </div>
+    </div>
+  </li>
+  <li>
+    <p>比较两个文件确保二者一致</p>
+
+    <div class="snippet">
+      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sha256sum</span> /tmp/big.txt
+  <span class="nb">sha256sum</span> /tmp/big-received.txt
+</code></pre></div>      </div>
+    </div>
+  </li>
+</ul>
+
+<p>如果 SHA-256 哈希值都能匹配上， 那我们就可以确定文件被正确传输了。</p>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 5: building an IP router</title><link href="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 5: building an IP router" /><published>2023-05-30T00:00:00+08:00</published><updated>2023-05-30T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/30/cs144-lab5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/30/cs144-lab5.html"><![CDATA[<p>记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。
 <!--more--></p>
 <ul>
   <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
@@ -10,7 +117,7 @@
 <h2 id="1-内容简述">1. 内容简述</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-23-cs144-lab5/check5-structure.png" alt="IP router structure" width="500" />
+    <img src="/norobots/images/2023-05-30-cs144-lab5/check5-structure.png" alt="IP router structure" width="500" />
     <br />
     <font size="2" color="#999"><u>IP router structure</u></font>
 </div>
@@ -71,7 +178,7 @@
 <h2 id="3-网络拓扑">3. 网络拓扑</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-23-cs144-lab5/simulated-router-and-interfaces.png" alt="Simulated router and interfaces topology" width="800" />
+    <img src="/norobots/images/2023-05-30-cs144-lab5/simulated-router-and-interfaces.png" alt="Simulated router and interfaces topology" width="800" />
     <br />
     <font size="2" color="#999"><u>Simulated router and interfaces topology</u></font>
 </div>
@@ -126,7 +233,7 @@ Built target check5
 <h2 id="1-内容简述">1. 内容简述</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-23-cs144-lab4/check4-structure.png" alt="network interface structure" width="300" />
+    <img src="/norobots/images/2023-05-27-cs144-lab4/check4-structure.png" alt="network interface structure" width="300" />
     <br />
     <font size="2" color="#999"><u>network interface structure</u></font>
 </div>
@@ -321,7 +428,7 @@ Total Test <span class="nb">time</span> <span class="o">(</span>real<span class=
 <h2 id="3-tcp-sender-实现">3. TCP Sender 实现</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-23-cs144-lab3/space-structure.png" alt="space structure" width="600" />
+    <img src="/norobots/images/2023-05-24-cs144-lab3/space-structure.png" alt="space structure" width="600" />
     <br />
     <font size="2" color="#999"><u>space structure, HangX-Ma</u></font>
 </div>
@@ -1260,7 +1367,16 @@ YOUR_CODE_HERE
 
 <h3 id="6-增加-jekyll-seo-tag">6. 增加 jekyll-seo-tag</h3>
 
-<p>按照官网给的指导书就行 <a href="https://github.com/jekyll/jekyll-seo-tag">jekyll/jekyll-seo-tag</a>。</p>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="TeXt" /><summary type="html"><![CDATA[在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream</title><link href="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream" /><published>2023-05-14T00:00:00+08:00</published><updated>2023-05-14T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/14/cs144-lab1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html"><![CDATA[<p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
+<p>按照官网给的指导书就行 <a href="https://github.com/jekyll/jekyll-seo-tag">jekyll/jekyll-seo-tag</a>。</p>
+
+<h3 id="7-一键代码复制">7. 一键代码复制</h3>
+
+<p>文章倒是没咋看， 主要看 PR 的 commit 部分更改了啥自己加上了， 感觉效果还挺不错的。</p>
+
+<blockquote>
+  <p><a href="https://be-my-only.xyz/blog/TeXt-copy-to-clipboard/">为博客添加代码块一键复制功能 - Yuze Zou</a><br />
+<a href="https://github.com/kitian616/jekyll-TeXt-theme/pull/218/commits">feat: copy to clipboard for code blocks #218</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="TeXt" /><summary type="html"><![CDATA[在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream</title><link href="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream" /><published>2023-05-14T00:00:00+08:00</published><updated>2023-05-14T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/14/cs144-lab1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html"><![CDATA[<p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
 <!--more--></p>
 <blockquote>
   <p><a href="https://kiprey.github.io/2021/11/cs144-lab1/">Kiprey</a> 2021 年的 Lab1 的记录给予了我帮助和启发。</p>
@@ -2898,500 +3014,4 @@ Total points: 36/36
   <li><a href="http://www.cs.cmu.edu/afs/cs/academic/class/15213-f15/www/schedule.html">15-213/18-213/15-513: Intro to Computer Systems (ICS)</a></li>
   <li><a href="http://csapp.cs.cmu.edu/3e/labs.html">Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) - Lab Assignments</a></li>
   <li><a href="https://github.com/HangX-Ma/csapp-2015">Github repository: csapp-2015</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="CSAPP" /><summary type="html"><![CDATA[Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Data Lab， 实现源码可从 Github 获取。]]></summary></entry><entry><title type="html">U-Boot 基础概念与学习分享</title><link href="https://hangx-ma.github.io/2023/02/27/uboot-concept.html" rel="alternate" type="text/html" title="U-Boot 基础概念与学习分享" /><published>2023-02-27T00:00:00+08:00</published><updated>2023-02-27T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/02/27/uboot-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/02/27/uboot-concept.html"><![CDATA[<ul>
-  <li>Board: rockchip-px30, armv8, Cortex-A35</li>
-  <li>U-Boot: <a href="https://github.com/rockchip-linux/u-boot">rockchip-linux/u-boot</a>, branch next-dev</li>
-  <li>Tools: VScode, Exuberant CTags</li>
-</ul>
-
-<h2 id="1-前言">1. 前言</h2>
-
-<p>学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。</p>
-
-<h2 id="2-学习路线">2. 学习路线</h2>
-
-<p>一般来说芯片公司会提供相关的手册介绍各个组件， 这对了解特定型号的开发板是很有效的， 但不适合初学者进行系统的学习， 建立全局概念应当是第一位的。 学习 u-boot 应当对以下几个方面有所了解：</p>
-
-<ul>
-  <li>ARM Assembly， 推荐 <em>Kyle Baldwin</em> 的 <em>ARM Assembly By Example</em>， 我自己在 <a href="https://github.com/HangX-Ma/ARM-Assembly-By-Example">github</a> 上也实现了相关的 lab。</li>
-  <li>Device Tree， <a href="http://devicetree.org/">The DeviceTree Specification</a> 结合具体的 dts/dtsi 文件阅读学习。</li>
-  <li>Linker Script， <a href="https://www.gnu.org/software/binutils/">GNU Binutils</a> 官方的ld文档合具体的lds文件进行阅读学习， 结合 <em>程序员的自我修养–链接装载与库</em> 这本书建立相关概念。</li>
-  <li>Kconfig, <a href="https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html">Kconfig Language</a> 同样用在了 u-boot 中需要对其有一定的了解。</li>
-</ul>
-
-<p>如果对 DM(Driver Model) 有兴趣， 可以阅读 <a href="https://lwn.net/Kernel/LDD3/">Linux Device Driver, Third Edition</a>，但具备以上几块知识已经足够理解 u-boot 启动流程。 Das U-Boot 提供的文档以及 u-boot 源码中提供的 <code class="language-plaintext highlighter-rouge">README</code> 这类文档不需要仔细读完， 这些仅供学习参考， 但 <a href="https://elinux.org/Boot_Loaders#U-Boot">elinux_talks</a> 这部分资源也值得查阅。</p>
-
-<p>全局概念非常重要， 先啃源码建立相关概念， 带着问题探究细节会事半功倍。</p>
-
-<h2 id="3-u-boot-框架与启动阶段">3. U-Boot 框架与启动阶段</h2>
-
-<h3 id="31-u-boot-架构分析">3.1 U-Boot 架构分析</h3>
-
-<p>u-boot 的开发者在<a href="https://github.com/rockchip-linux/u-boot/blob/next-dev/README#L132-L167">开发文档</a>中描述目录的层次结构， 但缺少更为宏观的概括。 以 rockchip-px30 为例， 其在 u-boot 中的文件可被划归为以下几类。以CPU，ARCH，Board 三级对文件进行划分可以帮助我们在配置新板时有更清晰的规划。 <em>Quentin Schulz</em> 在 2017 年的嵌入式 linux 欧洲会议上的演讲 <em><a href="https://elinux.org/images/2/2a/Schulz-how-to-support-new-board-u-boot-linux.pdf">Porting U-Boot and Linux on new ARM boards: a step-by-step guide</a></em> 则具体介绍了详细的实施步骤。</p>
-
-<blockquote>
-  <p>CPU (armv8), ARCH (arm), Board(px30)</p>
-</blockquote>
-
-<ul>
-  <li>CPU 层级依赖文件
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8/*c;*S;*lds</code></li>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/armv8/*h</code></li>
-    </ul>
-  </li>
-  <li>ARCH(arm) 层级依赖文件
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/lib/*c;*S;*lds</code></li>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/*h;*S</code></li>
-    </ul>
-  </li>
-  <li>Board 层级依赖文件
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/*c</code></li>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/*c</code></li>
-    </ul>
-  </li>
-  <li>Board 层级配置文件
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/arch-rockchip/*h;*S</code></li>
-      <li><code class="language-plaintext highlighter-rouge">include/rockchip/*h</code></li>
-      <li><code class="language-plaintext highlighter-rouge">include/px30_common.h;evb_px30.h</code></li>
-    </ul>
-  </li>
-  <li>Board 层级非依赖文件
-    <ul>
-      <li>common(cmd, flash, env, usb, …), disk(partition)</li>
-      <li>drivers, fs, net, lib</li>
-    </ul>
-  </li>
-</ul>
-
-<div align="center">
-    <img src="/norobots/images/2023-02-27-uboot-concept/hierarchy.png" alt="U-Boot Hierarchy, HangX-Ma" width="400" />
-    <br />
-    <font size="2" color="#999"><u>U-Boot Hierarchy, HangX-Ma</u></font>
-</div>
-
-<p>u-boot 的初始化过程就是 CPU $\rightarrow$ ARCH $\rightarrow$ Board 的过程， 但并不严格划归， ARCH部分的通用代码会调用 Board 相关的接口。 在 <a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">wowo</a> 的文章中提到曾经存在于 ARCH 和 Board 之间的 machine 层级由于最新的ARM64架构引入了 device tree 的缘故， 已经将 machine 概念删除了， 在当前 u-boot 中看到的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 的目录或文件就属于 machine 层级， 虽然 u-boot 还未更新相关的架构概念， 但在开发层面 u-boot 和 linux 内核几乎同时适用了 device tree， 这意味着 u-boot 也很可能在之后的更新中删除类似的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 文件。</p>
-
-<h4 id="311-举例从-kconfig-自底向上">3.1.1 举例——从 Kconfig 自底向上</h4>
-
-<p>从 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中自底向上梳理整个编译框架， 假设我们使用的目标板是 rockchip-px30 系列的 evb-px30， 那么 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30</code> 文件夹中定义了目标板的一些依赖代码， 在 <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code> 会有该目标板的配置信息， 类似的配置信息和编译是息息相关的需要格外留意。</p>
-
-<p>从顶层的 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/Kconfig</code> 查看， 可以找到 <code class="language-plaintext highlighter-rouge">TARGET_EVB_PX30</code> 整个关键量以及定义的 <code class="language-plaintext highlighter-rouge">BORAD</code>， <code class="language-plaintext highlighter-rouge">VENDOR</code> 等编译相关的变量。</p>
-
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># board/rockchip/evb_px30/Kconfig</span>
-if TARGET_EVB_PX30
-
-config SYS_BOARD
-    default <span class="s2">"evb_px30"</span>
-
-config SYS_VENDOR
-    default <span class="s2">"rockchip"</span>
-
-config SYS_CONFIG_NAME
-    default <span class="s2">"evb_px30"</span>
-
-config BOARD_SPECIFIC_OPTIONS <span class="c1"># dummy</span>
-    def_bool y
-
-endif
-</code></pre></div></div>
-
-<p>顺着前述所提及的关键量， 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/Kconfig</code> 中能找到引用信息（尤其是 source 了前述的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件）， 由于当前使用的就是 evb-px30 板， <code class="language-plaintext highlighter-rouge">EVB_PX30</code> 该 <code class="language-plaintext highlighter-rouge">bool</code> 变量是 <code class="language-plaintext highlighter-rouge">true</code>。 可以看到该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件在框架中属于亟待更新的 machine 层级， 所以在该部分可以看到 <code class="language-plaintext highlighter-rouge">SYS_SOC</code> 这个配置变量。 在该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件中还覆盖定义了 <code class="language-plaintext highlighter-rouge">SYS_MALLOC_F_LEN</code> 和 <code class="language-plaintext highlighter-rouge">SPL_SERIAL_SUPPORT</code>。</p>
-
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/px30/Kconfig</span>
-if ROCKCHIP_PX30
-
-config TARGET_EVB_PX30
-    bool <span class="s2">"EVB_PX30"</span>
-    select BOARD_LATE_INIT
-
-config SYS_SOC
-    default <span class="s2">"rockchip"</span>
-
-config SYS_MALLOC_F_LEN
-    default 0x400
-
-config SPL_SERIAL_SUPPORT
-    default y
-
-source <span class="s2">"board/rockchip/evb_px30/Kconfig"</span>
-
-endif
-</code></pre></div></div>
-
-<p>在更上一级目录则看到更为通用的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件会配置 <code class="language-plaintext highlighter-rouge">ROCKCHIP_PX30</code> 这个定义量。 可以看到在该目录下配置了 px30 系列使用默认配置。 我们再向上一级的查找 <code class="language-plaintext highlighter-rouge">ARCH_ROCKCHIP</code> 变量以其找到顶层的 <code class="language-plaintext highlighter-rouge">xxx_defconfig</code> 配置文件。</p>
-
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/Kconfig</span>
-if ARCH_ROCKCHIP
-
-config ROCKCHIP_PX30
-    bool <span class="s2">"Support Rockchip PX30"</span>
-    select ARM64 if !ARM64_BOOT_AARCH32
-    select GICV2
-    select ARM_SMCCC
-    select SUPPORT_SPL
-    select SUPPORT_TPL
-    select SPL if !ARM64_BOOT_AARCH32
-    select TPL if !ARM64_BOOT_AARCH32
-    select TPL_TINY_FRAMEWORK if TPL
-
-    imply SPL_SEPARATE_BSS
-    imply SPL_SERIAL_SUPPORT
-    imply TPL_SERIAL_SUPPORT
-    help
-      The Rockchip PX30 is a ARM-based SoC with a quad-core Cortex-A35
-      including NEON and GPU, Mali-400 graphics, several DDR3 options
-      and video codec support. Peripherals include Gigabit Ethernet,
-      USB2 host and OTG, SDIO, I2S, UART, SPI, I2C and PWMs.
-
-if ROCKCHIP_PX30
-
-config TPL_LDSCRIPT
-    default <span class="s2">"arch/arm/mach-rockchip/u-boot-tpl-v8.lds"</span>
-
-config TPL_TEXT_BASE
-    default 0xff0e1000
-
-config TPL_MAX_SIZE
-    default 10240
-
-config ROCKCHIP_RK3326
-    bool <span class="s2">"Support Rockchip RK3326 "</span>
-    help
-      RK3326 can use most code from PX30, but at some situations we have
-      to distinguish between RK3326 and PX30, so this macro gives help.
-      It is usually selected in rk3326 board defconfig.
-endif
-...
-</code></pre></div></div>
-
-<p>在更上一级， 我们先找到了 <code class="language-plaintext highlighter-rouge">arch/arm/Kconfig</code>， ARCH 层级的默认配置。</p>
-
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/Kconfig</span>
-...
-config ARCH_ROCKCHIP
-    bool <span class="s2">"Support Rockchip SoCs"</span>
-    select OF_CONTROL
-    select BLK
-    select DM
-    select SPL_DM if SPL
-    select SYS_MALLOC_F
-    select SYS_THUMB_BUILD if !ARM64
-    select SPL_SYS_MALLOC_SIMPLE if SPL
-    imply DM_GPIO
-    select DM_SERIAL
-    select DM_SPI
-    select DM_SPI_FLASH
-    select DM_USB if USB
-    select CMD_ROCKUSB if USB_GADGET_DOWNLOAD
-    select ENABLE_ARM_SOC_BOOT0_HOOK
-    select SYS_NS16550
-    select SPI
-    select DEBUG_UART_BOARD_INIT
-    select PANIC_HANG
-    imply DM_MMC
-    imply DM_I2C
-    imply DM_PWM
-    imply DM_REGULATOR
-    imply CMD_FASTBOOT
-    imply FASTBOOT
-    imply FAT_WRITE
-    imply USB_FUNCTION_FASTBOOT
-    imply USB_FUNCTION_ROCKUSB
-    imply SPL_SYSRESET
-    imply TPL_SYSRESET
-    imply ADC
-    imply SARADC_ROCKCHIP
-...
-</code></pre></div></div>
-
-<p>最终我们能在 <code class="language-plaintext highlighter-rouge">configs/evb-px30_defconfig</code><strong>(Target)</strong> 中找到用户自定义的基本宏信息， 另外一些信息则在前述提及的配置文件中。 例如 <code class="language-plaintext highlighter-rouge">include/configs/px30_common.h</code>， <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code>， 以及 <code class="language-plaintext highlighter-rouge">include/configs/rockchip-common.h</code>。 我们自底向上， 特定的板级文件开始溯源， 找到了最终顶层的配置文件。 根据顶层的配置文件以及每个层级的配置文件可以梳理出编译特定板所需的功能。 另外， 在底层的 TARGET 的配置中可以看到诸如 <code class="language-plaintext highlighter-rouge">SYS_xxx</code> 的一系列配置， 这些配置会在更上层的 <code class="language-plaintext highlighter-rouge">arch/Kconfig</code> 中定义。 所以综上可以总结出如下配置关系图。</p>
-
-<div class="mermaid" align="center">
-flowchart
-    subgraph Target
-        evb-px30_defconfig
-    end
-    subgraph arch
-        subgraph arm
-            subgraph mach-rockchip
-                subgraph px30
-                Board/evb-px30
-                end
-            end
-        end
-    end
-    style Target fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style evb-px30_defconfig fill:#F5F5DC,color:#8B8378
-    style arch fill:#4A708B,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style arm fill:#838B8B,stroke:#363636,color:#F5F5F5
-    style mach-rockchip fill:#6CA6CD,stroke:#363636,color:#F5F5F5
-    style px30 fill:#4A708B,stroke:#363636,color:#F5F5F5
-    style Board/evb-px30 fill:#F5F5DC,color:#8B8378
-    Target -.-&gt; arch
-</div>
-
-<h3 id="32-boot-loader-stage">3.2 Boot Loader Stage</h3>
-
-<p>BLx(Boot Loader Stage) 指代 Boot Loader 的各个阶段， 具体的划分根据 u-boot 初始化时所在存储设备略有不同， 一般将 u-boot 启动划分为 4 个阶段， BL0， BL1， BL2， BL3。值得注意的是这与 ARM TrustZone 的划分非属同源， 在 ARM TrustZone 的划分中， u-boot 属于 BL33 Non-secure 部分。</p>
-
-<ul>
-  <li><strong>BL0</strong>， SOC 生产厂家固化在 iROM(Internal ROM) 中的启动代码， 主要负责加载 BL1 的程序， 该部分被称作 Initial Program Loader (IPL) 或者 Primary Program Loader (PPL)。</li>
-  <li><strong>BL1</strong>， 该部分被称为 SPL(Secondary Program Loader)， 若 SPL 部分仍超过了 flash 存储限制， 首先会通过 TPL(Trinary Program Loader) 进行更简洁的初始化如 DDR 部分的初始化，以保证代码体积极小， 之后再从指定位置加载 SPL 继续执行初始化。</li>
-  <li><strong>BL2</strong>， 该阶段 u-boot 运行程序重定位之前的部分， 主要负责一系列初始化操作以及构建 C 语言的运行环境， 最为关键的是将 u-boot 重定位至 DRAM/SDRAM 中继续执行 BL3 阶段的程序。</li>
-  <li><strong>BL3</strong>， 在该阶段实质上加载了u-boot， 当然通过 ATF(Architecture Trusted Firmware) 加载也是可以的。 该阶段在负责初始化 SOC 的外设， 准备内核启动参数以及加载运行内核等操作。</li>
-</ul>
-
-<div align="center">
-    <img src="/norobots/images/2023-02-27-uboot-concept/bootloader-startup-sequence.png" alt="Boot loader sequences, HouchengLin" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Boot loader sequences, HouchengLin</u></font>
-</div>
-
-<p>根据以上描述， 以图例形式表述 u-boot 的启动流程应当如下所示。</p>
-
-<div class="mermaid" align="center">
-flowchart LR
-    p1(BootROM)
-    p2(TPL, optional)
-    p3(SPL)
-    p4(ATF, optional)
-    p5(U-Boot)
-    p6(Kernel)
-    style p1 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style p2 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
-    style p3 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
-    style p4 fill:#8B1A1A,stroke:#363636,color:#F5F5F5
-    style p5 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style p6 fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    p1 --&gt; p2 --&gt; p3 --&gt; p4 --&gt; p5 --&gt; p6
-    p1 -.-&gt; p3
-    p3 -.-&gt; p5
-    p1 ==&gt; p5
-</div>
-
-<h2 id="4-浅析-tpl">4. 浅析 TPL</h2>
-
-<p>嵌入式的代码铁定有个名为 <code class="language-plaintext highlighter-rouge">start.S</code> 的入口汇编代码， 但在进行源码分析之前， 我比较喜欢阅读链接脚本以此获悉 u-boot 的构成以及分析启动过程中的一些工作。 在 <code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8</code> 目录下有两个 <code class="language-plaintext highlighter-rouge">lds</code> 文件， armv8 的 BootROM $\rightarrow$ u-boot 的引导使用 <code class="language-plaintext highlighter-rouge">u-boot.lds</code> 进行链接， 而在 u-boot 之前存在 SPL/TPL 阶段则会使用 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 或 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/u-boot-tpl-v8.lds</code> 进行链接。</p>
-
-<p>在上述流程中提及 TPL 的存在， 这也是让我比较困惑的， TPL 如何 与 SPL 进行配合实现对 bootloader 的引导启动， 这一块内容值得深入探究。 不妨先从 TPL 的链接脚本入手， 厘清 TPL 阶段的相关逻辑。</p>
-
-<blockquote>
-  <p>这两篇文章关于 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 有着不同详略的解析， 可以用以了解 u-boot 相关的链接脚本的 section 的基本功能以及了解链接脚本的基本概念， 这些内容已有前人做了充分的解析不再赘述。</p>
-
-  <ul>
-    <li><a href="https://blog.csdn.net/u013440753/article/details/105879835">Armv8架构UBOOT 启动篇——SPL(u-boot-spl.lds链接脚本), Kernel_Nuts</a></li>
-    <li><a href="https://blog.csdn.net/maybeYoc/article/details/122937844">ARMv8架构u-boot启动流程详细分析(一), 内核新视界</a></li>
-  </ul>
-</blockquote>
-
-<h3 id="41-tpl-configurations">4.1 TPL Configurations</h3>
-
-<p>根据前述配置， evb-px30 在启动时会经由 TPL 以及 SPL 引导 u-boot。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中可以看到与 TPL 相关的一些定义：<code class="language-plaintext highlighter-rouge">TPL</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_LDSCRIPT</code>， <code class="language-plaintext highlighter-rouge">TPL_TEXT_BASE</code>， <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， <code class="language-plaintext highlighter-rouge">SUPPORT_TPL</code>, 这些宏定义会影响后续编译的过程。</p>
-
-<p>其中， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这个宏定义非常重要。 网上很多博客提及相关内容仅说明在定义 <code class="language-plaintext highlighter-rouge">CONFIG_TPL</code> 之后 <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 会自动定义， 但没有详细说明具体位置。 在 <code class="language-plaintext highlighter-rouge">scripts/Makefile.autoconf</code> 文件的 85-87 行可以看到几行规则， 实际上向 <code class="language-plaintext highlighter-rouge">tpl/u-boot.cfg</code> 传递了 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这两个量。 在其他任何 <code class="language-plaintext highlighter-rouge">config.mk</code>，<code class="language-plaintext highlighter-rouge">Kconfig</code>， <code class="language-plaintext highlighter-rouge">Kbuild</code> 这样的文件中都不会找到这两个量的定义。</p>
-
-<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># scripts/Makefile.autoconf
-</span><span class="nl">tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
-    <span class="err">$(Q)mkdir</span> <span class="err">-p</span> <span class="nf">$(</span><span class="nb">dir</span> <span class="nv">$@</span><span class="p">)</span>
-    <span class="nf">$(</span><span class="nb">call</span> cmd,u_boot_cfg,-DCONFIG_SPL_BUILD <span class="nt">-DCONFIG_TPL_BUILD</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>另外在顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件我们可以找到这样一则规则， 是 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 的上一级引用。</p>
-
-<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Makefile
-</span><span class="nl">u-boot.cfg spl/u-boot.cfg tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
-    <span class="err">$(Q)$(MAKE)</span> <span class="err">-f</span> <span class="err">$(srctree)/scripts/Makefile.autoconf</span> <span class="err">$(@)</span>
-</code></pre></div></div>
-
-<p>而当我们查看 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 所描述的功能时， 可以看到前述的 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 以及其他生成的宏定义最终会被转移到 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中以完成全局性的定义。</p>
-
-<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># This helper makefile is used for creating
-#  - symbolic links (arch/$ARCH/include/asm/arch
-#  - include/autoconf.mk, {spl,tpl}/include/autoconf.mk
-#  - include/config.h
-#
-# When our migration to Kconfig is done
-# (= When we move all CONFIGs from header files to Kconfig)
-# this makefile can be deleted.
-</span></code></pre></div></div>
-
-<h3 id="42-tpl-linker-script">4.2 TPL Linker Script</h3>
-
-<p>BootROM 完成基本的初始化后首先会在 iRAM 中载入 TPL 段的运行代码。</p>
-
-<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">OUTPUT_FORMAT(</span><span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">)</span>
-<span class="err">OUTPUT_ARCH(aarch64)</span>
-<span class="err">ENTRY(_start)</span>
-<span class="err">SECTIONS</span>
-<span class="err">{</span>
-    <span class="nv">.</span> <span class="o">=</span> 0x00000000<span class="p">;</span>
-
-    <span class="nl">.text </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__image_copy_start)</span>
-        <span class="err">CPUDIR/start.o</span> <span class="err">(.text*)</span>
-        <span class="err">*(.text*)</span>
-    <span class="err">}</span>
-
-    <span class="nl">.rodata </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))</span>
-    <span class="err">}</span>
-
-    <span class="nl">.data </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.data*)</span>
-    <span class="err">}</span>
-
-    <span class="nl">.u_boot_list </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">KEEP(*(SORT(.u_boot_list*)));</span>
-    <span class="err">}</span>
-
-    <span class="nl">.image_copy_end </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__image_copy_end)</span>
-    <span class="err">}</span>
-
-    <span class="nl">.end </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__end)</span>
-    <span class="err">}</span>
-
-    <span class="nv">_image_binary_end</span> <span class="o">=</span> .<span class="p">;</span>
-
-    <span class="nl">.bss_start (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">KEEP(*(.__bss_start));</span>
-    <span class="err">}</span>
-
-    <span class="nl">.bss (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="err">*(.bss*)</span>
-         <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-    <span class="err">}</span>
-
-    <span class="nl">.bss_end (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="err">KEEP(*(.__bss_end));</span>
-    <span class="err">}</span>
-
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynsym) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynstr*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynamic*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.plt*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.interp*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.gnu*) }</span>
-<span class="err">}</span>
-
-<span class="c">#if defined(CONFIG_TPL_MAX_SIZE)
-</span><span class="err">ASSERT(__image_copy_end</span> <span class="err">-</span> <span class="err">__image_copy_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_SIZE),</span> <span class="err">\</span>
- <span class="s2">"TPL image too big"</span><span class="err">);</span>
-<span class="c">#endif
-</span>
-<span class="c">#if defined(CONFIG_TPL_BSS_MAX_SIZE)
-</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">__bss_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_BSS_MAX_SIZE),</span> <span class="err">\</span>
- <span class="s2">"TPL image BSS too big"</span><span class="err">);</span>
-<span class="c">#endif
-</span>
-<span class="c">#if defined(CONFIG_TPL_MAX_FOOTPRINT)
-</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_FOOTPRINT),</span> <span class="err">\</span>
- <span class="s2">"TPL image plus BSS too big"</span><span class="err">);</span>
-<span class="c">#endif
-</span></code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-plaintext highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-plaintext highlighter-rouge">__image_copy_start</code> 和 <code class="language-plaintext highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-plaintext highlighter-rouge">bss</code> 段都被声明了 <code class="language-plaintext highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-plaintext highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
-    <br />
-    <font size="2" color="#999"><u>TPL Loading Memory, HangX-Ma</u></font>
-</div>
-
-<p>另外可以从 <code class="language-plaintext highlighter-rouge">ld</code> 文件中看到， 入口程序是 <code class="language-plaintext highlighter-rouge">CPUDIR/start.o</code>, <code class="language-plaintext highlighter-rouge">CPUDIR</code> 可以依据层级划分从各个较为顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件中找到具体定义。 但根据架构分析中的概念， 不难得出此处的 <code class="language-plaintext highlighter-rouge">CPUDIR</code> 是 <code class="language-plaintext highlighter-rouge">arch/arm/armv8</code>。 <code class="language-plaintext highlighter-rouge">start.S</code> 最终会定位到 <code class="language-plaintext highlighter-rouge">_main</code> 程序入口继续执行流程。（关于 <code class="language-plaintext highlighter-rouge">start.S</code> 的详细流程可以参考  <a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a> 由于我们的编译是 AArch64 架构， 那么 C Runtime Environment 的建立也应当是 <code class="language-plaintext highlighter-rouge">crt0_64.S</code>， 可以在这个文件中看到， <code class="language-plaintext highlighter-rouge">board_init_f_alloc_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_init_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_boot_flags</code> 几个函数通过在栈顶预留内存来达到给 <code class="language-plaintext highlighter-rouge">GD(Global Data)</code> 开辟内存空间， 在 AArch64 架构中 <code class="language-plaintext highlighter-rouge">GD</code> 指针地址会被保留在 <code class="language-plaintext highlighter-rouge">x18</code> 寄存器中供全局使用， 之后跳转到 <code class="language-plaintext highlighter-rouge">board_init_f</code>。 这是一个分水岭， TPL， SPL 以及 u-boot 都会执行这个函数。</p>
-
-<p>一般来说可以将 u-boot 的启动过程划分为两个阶段， 也就是前述的 BL2 和 BL3 的区分。 Pre-relocation(<code class="language-plaintext highlighter-rouge">common/board_f.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">f</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">flash</code>， 以及 After-relocation(<code class="language-plaintext highlighter-rouge">common/board_r.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">r</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">RAM</code>。</p>
-
-<p>我们知道 TPL 只完成一些很基本的初始化流程， 对于 TPL 而言实际上不存在重定位的需求， 所以关键就在 <code class="language-plaintext highlighter-rouge">board_init_f</code> 这个函数。</p>
-
-<ul>
-  <li>SPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/spl.c</code></li>
-  <li>TPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/tpl.c</code></li>
-  <li>U-Boot： <code class="language-plaintext highlighter-rouge">common/board_f.c</code></li>
-</ul>
-
-<p>在编译链接时， 编译组件就会对这几个文件进行区分， 以保证绑定正确的可执行文件。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Makefile</code> 中就巧妙的在编译 TPL 文件时取消了 SPL 相关文件的生成， 而在编译 SPL 文件时则不受 TPL 的相关定义影响。</p>
-
-<p>根据之前的宏定义梳理的在 TPL 阶段的 <code class="language-plaintext highlighter-rouge">board_init_f</code> 所做的工作如下， 时钟初始化， CPU 部分初始化， UART 串口初始化， SDRAM 初始化。 这些工作都完成之后会通过 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 默认定义的 <code class="language-plaintext highlighter-rouge">TPL_ROCKCHIP_BACK_TO_BROM</code> 宏引导的 <code class="language-plaintext highlighter-rouge">back_to_bootrom</code> 返回 BootROM 阶段再进行下一阶段的 SPL。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>board_init_f
-    rockchip_stimer_init
-    arch_cpu_init
-    debug_uart_init
-    timer_init
-    sdram_init
-    back_to_bootrom
-</code></pre></div></div>
-
-<div class="mermaid" align="center">
-flowchart LR
-    p1(BootROM)
-    p2(TPL)
-    p3(SPL)
-    p4(U-Boot)
-    p5(Kernel)
-    style p1 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style p2 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
-    style p3 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
-    style p4 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style p5 fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    p1 -.-&gt;|stage 1 'init'| p2
-    p2 -.-&gt;|stage 2 'back to rom'| p1
-    p1 --&gt;|stage 3| p3
-    p3 --&gt; p4
-    p4 --&gt; p5
-</div>
-
-<p>至于 SPL 的具体流程可以参考 TPL 的流程进行推导相关的资料也非常详细， 在<a href="#6-参考">参考</a>部分的 <a href="#61-u-boot">U-Boot</a> 部分已经列举了筛选过的较好的资料可供选读。</p>
-
-<h2 id="5-总结">5. 总结</h2>
-
-<p>文章对 u-boot 学习路线进行了简单介绍， 并从 u-boot 构建框架着手解构 u-boot， 以 Kconfig 为索引文件自底向上分析框架。 除此之外还介绍了 Boot Loader 的几个基本流程， 对其中的 TPL 过程进行了剖析。后续会在此篇博文的基础上进行增改扩充基础概念部分， 而其他需要仔细剖析的部分则另建博文进行阐述。</p>
-
-<h2 id="6-参考">6. 参考</h2>
-
-<h3 id="61-u-boot">6.1 U-Boot</h3>
-
-<ul>
-  <li><a href="https://www.cnblogs.com/xiaojiang1025/p/6496704.html">从0移植uboot (二) _uboot启动流程分析, Abnor</a></li>
-  <li><a href="http://www.wowotech.net/sort/u-boot">u-boot分析(文章类), wowo</a></li>
-  <li><a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">X-003-UBOOT-基于Bubblegum-96平台的u-boot移植说明, wowo</a></li>
-  <li><a href="https://wowothink.com/146db8db/">u-boot启动流程, wowothink</a></li>
-  <li><a href="https://blog.csdn.net/maybeYoc/article/details/122937844">ARMv8架构u-boot启动流程详细分析(一), 内核新视界</a></li>
-  <li><a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a></li>
-  <li><a href="https://blog.csdn.net/u013440753/article/details/105897679">Armv8架构UBOOT 启动篇——SPL(start.S), Kernel_Nuts</a></li>
-  <li><a href="https://blog.csdn.net/u013440753/article/details/105879835">Armv8架构UBOOT 启动篇——SPL(u-boot-spl.lds链接脚本), Kernel_Nuts</a></li>
-  <li><a href="https://elinux.org/images/d/d6/U-Boot-Bootloader-for-IoT-Platform-Alexey-Brodkin-Synopsys-2.pdf">U-Boot - Bootloader for IoT Platform? [ELCE 2018], Alexey Brodkin, Synopsys</a></li>
-  <li><a href="https://www.slideshare.net/HouchengLin/uboot-startup-sequence">U-boot startup sequence, HouchengLin</a></li>
-</ul>
-
-<h3 id="62-arm-参考手册">6.2 ARM 参考手册</h3>
-
-<ul>
-  <li><a href="https://developer.arm.com/documentation/100076/0100/">Arm® Instruction Set Reference Guide</a></li>
-  <li><a href="https://developer.arm.com/documentation/dui0068/b/ARM-Instruction-Reference">ARM Developer Suite Assembler Guide</a></li>
-  <li><a href="https://developer.arm.com/documentation/ddi0487/ia/">Arm Architecture Reference Manual for A-profile architecture</a></li>
-  <li><a href="https://developer.arm.com/documentation/100236/0100/">Arm Cortex-A35 Processor Technical Reference Manual</a></li>
-  <li><a href="https://developer.arm.com/documentation/espc0003/1-0/?lang=en">ARM ELF Specification</a></li>
-</ul>
-
-<h3 id="63-aarch64-架构">6.3 AArch64 架构</h3>
-
-<ul>
-  <li><a href="https://developer.arm.com/documentation/101811/latest">Learn the architecture - AArch64 memory management</a></li>
-  <li><a href="https://developer.arm.com/documentation/102406/latest/">Learn the architecture - Introduction to security</a></li>
-  <li><a href="https://developer.arm.com/documentation/102412/latest">Learn the architecture - AArch64 Exception Model</a></li>
-  <li><a href="https://developer.arm.com/documentation/102418/latest/">Learn the architecture - TrustZone for AArch64</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="u-boot" /><category term="Linux" /><summary type="html"><![CDATA[学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="CSAPP" /><summary type="html"><![CDATA[Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Data Lab， 实现源码可从 Github 获取。]]></summary></entry></feed>

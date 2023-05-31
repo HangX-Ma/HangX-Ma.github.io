@@ -309,13 +309,13 @@
   <ul class="menu">
     <li>
       <button type="button" class="button button--secondary button--pill tag-button tag-button--all" data-encode="">
-        Show All<div class="tag-button__count">10</div>
+        Show All<div class="tag-button__count">11</div>
       </button>
     </li><li><button type="button" class="button button--pill tag-button tag-button-1" data-encode="CSAPP">
           <span>CSAPP</span><div class="tag-button__count">1</div>
         </button>
       </li><li><button type="button" class="button button--pill tag-button tag-button-4" data-encode="Course">
-          <span>Course</span><div class="tag-button__count">6</div>
+          <span>Course</span><div class="tag-button__count">7</div>
         </button>
       </li><li><button type="button" class="button button--pill tag-button tag-button-1" data-encode="Git">
           <span>Git</span><div class="tag-button__count">1</div>
@@ -330,7 +330,7 @@
           <span>Tool</span><div class="tag-button__count">3</div>
         </button>
       </li><li><button type="button" class="button button--pill tag-button tag-button-4" data-encode="cs144">
-          <span>cs144</span><div class="tag-button__count">5</div>
+          <span>cs144</span><div class="tag-button__count">6</div>
         </button>
       </li><li><button type="button" class="button button--pill tag-button tag-button-1" data-encode="u-boot">
           <span>u-boot</span><div class="tag-button__count">1</div>
@@ -344,6 +344,8 @@
       </li></ul>
 </div>
 <div class="js-result layout--archive__result d-none"><div class="article-list items"><section><h2 class="article-list__group-header">2023</h2><ul class="items"><li class="item" itemscope itemtype="http://schema.org/BlogPosting" data-tags="Course,cs144">
+        <div class="item__content"><span class="item__meta">May 31</span><a itemprop="headline" class="item__header" href="/2023/05/31/cs144-lab6.html">cs144-sp23, Lab Checkpoint 6: putting it all together</a></div>
+      </li><li class="item" itemscope itemtype="http://schema.org/BlogPosting" data-tags="Course,cs144">
         <div class="item__content"><span class="item__meta">May 30</span><a itemprop="headline" class="item__header" href="/2023/05/30/cs144-lab5.html">cs144-sp23, Lab Checkpoint 5: building an IP router</a></div>
       </li><li class="item" itemscope itemtype="http://schema.org/BlogPosting" data-tags="Course,cs144">
         <div class="item__content"><span class="item__meta">May 27</span><a itemprop="headline" class="item__header" href="/2023/05/27/cs144-lab4.html">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</a></div>
@@ -1088,7 +1090,64 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
     mermaid.init(undefined, '.language-mermaid');
   });
 </script>
+<script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+	clipboardSnippets.on('success', function(e) {
+		e.clearSelection();
+		showTooltip(e.trigger, 'Copied!');
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
 
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];

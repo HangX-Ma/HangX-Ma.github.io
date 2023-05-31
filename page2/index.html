@@ -307,6 +307,20 @@
 
 <!-- end custom main top snippet -->
 <article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="HangX-Ma"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/2023/03/14/vsvim-keyborad-setting.html"><h2 itemprop="headline" class="item__header">vscode(win): vim keyboard mapping</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">参考了知乎博主 云崖君 的 vscode + vim 全键盘操作高效搭配方案， 仅用以记录个人使用配置， 内容较为简略。 配置文件可见 setting.json 以及 keybindings.json。</div><p><a href="/2023/03/14/vsvim-keyborad-setting.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Tool">Tool</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=vscode">vscode</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=vim">vim</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 14, 2023</span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s14svsvim-keyborad-setting.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-14T00:00:00+08:00">
+    <meta itemprop="keywords" content="Tool,vscode,vim"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/2023/03/07/csapp-datalab.html"><h2 itemprop="headline" class="item__header">CSAPP - Data Lab</h2></a></header>
           <div class="item__description"><div class="article__content" itemprop="description articleBody">Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Data Lab， 实现源码可从 Github 获取。</div><p><a href="/2023/03/07/csapp-datalab.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
@@ -329,7 +343,7 @@
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s02s27suboot-concept.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-02-27T00:00:00+08:00">
     <meta itemprop="keywords" content="u-boot,Linux"></div>
       </article></div>
-</div><div class="layout--home"><div class="pagination"><p>10 post articles, 2 pages.</p>
+</div><div class="layout--home"><div class="pagination"><p>11 post articles, 2 pages.</p>
     <div class="pagination__menu">
       <ul class="menu menu--nowrap"><li><a class="button button--secondary button--circle" href="/">
             <i class="fas fa-angle-left"></i>
@@ -1019,7 +1033,64 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         });
       });
     });
-  </script>
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+	clipboardSnippets.on('success', function(e) {
+		e.clearSelection();
+		showTooltip(e.trigger, 'Copied!');
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
+
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];

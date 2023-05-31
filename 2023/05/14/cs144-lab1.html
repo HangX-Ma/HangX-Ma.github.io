@@ -1505,7 +1505,64 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         $("[data-page-key='s2023s05s14scs144-lab1.html']").text(view);
       });
     });
-  </script><script>function setClipboardText(event){
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+	clipboardSnippets.on('success', function(e) {
+		e.clearSelection();
+		showTooltip(e.trigger, 'Copied!');
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
+
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script><script>function setClipboardText(event){
     // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
     let clipboardData = event.clipboardData || window.clipboardData;
     // 如果未复制或者未剪切，则return出去
@@ -1521,17 +1578,19 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
         // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
         // data: 一个 DOMString表示要添加到 drag object的数据。
-        var copyright = '\n\n'
-        + '\nAuthor: HangX-Ma(一只豆腐)'
-        + '\nEmail: m-contour@qq.com'
-        + '\nArticle Address: ' + window.location.hostname + window.location.pathname
-        + '\nCopyright Notice: '
-        + 'The copyright belongs to the author. '
-        + 'For commercial reproduction, please contact the author for authorization. '
-        + 'For non-commercial reproduction, please indicate the source.'
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
 
-        clipboardData.setData('text/plain', text + copyright);
-
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
     }
 };
 var contents = document.getElementsByClassName("page__content");
