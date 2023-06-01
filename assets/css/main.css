@@ -6338,6 +6338,17 @@ html,
 }
 
 /* end back to top scss snippet */
+.content-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.st0 {
+  fill: #515151;
+}
+
 /* end custom scss snippet */
 
 /*# sourceMappingURL=main.css.map */

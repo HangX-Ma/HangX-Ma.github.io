@@ -48,12 +48,15 @@
 <loc>https://hangx-ma.github.io/about.html</loc>
 </url>
 <url>
-<loc>https://hangx-ma.github.io/archive.html</loc>
+<loc>https://hangx-ma.github.io/blog/archive.html</loc>
+</url>
+<url>
+<loc>https://hangx-ma.github.io/blog/</loc>
 </url>
 <url>
 <loc>https://hangx-ma.github.io/</loc>
 </url>
 <url>
-<loc>https://hangx-ma.github.io/page2/</loc>
+<loc>https://hangx-ma.github.io/blog/page2/</loc>
 </url>
 </urlset>
