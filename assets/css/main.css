@@ -6338,11 +6338,27 @@ html,
 }
 
 /* end back to top scss snippet */
+/* set blog/landing.html content to the center of the page */
 .content-center {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* avid bad webpage display */
+@media screen and (max-width: 640px) {
+  #divMain {
+    width: 100%;
+  }
+  p {
+    line-height: 150%;
+  }
+}
+/* auto wrap code */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* end custom scss snippet */

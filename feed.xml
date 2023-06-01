@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-01T13:55:14+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-01T22:09:55+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
 <!--more--></p>
 <ul>
@@ -38,7 +38,7 @@
 </code></pre></div>    </div>
   </li>
   <li>
-    <p>client 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend client cs144.keithw.org 4089</code>， 若顺利的话 client 端会打印如下信息：</p>
+    <p>client 端在 build 文件夹下输入 <code class="language-bash highlight highlighter-rouge">./apps/endtoend client cs144.keithw.org 4089</code>， 若顺利的话 client 端会打印如下信息：</p>
 
     <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend client cs144.keithw.org 4089
  DEBUG: Network interface has Ethernet address 02:00:00:e0:84:14 and IP address 192.168.0.1
@@ -78,7 +78,8 @@
   DEBUG: Outbound stream to 192.168.0.50:36742 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span>
   <span class="c"># press Ctrl-D at client</span>
   DEBUG: Inbound stream from 192.168.0.50:36742 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 192.168.0.50:36742 has been fully acknowledged.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown...
+  DEBUG: Outbound stream to 192.168.0.50:36742 has been fully acknowledged.
   DEBUG: TCP connection finished cleanly.
   <span class="k">done</span><span class="nb">.</span>
   Exiting... <span class="k">done</span><span class="nb">.</span>
@@ -92,7 +93,8 @@
   <span class="c"># press Ctrl-D at client</span>
   DEBUG: Outbound stream to 172.16.0.100:1234 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
   DEBUG: Inbound stream from 172.16.0.100:1234 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
+  DEBUG: Waiting <span class="k">for </span>clean shutdown...
+  DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
   DEBUG: TCP connection finished cleanly.
   <span class="k">done</span><span class="nb">.</span>
   Exiting... <span class="k">done</span><span class="nb">.</span>
@@ -156,7 +158,8 @@
     <p><em><strong>server</strong></em></p>
 
     <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  DEBUG: Inbound stream from 192.168.0.50:27200 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown... DEBUG: Outbound stream to 192.168.0.50:27200 finished <span class="o">(</span>63000 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
+  DEBUG: Waiting <span class="k">for </span>clean shutdown...
+  DEBUG: Outbound stream to 192.168.0.50:27200 finished <span class="o">(</span>63000 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
   DEBUG: Outbound stream to 192.168.0.50:27200 has been fully acknowledged.
   DEBUG: TCP connection finished cleanly.
   <span class="k">done</span><span class="nb">.</span>
@@ -1421,8 +1424,7 @@ YOUR_CODE_HERE
   <li>
     <p>增加新的文章信息。</p>
 
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-  {%- if _show_author or _show_date or _pageview or _show_last_modified -%}
+    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  {%- if _show_author or _show_date or _pageview or _show_last_modified -%}
     {%- if _show_last_modified -%}
       <span class="nt">&lt;li&gt;</span>
       {%- include snippets/get-locale-string.html key='ARTICLE_DATE_FORMAT' -%}
@@ -1451,6 +1453,59 @@ YOUR_CODE_HERE
 <blockquote>
   <p><a href="https://be-my-only.xyz/blog/TeXt-copy-to-clipboard/">为博客添加代码块一键复制功能 - Yuze Zou</a><br />
 <a href="https://github.com/kitian616/jekyll-TeXt-theme/pull/218/commits">feat: copy to clipboard for code blocks #218</a></p>
+</blockquote>
+
+<h3 id="8-代码自动换行与行号设置">8. 代码自动换行与行号设置</h3>
+
+<h4 id="自动换行">自动换行</h4>
+
+<p>在 <code class="language-plaintext highlighter-rouge">_sass/custom.scss</code> 中加入如下代码即可。</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* auto wrap code */</span>
+<span class="nt">pre</span> <span class="p">{</span>
+    <span class="nl">white-space</span><span class="p">:</span> <span class="n">pre-wrap</span><span class="p">;</span>
+    <span class="nl">word-wrap</span><span class="p">:</span> <span class="n">break-word</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://www.jarods.org/2001.html">让pre标签的代码块自动换行</a></p>
+</blockquote>
+
+<h4 id="代码行号设置">代码行号设置</h4>
+
+<p>按这种方法可以对常规的 Markdown 的代码段自动显示行号， 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中加入以下代码即可。 但这种方式会在 code 外层套上一个 table 的框， 不美观。</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># More › http://kramdown.gettalong.org/quickref.html</span>
+<span class="c1"># Options › http://kramdown.gettalong.org/options.html</span>
+<span class="na">kramdown</span><span class="pi">:</span>
+  <span class="na">input</span><span class="pi">:</span>          <span class="s">GFM</span>
+  <span class="c1"># https://github.com/jekyll/jekyll/pull/4090</span>
+  <span class="na">syntax_highlighter</span><span class="pi">:</span> <span class="s">rouge</span>
+
+  <span class="c1"># Rouge Highlighter in Kramdown › http://kramdown.gettalong.org/syntax_highlighter/rouge.html</span>
+  <span class="c1"># span, block element options fall back to global</span>
+  <span class="na">syntax_highlighter_opts</span><span class="pi">:</span>
+    <span class="c1"># Rouge Options › https://github.com/jneen/rouge#full-options</span>
+    <span class="na">default_lang</span><span class="pi">:</span> <span class="s">c</span> 
+    <span class="na">css_class</span><span class="pi">:</span> <span class="s1">'</span><span class="s">highlight'</span>
+    <span class="c1">#line_numbers: true # bad idea, spans don't need linenos and would inherit this option</span>
+    <span class="na">span</span><span class="pi">:</span>
+      <span class="na">line_numbers</span><span class="pi">:</span> <span class="kc">false</span>
+    <span class="na">block</span><span class="pi">:</span>
+      <span class="na">line_numbers</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">start_line</span><span class="pi">:</span> <span class="m">1</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a><br />
+<a href="https://www.luxiyue.com/server/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AEhighlight-js%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%B7%BB%E5%8A%A0%E8%A1%8C%E5%8F%B7/">代码高亮Highlight.Js的使用以及添加行号</a><br />
+<a href="https://www.wannaexpresso.com/2020/03/04/jekyll-blog-troubleshooting/">Jekyll博客搭建答疑解惑</a><br />
+<a href="https://mrcn.ski/jekyll-syntax-highlighting-and-line-numbers/">Jekyll: Syntax Highlighting And Line Numbers</a><br />
+<a href="https://www.drewsilcock.co.uk/proper-linenumbers">Proper line numbers with Jekyll</a><br />
+<a href="https://botleg.com/stories/line-numbers-in-jekyll-code-blocks/">Line numbers in Jekyll code blocks</a><br />
+<a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br />
+<a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
 </blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="TeXt" /><summary type="html"><![CDATA[在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream</title><link href="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream" /><published>2023-05-14T00:00:00+08:00</published><updated>2023-05-14T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/14/cs144-lab1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html"><![CDATA[<p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
 <!--more--></p>
 <blockquote>
