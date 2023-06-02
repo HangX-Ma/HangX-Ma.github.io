@@ -543,13 +543,28 @@ window.Lazyload.js(SOURCES.jquery, function() {
   <div class="swiper__button swiper__button--next fas fa-chevron-right"></div>
 </div>
 
+
+<style>
+  @media only screen and (max-width: 400px){
+    header.header-info{
+      height: auto;
+    }
+  }
+
+  @media only screen and (min-width: 400px) {
+    header.header-info{
+      background-attachment: fixed;
+    }
+  }
+</style>
+
 <header class="intro-header" id="intro-header">
 <div class="content-center" align="center">
     <div class="header-avatar" style="opacity: 1;">
         <img class="homepage-logo" alt="logo" src="/assets/android-chrome-192x192.png"/>
     </div>
     <!-- Only shows on desktop -->
-    <div class="header-info">
+    <header class="header-info">
         <div class="homepage-description">
             <div class="header-info-back">
             <div class="site-heading home-site-heading">
@@ -558,7 +573,7 @@ window.Lazyload.js(SOURCES.jquery, function() {
             </div>
             </div>
         </div>
-    </div>
+    </header>
     <a class="button--rounded button--theme-dark button-lg" style="color: #F5F5F5; background-color: rgba(0,0,0,.4); font-family: 'Arial Black';" title="Blogs" href="/blog" target="_self"><i class="fas fa-link" style="color: #f5f5f5;"></i> BLOGS</a>
     <a class="button--rounded button--theme-dark button-lg" style="color: #F5F5F5; background-color: rgba(0,0,0,.4); font-family: 'Arial Black';" title="About" href="/about.md" target="_self"><i class="fas fa-paw" style="color: #f5f5f5;"></i> ABOUT</a>
     <br>
@@ -607,6 +622,35 @@ window.Lazyload.js(SOURCES.jquery, function() {
 </div>
 </header>
 <!-- <body class="home-page"></body> -->
+
+<!-- <script>
+  // header image switcher
+  function changeImage(n) {
+    headerImgList = '[]'.replace(/=>/g,":").replace(/}{/g,"},{");
+    headerImgList = $.parseJSON(headerImgList);
+    len = headerImgList.length
+
+    introHeader = document.getElementById("intro-header");
+    curImgURL = getComputedStyle(introHeader, null).backgroundImage;
+
+    for(let i = 0; i < len; i++) {
+      if(curImgURL.indexOf(headerImgList[i].url) != -1) {
+        newImg = headerImgList[(i + n + len) % len]
+        $(".intro-header").css("background-image", 'url("/' + newImg.url + '")');
+
+        if(newImg.mask) $(".header-mask").css("background", newImg.mask);
+        else $(".header-mask").css("background", "rgb(0, 0, 0, 0)");
+      }
+    }
+  }
+
+  // fade out while scrolling
+  $(window).scroll(function(){
+    $(".img-prev, .img-next, .headertop-down, .header-avatar, .header-bubble, .header-info").css({
+      "opacity": 1 - $(this).scrollTop() * 1.2 / $(this).height(),
+    })
+  })
+</script> -->
 
 <script>(function () {
   var $root = document.getElementsByClassName('root')[0];
