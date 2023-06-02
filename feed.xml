@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-01T22:09:55+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-02T11:47:50+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
 <!--more--></p>
 <ul>
@@ -1506,6 +1506,30 @@ YOUR_CODE_HERE
 <a href="https://botleg.com/stories/line-numbers-in-jekyll-code-blocks/">Line numbers in Jekyll code blocks</a><br />
 <a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br />
 <a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
+</blockquote>
+
+<h3 id="9-取消滚动条但不影响滚动">9. 取消滚动条但不影响滚动</h3>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-plaintext highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">main</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100vw</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100vh</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">section</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://zxuqian.cn/css-how-to-hide-scrollbars/">CSS 如何隐藏滚动条，但不影响内容滚动</a></p>
 </blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="TeXt" /><summary type="html"><![CDATA[在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream</title><link href="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream" /><published>2023-05-14T00:00:00+08:00</published><updated>2023-05-14T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/14/cs144-lab1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/14/cs144-lab1.html"><![CDATA[<p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
 <!--more--></p>
 <blockquote>

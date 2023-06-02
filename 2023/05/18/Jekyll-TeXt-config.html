@@ -334,11 +334,11 @@
             </li>
 <li>
 <i class="fas fa-file-word"></i>
-                <span> Total 13884 words </span>
+                <span> Total 14148 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 39 mins </span>
+                <span> About 40 mins </span>
             </li>
 <li>
 <i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li>
@@ -939,6 +939,30 @@ YOUR_CODE_HERE
 <a href="https://botleg.com/stories/line-numbers-in-jekyll-code-blocks/">Line numbers in Jekyll code blocks</a><br>
 <a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br>
 <a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
+</blockquote>
+
+<h3 id="9-取消滚动条但不影响滚动">9. 取消滚动条但不影响滚动</h3>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-plaintext highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">main</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100vw</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100vh</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">section</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://zxuqian.cn/css-how-to-hide-scrollbars/">CSS 如何隐藏滚动条，但不影响内容滚动</a></p>
 </blockquote>
 </div>
 <section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
