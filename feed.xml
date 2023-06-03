@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-02T17:13:23+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-03T10:18:21+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
 <!--more--></p>
 <ul>
@@ -269,20 +269,46 @@
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Testing traffic between two ordinary hosts <span class="o">(</span>applesauce to cherrypie<span class="o">)</span>...
 
-Host applesauce trying to send datagram <span class="o">(</span>with next hop <span class="o">=</span> 10.0.0.1<span class="o">)</span>: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
-Transferring frame from applesauce to router.eth0: <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, <span class="nv">sender</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/10.0.0.1
-Transferring frame from router.eth0 to applesauce: <span class="nv">dst</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nv">src</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, <span class="nv">sender</span><span class="o">=</span>02:00:00:dd:27:73/10.0.0.1, <span class="nv">target</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2
-Transferring frame from applesauce to router.eth0: <span class="nv">dst</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nb">type</span><span class="o">=</span>IPv4, payload: IPv4: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
-Transferring frame from router.eth2 to cherrypie: <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, <span class="nv">sender</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/192.168.0.2
-Transferring frame from cherrypie to router.eth2: <span class="nv">dst</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nv">src</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, <span class="nv">sender</span><span class="o">=</span>ea:80:f1:26:53:c8/192.168.0.2, <span class="nv">target</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1
-Transferring frame from router.eth2 to cherrypie: <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
-<span class="nv">dst</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>IPv4, payload: bad IPv4 datagram
-<span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
-<span class="o">[</span>NetworkInterface ERROR]: <span class="s1">'recv_frame'</span> IPV4 parse error
+Host applesauce trying to send datagram <span class="o">(</span>with next hop <span class="o">=</span> 10.0.0.1<span class="o">)</span>: 
+    IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 
+    <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+
+Transferring frame from applesauce to router.eth0: 
+    <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, 
+    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, 
+    <span class="nv">sender</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/10.0.0.1
+
+Transferring frame from router.eth0 to applesauce: 
+    <span class="nv">dst</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nv">src</span><span class="o">=</span>02:00:00:dd:27:73, 
+    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, 
+    <span class="nv">sender</span><span class="o">=</span>02:00:00:dd:27:73/10.0.0.1, <span class="nv">target</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2
+
+Transferring frame from applesauce to router.eth0: 
+    <span class="nv">dst</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, 
+    <span class="nb">type</span><span class="o">=</span>IPv4, payload: IPv4: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, 
+    <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+
+Transferring frame from router.eth2 to cherrypie: 
+    <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>ARP, 
+    payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, 
+    <span class="nv">sender</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/192.168.0.2
+
+Transferring frame from cherrypie to router.eth2: 
+    <span class="nv">dst</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nv">src</span><span class="o">=</span>ea:80:f1:26:53:c8, 
+    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, 
+    <span class="nv">sender</span><span class="o">=</span>ea:80:f1:26:53:c8/192.168.0.2, <span class="nv">target</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1
+
+Transferring frame from router.eth2 to cherrypie: 
+    <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
+    <span class="nv">dst</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, 
+    <span class="nb">type</span><span class="o">=</span>IPv4, payload: bad IPv4 datagram
+    <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
+    <span class="o">[</span>NetworkInterface ERROR]: <span class="s1">'recv_frame'</span> IPV4 parse error
 
 
 
-Error: Host cherrypie did NOT receive an expected Internet datagram: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2
+Error: Host cherrypie did NOT receive an expected Internet datagram: 
+        IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2
 </code></pre></div></div>
 
 <h2 id="5-测试结果">5. 测试结果</h2>
