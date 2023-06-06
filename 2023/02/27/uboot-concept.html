@@ -12,7 +12,7 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>U-Boot 基础概念与学习分享 - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>u-boot 构建框架与启动分析 - 一只豆腐</title>
 
 <meta name="description" content="学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/02/27/uboot-concept.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
@@ -264,9 +264,9 @@
   })();
 </script>
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>U-Boot 基础概念与学习分享 | 一只豆腐</title>
+<title>u-boot 构建框架与启动分析 | 一只豆腐</title>
 <meta name="generator" content="Jekyll v4.3.2" />
-<meta property="og:title" content="U-Boot 基础概念与学习分享" />
+<meta property="og:title" content="u-boot 构建框架与启动分析" />
 <meta name="author" content="HangX-Ma" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。" />
@@ -277,9 +277,9 @@
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2023-02-27T00:00:00+08:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="U-Boot 基础概念与学习分享" />
+<meta property="twitter:title" content="u-boot 构建框架与启动分析" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-02-27T00:00:00+08:00","datePublished":"2023-02-27T00:00:00+08:00","description":"学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。","headline":"U-Boot 基础概念与学习分享","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/02/27/uboot-concept.html"},"url":"https://hangx-ma.github.io/2023/02/27/uboot-concept.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-02-27T00:00:00+08:00","datePublished":"2023-02-27T00:00:00+08:00","description":"学习 u-boot 启动流程有些时日了， 虽然看了大量的文章以及在此期间仔细阅读源码， 但是仍感觉很多知识点掌握不深刻容易遗忘，不如在写博文的时候重溯整个流程， 也分享关于 u-boot 的学习方式。","headline":"u-boot 构建框架与启动分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/02/27/uboot-concept.html"},"url":"https://hangx-ma.github.io/2023/02/27/uboot-concept.html"}</script>
 <!-- End Jekyll SEO tag -->
 
   </head>
@@ -302,11 +302,7 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>U-Boot 基础概念与学习分享</h1></header><span class="split-space">&nbsp;</span>
-          <a class="edit-on-github"
-            title="Edit on Github"
-            href="https://github.com/HangX-Ma/HangX-Ma.github.io/tree/master/_posts/2023-02-27-uboot-concept.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="U-Boot 基础概念与学习分享"><div class="article__info clearfix"><ul class="left-col menu"><li>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>u-boot 构建框架与启动分析</h1></header></div><meta itemprop="headline" content="u-boot 构建框架与启动分析"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=u-boot">u-boot</a>
             </li><li>
@@ -314,7 +310,7 @@
                 href="/blog/archive.html?tag=Linux">Linux</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Feb 27, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 12275 words </span>
+                <span> Total 12241 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -345,8 +341,6 @@
 </ul>
 
 <p>如果对 DM(Driver Model) 有兴趣， 可以阅读 <a href="https://lwn.net/Kernel/LDD3/">Linux Device Driver, Third Edition</a>，但具备以上几块知识已经足够理解 u-boot 启动流程。 Das U-Boot 提供的文档以及 u-boot 源码中提供的 <code class="language-plaintext highlighter-rouge">README</code> 这类文档不需要仔细读完， 这些仅供学习参考， 但 <a href="https://elinux.org/Boot_Loaders#U-Boot">elinux_talks</a> 这部分资源也值得查阅。</p>
-
-<p>全局概念非常重要， 先啃源码建立相关概念， 带着问题探究细节会事半功倍。</p>
 
 <h2 id="3-u-boot-框架与启动阶段">3. U-Boot 框架与启动阶段</h2>
 
@@ -1666,7 +1660,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s02s27suboot-concept.html';
-      var title = "U-Boot 基础概念与学习分享";
+      var title = "u-boot 构建框架与启动分析";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s02s27suboot-concept.html']").text(view);
       });

@@ -12,10 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>cs144-sp23, Lab Checkpoint 3: the TCP sender - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>MDIO (Management Data Input/Output) - 一只豆腐</title>
 
-<meta name="description" content="记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。">
-<link rel="canonical" href="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/06/06/net-mdio.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -264,316 +264,140 @@
   })();
 </script>
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>cs144-sp23, Lab Checkpoint 3: the TCP sender | 一只豆腐</title>
+<title>MDIO (Management Data Input/Output) | 一只豆腐</title>
 <meta name="generator" content="Jekyll v4.3.2" />
-<meta property="og:title" content="cs144-sp23, Lab Checkpoint 3: the TCP sender" />
+<meta property="og:title" content="MDIO (Management Data Input/Output)" />
 <meta name="author" content="HangX-Ma" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。" />
-<meta property="og:description" content="记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。" />
-<link rel="canonical" href="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" />
-<meta property="og:url" content="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" />
+<meta name="description" content="介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。" />
+<meta property="og:description" content="介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。" />
+<link rel="canonical" href="https://hangx-ma.github.io/2023/06/06/net-mdio.html" />
+<meta property="og:url" content="https://hangx-ma.github.io/2023/06/06/net-mdio.html" />
 <meta property="og:site_name" content="一只豆腐" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2023-05-24T00:00:00+08:00" />
+<meta property="article:published_time" content="2023-06-06T00:00:00+08:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="cs144-sp23, Lab Checkpoint 3: the TCP sender" />
+<meta property="twitter:title" content="MDIO (Management Data Input/Output)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-05-24T00:00:00+08:00","datePublished":"2023-05-24T00:00:00+08:00","description":"记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。","headline":"cs144-sp23, Lab Checkpoint 3: the TCP sender","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"},"url":"https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-06-06T00:00:00+08:00","datePublished":"2023-06-06T00:00:00+08:00","description":"介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。","headline":"MDIO (Management Data Input/Output)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/06/06/net-mdio.html"},"url":"https://hangx-ma.github.io/2023/06/06/net-mdio.html"}</script>
 <!-- End Jekyll SEO tag -->
 
   </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root">
-<div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner">
-<div class="page__header d-print-none">
-<header class="header"><div class="main">
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
       <div class="header__title">
-        <div class="header__brand">
-<img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"><a title="Code, life and embedded system...
-" href="/">一只豆腐</a>
-</div>
-<button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
-</div>
-<nav class="navigation">
-        <ul>
-<li class="navigation__item"><a href="/blog/">Blogs</a></li>
-<li class="navigation__item"><a href="/blog/archive.html">Archive</a></li>
-<li class="navigation__item"><a href="/about.html">About</a></li>
-<li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
-</ul>
-      </nav>
-</div>
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
   </header>
-</div>
-<div class="page__content"><div class="main"><div class="grid grid--reverse">
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
 
               <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
 </aside></div>
 
-              <div class="col-main cell cell--auto">
-<!-- start custom main top snippet -->
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>cs144-sp23, Lab Checkpoint 3: the TCP sender</h1></header></div>
-<meta itemprop="headline" content="cs144-sp23, Lab Checkpoint 3: the TCP sender">
-<div class="article__info clearfix">
-<ul class="left-col menu">
-<li>
-              <a class="button button--secondary button--pill button--sm" href="/blog/archive.html?tag=Course">Course</a>
-            </li>
-<li>
-              <a class="button button--secondary button--pill button--sm" href="/blog/archive.html?tag=cs144">cs144</a>
-            </li>
-</ul>
-<ul class="right-col menu">
-<li>
-<i class="fas fa-user"></i> <span>HangX-Ma</span>
-</li>
-<li>
-<i class="far fa-calendar-alt"></i> <span>May 24, 2023</span>
-            </li>
-<li>
-<i class="fas fa-file-word"></i>
-                <span> Total 5496 words </span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>MDIO (Management Data Input/Output)</h1></header></div><meta itemprop="headline" content="MDIO (Management Data Input/Output)"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=Network">Network</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=Linux">Linux</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 06, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 2196 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 16 mins </span>
-            </li>
-<li>
-<i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s24scs144-lab3.html">0</span> views</li>
-</ul>
-</div>
-<meta itemprop="author" content="HangX-Ma">
-<meta itemprop="datePublished" content="2023-05-24T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs144">
-<div class="js-article-content">
-<div class="layout--article">
-<!-- start custom article top snippet -->
+                <span> About 7 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s06snet-mdio.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-06T00:00:00+08:00">
+    <meta itemprop="keywords" content="Network,Linux"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody">
-<p>记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。
-<!--more--></p>
-<ul>
-  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
-  <li>CS144 Spring 2023 Lab3 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check3.pdf">Lab Checkpoint 3: the TCP sender</a>。</li>
-  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
-</ul>
+<div class="article__content" itemprop="articleBody"><h2 id="1-mdio-简介">1. MDIO 简介</h2>
 
-<h2 id="1-内容简述">1. 内容简述</h2>
+<p><a href="#ref-mdio-wiki">wiki</a> 中这样定于 <em><strong>MDIO（Management Data Input/Output）</strong></em>： <em>MDIO 是 IEEE 802.3 标准定义一种两线以太网串行总线用于 <strong>MII（Media Independent Interface）</strong>， 有时关于 MDIO 我们还会说到 <strong>SMI（Serial Management Interface）</strong> 或者 <strong>MIIM（Media Independent Interface Management）</strong></em>。SMI/MDIO 协议用来管理 <em><strong>MAC（Media Access Controller）</strong></em> 与 <em><strong>PHY（Physical）</strong></em> 两个网络层之间的数据传输。 控制 MDIO 总线的设备称为 <em><strong>STA（Station Management Entity）</strong></em> 而被 MDIO 总线管理的设备称为 <em><strong>MMD（MDIO Manageable Device）</strong></em>。</p>
 
-<p>Lab3 将实现 TCP 中的 <em><strong>TCPSender</strong></em>， 其需要完成的功能有：</p>
+<blockquote>
+  <p>MDIO 上层是 MII 其有两个接口： 数据接口连接以太网 MAC 层， 用以发送和接收以太网帧数据； 另外一个 PHY 管理接口了， 也就是我们所说的 MDIO 接口。</p>
+</blockquote>
 
-<ul>
-  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以 TCP Segments 的格式不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
-  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据被称为 “outstanding segments”。</li>
-  <li>若是这些 segments 在足够长的时间后没有没接收， 则重传这些 segments 数据。</li>
-</ul>
-
-<p>这些功能实现了 “automatic repeat request (ARQ)” 机制， <em><strong>TCPSender</strong></em> 的任务就是确保 <em><strong>TCPReceiver</strong></em> 能收到每个字节至少一次。</p>
-
-<h2 id="2-tcpsender-如何监测丢包">2. TCPSender 如何监测丢包</h2>
-
-<p><em><strong>TCPSender</strong></em> 会跟踪那些 outstanding segments 的状态， 周期性调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数以指示这些 segments 自发出以来所经过的时间。 <em><strong>TCPSender</strong></em> 会在内部的存储空间存储 <code class="language-plaintext highlighter-rouge">TCPSenderMessages</code> 的信息并遍历这个集合， 找出那些 <strong>已发出但经过时间太久但还未被接收</strong> 的 segments 进行 <strong>数据超时重传</strong>， 直到所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都被接收。</p>
-
-<p>那么如何界定 <strong>已发出但经过时间太久</strong> 这个定义就尤为重要， 太长的等待时间会增加通信延时， 而太短的等待时间则会浪费网络存储空间以及增大开销。 需要注意如下几点：</p>
-
-<ul>
-  <li>
-<code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类与操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
-  <li>
-<strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变 （可能为初值的两倍， 或者等于初值） 以记录 outstanding segments 在超时重传前所经过的时间。</li>
-  <li>重传定时器 timer 以 tick 为时间单位， timer 会在某个时间启动， 在经过 RTO 时间后失效。</li>
-  <li>包含数据的 segment 被传输后 timer 会被启动， 直到经过 RTO 毫秒后 timer 会失效。</li>
-  <li>当所有的 outstanding 数据都被接收后， 服务于重传机制的 timer 将会被停止。</li>
-  <li>
-    <p><a href="#func_tick">以下信息与 <em>tick</em> 函数的实现密切相关</a></p>
-
-    <p>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：</p>
-
-    <ol>
-      <li>将时间最早的未被接收的 segment 进行重传 （<code class="language-plaintext highlighter-rouge">seqno</code> 最小的那个）。</li>
-      <li>若此时 window size 非零：
-        <ul>
-          <li>跟踪记录连续 <strong>重传的数量</strong>， 并在每次重传后进行累加， <em><strong>TCPConnection</strong></em> 会使用这个信息用以判断 TCP 连接的可靠性， 太多连续的重传意味着 TCP 连接不稳定需要终止。</li>
-          <li>设置 RTO 值为原来的两倍。 “exponential backoff” 以降低较差网络的重传速度， 避免加深网络的拥堵。</li>
-        </ul>
-      </li>
-      <li>重置 timer 并启动， 使其在 RTO 毫秒之后失效 （需要考虑 RTO 已经翻倍）。</li>
-    </ol>
-  </li>
-  <li>
-    <p><a href="#func_receive">以下信息与 <em>receive</em> 函数的实现密切相关</a></p>
-
-    <p>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）:</p>
-
-    <ol>
-      <li>需要将 RTO 设置为其初始值。</li>
-      <li>如果发送方仍有 outstanding 的数据， timer 需要重启并将会在 RTO 毫秒后失效。</li>
-      <li>重置前述的 <strong>连续重传数量</strong> 为 0。</li>
-    </ol>
-  </li>
-</ul>
-
-<h2 id="3-tcp-sender-实现">3. TCP Sender 实现</h2>
+<p>MMD 一般是指 PHY 设备这类 MDIO 从设备， MDIO 接口会连接控制单元控制 PHY 设备以及获取其状态 （读写寄存器）。 每个 PHY 设备能在执行操作之前监视， 在执行操作时则可通过寄存器监视其状态。 这些寄存器提供了状态和控制信息， 包括 <em>link status, speed ability and selection, power down for low power consumption, duplex mode (full or half), auto-negotiation, fault signalling, loopback</em>。 MDIO 协议的作用就是配置 PHY 层所需要的接收/发送的参量。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-05-24-cs144-lab3/space-structure.png" alt="space structure" width="600">
-    <br>
-    <font size="2" color="#999"><u>space structure, HangX-Ma</u></font>
+    <img src="/norobots/images/2023-06-06-net-mdio/mdio-interface-layout.png" alt="MDIO interface layout" width="600" />
+    <br />
+    <font size="2" color="#999"><u>MDIO interface layout</u></font>
 </div>
 
-<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。 上图是 Sender 端所看到的内存结构以及 <code class="language-plaintext highlighter-rouge">seqno</code> 的分布。</p>
+<p>前述所说， MDIO 是一种双线协议， 其接口由两种信号构成：</p>
 
-<ol>
-  <li>
-    <p><em><strong>push:</strong></em> 不断读取新的字节， 并组装生成 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。 需要使满足 window 尺寸的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 尽可能大， 但上限是 <code class="language-plaintext highlighter-rouge">TCPConfig::MAX PAYLOAD SIZE (1452 bytes)</code>。 <code class="language-plaintext highlighter-rouge">TCPSenderMessage::sequence length()</code> 会用以计量该 segment 占用的 <code class="language-plaintext highlighter-rouge">seqno</code> 的尺寸， SYN 和 FIN 都需要计算在内。</p>
+<ul>
+  <li><strong>MDIO Data Clock（MDC）：</strong> 由 MAC 设备驱动的连接到 PHY 设备的时钟信号。</li>
+  <li><strong>MDIO Data：</strong> 双向的数据传输， 所有的设备都依据 MDC 同步 （synchronous） 传输。</li>
+</ul>
 
-    <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Push bytes from the outbound stream */</span>
- <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="n">Reader</span> <span class="o">&amp;</span><span class="n">outbound_stream</span><span class="p">);</span>
-</code></pre></div>    </div>
+<p>虽然 MDIO 的是一种最高仅有 2.5 MHz 的低速总线 （最新的 DP83640 已经能支持 25 MHz）， 最开始是由 IEEE 802.3 的 Clause 22 定义， 后为了满足对 10G 以太网的设备需求在 IEEE 802.3ae 定义了 Clause 45。 对于 MDIO 总线而言其仅有一个主设备， 但能有多达 32 个 PHY 从设备。</p>
 
-    <blockquote>
-      <p>这里也是需要注意 window size 最小应当为 1。 另外我们需要两个布尔变量来记录是否需要给传输的 <em><strong>TCPSenderMessage</strong></em> 增加 SYN 标志或者 FIN 标志。 我们以如下顺序对 msg 进行组装： SYN， payload， FIN。 需要注意的是， FIN 标志设定有一定的条件限制：</p>
+<blockquote>
+  <p>MDIO 主从设备的控制器有不同的协议适用要求：</p>
 
-      <ul>
-        <li>FIN 之前没设定过；</li>
-        <li>Reader 已经没有数据了；</li>
-        <li>塞完 SYN 和 payload 之后我们的 window size 还能容纳一个 FIN 的位置
-如果本次 FIN 没有传输， 就下次传输， 不会有什么影响。</li>
-      </ul>
+  <ul>
+    <li>MDIO master controller: Clause 22 和 Clause 45 均可</li>
+    <li>MDIO slave controller: Clause 22</li>
+    <li>MDIO slave controller: Clause 45</li>
+  </ul>
+</blockquote>
 
-      <p>另外， 只有在 outstanding segments 清空后我们才需要在传输新的 <em><strong>TCPSenderMessage</strong></em> 时重置 timer， 否则 timer 将在很大程度上失去其基本作用。 每次传输都需要更新 outstanding segments 集合以及发送的 <code class="language-plaintext highlighter-rouge">seqno</code> 数量， <code class="language-plaintext highlighter-rouge">next_seqno</code> 等信息。</p>
-    </blockquote>
+<h2 id="2-clause-22">2. Clause 22</h2>
 
-    <p class="info">cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
-  </li>
-  <li>
-    <p><em><strong>maybe_send:</strong></em> 必要时发送 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 或者为空。</p>
-
-    <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>我们需要额外创建一个队列变量 <code class="language-plaintext highlighter-rouge">segments_out_</code> 来管理需要发送的 segments， 使用队列可以保证传输的先后顺序。 仅在这个队列的元素数量不为零且收到 SYN 信号才返回队列头部的那个数据， 并将其从队列头部移除。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>receive:</strong></em> <a id="func_receive"></a> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
-
-    <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
- <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>我们只需要按照 <a href="#2-tcpsender-%E5%A6%82%E4%BD%95%E7%9B%91%E6%B5%8B%E4%B8%A2%E5%8C%85">2.TCPSender 如何监测丢包</a> 中的最后一条逻辑写代码就行。</p>
-
-      <p>这里需要注意， 接收的 <code class="language-plaintext highlighter-rouge">TCPReceiveMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 可能为空， 这时候不能直接返回， 有可能是我们传输了一个 <em><strong>empty message</strong></em> 去获取 window size 而返回的一个包。 因此， 我们需要更新 <code class="language-plaintext highlighter-rouge">window_size_</code> 变量， 除此之外就什么都不做了。</p>
-
-      <p>或者收到的这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比我们当前保存的 <code class="language-plaintext highlighter-rouge">next_seqno</code> 都要大， 这可能是一个错误信息需要丢弃这段数据。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>tick:</strong></em> <a id="func_tick"></a> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
-
-    <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
- <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>除了要创建一个 <code class="language-plaintext highlighter-rouge">timer_</code> 变量存储时间外， 在 tick 中还需要做 <a href="#2-tcpsender-%E5%A6%82%E4%BD%95%E7%9B%91%E6%B5%8B%E4%B8%A2%E5%8C%85">2.TCPSender 如何监测丢包</a> 中的几件事：</p>
-
-      <ol>
-        <li>若 outstanding segments 存在且 timer 失效， 重传时间最早的那个 segments。</li>
-        <li>window size 非零时累加连续重传数量， 并进行 “exponential backoff”。</li>
-        <li>重置 timer 的值为 0， 为下一次重传准备。</li>
-      </ol>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。</p>
-
-    <div class="language-cpp highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code> <span class="cm">/* Generate an empty TCPSenderMessage */</span>
- <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>这种长度为 0 的 segments 不需要被监测并纳入 outstanding segments 用以重传。 我们只需要返回一个仅有 <code class="language-plaintext highlighter-rouge">ackno</code> 被赋值为下一个需要接收的字节的 <code class="language-plaintext highlighter-rouge">seqno</code> 的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。</p>
-    </blockquote>
-  </li>
-</ol>
-
-<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
-
-<h3 id="helper-functions">Helper Functions</h3>
-
-<p>简化 <code class="language-plaintext highlighter-rouge">seqno</code> 与 <code class="language-plaintext highlighter-rouge">abs_seqno</code> 转换， 使用如下两个 helper functions 即可满足需求。 之后在给 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 赋值就很方便了。</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint64_t</span> <span class="n">get_next_abs_seqno_</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
-<span class="n">Wrap32</span> <span class="n">get_next_seqno</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isn_</span> <span class="o">+</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
-</code></pre></div></div>
-
-<h2 id="4-坑点记录">4. 坑点记录</h2>
-
-<h3 id="41-the-test-retx-syn-twice-at-the-right-times-then-ack-failed">4.1 <em>The test “Retx SYN twice at the right times, then ack” failed.</em>
-</h3>
-
-<p>这个问题是初始化 window size 不正确导致的， 在文档里的 FAQs 部分有这么一段：</p>
-
-<p class="info"><strong>Q:</strong> <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
-<br>
-<strong>A:</strong> One.</p>
-
-<p>当时我将 <code class="language-plaintext highlighter-rouge">window_size_</code> 初始化为 0， 结果在调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数后 <code class="language-plaintext highlighter-rouge">window_size_ &gt; 0</code> 这条条件判断语句永远不满足， <code class="language-plaintext highlighter-rouge">RTO_timeout_</code> 永远无法进行翻倍。 正确的做法是将 window size 初始化为 1。</p>
-
-<h3 id="42-the-test-retx-syn-until-too-many-retransmissions-failed">4.2 <em>The test “Retx SYN until too many retransmissions” failed.</em>
-</h3>
-
-<p><code class="language-plaintext highlighter-rouge">RTO_timeout</code> 翻倍， 但我以为是初始值翻倍就直接设定成了 <code class="language-plaintext highlighter-rouge">RTO_timeout = 2 * initial_RTO_ms_</code>， 实际上指导书就是说 <em><strong>Double the value of RTO</strong></em> 并且说明是 <em><strong>exponential backoff</strong></em> （给的提示很明显 <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">）。</p>
-
-<h3 id="5-测试结果">5. 测试结果</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
-      Start 28: send_connect
-27/36 Test <span class="c">#28: send_connect .....................   Passed    0.09 sec</span>
-      Start 29: send_transmit
-28/36 Test <span class="c">#29: send_transmit ....................   Passed    1.11 sec</span>
-      Start 30: send_retx
-29/36 Test <span class="c">#30: send_retx ........................   Passed    0.08 sec</span>
-      Start 31: send_window
-30/36 Test <span class="c">#31: send_window ......................   Passed    0.35 sec</span>
-      Start 32: send_ack
-31/36 Test <span class="c">#32: send_ack .........................   Passed    0.08 sec</span>
-      Start 33: send_close
-32/36 Test <span class="c">#33: send_close .......................   Passed    0.09 sec</span>
-      Start 34: send_extra
-33/36 Test <span class="c">#34: send_extra .......................   Passed    0.16 sec</span>
-      Start 36: compile with optimization
-34/36 Test <span class="c">#36: compile with optimization ........   Passed   18.01 sec</span>
-      Start 37: byte_stream_speed_test
-             ByteStream throughput: 1.02 Gbit/s
-35/36 Test <span class="c">#37: byte_stream_speed_test ...........   Passed    0.45 sec</span>
-      Start 38: reassembler_speed_test
-             Reassembler throughput: 1.83 Gbit/s
-36/36 Test <span class="c">#38: reassembler_speed_test ...........   Passed    0.85 sec</span>
-
-100% tests passed, 0 tests failed out of 36
-
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span> 170.63 sec
-Built target check3
-</code></pre></div></div>
+<div align="center">
+    <img src="/norobots/images/2023-06-06-net-mdio/clause22-frame-format.png" alt="Clause 22 format format" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Clause 22 format format</u></font>
 </div>
-<section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+
+<p>Clause 22 的帧格式只允许 5 bit 物理层地址和寄存器地址， 这限制了 STA 可以连接的 MMD 的数量。 此外，Clause 22 MDIO 只支持限压 5V 的设备且不支持多设备的 PHY。</p>
+
+<h2 id="3-clause-45">3. Clause 45</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-06-06-net-mdio/clause45-frame-format.png" alt="Clause 45 format format" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Clause 45 format format</u></font>
+</div>
+
+<p>Clause 45 更改了寄存器的读写模式， 不同于 Clause 22 将寄存器读写数据以及地址都放在一个独立帧， Clause 45 分成了两帧进行传输， 第一帧为地址帧确定 MMD 和 寄存器， 第二帧为数据帧进行数据的读写。 这种设计不仅向后兼容 Clause 22， 并且将地址从 5 bit 扩展到了 16 bit， 使得寄存器的访问数量从 32 个增加到了 65535 个。 另外 Clause 45 支持 32 个端口， 每个端口都能支持 32 个 MMD 设备。</p>
+
+<h2 id="4-mdio-与-phy-与-nic">4. MDIO 与 PHY 与 NIC</h2>
+
+<p>网卡 （NIC） 工作在 OSI 的最后两层， 物理层和数据链路层</p>
+
+<ul>
+  <li><strong>物理层</strong> 定义了数据传送与接收所需要的电与光信号、 线路状态、 时钟基准、 数据编码和电路等， 并向数据链路层设备提供标准接口。</li>
+  <li><strong>数据链路层</strong> 则提供寻址机制、 数据帧的构建、 数据差错检查、 传送控制、 向网络层提供标准的数据接口等功能。 以太网卡中数据链路层的芯片称之为 MAC 控制器。</li>
+</ul>
+
+<p>物理层的芯片称之为 PHY。 IEEE-802.3 标准定义了以太网 PHY。 包括 <em><strong>MII（Media Independent Interface）</strong></em> 子层， <em><strong>PCS（Physical Coding Sublayer）</strong></em>， <em><strong>PMA（Physical Medium Attachment）</strong></em> 子层， <em><strong>PMD（Physical Medium Dependent）</strong></em> 子层， <em><strong>MDI（Medium Dependent Interface）</strong></em> 子层， 符合 IEEE-802.3k 中用于 10BaseT 和 100BaseTX 的规范。</p>
+
+<p>PHY 和 MAC 之间通过 IEEE 定义的标准的 <em><strong>MII（Media Independent Interface）</strong></em> 连接 MAC 和 PHY。 MII 传递了网络的所有数据和数据的控制。 以太网接口实质是 MAC 通过 MII 总线控制 PHY 的过程。 按照前述内容可知， IEEE 定义了 MDIO 总线服务于 MII 用以与 PHY 的通信。</p>
+
+<h2 id="5-参考">5. 参考</h2>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Management_Data_Input/Output">Management Data Input/Output - wikipedia</a> <a id="ref-mdio-wiki"></a></li>
+  <li><a href="https://www.latticesemi.com/-/media/LatticeSemi/Documents/ReferenceDesigns/JM/MDIOMasterandSlaveControllersDocumentation.ashx?document_id=50604">MDIO Master and Slave Controllers - LATTICE-semiconductor</a></li>
+  <li><a href="https://prodigytechno.com/mdio-management-data-input-output/">MDIO ( Management Data Input/Output )</a></li>
+  <li><a href="https://www.totalphase.com/support/articles/200349206-mdio-background/">MDIO Background</a></li>
+  <li><a href="https://grouper.ieee.org/groups/802/3/ae/public/jul00/law_1_0700.pdf">IEEE P802.3ae 10Gb/s Ethernet MDC/MDIO Proposal</a></li>
+  <li><a href="https://www.cnblogs.com/jason-lu/articles/3195473.html">网口扫盲三:以太网芯片MAC和PHY的关系</a></li>
+</ul>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
         <a class="a2a_button_copy_link"></a>
@@ -632,32 +456,18 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none">
-<footer class="article__footer"><meta itemprop="dateModified" content="2023-05-24T00:00:00+08:00">
-<!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-06-06T00:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
-<div class="article__subscribe">
-<div class="subscribe">
-<i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a>
-</div>
-</div>
-<div class="article__license"><div class="license">
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
     <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
       <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
-        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix">
-<div class="previous">
-<span>PREVIOUS</span><a href="/2023/05/23/cs144-lab2.html">cs144-sp23, Lab Checkpoint 2: the TCP receiver</a>
-</div>
-<div class="next">
-<span>NEXT</span><a href="/2023/05/27/cs144-lab4.html">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</a>
-</div>
-</div>
-</div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/05/31/cs144-lab6.html">cs144-sp23, Lab Checkpoint 6: putting it all together</a></div></div></div>
 
 </div>
 
@@ -686,15 +496,12 @@ function toggle() {
   });
 })();
 </script>
-</div>
-<section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
 	<style type="text/css">
 		.gitalk-wrapper .gt-header-textarea {
 			color: #333 !important;
 		}
-	</style>
-<div class="gitalk-wrapper" id="js-gitalk-container"></div>
-<script>
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
 		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
 		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
 			var gitalk = new Gitalk({
@@ -703,7 +510,7 @@ function toggle() {
 				repo: 'HangX-Ma.github.io',
 				owner: 'HangX-Ma',
 				admin: ['HangX-Ma'],
-				id: '/2023/05/24/cs144-lab3',
+				id: '/2023/06/06/net-mdio',
                 labels: 'gitalk'.split(',').filter(l => l),
                 perPage: '15',
                 proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
@@ -714,39 +521,27 @@ function toggle() {
 
 <!-- end custom main bottom snippet -->
 </div>
-            </div></div></div>
-<div class="page__footer d-print-none">
+            </div></div></div><div class="page__footer d-print-none">
 <footer class="footer py-4 js-page-footer">
-  <div class="main">
-<div itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="HangX-Ma">
-<meta itemprop="url" content="https://HangX-Ma.github.io">
-<meta itemprop="description" content="Never stop studying">
-<div class="footer__author-links">
-<div class="author-links">
-  <ul class="menu menu--nowrap menu--inline">
-<link itemprop="url" href="https://HangX-Ma.github.io">
-<li title="Send me an Email.">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying"><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline"><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
       <a class="button button--circle mail-button" itemprop="email" href="mailto:m-contour@qq.com" target="_blank">
         <i class="fas fa-envelope"></i>
-      </a>
-</li>
-<li title="Follow me on Github.">
+      </a><li title="Follow me on Github.">
         <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/HangX-Ma" target="_blank">
-          <div class="icon">
-<svg fill="#000000" width="24px" height="24px" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z"></path>
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
 </svg>
 </div>
         </a>
-      </li>
-</ul>
+      </li></ul>
 </div>
 </div>
-    </div>
-<div class="site-info mt-2">
+    </div><div class="site-info mt-2">
       <div>© 一只豆腐 2021,
-        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> &amp; <a title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
       </div>
       <div align="center">
         <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -760,10 +555,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div>
-</div>
-    </div>
-<script>(function() {
+</div></div>
+    </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {
     var $body = $('body'), $window = $(window);
@@ -827,8 +620,7 @@ function toggle() {
     $.fn.modal = modal;
   });
 })();
-</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal">
-<script>
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
 (function () {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {
@@ -920,7 +712,7 @@ function toggle() {
     <div class="search-bar">
       <div class="search-box js-search-box">
         <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
-        <input type="text">
+        <input type="text" />
         <div class="search-box__icon-clear js-icon-clear">
           <a><i class="fas fa-times"></i></a>
         </div>
@@ -1044,8 +836,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
   });
 });
 </script>
-</div>
-</div>
+</div></div>
 
 
 <script>(function() {
@@ -1451,13 +1242,13 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      var key =   's2023s05s24scs144-lab3.html';
-      var title = "cs144-sp23, Lab Checkpoint 3: the TCP sender";
+      var key =   's2023s06s06snet-mdio.html';
+      var title = "MDIO (Management Data Input/Output)";
       pageview.increase(key, title, function(view) {
-        $("[data-page-key='s2023s05s24scs144-lab3.html']").text(view);
+        $("[data-page-key='s2023s06s06snet-mdio.html']").text(view);
       });
     });
-  </script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script async>(function() {
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
 	// This script is built on clipboard.js, cf: https://clipboardjs.com/
 	// 1. find all code blocks defined under snippet class
 	var snippets = document.querySelectorAll('pre');
