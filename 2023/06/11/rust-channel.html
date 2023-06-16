@@ -12,7 +12,7 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Rust 线程同步： Channel - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Async Programming in Rust： Channel - 一只豆腐</title>
 
 <meta name="description" content="学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/06/11/rust-channel.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
@@ -264,9 +264,9 @@
   })();
 </script>
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Rust 线程同步： Channel | 一只豆腐</title>
+<title>Async Programming in Rust： Channel | 一只豆腐</title>
 <meta name="generator" content="Jekyll v4.3.2" />
-<meta property="og:title" content="Rust 线程同步： Channel" />
+<meta property="og:title" content="Async Programming in Rust： Channel" />
 <meta name="author" content="HangX-Ma" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。" />
@@ -277,9 +277,9 @@
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2023-06-11T00:00:00+08:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Rust 线程同步： Channel" />
+<meta property="twitter:title" content="Async Programming in Rust： Channel" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-06-11T00:00:00+08:00","datePublished":"2023-06-11T00:00:00+08:00","description":"学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。","headline":"Rust 线程同步： Channel","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/06/11/rust-channel.html"},"url":"https://hangx-ma.github.io/2023/06/11/rust-channel.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HangX-Ma"},"dateModified":"2023-06-11T00:00:00+08:00","datePublished":"2023-06-11T00:00:00+08:00","description":"学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。","headline":"Async Programming in Rust： Channel","mainEntityOfPage":{"@type":"WebPage","@id":"https://hangx-ma.github.io/2023/06/11/rust-channel.html"},"url":"https://hangx-ma.github.io/2023/06/11/rust-channel.html"}</script>
 <!-- End Jekyll SEO tag -->
 
   </head>
@@ -304,7 +304,7 @@
             <li>
                 <i class="fas fa-clock"></i>
                 <span> About 7 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s11srust-channel.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Rust 线程同步： Channel</h1></header></div><p class="overlay__excerpt">学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。</p></div></div>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s11srust-channel.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Async Programming in Rust： Channel</h1></header></div><p class="overlay__excerpt">学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -314,7 +314,7 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="Rust 线程同步： Channel"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-11T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="Async Programming in Rust： Channel"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-11T00:00:00+08:00">
     <meta itemprop="keywords" content="rust"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
@@ -484,7 +484,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/06/06/net-mdio.html">MDIO (Management Data Input/Output)</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/06/06/net-mdio.html">MDIO (Management Data Input/Output)</a></div><div class="next"><span>NEXT</span><a href="/2023/06/16/rust-async.html">Async Programming in Rust: Futures, Async/Await</a></div></div></div>
 
 </div>
 
@@ -1260,7 +1260,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s06s11srust-channel.html';
-      var title = "Rust 线程同步： Channel";
+      var title = "Async Programming in Rust： Channel";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s06s11srust-channel.html']").text(view);
       });
