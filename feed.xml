@@ -1,9 +1,91 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-16T16:27:22+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">Async Programming in Rust: Futures, Async/Await</title><link href="https://hangx-ma.github.io/2023/06/16/rust-async.html" rel="alternate" type="text/html" title="Async Programming in Rust: Futures, Async/Await" /><published>2023-06-16T00:00:00+08:00</published><updated>2023-06-16T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/16/rust-async</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/16/rust-async.html"><![CDATA[<h2 id="参考">参考</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-20T00:01:27+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
+  <li>rCore 第一章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/main/ch1">Github</a> 中。</li>
+  <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+</ul>
+
+<h2 id="1-为内核支持函数调用">1. 为内核支持函数调用</h2>
+
+<h3 id="11-导读问答">1.1 导读问答</h3>
+
+<ul>
+  <li>
+    <p><em>如何使得函数返回时能够跳转到调用该函数的下一条指令，即使该函数在代码中的多个位置被调用？</em></p>
+
+    <blockquote>
+      <p>RISC-V 中 <code class="language-plaintext highlighter-rouge">ra</code> 寄存器 （即 <code class="language-plaintext highlighter-rouge">x1</code> 寄存器） 是用来保存函数的返回地址的， 函数调用时会使用相关的跳转指令 <code class="language-plaintext highlighter-rouge">jal</code> 或者 <code class="language-plaintext highlighter-rouge">jalr</code>， 这两条指令都会在函数调用前将 <code class="language-plaintext highlighter-rouge">pc+4</code> 即下一条指令的地址存入 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器， 一般情况下 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器会选为 <code class="language-plaintext highlighter-rouge">ra</code>。 在函数需要返回时， 只需要通过 <code class="language-plaintext highlighter-rouge">ret</code> 汇编伪指令， 即可使主程序继续在 <code class="language-plaintext highlighter-rouge">ra</code> 保存的物理地址继续执行， 这里 <code class="language-plaintext highlighter-rouge">ret</code> 伪指令会被解析为 <code class="language-plaintext highlighter-rouge">jalr x0, 0(ra)</code>。 但在使用 <code class="language-plaintext highlighter-rouge">ra</code> 寄存器时需要注意函数调用上下文， 保证控制流转移前后特定的寄存器值保持不变。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>对于一个函数而言，保证它调用某个子函数之前，以及该子函数返回到它之后（某些）通用寄存器的值保持不变有何意义？</em></p>
+
+    <blockquote>
+      <p>这些特定的寄存器分为 <em><strong>Caller-Saved</strong></em> 和 <em><strong>Callee-Saved</strong></em> 两类， 对于编译器而言， 每个函数的编译是独立的， 子函数的寄存器是未知的， 这些寄存器的值的改变可能会影响整个函数的运行。 例如 <code class="language-plaintext highlighter-rouge">ra</code> 在嵌套函数调用中， 若没有保存通用寄存器的值， 可能会因子函数覆盖了 <code class="language-plaintext highlighter-rouge">ra</code> 的值而使得控制流出现混乱。 因而保证这些特定的通用寄存器的值保持不变可以保证 <strong>多层嵌套调用</strong> 的正确， 以及实现对寄存器的复用 （寄存器资源非常珍贵）。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>调用者函数和被调用者函数如何合作保证调用子函数前后寄存器内容保持不变？调用者保存和被调用者保存寄存器的保存与恢复各自由谁负责？它们暂时被保存在什么位置？它们于何时被保存和恢复（如函数的开场白/退场白）？</em></p>
+
+    <blockquote>
+      <p>需要依据 <strong>Calling Convention</strong> 对各自需要保存的寄存器进行保存， 正如 <strong>Caller-Saved</strong> 和 <strong>Callee-Saved</strong> 二者的字面含义， 调用者保存寄存器就由调用函数保存， 被调用者寄存器则由被调用函数保存， 这些寄存器都被保存在 <strong>栈帧</strong> 上。 一般在被调用函数开始时会保存这些寄存器， 而在被调用函数结束时会恢复寄存器， 这对于 <strong>Caller</strong> 和 <strong>Callee</strong> 而言是一致的。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>在 RISC-V 架构上，调用者保存和被调用者保存寄存器如何划分的？</em></p>
+
+    <blockquote>
+      <p>主要还是根据 <strong>调用规范</strong>（Calling Convention）</p>
+
+      <ul>
+        <li>a0~a7（<code class="language-plaintext highlighter-rouge">x10~x17</code>）， 用来传递输入参数， 其中的 a0 和 a1 还用来保存返回值。 <strong>调用者保存</strong>。</li>
+        <li>t0~t6(<code class="language-plaintext highlighter-rouge">x5~x7</code>, <code class="language-plaintext highlighter-rouge">x28~x31</code>)， 作为临时寄存器使用，在被调函数中可以随意使用无需保存。</li>
+        <li>s0~s11(<code class="language-plaintext highlighter-rouge">x8~x9</code>, <code class="language-plaintext highlighter-rouge">x18~x27</code>)， 作为临时寄存器使用，被调函数保存后才能在被调函数中使用。 <strong>被调用者保存</strong>。</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>sp</em> 和 <em>ra</em> 是调用者还是被调用者保存寄存器，为什么这样约定？</p>
+
+    <blockquote>
+      <ul>
+        <li>ra(<code class="language-plaintext highlighter-rouge">x1</code>) 是被调用者保存的。 被调用者函数可能也会调用函数， 在调用之前就需要修改 <code class="language-plaintext highlighter-rouge">ra</code> 使得这次调用能正确返回。 因此，每个函数都需要在开头保存 <code class="language-plaintext highlighter-rouge">ra</code> 到自己的栈帧中，并在结尾使用 <code class="language-plaintext highlighter-rouge">ret</code> 返回之前将其恢复。</li>
+        <li>sp(<code class="language-plaintext highlighter-rouge">x2</code>) 是被调用者保存的。sp 是栈指针 (Stack Pointer) 寄存器， 它指向下一个将要被存储的栈顶位置。 sp 寄存器和 fp 寄存器构成了当前栈帧的空间范围， 同样的被调用函数也会调用其他函数， 这会更新栈帧， 所以 sp 以及 fp 都约定为被调用者保存寄存器。</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>如何使用寄存器传递函数调用的参数和返回值？如果寄存器数量不够用了，如何传递函数调用的参数？</em></p>
+
+    <blockquote>
+      <p>a0~a7 可用以传递函数参数， 而 a0， a1 则用以保存函数返回值。 若寄存器数量不足， 可以通过栈进行参数传递， 在参数压栈结束后， 可以在 a0 或者 a1 中保存当前 sp 的值 （栈顶位置）， 通过偏移获取栈中保存的参数。</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="12-程序解释与问题记录">1.2 程序解释与问题记录</h3>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">clear_bss</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+        <span class="k">static</span> <span class="k">mut</span> <span class="n">sbss</span><span class="p">:</span> <span class="nb">u64</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">mut</span> <span class="n">ebss</span><span class="p">:</span> <span class="nb">u64</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">unsafe</span> <span class="p">{</span>
+        <span class="p">(</span><span class="n">sbss</span> <span class="k">as</span> <span class="nb">usize</span><span class="o">..</span><span class="n">ebss</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">ptr</span><span class="p">|{</span>
+                <span class="c1">// use volatile to avoid compiler optimization</span>
+                <span class="p">(</span><span class="n">ptr</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span><span class="nf">.write_volatile</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rcore" /><summary type="html"><![CDATA[第一章：应用程序与基本执行环境， 阅读 rCore tutorial book 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Async Programming in Rust: Futures, Async/Await</title><link href="https://hangx-ma.github.io/2023/06/16/rust-async.html" rel="alternate" type="text/html" title="Async Programming in Rust: Futures, Async/Await" /><published>2023-06-16T00:00:00+08:00</published><updated>2023-06-16T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/16/rust-async</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/16/rust-async.html"><![CDATA[<h2 id="参考">参考</h2>
 
 <ul>
   <li><a href="https://www.youtube.com/watch?v=lJ3NC-R3gSI">Rust’s Journey to Async/Await - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-2019/">[Slide]</a></li>
   <li><a href="https://www.youtube.com/watch?v=NNwK5ZPAJCk">The Talk You’ve Been Await-ing for - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-async-await/">[Slide]</a></li>
+  <li><a href="https://course.rs/advance/async/intro.html">Rust语言圣经(Rust Course) - 异步编程</a></li>
 </ul>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。]]></summary></entry><entry><title type="html">Async Programming in Rust： Channel</title><link href="https://hangx-ma.github.io/2023/06/11/rust-channel.html" rel="alternate" type="text/html" title="Async Programming in Rust： Channel" /><published>2023-06-11T00:00:00+08:00</published><updated>2023-06-11T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/11/rust-channel</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/11/rust-channel.html"><![CDATA[<blockquote>
   <ul>
     <li>CS110L Spring 2020 仓库： <a href="https://github.com/HangX-Ma/cs110l-sp20">https://github.com/HangX-Ma/cs110l-sp20</a></li>
@@ -1155,582 +1237,4 @@ flowchart LR
 
 <blockquote>
   <p><a href="https://cotes.page/posts/the-seo-to-jekyll/">Jekyll 的 SEO 优化</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="Git" /><summary type="html"><![CDATA[通过私有化 Git Pages 源码仓库， 并自动化推送和部署公有 Git Pages 仓库以实现源数据保护。]]></summary></entry><entry><title type="html">关于 Jekyll TeXt 博客搭建</title><link href="https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html" rel="alternate" type="text/html" title="关于 Jekyll TeXt 博客搭建" /><published>2023-05-18T00:00:00+08:00</published><updated>2023-05-18T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config.html"><![CDATA[<p>之前用 Hexo 搭 Git Pages 的经历实在是惨痛， 个人对前端没什么研究配置非常痛苦， 尤其是还需要装大量的依赖库尝试解决 <strong>图片显示</strong>、 <strong>Markdown显示</strong>， <strong>数学公式显示</strong> 等问题， Node.js 也非常不省心， 库版本冲突也很严重。 咬咬牙用了一段时间博客园， 不简洁， 不优雅， 不顺我心。 偶然间在知乎上看到了一些关于 Hugo， Jekyll， Hexo 相关的比较， Jekyll 虽然用 Ruby 构建速度稍慢 （实际感觉还挺快）， 但关键是 Github 的支持非常友好， 能自动编译并部署网站， 而且相关的社区建设也很不错， 对于只想专注记录并做点代码微调的人而言显得非常良心。 偶然间发现了 <code class="language-plaintext highlighter-rouge">TeXt</code> 这款主题， 文档很新而且很全面， 样式也吸引人， 就此入坑了。 前后花了两天去踩坑配自己心仪的样式， 在此记录一些配置细节， 不定期更新。</p>
-
-<p class="info"><code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 中的配置对 <code class="language-plaintext highlighter-rouge">_config.yml</code> 会进行覆写有更高的优先级。</p>
-
-<h2 id="logo">logo</h2>
-
-<p>给自己的网站增加一个独一无二的 logo 是很多人第一件要做的事， 但这个 logo 尺寸也是有要求的， 例如 Bing 网页抓取的页面不能超过 125 KB。 因而 <code class="language-plaintext highlighter-rouge">logo.svg</code> 尺寸尽可能要小， 否则会导致页面尺寸过大出现网页抓取的 SEO 问题。</p>
-
-<h2 id="bootcdn">bootcdn</h2>
-
-<p>BootCDN 域名已经迁移到 <code class="language-plaintext highlighter-rouge">https://cdn.bootcdn.net/</code>， 以 <code class="language-plaintext highlighter-rouge">https://cdn.bootcss.com/</code> 开头的链接已经全部不可用， 需要在新的 BootCDN 往网站中找到相应的 js 文件进行更新。 需要在 <code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 更新这些链接并适当更新版本， 老旧版本可能会造成一些问题。</p>
-
-<p class="warning">需要注意的是， <code class="language-plaintext highlighter-rouge">mathjax</code> 需要更换为 <code class="language-plaintext highlighter-rouge">https://unpkg.com/</code> 源， BootCDN 源出现 <code class="language-plaintext highlighter-rouge">Uncaught ReferenceError: MathJax is not defined</code>。</p>
-
-<h2 id="leancloud">leancloud</h2>
-
-<p>使用 leancloud 国际版需要更新 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud.js</code> 的 <code class="language-plaintext highlighter-rouge">serverURLs</code> 为如下形式。</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">serverURLs</span><span class="pi">:</span> <span class="s">https://xxxxxxxx.api.lncldglobal.com</span> <span class="c1"># 把xxxxxxxx替换成你自己AppID的前8位字符</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>这个问题是在 valine 的 issue 版面找到的 <a href="https://github.com/xCss/Valine/issues/340">国际版域名问题 #340</a>。</p>
-</blockquote>
-
-<h2 id="pageview">pageview</h2>
-
-<h3 id="1-自动生成文章标识-key">1. 自动生成文章标识 <em>key</em></h3>
-
-<p>按照文档配置好 leancloud 之后发现文章的 views 一直都没有变化， 后检查文档说明发现需要给每篇文章增加一个 <em>unique key</em> 才能进行阅读量的统计。 找到 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud/post.html</code> 发现几个 <code class="language-plaintext highlighter-rouge">page.key</code> 的变量， 以及 <code class="language-plaintext highlighter-rouge">_includes/article-info.html</code> 中有这么一句代码给 <code class="language-plaintext highlighter-rouge">data-page-key</code> 进行了赋值。 <code class="language-plaintext highlighter-rouge">data-page-key</code> 是 <code class="language-plaintext highlighter-rouge">post.html</code> 用以判断是否对 pageview 进行增加的依据。</p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.key }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
-</code></pre></div></div>
-
-<p>对于 Jekyll 而言， <code class="language-plaintext highlighter-rouge">page.id</code> 以及 <code class="language-plaintext highlighter-rouge">page.url</code> 都是内置的变量， 且对于一个网页而言， 这两个值都可以作为唯一标识， 其作用与 <em>unique key</em> 的作用别无二致。 那么可以选择其中一个对原有的 <code class="language-plaintext highlighter-rouge">page.key</code> 进行替代。 但是， <code class="language-plaintext highlighter-rouge">page.id</code> 当时产生了一个问题， 虽然文章中的 views 部分会增加了， 但文章列表中仍然显示为 0， 我怀疑当时将 <code class="language-plaintext highlighter-rouge">data-page-key</code> 直接改为 <code class="language-plaintext highlighter-rouge">page.id</code>， 并且没有对 <code class="language-plaintext highlighter-rouge">/</code> 进行处理有关系。 实际的更改如下所示：</p>
-
-<ul>
-  <li>
-    <p>post.html</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  { page.key } -&gt;  { page.url }
-  {{ page.key }} -&gt; {{ page.url | replace:'/', 's' }}
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>article.html</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  {{ include.article.key }} -&gt; {{ include.article.url | replace: '/', 's' }}
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<blockquote>
-  <p>该部分有两条在 TeXt theme 的 <em>issues</em> 均有提及</p>
-
-  <ul>
-    <li>原文链接 <a href="https://github.com/Real-king-Ph/Real-king-Ph.GitHub.io/blob/master/_posts/2022-04-06M/2022-04-05-TeXt%E4%B8%BB%E9%A2%98%E4%B8%8B-key%E7%9A%84%E9%87%8D%E8%AE%BE-leancloud%E8%BD%AC%E5%9B%BD%E9%99%85%E7%89%88.md">Key 的重设</a></li>
-    <li><a href="https://github.com/kitian616/jekyll-TeXt-theme/issues/321">Feature request: support post.id for comments</a></li>
-  </ul>
-</blockquote>
-
-<h3 id="2-home-界面的多余的-views">2. Home 界面的多余的 views</h3>
-
-<p>开启 pageview 之后在 Home/Archive/About 界面的右上角也能看到 views 这个字样， 感觉非常多余， 其实只需要在上述的那句 <code class="language-plaintext highlighter-rouge">data-page-key</code> 的代码前加一些判断， 让这个字样在 Home/Archive/About 界面不显示即可。 对于 Archive 以及 About 两个界面， 需要判断 <code class="language-plaintext highlighter-rouge">page.url != '/archive.html'</code> 以及 <code class="language-plaintext highlighter-rouge">page.url != '/about.html'</code>， 但对于 Home 界面就有些麻烦， 这些 views 在 Home 界面是全关联的， 如果右上角的 views 消失了， 后面的 article list 中的也会跟着消失， 所以需要区分 Home 界面本身的 article 和我们的在 <code class="language-plaintext highlighter-rouge">_posts</code> 文件夹下的 article。</p>
-
-<p>发现 <code class="language-plaintext highlighter-rouge">home.html</code> 实际也是一种特殊的 post， 只是它的 title 被认为设置隐藏了。 所以， 只需要给这篇特殊的文章设定 <code class="language-plaintext highlighter-rouge">pageview: false</code> 就能让它的 pageview 字样消失而不影响 Home 界面其他文章的 pageview 字样的显示。</p>
-
-<blockquote>
-  <p>后来想想对于 Archive 和 About 这两个界面而言也是同样的道理， 都应该能用 <code class="language-plaintext highlighter-rouge">pageview: false</code> 将 pageview 字样去除。 实践证明确实可行！</p>
-</blockquote>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--  article-info.html --&gt;</span>
-{%- if page.layout != "404" -%}
-    {%- if page.url != '/about.html' and page.url != '/archive.html' -%}
-        <span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.url | replace: '/', 's' }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
-    {%- endif -%}
-{%- else -%}
-    <span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> 404 {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
-{%- endif -%}
-</code></pre></div></div>
-
-<h2 id="gitalk">gitalk</h2>
-
-<p>从博客园换成 Git Pages 的另外一个原因是评论系统的便利性， Github 账号登陆省去了评论需要重新创建账号的麻烦。 尝试过使用 valine 作为评论系统， 虽然可以和 leancloud 公用 key， 但界面有些复杂不简洁不如 gitalk 赏心悦目。</p>
-
-<p class="info">gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-plaintext highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
-
-<h3 id="1-让-gitalk-摆脱-pagekey">1. 让 gitalk 摆脱 page.key</h3>
-
-<p>这里就不能直接改成把 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中的 <code class="language-plaintext highlighter-rouge">page.key</code> 直接改成 <code class="language-plaintext highlighter-rouge">page.url</code>， 不然在 Home 和 About 这两个界面也会出现评论框， 我改成了 <code class="language-plaintext highlighter-rouge">page.id</code> 就神奇的解决了问题。</p>
-
-<p>另外在 issue 版面我看到一条 <a href="https://github.com/mzlogin/mzlogin.github.io/issues/63">发布的新文章提示“未找到相关的 Issues 进行评论，请联系xxx初始化创建” #63</a> 的问题， 如果自己是管理员的话登陆一下就能自动创建评论区解决问题。 关键的是这一句， 文章链接过长 （超过 50 个字符） 也会导致创建失败出现 <code class="language-plaintext highlighter-rouge">Error: Validation Failed.</code>， 按照 <a href="https://github.com/mzlogin/mzlogin.github.io/commit/5ef353c011b21c04193df19096bc67a7b7140bec">Prevent comments initialize issue</a> 中的记录， 只需要将 <code class="language-plaintext highlighter-rouge">page.id</code> 改为 <code class="language-plaintext highlighter-rouge">page.id | truncate: 50, ''</code> 即可解决问题。</p>
-
-<h3 id="2-error-request-failed-with-status-code-403">2. Error: Request failed with status code 403</h3>
-
-<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-plaintext highlighter-rouge">proxy</code> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-plaintext highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-plaintext highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-plaintext highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <a href="https://xxxx.netlify.app">https://xxxx.netlify.app</a> 的 site 地址， 如果在网页中输入 <a href="https://xxxx.netlify.app/github_access_token">https://xxxx.netlify.app/github_access_token</a> 会出现 <code class="language-plaintext highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-plaintext highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <em>github_access_token</em> 也是可以的。</p>
-
-<blockquote>
-  <p><strong>vercel</strong>: <a href="https://vercel.prohibitorum.top/github_access_token">https://vercel.prohibitorum.top/github_access_token</a><br />
-<strong>netlify</strong>: <a href="https://strong-caramel-969805.netlify.app/github_access_token">https://strong-caramel-969805.netlify.app/github_access_token</a></p>
-</blockquote>
-
-<h3 id="3-error-uconcatjoin-is-not-a-function">3. Error: u.concat(…).join is not a function</h3>
-
-<p>在 gitalk repository 的 issue 界面就可以找到这条问题的处理办法， <a href="https://github.com/gitalk/gitalk/issues/114">Error: u.concat(…).join is not a function! #114</a> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 配置界面给 gitalk 加上如下代码。</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gitalk</span><span class="pi">:</span>
-  <span class="na">labels</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">gitalk</span>
-</code></pre></div></div>
-
-<p>另外在 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中进行修改。</p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const gitalk = new Gitalk({
-    // ...
-    labels: '{{ theme.gitalk.labels }}'.split(',').filter(l =&gt; l),
-    //...
-});
-gitalk.render('gitalk-container');
-</code></pre></div></div>
-
-<h2 id="site-exposure">site exposure</h2>
-
-<p>注册 google analytics 并且配置好 <code class="language-plaintext highlighter-rouge">_config.yml</code> 文件中的 <code class="language-plaintext highlighter-rouge">analytics</code> 部分的信息， 会发现 <a href="https://analytics.google.com/">google analytics</a> 好像并没有开始工作。 实际上是 google 并没有将网站纳入搜索索引中， 在 google 搜索中输入 <code class="language-plaintext highlighter-rouge">site:YOUR_GIT_PAGES_ADDRESS</code> 会发现没有任何内容。 要么等着 google 的搜索引擎来抓网页， 要么就自己主动先进行配置申请。</p>
-
-<blockquote>
-  <p><a href="https://evanli.github.io/blog/2018/10/25/let-jekyll-github-pages-be-searched-by-google/">让Google搜索到用Jekyll搭建在Github Pages上的博客</a><br />
-<a href="https://blog.naibabiji.com/tutorial/google-analytics.html">自己建网站怎么添加Google Analytics统计代码查看每日流量</a></p>
-</blockquote>
-
-<h3 id="1-sitemap">1. sitemap</h3>
-
-<p>站点地图(Site Map)是用来注明网站结构的文件，我们希望搜索引擎的爬虫了解我们的网站结构,以便于高效爬取内容，快速建立索引。 使用 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 生成我们的 Git Pages 的 sitemap.xml 文件， 然后将其放在自己网站文件的根目录。 之后就需要在对应的 Google Search Console 中增加 sitemap URL 进行验证。 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 需要在我们增添新的博文或内容后手动进行更新， 以使得搜索引擎能够获取网站的最新内容。 或者通过 jekyll-sitemap 插件自动生成更新。</p>
-
-<h3 id="2-google-search-console">2. Google Search Console</h3>
-
-<p>资源类型选择 “网站前缀”， 提交我们的 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 并对需要的网址进行网站检查， 然后申请编入索引。</p>
-
-<h3 id="3-bing-webmasters">3. Bing Webmasters</h3>
-
-<p>如果想要在 Bing 中增加自己的网站索引也是类似的操作， 只是我们需要用到 <a href="https://www.bing.com/webmasters/">Bing Webmaster Tools</a>。 如果用 Google Search Console 顺利的话， 可以用同一个 Google 账号导入相关的信息， 但 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 验证好像还是需要自己添加。</p>
-
-<h3 id="4-url-上传搜索引擎索引">4. URL 上传搜索引擎索引</h3>
-
-<p>这篇 <a href="https://www.cnblogs.com/duanguyuan/p/16205184.html">文章</a> 介绍了如何通过 API 接口提交 URL 申请， 以加快文章列表被搜索引擎的收录。</p>
-
-<ul>
-  <li>
-    <p>生成 URL 列表手动递交</p>
-
-    <p>在提交 URL 之前需要准备好 URL 列表， 形如</p>
-
-    <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  http://www.your-site.com/1.html
-  http://www.your-site.com/2.html
-</code></pre></div>    </div>
-
-    <p>我们可以手动通过 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 网站生成 sitemap， 或者通过 Github 支持的 <code class="language-plaintext highlighter-rouge">jekyll-sitemap</code> 插件在部署后自动生成， 这个插件可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中看到是已经被添加了的。 那么之后就可以用以下 Linux 命令提取 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 文件中的 URL， 筛选我们最新添加的部分。</p>
-
-    <blockquote>
-      <p>可以使用诸如 compareit 这类插件进行更高效的对比筛选</p>
-    </blockquote>
-  </li>
-  <li>
-    <p>API 推送递交</p>
-
-    <p>Bing 以及 Baidu 都提供了 API 接口进行提交。 根据 <a href="https://www.bing.com/webmasters/">Bing Webmasters</a> 以及 <a href="https://ziyuan.baidu.com/linksubmit/">Baidu linksubmit</a> 提供的 API 结构， 可以更改如下 <code class="language-plaintext highlighter-rouge">commit_urls.py</code> 的相应信息， 使用 <code class="language-plaintext highlighter-rouge">python commit_urls.py</code> 提交网站， 该办法是通过 Git Log 获取最新一条更改信息， 并将其中与 URL 对应部分进行裁剪组合获取所需的 URLs。</p>
-
-    <details>
-      <summary> <code class="language-plaintext highlighter-rouge">commit_urls.py</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
-
-      <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kn">import</span> <span class="n">os</span>
-  <span class="kn">import</span> <span class="n">subprocess</span>
-  <span class="kn">import</span> <span class="n">requests</span>
-  <span class="kn">import</span> <span class="n">json</span>
-
-  <span class="k">def</span> <span class="nf">commit_urls</span><span class="p">():</span>
-      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Submit newest URLs to Baidu and Bing</span><span class="sh">"</span><span class="p">)</span>
-      <span class="n">os</span><span class="p">.</span><span class="nf">system</span><span class="p">(</span><span class="sh">"</span><span class="s">git checkout master</span><span class="sh">"</span><span class="p">)</span>
-      <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
-
-      <span class="c1"># 生成url列表
-</span>      <span class="n">ret</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
-          <span class="sh">"</span><span class="s">git rev-parse --short HEAD</span><span class="sh">"</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span>
-      <span class="p">)</span>
-      <span class="k">if</span> <span class="n">ret</span><span class="p">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-          <span class="n">commit_id</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stdout</span><span class="p">,</span> <span class="sh">"</span><span class="s">utf_8</span><span class="sh">"</span><span class="p">).</span><span class="nf">strip</span><span class="p">()</span>
-          <span class="n">ret</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
-              <span class="sh">"</span><span class="s">git show --pretty=</span><span class="sh">"</span> <span class="sh">"</span><span class="s"> --name-only </span><span class="sh">"</span> <span class="o">+</span> <span class="n">commit_id</span><span class="p">,</span>
-              <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span>
-              <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="p">.</span><span class="n">PIPE</span><span class="p">,</span>
-          <span class="p">)</span>
-          <span class="k">if</span> <span class="n">ret</span><span class="p">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-              <span class="n">changes</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stdout</span><span class="p">,</span> <span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
-              <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
-                  <span class="sh">'''</span><span class="s"> 使用 Jekyll 主题直接上传源码至 Git Pages 版本
-                  # change[7:] 去掉最前面的 _post/
-                  change = change[7:]
-                  post_name = change.split(</span><span class="sh">"</span><span class="s">-</span><span class="sh">"</span><span class="s">)
-                  if len(post_name) &gt; 3:
-                      year = str(post_name.__getitem__(0))
-                      month = str(post_name.__getitem__(1))
-                      day = str(post_name.__getitem__(2))
-                      if len(year) == 4 and int(year) &gt;= 2023:
-                          if len(month) == 2 and int(month) &gt;= 1 and int(month) &lt;= 12:
-                              if len(day) == 2 and int(day) &gt;= 1 and int(day) &lt;= 31:
-                                  if change.endswith(</span><span class="sh">"</span><span class="s">.md</span><span class="sh">"</span><span class="s">):
-                                      # change[:-3] 是为了去掉末尾的 .md
-                                      prefix = year + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + month + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s"> + day + </span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="s">
-                                      article_path = prefix + change[len(prefix):-3]
-                                      urls.append(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="s">.format(article_path))
-                  </span><span class="sh">'''</span>
-                  <span class="c1"># 文章为 .html 结尾的编译后的静态网站， 自行更改相关配置
-</span>                  <span class="k">if</span> <span class="n">change</span><span class="p">.</span><span class="nf">endswith</span><span class="p">(</span><span class="sh">"</span><span class="s">.html</span><span class="sh">"</span><span class="p">):</span>
-                      <span class="c1"># change[:-5] 是为了去掉末尾的 .html
-</span>                      <span class="n">urls</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">https://your-site.com/{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">change</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]))</span>
-          <span class="k">else</span><span class="p">:</span>
-              <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">subprocess run error:{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stderr</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-          <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">subprocess run error:{}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="n">stderr</span><span class="p">))</span>
-
-      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Current submitted URLs:</span><span class="sh">"</span><span class="p">,</span> <span class="n">urls</span><span class="p">)</span>
-
-      <span class="c1"># 提交到 Bing
-</span>      <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-          <span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">application/json; charset=utf-8</span><span class="sh">"</span><span class="p">,</span>
-          <span class="sh">"</span><span class="s">Host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ssl.bing.com</span><span class="sh">"</span><span class="p">,</span>
-      <span class="p">}</span>
-      <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">siteUrl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">https://your-site.com</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">urlList</span><span class="sh">"</span><span class="p">:</span> <span class="n">urls</span><span class="p">}</span>
-      <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
-          <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">https://www.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=your-apikey</span><span class="sh">"</span><span class="p">,</span>
-          <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-          <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-      <span class="p">)</span>
-      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Bing</span><span class="sh">'</span><span class="s">s response: </span><span class="sh">"</span><span class="p">,</span> <span class="n">response</span><span class="p">.</span><span class="n">content</span><span class="p">)</span>
-
-      <span class="c1"># 提交到百度
-</span>      <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-          <span class="sh">"</span><span class="s">User-Agent</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">curl/7.12.1</span><span class="sh">"</span><span class="p">,</span>
-          <span class="sh">"</span><span class="s">Host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">data.zz.baidu.com</span><span class="sh">"</span><span class="p">,</span>
-          <span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">text/plain</span><span class="sh">"</span>
-      <span class="p">}</span>
-      <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
-          <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://data.zz.baidu.com/urls?site=your-site.com&amp;token=your-token</span><span class="sh">"</span><span class="p">,</span>
-          <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-          <span class="n">data</span><span class="o">=</span><span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
-      <span class="p">)</span>
-      <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Baidu</span><span class="sh">'</span><span class="s">s response: </span><span class="sh">"</span><span class="p">,</span> <span class="n">response</span><span class="p">.</span><span class="n">content</span><span class="p">)</span>
-</code></pre></div>      </div>
-
-    </details>
-
-    <p>如果成功则会有类似如下的打印</p>
-
-    <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Submit newest URLs to Baidu and Bing
-  Switched to branch 'master'
-  Your branch is up to date with 'origin/master'.
-  Current submitted URLs: ['https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config']
-  Bing's response:  b'{"d":null}'
-  Baidu's response:  b'{"remain":99,"success":1}'
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<h2 id="copyright">Copyright</h2>
-
-<p>复制博客内容的时候增加版权信息感觉也是挺有用的， 需要确认版权声明的位置， 对于文章而言， 主题内容肯定在 <code class="language-plaintext highlighter-rouge">content</code> 中。 F12 使用开发者工具可以确定 TeXt 主题的文章主题内容是在 <code class="language-plaintext highlighter-rouge">&lt;div class="page__content"&gt;</code> 中。 我在 <code class="language-plaintext highlighter-rouge">_includes/custom</code> 中创建了一个 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听版权声明， 之后只需要在 <code class="language-plaintext highlighter-rouge">_layouts/page.html</code> 中引用该 js 文件即可。 当然为了灵活处理， 可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 增加 copyright 的开关并在引用时加入条件语句。</p>
-
-<details>
-  <summary> <code class="language-plaintext highlighter-rouge">copyright.js</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
-
-  <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
-    <span class="c1">// clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容</span>
-    <span class="kd">let</span> <span class="nx">clipboardData</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">clipboardData</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">clipboardData</span><span class="p">;</span>
-    <span class="c1">// 如果未复制或者未剪切，则return出去</span>
-    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">clipboardData</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span><span class="p">;</span> <span class="p">}</span>
-    <span class="nx">event</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
-    <span class="c1">// Selection 对象，表示用户选择的文本范围或光标的当前位置。</span>
-    <span class="c1">//     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串</span>
-    <span class="kd">let</span> <span class="nx">text</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nf">getSelection</span><span class="p">().</span><span class="nf">toString</span><span class="p">();</span>
-
-    <span class="k">if </span><span class="p">(</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// 如果文本存在则先取消文本默认事件</span>
-        <span class="nx">event</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
-        <span class="c1">// 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本</span>
-        <span class="c1">// format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。</span>
-        <span class="c1">// data: 一个 DOMString表示要添加到 drag object的数据。</span>
-        <span class="kd">var</span> <span class="nx">copyright</span> <span class="o">=</span> <span class="dl">'</span><span class="se">\n\n</span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Author: HangX-Ma(一只豆腐)</span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Email: m-contour@qq.com</span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Article Address: </span><span class="dl">'</span> <span class="o">+</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">hostname</span> <span class="o">+</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="se">\n</span><span class="s1">Copyright Notice: </span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="s1">The copyright belongs to the author. </span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="s1">For commercial reproduction, please contact the author for authorization. </span><span class="dl">'</span>
-        <span class="o">+</span> <span class="dl">'</span><span class="s1">For non-commercial reproduction, please indicate the source.</span><span class="dl">'</span>
-
-        <span class="nx">clipboardData</span><span class="p">.</span><span class="nf">setData</span><span class="p">(</span><span class="dl">'</span><span class="s1">text/plain</span><span class="dl">'</span><span class="p">,</span> <span class="nx">text</span> <span class="o">+</span> <span class="nx">copyright</span><span class="p">);</span>
-
-    <span class="p">}</span>
-<span class="p">};</span>
-<span class="kd">var</span> <span class="nx">contents</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementsByClassName</span><span class="p">(</span><span class="dl">"</span><span class="s2">page__content</span><span class="dl">"</span><span class="p">);</span>
-<span class="c1">// 监听文章内容的copy事件</span>
-<span class="nx">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">copy</span><span class="dl">'</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
-    <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>  </div>
-
-</details>
-
-<ul>
-  <li>
-    <p>通过 F12 开发者工具查阅自己的网站主题内容所属位置。</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- F12 查阅地址 --&gt;</span>
-  <span class="nt">&lt;body&gt;</span>
-  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"root"</span> <span class="na">data-is-touch=</span><span class="s">"false"</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"layout--page js-page-root"</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__main js-page-main page__viewport cell cell--auto"</span><span class="nt">&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__main-inner"</span><span class="nt">&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__header d-print-none"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__content"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__header d-print-none"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;/div&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/body&gt;</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>将 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听 javascript 文件在 head 中引用。</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- _layouts/page.html 底部增添 copyright.js --&gt;</span>
-  ...
-  {%- if page.copyright -%}
-  <span class="nt">&lt;script&gt;</span>
-  <span class="p">{</span><span class="o">%-</span> <span class="nx">include</span> <span class="nx">custom</span><span class="o">/</span><span class="nx">copyright</span><span class="p">.</span><span class="nx">js</span> <span class="o">-%</span><span class="p">}</span>
-  <span class="nt">&lt;/script&gt;</span>
-  {%- endif -%}
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<blockquote>
-  <p><a href="https://blog.csdn.net/qq_33430083/article/details/105626840">新手如何给Hexo博客在复制时添加版权声明</a></p>
-</blockquote>
-
-<h2 id="markdown">markdown</h2>
-
-<h3 id="1-代码块-liquid-代码误解析">1. 代码块 Liquid 代码误解析</h3>
-
-<p>如果页面是通过Jekyll引擎进行渲染的, 那么在文章中写了 Liquid 代码, 引擎也会将其解析。 找了一圈发现最方便的是针对块内容进行特殊的解释。 这样在 <code class="language-plaintext highlighter-rouge">{% raw %}</code> 以及 <code class="language-plaintext highlighter-rouge">{% endraw %}</code> 之间的代码就不会被解析了， 但也需要注意空白符此时也会被作为 raw 的一部分显示在代码块中。</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% raw %}
-{% this %}
-{% endraw %}
-</code></pre></div></div>
-
-<p>作为替代，如果 Jekyll 的版本在 4.0 及以上，也可以在 post 顶部的 YAML 区域指定：</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">render_with_liquid</span><span class="pi">:</span> <span class="kc">false</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://blog.csdn.net/qq_41437512/article/details/123031890">设置Markdown中展示Liquid(Jekyll)但不解析的方式</a><br />
-<a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
-</blockquote>
-
-<h3 id="2-代码块折叠">2. 代码块折叠</h3>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{::options parse_block_html="true" /}
-
-<span class="nt">&lt;details&gt;&lt;summary</span> <span class="na">markdown=</span><span class="s">"span"</span><span class="nt">&gt;</span> `commit_urls.py` <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"fas fa-file-code"</span> <span class="na">style=</span><span class="s">"color: #ff4040;"</span><span class="nt">&gt;&lt;/i&gt;&lt;/summary&gt;</span>
-
-YOUR_CODE_HERE
-
-<span class="nt">&lt;/details&gt;</span>
-
-{::options parse_block_html="false" /}
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://www.endtoend.ai/tutorial/collapsible-code-blocks/">Collapsible Code Blocks in GitHub Pages</a></p>
-</blockquote>
-
-<h2 id="个性化配置">个性化配置</h2>
-
-<h3 id="1-back-to-top">1. Back To Top</h3>
-
-<p>给网页增加返回顶部的功能能提供阅读的便利， 尝试过很多自己添加 js 代码的方式都没成功， 或者是中间没有过渡动画。 Github 上的一个开源的库倒是非常好用， 配置也很简单。 我在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 的 body 部分增加了配置代码， 毕竟所有的页面都是继承自 base， 这样这个 Back-To-Top 按钮就能全局可见了。</p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- _layouts/base.html --&gt;</span>
-<span class="nt">&lt;body&gt;</span>
-    ...
-    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-    <span class="nt">&lt;script&gt;</span><span class="nf">addBackToTop</span><span class="p">({</span>
-        <span class="na">diameter</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-        <span class="na">backgroundColor</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#FF4040</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">textColor</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#FFFFF0</span><span class="dl">'</span><span class="p">,</span>
-    <span class="p">})</span><span class="nt">&lt;/script&gt;</span>
-<span class="nt">&lt;/body&gt;</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://github.com/vfeskov/vanilla-back-to-top">vfeskov/vanilla-back-to-top</a>: Simple and tiny Back To Top button with no dependencies.</p>
-</blockquote>
-
-<h3 id="2-隐藏-addtoany-悬浮按钮">2. 隐藏 AddToAny 悬浮按钮</h3>
-
-<p>摸索了有一阵子， 发现 AddToAny 的按钮实际上是通过 <code class="language-plaintext highlighter-rouge">&lt;a class="a2a_button_copy_link"&gt;&lt;/a&gt;</code> 这样的语句添加的， 那我们只需要对这些语句段进行控制就能控制 AddToAny 的按钮的隐藏和显示了。 这对于手机阅读非常重要， 读者也不希望一个特占位置的分享按钮影响阅读体验， 把它缩小成一个小三角就很优雅了。</p>
-
-<blockquote>
-  <p>主要通过切换 <code class="language-plaintext highlighter-rouge">display: block</code> 和 <code class="language-plaintext highlighter-rouge">display: none</code> 两种状态完成显示和隐藏。</p>
-</blockquote>
-
-<h3 id="3-访客与阅读统计">3. 访客与阅读统计</h3>
-
-<p>用 “不蒜子”， 非常简易！ 只需要在 <code class="language-plaintext highlighter-rouge">_includes/footer.html</code> 中加入如下代码， 就能获得和咱一样的显示效果了。</p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"site-info mt-2"</span><span class="nt">&gt;</span>
-      ...
-      <span class="nt">&lt;div</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;script </span><span class="na">async</span> <span class="na">src=</span><span class="s">"//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-        <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_container_site_pv"</span><span class="nt">&gt;</span>
-            Total <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_value_site_pv"</span><span class="nt">&gt;&lt;i</span> <span class="na">class=</span><span class="s">"fa fa-spinner fa-pulse"</span><span class="nt">&gt;&lt;/i&gt;&lt;/span&gt;</span> views,
-        <span class="nt">&lt;/span&gt;</span>
-        <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_container_site_uv"</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"busuanzi_value_site_uv"</span><span class="nt">&gt;&lt;i</span> <span class="na">class=</span><span class="s">"fa fa-spinner fa-pulse"</span><span class="nt">&gt;&lt;/i&gt;&lt;/span&gt;</span> visitors.
-        <span class="nt">&lt;/span&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-</code></pre></div></div>
-
-<h3 id="4-个性化页签">4. 个性化页签</h3>
-
-<p>个性化 Tab 标签。 相信很多人都看过 Tab 标签显示突然崩溃， 然后点回去又是好的。 我创建了 <code class="language-plaintext highlighter-rouge">_include/custom/funny-title.js</code> 文件， 并在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 中以 script 的形式引用了该文件。 这样我的网站的 Tab 也能跟读者开个小小的玩笑了 :stuck_out_tongue_closed_eyes:。</p>
-
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// funny-title.js</span>
-<span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">OriginTitle</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">title</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">titleTime</span><span class="p">;</span>
-    <span class="nb">document</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">visibilitychange</span><span class="dl">'</span><span class="p">,</span> <span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">if </span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">hidden</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nf">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">[rel="icon"]</span><span class="dl">'</span><span class="p">).</span><span class="nf">attr</span><span class="p">(</span><span class="dl">'</span><span class="s1">href</span><span class="dl">'</span><span class="p">,</span> <span class="dl">"</span><span class="s2">/favicon.ico</span><span class="dl">"</span><span class="p">);</span>
-            <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">╭(°A°`)╮ 页面崩溃啦 ~</span><span class="dl">'</span><span class="p">;</span>
-            <span class="nf">clearTimeout</span><span class="p">(</span><span class="nx">titleTime</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">else</span> <span class="p">{</span>
-            <span class="nf">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">[rel="icon"]</span><span class="dl">'</span><span class="p">).</span><span class="nf">attr</span><span class="p">(</span><span class="dl">'</span><span class="s1">href</span><span class="dl">'</span><span class="p">,</span> <span class="dl">"</span><span class="s2">/favicon.ico</span><span class="dl">"</span><span class="p">);</span>
-            <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">(ฅ&gt;ω&lt;*ฅ) 噫又好啦 ~</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">OriginTitle</span><span class="p">;</span>
-            <span class="nx">titleTime</span> <span class="o">=</span> <span class="nf">setTimeout</span><span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
-                <span class="nb">document</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">OriginTitle</span><span class="p">;</span>
-            <span class="p">},</span> <span class="mi">2000</span><span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">});</span>
-<span class="p">})();</span>
-</code></pre></div></div>
-
-<h3 id="5-增加-last_modified-标签">5. 增加 last_modified 标签</h3>
-
-<p>想给有些文章加上 <strong>最后的修改日期</strong> 以方便标识和记忆， 但这个主题的 <code class="language-plaintext highlighter-rouge">last_date</code> 的功能是在文章末尾添加一句最后修改日期， 我想自己加一个和文章日期非常像的样式， 也在文章列表中显示出来的那种。 既然之前操作过 pageview， 已经知道是在 <code class="language-plaintext highlighter-rouge">article-info.html</code> 修改文章样式， 那就模仿已有格式增加。</p>
-
-<ul>
-  <li>
-    <p>增加 <code class="language-plaintext highlighter-rouge">_show_last_modified</code> 标识以判断是否显示最后修改日期。</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  {%- assign _show_last_modified = include.article.last_modified -%}
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>增加新的文章信息。</p>
-
-    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  {%- if _show_author or _show_date or _pageview or _show_last_modified -%}
-    {%- if _show_last_modified -%}
-      <span class="nt">&lt;li&gt;</span>
-      {%- include snippets/get-locale-string.html key='ARTICLE_DATE_FORMAT' -%}
-      <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"far fa-edit"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span&gt;</span>{{ include.article.last_modified | date: __return }}<span class="nt">&lt;/span&gt;</span>
-      <span class="nt">&lt;/li&gt;</span>
-    {%- endif -%}
-  {%- endif -%}
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>最后只要在想增加该信息的文章的头部增加如下样式信息就能显示了。</p>
-
-    <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">last_modified</span><span class="pi">:</span> <span class="s">2023-05-20</span> <span class="c1"># 需要和日期的格式一致</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<h3 id="6-增加-jekyll-seo-tag">6. 增加 jekyll-seo-tag</h3>
-
-<p>按照官网给的指导书就行 <a href="https://github.com/jekyll/jekyll-seo-tag">jekyll/jekyll-seo-tag</a>。</p>
-
-<h3 id="7-一键代码复制">7. 一键代码复制</h3>
-
-<p>文章倒是没咋看， 主要看 PR 的 commit 部分更改了啥自己加上了， 感觉效果还挺不错的。</p>
-
-<blockquote>
-  <p><a href="https://be-my-only.xyz/blog/TeXt-copy-to-clipboard/">为博客添加代码块一键复制功能 - Yuze Zou</a><br />
-<a href="https://github.com/kitian616/jekyll-TeXt-theme/pull/218/commits">feat: copy to clipboard for code blocks #218</a></p>
-</blockquote>
-
-<h3 id="8-代码自动换行与行号设置">8. 代码自动换行与行号设置</h3>
-
-<h4 id="自动换行">自动换行</h4>
-
-<p>在 <code class="language-plaintext highlighter-rouge">_sass/custom.scss</code> 中加入如下代码即可。</p>
-
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* auto wrap code */</span>
-<span class="nt">pre</span> <span class="p">{</span>
-    <span class="nl">white-space</span><span class="p">:</span> <span class="n">pre-wrap</span><span class="p">;</span>
-    <span class="nl">word-wrap</span><span class="p">:</span> <span class="n">break-word</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://www.jarods.org/2001.html">让pre标签的代码块自动换行</a></p>
-</blockquote>
-
-<h4 id="代码行号设置">代码行号设置</h4>
-
-<p>按这种方法可以对常规的 Markdown 的代码段自动显示行号， 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中加入以下代码即可。 但这种方式会在 code 外层套上一个 table 的框， 不美观。</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># More › http://kramdown.gettalong.org/quickref.html</span>
-<span class="c1"># Options › http://kramdown.gettalong.org/options.html</span>
-<span class="na">kramdown</span><span class="pi">:</span>
-  <span class="na">input</span><span class="pi">:</span>          <span class="s">GFM</span>
-  <span class="c1"># https://github.com/jekyll/jekyll/pull/4090</span>
-  <span class="na">syntax_highlighter</span><span class="pi">:</span> <span class="s">rouge</span>
-
-  <span class="c1"># Rouge Highlighter in Kramdown › http://kramdown.gettalong.org/syntax_highlighter/rouge.html</span>
-  <span class="c1"># span, block element options fall back to global</span>
-  <span class="na">syntax_highlighter_opts</span><span class="pi">:</span>
-    <span class="c1"># Rouge Options › https://github.com/jneen/rouge#full-options</span>
-    <span class="na">default_lang</span><span class="pi">:</span> <span class="s">c</span> 
-    <span class="na">css_class</span><span class="pi">:</span> <span class="s1">'</span><span class="s">highlight'</span>
-    <span class="c1">#line_numbers: true # bad idea, spans don't need linenos and would inherit this option</span>
-    <span class="na">span</span><span class="pi">:</span>
-      <span class="na">line_numbers</span><span class="pi">:</span> <span class="kc">false</span>
-    <span class="na">block</span><span class="pi">:</span>
-      <span class="na">line_numbers</span><span class="pi">:</span> <span class="kc">true</span>
-      <span class="na">start_line</span><span class="pi">:</span> <span class="m">1</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a><br />
-<a href="https://www.luxiyue.com/server/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AEhighlight-js%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%B7%BB%E5%8A%A0%E8%A1%8C%E5%8F%B7/">代码高亮Highlight.Js的使用以及添加行号</a><br />
-<a href="https://www.wannaexpresso.com/2020/03/04/jekyll-blog-troubleshooting/">Jekyll博客搭建答疑解惑</a><br />
-<a href="https://mrcn.ski/jekyll-syntax-highlighting-and-line-numbers/">Jekyll: Syntax Highlighting And Line Numbers</a><br />
-<a href="https://www.drewsilcock.co.uk/proper-linenumbers">Proper line numbers with Jekyll</a><br />
-<a href="https://botleg.com/stories/line-numbers-in-jekyll-code-blocks/">Line numbers in Jekyll code blocks</a><br />
-<a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br />
-<a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
-</blockquote>
-
-<h3 id="9-取消滚动条但不影响滚动">9. 取消滚动条但不影响滚动</h3>
-
-<p>使用 <code class="language-plaintext highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-plaintext highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
-
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
-  <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nt">main</span> <span class="p">{</span>
-  <span class="nl">width</span><span class="p">:</span> <span class="m">100vw</span><span class="p">;</span>
-  <span class="nl">height</span><span class="p">:</span> <span class="m">100vh</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nt">section</span> <span class="p">{</span>
-  <span class="nl">width</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
-  <span class="nl">height</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
-<span class="p">}</span>
-
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://zxuqian.cn/css-how-to-hide-scrollbars/">CSS 如何隐藏滚动条，但不影响内容滚动</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="TeXt" /><summary type="html"><![CDATA[在此记录一些与 Jekyll TeXt 主题相关的配置细节， 以及问题的解决办法， 不定期更新。]]></summary></entry></feed>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="Git" /><summary type="html"><![CDATA[通过私有化 Git Pages 源码仓库， 并自动化推送和部署公有 Git Pages 仓库以实现源数据保护。]]></summary></entry></feed>
