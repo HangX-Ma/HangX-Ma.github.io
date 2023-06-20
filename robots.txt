@@ -5,6 +5,6 @@ layout: null
 User-agent: *
 Allow: /
 
-Disallow: /norobots/
+Disallow: /norobots/images
 
 Sitemap: {{ site.url }}/sitemap.xml
