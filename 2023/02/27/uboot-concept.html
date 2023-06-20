@@ -309,8 +309,9 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Linux">Linux</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Feb 27, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Jun 20, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 12241 words </span>
+                <span> Total 12420 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -590,6 +591,24 @@ flowchart LR
     p1 -.-&gt; p3
     p3 -.-&gt; p5
     p1 ==&gt; p5
+</div>
+
+<h3 id="33-bootflow">3.3 BootFlow</h3>
+
+<p>Western Digital 在 2019 年 12 月的一份 <a href="https://riscv.org/wp-content/uploads/2019/12/Summit_bootflow.pdf"><em>An Introduction to RISC-V Boot Flow</em></a> 报告中有这么两幅流程图阐述了 boot 的基本结构以及 ARM64 的 boot 流程， 非常清晰可供参阅。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-02-27-uboot-concept/common-boot-flow.png" alt="Common boot flow, Western Digital" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Common boot flow, Western Digital</u></font>
+</div>
+
+<p><br /></p>
+
+<div align="center">
+    <img src="/norobots/images/2023-02-27-uboot-concept/common-boot-flow-arm64.png" alt="Common boot flow in ARM64, Western Digital" width="800" />
+    <br />
+    <font size="2" color="#999"><u>Common boot flow in ARM64, Western Digital</u></font>
 </div>
 
 <h2 id="4-浅析-tpl">4. 浅析 TPL</h2>

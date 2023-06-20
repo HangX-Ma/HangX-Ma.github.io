@@ -310,11 +310,11 @@
                 href="/blog/archive.html?tag=rcore">rcore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 19, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 1803 words </span>
+                <span> Total 3237 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 6 mins </span>
+                <span> About 9 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s19srcore-note-ch1.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-19T00:00:00+08:00">
     <meta itemprop="keywords" content="rust,rcore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -386,6 +386,8 @@
 
 <h3 id="12-程序解释与问题记录">1.2 程序解释与问题记录</h3>
 
+<p>在该章节的评论区讨论最多的是 <code class="language-plaintext highlighter-rouge">extern "C"</code> 以及 <code class="language-plaintext highlighter-rouge">*mut u8</code> 裸指针转换的问题， 下面的代码是更改完善后的。 linker script 中的全局变量定义后， 在 C 语言中可以通过 <code class="language-plaintext highlighter-rouge">extern int x</code> 这种形式导入， 这在 rust 中也是可以通过类似的方式实现的， 可以参考 <a href="https://github.com/rustsbi/rustsbi-qemu/blob/main/rustsbi-qemu/src/main.rs#L70">rustsbi</a> 中的方式。 另外， 根据 <em>Rust 程序设计语言</em> 中的 <em>19.1不安全的 Rust: 解引用裸指针</em> 中的 <a href="https://kaisery.github.io/trpl-zh-cn/ch19-01-unsafe-rust.html#%E8%A7%A3%E5%BC%95%E7%94%A8%E8%A3%B8%E6%8C%87%E9%92%88">描述</a> <code class="language-plaintext highlighter-rouge">(ptr as *mut u8)</code> 实际是将 <code class="language-plaintext highlighter-rouge">ptr</code> 所指向的 64 位地址转为 <code class="language-plaintext highlighter-rouge">u8</code> 类型的可变指针， <code class="language-plaintext highlighter-rouge">ptr.write_volatile(0)</code> 方法将 0 写入指针类型 <code class="language-plaintext highlighter-rouge">ptr</code> 存储的地址所指向的 1 字节内存区域。</p>
+
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">clear_bss</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
         <span class="k">static</span> <span class="k">mut</span> <span class="n">sbss</span><span class="p">:</span> <span class="nb">u64</span><span class="p">;</span>
@@ -401,6 +403,42 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
+<p>另外关于栈中在 linker script 中被置于 <code class="language-plaintext highlighter-rouge">.bss</code> 段也有讨论， 在 <em>程序员的修养——链接、装载与库</em> 中就有提及</p>
+
+<div style="font-weight: bold; font-style: italic;">
+<p>
+“链接器为目标文件分配地址和空间” 这句话中的 “地址和空间” 其实有两个含义：第一个是在输出的可执行文件中的空间；第二个是在装载后的虚拟地址中的虚拟地址空间。
+</p>
+</div>
+
+<p>对于 <code class="language-plaintext highlighter-rouge">.bss</code> 这样的段来说， 分配空间的意义只局限于虚拟地址空间， 因为它在文件中并没有内容。 对于栈的初始化而言， 将其置于 <code class="language-plaintext highlighter-rouge">.bss</code> 段可避免其占用实际的 ELF 文件的空间， 但在后续加载内核内核后， 该部分栈会被分配到 VMA 中占据一定的虚拟内存空间。</p>
+
+<h2 id="2-rustsbi">2. RustSBI</h2>
+
+<p>SBI 是 RISC-V Supervisor Binary Interface 规范的缩写，OpenSBI 是RISC-V官方用C语言开发的SBI参考实现；RustSBI 是用 Rust 语言实现的 SBI。 RustSBI 的功能和 u-boot(SPL) 很类似但相较而言简单很多， 只需要在 boot 阶段为上层应用完成初始化工作后转移控制权给内核。 但是， RustSBI 又直接构成了内核和硬件沟通的桥梁， 为操作系统提供一系列二进制接口，以便其获取和操作硬件信息， RustSBI 能在内核运行时响应内核的请求为内核提供服务。</p>
+
+<p>Western Digital 在 2019 年 12 月的一份 <a href="https://riscv.org/wp-content/uploads/2019/12/Summit_bootflow.pdf"><em>An Introduction to RISC-V Boot Flow</em></a> 报告中有这么一幅流程图阐述了 RISC-V 的 boot 流程。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-06-19-rcore-note-ch1/riscv-upstream-boot-flow.png" alt="RISC-V Upstream Boot Flow, Western Digital" width="800" />
+    <br />
+    <font size="2" color="#999"><u>RISC-V Upstream Boot Flow, Western Digital</u></font>
+</div>
+
+<p>这里引用 <a href="https://github.com/denglj">dengji</a> 在附录 C 评论中对 boot 流程以及对 RISV-V SBI 的解释：</p>
+
+<ul>
+  <li><strong>Loader</strong> 要干的事情，就是内存初始化， 以及加载 Runtime 和 BootLoader 程序。 而Loader自己也是一段程序，常见的Loader就包括 BIOS/UEFI， 后者是前者的继任者。</li>
+  <li><strong>Runtime</strong> 固件程序是为了提供运行时服务（runtime services），它是对硬件最基础的抽象，为 OS 提供服务，当我们要在同一套硬件系统中运行不同的操作系统， 或者做硬件级别的虚拟化时， 就离不开Runtime 服务的支持。 SBI 就是 RISC-V 架构的 Runtime 规范。</li>
+  <li><strong>BootLoader</strong> 要干的事情包括文件系统引导、 网卡引导、 操作系统启动配置项设置、 操作系统加载等等。常见的 BootLoader 包括 GRUB，U-Boot，LinuxBoot 等。</li>
+  <li>而 <strong>BIOS/UEFI</strong> 的大多数实现， 都是 Loader、 Runtime、 BootLoader 三合一的，所以不能粗暴的认为 SBI 跟 BIOS/UEFI 有直接的可比性。 如果把 BIOS 当做一个泛化的术语使用， 而不是指某个具体实现的话， 那么可以认为 SBI 是 BIOS 的组成部分之一。</li>
+</ul>
+
+<blockquote>
+  <p><a href="https://riscv.org/wp-content/uploads/2019/12/Summit_bootflow.pdf">An Introduction to RISC-V Boot Flow</a><br />
+<a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></p>
+</blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
