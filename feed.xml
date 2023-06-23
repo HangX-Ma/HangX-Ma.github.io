@@ -1,6 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-22T15:55:31+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
-  <li>rCore 第一章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/main/ch1">Github</a> 中。</li>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-23T15:07:23+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 2</title><link href="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 2" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/rcore-note-ch2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html"><![CDATA[<ul>
+  <li>rCore 第二章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch2">Github</a> 中。</li>
+  <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-06-23-rcore-note-ch2/batchos-details.png" alt="Batch OS Details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Batch OS Details, rCore</u></font>
+</div>
+
+<h2 id="课后练习">课后练习</h2>
+
+<h3 id="编程题">编程题</h3>
+
+<h3 id="问答题">问答题</h3>
+
+<ol>
+  <li>
+    <p><em>函数调用与系统调用有何区别？</em></p>
+  </li>
+  <li>
+    <p><em>为了方便操作系统处理， Ｍ 态软件会将 S 态异常/中断委托给 S 态软件， 请指出有哪些寄存器记录了委托信息， rustsbi 委托了哪些异常/中断？（也可以直接给出寄存器的值）</em></p>
+  </li>
+  <li>
+    <p><em>如果操作系统以应用程序库的形式存在， 应用程序可以通过哪些方式破坏操作系统？</em></p>
+  </li>
+  <li>
+    <p><em>编译器/操作系统/处理器如何合作， 可采用哪些方法来保护操作系统不受应用程序的破坏？</em></p>
+  </li>
+  <li>
+    <p><em>RISC-V 处理器的S态特权指令有哪些， 其大致含义是什么， 有啥作用？</em></p>
+  </li>
+  <li>
+    <p><em>RISC-V 处理器在用户态执行特权指令后的硬件层面的处理过程是什么？</em></p>
+  </li>
+  <li>
+    <p><em>操作系统在完成 用户态 &lt;–&gt; 内核态 双向切换中的一般处理过程是什么？</em></p>
+  </li>
+  <li>
+    <p><em>程序陷入内核的原因有中断、 异常和陷入（系统调用）， 请问 riscv64 支持哪些中断/异常？ 如何判断进入内核是由于中断还是异常？ 描述陷入内核时的几个重要寄存器及其值。</em></p>
+  </li>
+  <li>
+    <p><em>在哪些情况下会出现特权级切换： 用户态 –&gt; 内核态， 以及内核态 –&gt; 用户态？</em></p>
+  </li>
+  <li>
+    <p><em>Trap 上下文的含义是啥？ 在本章的操作系统中， Trap 上下文的具体内容是啥？ 如果不进行 Trap 上下文的保存于恢复， 会出现什么情况？</em></p>
+  </li>
+</ol>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
+  <li>rCore 第一章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch1">Github</a> 中。</li>
   <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
   <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
   <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -1387,165 +1437,4 @@ Built target check2
 
 <ul>
   <li><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">Transmission Control Protocol - wikipedia</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。]]></summary></entry><entry><title type="html">私有化 Git Pages 源码仓库</title><link href="https://hangx-ma.github.io/2023/05/21/protect-source-data.html" rel="alternate" type="text/html" title="私有化 Git Pages 源码仓库" /><published>2023-05-21T00:00:00+08:00</published><updated>2023-05-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/21/protect-source-data</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/21/protect-source-data.html"><![CDATA[<h2 id="1-前言">1. 前言</h2>
-
-<p>被一件事儿恶心到了， 发现最开始发在博客园上的文章被爬到了一个不知名的小网站， 没有署名， 没有注明来源。 真的对这种侵犯个人权利的事情感到恶心， 至少引用和转载文章需要注明来源。 国内互联网的内容同质化严重， 优质内容也逐渐减少不是没有道理的。</p>
-
-<p>一气之下把 cnblogs 的内容都删掉了。</p>
-
-<p>后来又想了想什么地方造成了数据外泄， 毕竟 markdown 数据也是保存在自己的私有仓库中， 估计 content 部分的内容被精准地洗劫了， 而且图片是上传在博客园的服务器上的， 被爬走还能正常显示， 这和在 Git Pages 中用相对地址引用还有区别。</p>
-
-<p>感觉自己的 Git Pages 把源码都泄露在外头无异于数据裸奔， 另外 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 每次都需要自己去手动更新， 明明 jekyll-sitemap 插件能够将这件事情自动化处理， 于是产生了分离源码仓库和展示仓库的想法。</p>
-
-<h2 id="2-私有化与自动化部署">2. 私有化与自动化部署</h2>
-
-<p>实现的思路很清晰， 通过 Github Action 实现私有仓库的数据编译， 再将编译后的内容推送到目标公有仓库中， 所有的内容均对外不可见就完成了源码的私有化和部署的公有化。</p>
-
-<div class="mermaid" align="center">
-flowchart LR
-    p1(Private Repository)
-    p2(Git Action)
-    p3(Public Repository)
-    style p1 fill:#4F94CD,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    style p2 fill:#DCDCDC,stroke:#363636,color:#8B8B7A,color:#696969
-    style p3 fill:#FF6A6A,stroke:#363636,stroke-width:2px,color:#F5F5F5
-    p1 --&gt; p2
-    p2 --&gt;|Compile/Push| p3
-</div>
-
-<p>需要在自己的源码仓库中创建 <code class="language-plaintext highlighter-rouge">.github/workflows/jekyll.yml</code> 文件， 当然文件名可以自定义。 这样 Git Action 就可以识别这个配置文件的内容， 这个仓库就能执行配置文件定义的各个步骤。 在其中复制粘贴如下代码， 将其中带有提示性的大写的字符都替换为自己的配置。 但需要注意的是， 我们需要通过 <code class="language-plaintext highlighter-rouge">ssh-keygen -t rsa</code> 生成用于该仓库推送的一对密钥， 将私有密钥填写在私有仓库的 <code class="language-plaintext highlighter-rouge">Settings-&gt;Actions secrets and variables</code> 的 <code class="language-plaintext highlighter-rouge">Secrets</code> 中， 并将这个 <em>secret</em> 命名为 <code class="language-plaintext highlighter-rouge">DEPLOY_KEY</code>。 之后需要将公有密钥添加到 Github 账号的 <code class="language-plaintext highlighter-rouge">Settings-&gt;SSH and GPG keys</code> 中。</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># This workflow uses actions that are not certified by GitHub.</span>
-<span class="c1"># They are provided by a third-party and are governed by</span>
-<span class="c1"># separate terms of service, privacy policy, and support</span>
-<span class="c1"># documentation.</span>
-
-<span class="c1"># Sample workflow for building and deploying a Jekyll site to GitHub Pages</span>
-<span class="na">name</span><span class="pi">:</span> <span class="s">Deploy Jekyll site to Pages</span>
-
-<span class="na">on</span><span class="pi">:</span>
-  <span class="c1"># Runs on pushes targeting the default branch</span>
-  <span class="na">push</span><span class="pi">:</span>
-    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">YOUR_PRIVATE_REPO_SOURCE_BRANCH"</span><span class="pi">]</span>
-
-  <span class="c1"># Allows you to run this workflow manually from the Actions tab</span>
-  <span class="na">workflow_dispatch</span><span class="pi">:</span>
-
-<span class="c1"># Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages</span>
-<span class="na">permissions</span><span class="pi">:</span>
-  <span class="na">contents</span><span class="pi">:</span> <span class="s">read</span>
-  <span class="na">pages</span><span class="pi">:</span> <span class="s">write</span>
-  <span class="na">id-token</span><span class="pi">:</span> <span class="s">write</span>
-
-<span class="c1"># Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.</span>
-<span class="c1"># However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.</span>
-<span class="na">concurrency</span><span class="pi">:</span>
-  <span class="na">group</span><span class="pi">:</span> <span class="s2">"</span><span class="s">pages"</span>
-  <span class="na">cancel-in-progress</span><span class="pi">:</span> <span class="kc">false</span>
-
-<span class="na">env</span><span class="pi">:</span>
-  <span class="na">TZ</span><span class="pi">:</span> <span class="s">Asia/Shanghai</span>
-
-<span class="na">jobs</span><span class="pi">:</span>
-  <span class="c1"># Build job</span>
-  <span class="na">build</span><span class="pi">:</span>
-    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
-    <span class="na">steps</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v3</span>
-        <span class="na">with</span><span class="pi">:</span>
-           <span class="na">persist-credentials</span><span class="pi">:</span> <span class="kc">true</span> <span class="c1"># false 是用 personal token，true 是使用 GitHub token</span>
-           <span class="na">fetch-depth</span><span class="pi">:</span> <span class="m">0</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Setup Ruby</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">ruby/setup-ruby@55283cc23133118229fd3f97f9336ee23a179fcf</span> <span class="c1"># v1.146.0</span>
-        <span class="na">with</span><span class="pi">:</span>
-          <span class="na">ruby-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.1'</span> <span class="c1"># Not needed with a .ruby-version file</span>
-          <span class="na">bundler-cache</span><span class="pi">:</span> <span class="kc">true</span> <span class="c1"># runs 'bundle install' and caches installed gems automatically</span>
-          <span class="na">cache-version</span><span class="pi">:</span> <span class="m">0</span> <span class="c1"># Increment this number if you need to re-download cached gems</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Build with Jekyll</span>
-        <span class="c1"># Outputs to the './_site' directory by default</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="s">bundle exec jekyll build --baseurl "$" --config ./_config.yml</span>
-        <span class="na">env</span><span class="pi">:</span>
-          <span class="na">JEKYLL_ENV</span><span class="pi">:</span> <span class="s">production</span>
-          <span class="na">TZ</span><span class="pi">:</span> <span class="s">Asia/Shanghai</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload artifact</span>
-        <span class="c1"># Automatically uploads an artifact from the './_site' directory by default</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-pages-artifact@v1</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set SSH Environment</span>
-        <span class="na">env</span><span class="pi">:</span>
-          <span class="c1"># 1. Add this private key and title as DEPLOY_KEY in this repo -&gt; settings/secrets</span>
-          <span class="c1"># 2. Add corresponding public key and named as any text to the github page repo -&gt; settings/deploy keys</span>
-          <span class="na">DEPLOY_KEY</span><span class="pi">:</span> <span class="s">$</span>
-          <span class="na">USER_NAME</span><span class="pi">:</span> <span class="s">YOUR_USER_NAME</span>
-          <span class="na">USER_EMAIL</span><span class="pi">:</span> <span class="s">YOUR_USER_EMAIL</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
-          <span class="s">mkdir -p ~/.ssh/</span>
-          <span class="s">echo "$DEPLOY_KEY" | tr -d '\r' &gt; ~/.ssh/id_rsa</span>
-          <span class="s">chmod 600 ~/.ssh/id_rsa</span>
-          <span class="s">chmod 700 ~/.ssh &amp;&amp; chmod 600 ~/.ssh/*</span>
-          <span class="s">ssh-keyscan github.com &gt;&gt; ~/.ssh/known_hosts</span>
-          <span class="s">git config --global user.name $USER_NAME</span>
-          <span class="s">git config --global user.email $USER_EMAIL</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Commit and Push to Git Pages</span>
-        <span class="na">env</span><span class="pi">:</span>
-          <span class="na">USER_NAME</span><span class="pi">:</span> <span class="s">YOUR_USER_NAME</span>
-          <span class="na">USER_EMAIL</span><span class="pi">:</span> <span class="s">YOUR_USER_EMAIL</span>
-        <span class="na">working-directory</span><span class="pi">:</span> <span class="s">./</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span> 
-          <span class="s">git clone -b PUBLIC_REPOSITORY_BRANCH git@github.com:YOUR_USER_NAME/YOUR_USER_NAME.github.io.git gitpage_repo</span>
-          <span class="s">cd gitpage_repo</span>
-          <span class="s">cp robots.txt ../_site/robots.txt</span>
-          <span class="s">rm -rf *</span>
-          <span class="s">cp -r ../_site/* .</span>
-          <span class="s">git add -A</span>
-          <span class="s">git -c user.name="$USER_NAME" -c user.email="$USER_EMAIL" commit -am "Site Updated: `date +'%Y-%m-%d %H:%M:%S'`" </span>
-          <span class="s">git push origin master -f -q</span>
-</code></pre></div></div>
-
-<p>简化了个人摸索这个自动化配置的过程， 若对以上配置有所疑惑之处， 可以参考以下文章加深个人理解。 如有问题欢迎留言询问~</p>
-
-<blockquote>
-  <p><a href="https://juejin.cn/post/7120474763910676488">GitHub 私有仓库免费开启 GitHub Pages 的可行性方案</a><br />
-<a href="https://babybluue.github.io/posts/89195a6e">通过Github Action自动部署Hexo</a><br />
-<a href="https://gist.github.com/Half9000/7d83d7f8dea012926dc7d2203a1f169e">Hexo Deploy with Github Actions workflow</a><br />
-<a href="https://printempw.github.io/use-github-actions-to-deploy-hexo-blog/">使用 GitHub Actions 自动部署 Hexo 博客</a><br />
-<a href="https://blog.csdn.net/shiwanghualuo/article/details/128514693">github actions中如何判断仓库是否有变更</a></p>
-</blockquote>
-
-<h2 id="3-爬虫与目录结构保护">3. 爬虫与目录结构保护</h2>
-
-<p>更改网站的 <code class="language-plaintext highlighter-rouge">robots.txt</code> 为如下形式</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">layout</span><span class="pi">:</span> <span class="kc">null</span>
-<span class="nn">---</span>
-
-<span class="na">User-agent</span><span class="pi">:</span> <span class="err">*</span>
-
-<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/assets/</span>   <span class="c1"># /assets/ 是常规资源目录，不怕暴露路径</span>
-<span class="na">Disallow</span><span class="pi">:</span> <span class="s">/norobots/</span> <span class="c1"># 零碎敏感文件、目录等放置在此</span>
-
-<span class="na">Sitemap</span><span class="pi">:</span> <span class="s">https://hangx-ma.github.io/sitemap.xml</span>
-
-</code></pre></div></div>
-
-<p>出于安全考虑，站点的某些目录结构，譬如 <code class="language-plaintext highlighter-rouge">/norobots/</code>， 不希望被外部访问， 所以需要使用重定向来保护目录， 可以使用 GitHub 推荐的 Jekyll 重定向插件 <a href="https://github.com/jekyll/jekyll-redirect-from">Jekyll Redirect From</a>。</p>
-
-<p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem "jekyll-redirect-from"
-</code></pre></div></div>
-
-<p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">redirect_from</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s">/norobots/</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<p>具体的目录可以更具自己站点的实际情况定义， 按照上述定义， <code class="language-plaintext highlighter-rouge">访问 {SITE_URL}/norobots/</code> 会直接返回 404 页面， 从而保护了敏感目录。</p>
-
-<blockquote>
-  <p><a href="https://cotes.page/posts/the-seo-to-jekyll/">Jekyll 的 SEO 优化</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="Git" /><summary type="html"><![CDATA[通过私有化 Git Pages 源码仓库， 并自动化推送和部署公有 Git Pages 仓库以实现源数据保护。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab2: the TCP receiver 的思路与实践难点。]]></summary></entry></feed>

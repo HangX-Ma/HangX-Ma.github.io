@@ -12,11 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Home - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>rCore OS Note - Chapter 2 - 一只豆腐</title>
 
-<meta name="description" content="Code, life and embedded system...
-">
-<link rel="canonical" href="https://hangx-ma.github.io/blog/"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -266,125 +265,214 @@
 </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
       <div class="header__title">
-        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
 " href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
-        <ul><li class="navigation__item navigation__item--active"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
-</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
-
-              <div class="col-aside d-print-none js-col-aside"></div>
-
-              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
-
-<!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="HangX-Ma"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/23/rcore-note-ch2.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 2</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/06/23/rcore-note-ch2.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:linear-gradient(135deg, rgba(34, 139, 87 , .4), rgba(90, 60, 139, .4)),url(/assets/images/bg/rcore/keyboard.jpg);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=rust">rust</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/19/rcore-note-ch1.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 1</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第一章：应用程序与基本执行环境， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/06/19/rcore-note-ch1.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 19, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s19srcore-note-ch1.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-19T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/16/rust-async.html"><h2 itemprop="headline" class="item__header">Async Programming in Rust: Futures, Async/Await</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。</div><p><a href="/2023/06/16/rust-async.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 16, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s16srust-async.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-16T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/11/rust-channel.html"><h2 itemprop="headline" class="item__header">Async Programming in Rust： Channel</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。</div><p><a href="/2023/06/11/rust-channel.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 11, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s11srust-channel.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-11T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/06/net-mdio.html"><h2 itemprop="headline" class="item__header">MDIO (Management Data Input/Output)</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。</div><p><a href="/2023/06/06/net-mdio.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Network">Network</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Linux">Linux</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 06, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s06snet-mdio.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-06T00:00:00+08:00">
-    <meta itemprop="keywords" content="Network,Linux"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/05/31/cs144-lab6.html"><h2 itemprop="headline" class="item__header">cs144-sp23, Lab Checkpoint 6: putting it all together</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。</div><p><a href="/2023/05/31/cs144-lab6.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=cs144">cs144</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 31, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s31scs144-lab6.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-31T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs144"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/05/30/cs144-lab5.html"><h2 itemprop="headline" class="item__header">cs144-sp23, Lab Checkpoint 5: building an IP router</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。</div><p><a href="/2023/05/30/cs144-lab5.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=cs144">cs144</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 30, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s30scs144-lab5.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-30T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs144"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/05/27/cs144-lab4.html"><h2 itemprop="headline" class="item__header">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。</div><p><a href="/2023/05/27/cs144-lab4.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=cs144">cs144</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 27, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s27scs144-lab4.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-27T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs144"></div>
-      </article></div>
-</div><div class="layout--home"><div class="pagination"><p>16 post articles, 2 pages.</p>
-    <div class="pagination__menu">
-      <ul class="menu menu--nowrap"><li><div class="button button--secondary button--circle disabled">
-            <i class="fas fa-angle-left"></i>
-          </div></li><li>
-              <div class="button button--primary button--circle focus"><span>1</span></div>
-            </li><li>
-                <a class="button button--secondary button--circle" href="/blog/page2"><span>2</span></a>
-              </li><li><a class="button button--secondary button--circle" href="/blog/page2">
-            <i class="fas fa-angle-right"></i>
-          </a></li></ul>
-    </div>
-  </div></div>
-<script>/*(function () {
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 666 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 2 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
 
-})();*/
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 2"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
+    <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><ul>
+  <li>rCore 第二章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch2">Github</a> 中。</li>
+  <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+  <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-06-23-rcore-note-ch2/batchos-details.png" alt="Batch OS Details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Batch OS Details, rCore</u></font>
+</div>
+
+<h2 id="课后练习">课后练习</h2>
+
+<h3 id="编程题">编程题</h3>
+
+<h3 id="问答题">问答题</h3>
+
+<ol>
+  <li>
+    <p><em>函数调用与系统调用有何区别？</em></p>
+  </li>
+  <li>
+    <p><em>为了方便操作系统处理， Ｍ 态软件会将 S 态异常/中断委托给 S 态软件， 请指出有哪些寄存器记录了委托信息， rustsbi 委托了哪些异常/中断？（也可以直接给出寄存器的值）</em></p>
+  </li>
+  <li>
+    <p><em>如果操作系统以应用程序库的形式存在， 应用程序可以通过哪些方式破坏操作系统？</em></p>
+  </li>
+  <li>
+    <p><em>编译器/操作系统/处理器如何合作， 可采用哪些方法来保护操作系统不受应用程序的破坏？</em></p>
+  </li>
+  <li>
+    <p><em>RISC-V 处理器的S态特权指令有哪些， 其大致含义是什么， 有啥作用？</em></p>
+  </li>
+  <li>
+    <p><em>RISC-V 处理器在用户态执行特权指令后的硬件层面的处理过程是什么？</em></p>
+  </li>
+  <li>
+    <p><em>操作系统在完成 用户态 &lt;–&gt; 内核态 双向切换中的一般处理过程是什么？</em></p>
+  </li>
+  <li>
+    <p><em>程序陷入内核的原因有中断、 异常和陷入（系统调用）， 请问 riscv64 支持哪些中断/异常？ 如何判断进入内核是由于中断还是异常？ 描述陷入内核时的几个重要寄存器及其值。</em></p>
+  </li>
+  <li>
+    <p><em>在哪些情况下会出现特权级切换： 用户态 –&gt; 内核态， 以及内核态 –&gt; 用户态？</em></p>
+  </li>
+  <li>
+    <p><em>Trap 上下文的含义是啥？ 在本章的操作系统中， Trap 上下文的具体内容是啥？ 如果不进行 Trap 上下文的保存于恢复， 会出现什么情况？</em></p>
+  </li>
+</ol>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
 </script>
 
+<script async src="https://static.addtoany.com/menu/page.js"></script>
 
-</div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-06-23T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/06/19/rcore-note-ch1.html">rCore OS Note - Chapter 1</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/06/23/rcore-note-ch2',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
 
 <!-- end custom main bottom snippet -->
 </div>
@@ -941,6 +1029,68 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 
 })();*/
 </script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
   window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
     var $canvas = null, $this = null, _ctx = null, _text = '';
     $('.language-chart').each(function(){
@@ -1047,12 +1197,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      $('.js-pageview').each(function() {
-        var $this = $(this);
-        var key = $this.attr('data-page-key');
-        pageview.get(key, function(view) {
-          $this.attr('itemprop', 'userInteractionCount').attr('content', view).text(view);
-        });
+      var key =   's2023s06s23srcore-note-ch2.html';
+      var title = "rCore OS Note - Chapter 2";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s06s23srcore-note-ch2.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
@@ -1112,7 +1260,43 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 		}
 		return actionMsg;
 	}
-})();</script>
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];
