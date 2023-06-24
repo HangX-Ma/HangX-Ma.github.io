@@ -12,9 +12,9 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>vscode(win): vim keyboard mapping - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>VSCodeVim 配置指南 - 一只豆腐</title>
 
-<meta name="description" content="参考了知乎博主 云崖君 的 vscode + vim 全键盘操作高效搭配方案， 仅用以记录个人使用配置， 内容较为简略。 配置文件可见 setting.json 以及 keybindings.json。">
+<meta name="description" content="个人定制 VSCodeVim 的配置， 配置文件可见 setting.json 以及 keybindings.json， 鉴于目前 VSCodeVim 尚且不支持在 .vimrc 中进行设置 （仅支持 keymapping）， 还是需要使用 keybindings.json 配置键位映射。 而且有些 VSCode...">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/03/14/vsvim-keyborad-setting.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -282,7 +282,7 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>vscode(win): vim keyboard mapping</h1></header></div><meta itemprop="headline" content="vscode(win): vim keyboard mapping"><div class="article__info clearfix"><ul class="left-col menu"><li>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>VSCodeVim 配置指南</h1></header></div><meta itemprop="headline" content="VSCodeVim 配置指南"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Tool">Tool</a>
             </li><li>
@@ -293,129 +293,46 @@
                 href="/blog/archive.html?tag=vim">vim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 14, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 13910 words </span>
+                <span> Total 4683 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 39 mins </span>
+                <span> About 14 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s14svsvim-keyborad-setting.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-14T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,vscode,vim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>参考了知乎博主 <strong>云崖君</strong> 的 <a href="https://zhuanlan.zhihu.com/p/430603620#circle=on">vscode + vim 全键盘操作高效搭配方案</a>， 仅用以记录个人使用配置， 内容较为简略。 配置文件可见 <code class="language-plaintext highlighter-rouge">setting.json</code> 以及 <code class="language-plaintext highlighter-rouge">keybindings.json</code>。</p>
+<div class="article__content" itemprop="articleBody"><p>个人定制 VSCodeVim 的配置， 配置文件可见 <code class="language-plaintext highlighter-rouge">setting.json</code> 以及 <code class="language-plaintext highlighter-rouge">keybindings.json</code>， 鉴于目前 VSCodeVim 尚且不支持在 <code class="language-plaintext highlighter-rouge">.vimrc</code> 中进行设置 （仅支持 keymapping）， 还是需要使用 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 配置键位映射。 而且有些 VSCode 特有的界面也是需要通过这种方式实现的。 vscode 热键映射命令可以在 <code class="language-plaintext highlighter-rouge">Preference: Open Keyboard Shortcuts</code> 中复制命令的 ID 即可获得。</p>
 
 <!--more-->
 <p><a href="https://github.com/HangX-Ma/dotfiles/blob/main/vscode/vim/settings.json" class="button button--outline-primary button--pill">setting.json</a> <a href="https://github.com/HangX-Ma/dotfiles/blob/main/vscode/vim/keybindings.json" class="button button--outline-primary button--pill">keybindings.json</a></p>
 
-<h2 id="1-指令总览">1. 指令总览</h2>
+<h2 id="1-vim-基础指令说明">1. vim 基础指令说明</h2>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>------------ 资源管理 ------------
-j     ： 向下移动
-k     ： 向上移动
-space ： 打开文件或目录
-​
-新增：​
-alt+x ： 折叠文件夹
-i     ： 新增文件
-o     ： 新增目录
-r     ： 刷新目录
-a     ： 重命名文件或目录
-d     ： 删除文件或目录
-x     ： 剪切文件或目录
-y     ： 复制文件或目录
-p     ： 粘贴文件或目录
+<p>有几个 vim 基础指令之前一直不是很明白或者忘了， 需要特别记录一下使用功能。</p>
 
------------- 全局配置 ------------
-ctrl + g c ： 显示命令面板
-ctrl + g s ： 打开设置页面
-ctrl + g p ： 工作空间文件快速打开
-ctrl + g m ： 打开一个目录
-ctrl + g f ： 打开一个文件
-ctrl + g h ： 打开最近记录
-ctrl + g n ： 新建vscode实例
-ctrl + g q ： 关闭vscode示例
+<h3 id="11-operators">1.1 Operators</h3>
 
-ctrl + f n ： 新建文件
-ctrl + f o ： 打开文件
-ctrl + f e ： 另存为文件
-ctrl + f s ： 保存文件
-ctrl + f w ： 保存所有文件
-ctrl + f q ： 关闭文件
-ctrl + f a ： 关闭所有文件
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">~</code>: 转换大小写。</li>
+  <li><code class="language-plaintext highlighter-rouge">gu</code>： 转为小写。</li>
+  <li><code class="language-plaintext highlighter-rouge">gU</code>： 转为大写。</li>
+</ul>
 
-ctrl + n [ ： 切换侧边栏显示状态
-ctrl + n 1 ： 显示文件资源管理器
-ctrl + n 2 ： 显示全局搜索
-ctrl + n 3 ： 显示版本控制
-ctrl + n 4 ： 显示debug
-ctrl + n 5 ： 显示插件商店
-ctrl + n 6 ： 显示TODO Tree
-ctrl + n 7 ： 显示Bookmark
-​ctrl + n 7 ： 显示cnblog account
+<h3 id="12-motions">1.2 Motions</h3>
 
-ctrl + p [ ： 切换面板显示状态
-ctrl + p 1 ： 显示问题
-ctrl + p 2 ： 显示输出
-ctrl + p 3 ： 显示终端
-ctrl + p 4 ： 显示调试控制台
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ge</code>： <code class="language-plaintext highlighter-rouge">e</code> 跳转到单词的最后一个字符， <code class="language-plaintext highlighter-rouge">ge</code> 的作用是跳转到上一个单词的最后一个字符。</li>
+  <li><code class="language-plaintext highlighter-rouge">aw</code>： “a word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 包括它边上的空格。</li>
+  <li><code class="language-plaintext highlighter-rouge">iw</code>： “in word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 但不包括它边上的空格。</li>
+</ul>
 
-ctrl + q ：关闭当前选项卡或分屏
-ctrl + e ：聚焦在第一个选项卡中
-ctrl + , ：切换到上一个选项卡
-ctrl + . ：切换到下一个选项卡
-​
-ctrl + w s ：拆分一个上下分屏
-ctrl + w v ：拆分一个左右分屏
-​
-ctrl + w k ：将光标向上移动1屏
-ctrl + w j ：将光标向下移动1屏
-​
-ctrl + w h ：将光标向左移动1屏
-ctrl + w l ：将光标向右移动1屏
+<h3 id="13-quick-editor">1.3 Quick Editor</h3>
 
-ctrl + h ： 触发帮助提示
-ctrl + j ： 触发参数提示
-ctrl + k ： 触发建议提示
-ctrl + n ： 移动到下一个建议
-ctrl + p ： 移动到上一个建议
-tab      ： 选择下一个建议
-enter    ： 选择当前建议
-
-zz       ： 切换代码折叠（原生vim的zz不是切换折叠）
-<span class="nt">&lt;c-n&gt;</span>    ： 取消搜索高亮
-g[       ： 跳转到上一个问题
-g]       ： 跳转到下一个问题
-
-ctrl + alt + l ： 格式化代码（个人习惯）
- ​
-ctrl + = ： 放大字体
-ctrl + - ： 缩小字体
-
-ctrl + [ ： 快速缩进
-ctrl + ] ： 快速退格
-
-<span class="gs">** 编辑模式下生效 **</span>
-alt + j  ： 光标上移
-alt + k  ： 光标下移
-alt + h  ： 光标左移
-alt + l  ： 光标右移
-
-alt + ,  ： Go backward
-alt + .  ： Go forward
-
-<span class="gs">** 内嵌指令 **</span>
-<span class="nt">&lt;leader&gt;&lt;leader&gt;</span>s<span class="nt">&lt;char&gt;</span> ： 快速定位
-
-ds<span class="nt">&lt;existing&gt;</span>            ： 删除符号
-cs<span class="nt">&lt;existing&gt;&lt;desired&gt;</span>   ：替换符号
-
-gcc ：行注释
-gCC ：块注释
-
-gd ： 跳转到函数定义或引用处，搭配 ctrl+i/ctrl+o 查看源码很方便
-gh ： 触发帮助提示
-gb ： 开启多光标模式，选中和当前单词相同的单词
-</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">&lt;C-i&gt;</code>： 回到上一个编辑点。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;C-o&gt;</code>： 前进到下一个编辑点。</li>
+</ul>
 
 <h2 id="2-基础配置项-settingsjson">2. 基础配置项 (settings.json)</h2>
 
@@ -427,83 +344,21 @@ g[       ： 跳转到上一个问题
 g]       ： 跳转到下一个问题
 </code></pre></div></div>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">/*</span><span class="w"> </span><span class="err">setting.json</span><span class="w"> </span><span class="err">*/</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">绑定vim前导键</span><span class="w">
-    </span><span class="nl">"vim.leader"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;space&gt;"</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">启用easymotion插件</span><span class="w">
-    </span><span class="nl">"vim.easymotion"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">启用系统粘贴板作为vim寄存器</span><span class="w">
-    </span><span class="nl">"vim.useSystemClipboard"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">由vim接管ctrl+any的按键，而不是vscode</span><span class="w">
-    </span><span class="nl">"vim.useCtrlKeys"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">突出显示与当前搜索匹配的所有文本</span><span class="w">
-    </span><span class="nl">"vim.hlsearch"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">普通模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.normalModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">{</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">toggle</span><span class="w"> </span><span class="err">Fold</span><span class="w">
-        </span><span class="nl">"before"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"z"</span><span class="p">,</span><span class="w">
-            </span><span class="s2">"z"</span><span class="p">,</span><span class="w">
-        </span><span class="p">],</span><span class="w">
-        </span><span class="nl">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"editor.toggleFold"</span><span class="w">
-        </span><span class="p">]</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="p">{</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">cancel</span><span class="w"> </span><span class="err">highlight</span><span class="w">
-            </span><span class="nl">"before"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-                </span><span class="s2">"&lt;C-n&gt;"</span><span class="w">
-            </span><span class="p">],</span><span class="w">
-            </span><span class="nl">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-                </span><span class="s2">":nohl"</span><span class="w">
-            </span><span class="p">]</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="p">{</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">previous</span><span class="w"> </span><span class="err">problem</span><span class="w"> 
-        </span><span class="nl">"before"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"g"</span><span class="p">,</span><span class="w">
-            </span><span class="s2">"["</span><span class="p">,</span><span class="w">
-        </span><span class="p">],</span><span class="w">
-        </span><span class="nl">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"editor.action.marker.prevInFiles"</span><span class="w">
-        </span><span class="p">]</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="p">{</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">next</span><span class="w"> </span><span class="err">problem</span><span class="w"> 
-        </span><span class="nl">"before"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"g"</span><span class="p">,</span><span class="w">
-            </span><span class="s2">"]"</span><span class="p">,</span><span class="w">
-        </span><span class="p">],</span><span class="w">
-        </span><span class="nl">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="s2">"editor.action.marker.nextInFiles"</span><span class="w">
-        </span><span class="p">]</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-    </span><span class="p">]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">插入模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.insertModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">命令模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.commandLineModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">可视模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.operatorPendingModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">下面定义的按键将交由vscode进行处理，而不是vscode-vim插件</span><span class="w">
-    </span><span class="nl">"vim.handleKeys"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"&lt;C-a&gt;"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"&lt;C-f&gt;"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
 <h3 id="22-热键配置区域说明">2.2 热键配置区域说明</h3>
 
-<p>基本上vim的所有模式你都可以配置在下面的4个选项中：</p>
+<p>基本上 vim 的所有模式都可以配置在下面的 4 个选项中。 用过 Makefile 应该知道 Recursive Parse 和 NonRecursive Parse， 一般来说用非递归模式可以避免很多奇怪的错误， 推荐用非递归模式。</p>
 
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">普通模式下的非递归按键绑定</span><span class="w">
     </span><span class="nl">"vim.normalModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">插入模式下的非递归按键绑定</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">插入模式下的递归按键绑定</span><span class="w">
     </span><span class="nl">"vim.insertModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
     </span><span class="err">//</span><span class="w"> </span><span class="err">命令模式下的非递归按键绑定</span><span class="w">
     </span><span class="nl">"vim.commandLineModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">可视模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.operatorPendingModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">可视模式下的递归按键绑定</span><span class="w">
+    </span><span class="nl">"vim.visualModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
 </span></code></pre></div></div>
 
-<h2 id="3-自用热键方案-keybindingsjson">3. 自用热键方案 (keybindings.json)</h2>
+<h2 id="3-自定义热键方案-keybindingsjson">3. 自定义热键方案 (keybindings.json)</h2>
 
 <p><strong>vim+vscode 全键盘热键方案</strong> - 对于非代码编辑区的热键将其定义在 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 中，对于代码编辑区且属于 vim 的热键将其定义在 <code class="language-plaintext highlighter-rouge">settings.json</code> 文件中。</p>
 
@@ -521,49 +376,6 @@ g]       ： 跳转到下一个问题
 </span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">q</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">关闭vscode示例</span><span class="w">
 </span></code></pre></div></div>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">global</span><span class="w"> </span><span class="err">command</span><span class="w"> </span><span class="err">---</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示命令面板</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.showCommands"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">打开设置页面</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g s"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.openSettings"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">工作空间文件快速打开</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g p"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.quickOpen"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">打开一个目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g m"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.openFolder"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">打开一个文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g f"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.openFile"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">打开最近记录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g h"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.openRecent"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">新建vscode实例</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g n"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.newWindow"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">关闭vscode实例</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+g q"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.closeWindow"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
 <h4 id="312-文件命令定义">3.1.2 文件命令定义</h4>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + f n ： 新建文件
@@ -574,44 +386,6 @@ ctrl + f w ： 保存所有文件
 ctrl + f q ： 关闭文件
 ctrl + f a ： 关闭所有文件
 </code></pre></div></div>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">file</span><span class="w"> </span><span class="err">command</span><span class="w"> </span><span class="err">---</span><span class="w"> 
-    </span><span class="err">//</span><span class="w"> </span><span class="err">新建文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f n"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"welcome.showNewFileEntries"</span><span class="p">,</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">打开文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f o"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.openFileFolder"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">另存为文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f e"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.saveAs"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">保存文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f s"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.save"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">保存所有文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f w"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.files.saveAll"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">关闭文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f q"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.closeActiveEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">关闭所有文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+f a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.closeAllEditors"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
 
 <h4 id="313-侧边栏命令定义">3.1.3 侧边栏命令定义</h4>
 
@@ -626,57 +400,6 @@ ctrl + n 7 ： 显示Bookmark
 ​ctrl + n 7 ： 显示cnblog account
 </code></pre></div></div>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">side</span><span class="w"> </span><span class="err">bar</span><span class="w"> </span><span class="err">command</span><span class="w"> </span><span class="err">---</span><span class="w"> 
-    </span><span class="err">//</span><span class="w"> </span><span class="err">切换侧边栏显示状态</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n ["</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.toggleSidebarVisibility"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示文件资源管理器</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 1"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.files.action.focusFilesExplorer"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示全局搜索</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 2"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.replaceInFiles"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示版本控制</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 3"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.view.scm"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.scm.active"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示debug</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 4"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.view.debug"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"viewContainer.workbench.view.debug.enabled"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示插件商店</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 5"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.view.extensions"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"viewContainer.workbench.view.extensions.enabled"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示TODO</span><span class="w"> </span><span class="err">Tree</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 6"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"todo-tree-view.focus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示Bookmark</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 7"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bookmarksExplorer.focus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">cnblogs-account</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n 8"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cnblogs-account.focus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
 <h4 id="314-面板命令定义">3.1.4 面板命令定义</h4>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + p [ ： 切换面板显示状态
@@ -685,37 +408,6 @@ ctrl + p 2 ： 显示输出
 ctrl + p 3 ： 显示终端
 ctrl + p 4 ： 显示调试控制台
 </code></pre></div></div>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">panel</span><span class="w"> </span><span class="err">command</span><span class="w"> </span><span class="err">---</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">切换面板显示状态</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p ["</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.togglePanel"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示问题</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p 1"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.panel.markers.view.focus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示输出</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p 2"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.output.toggleOutput"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.panel.output.active"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示终端</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p 3"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.terminal.toggleTerminal"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"terminal.active"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">显示调试控制台</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p 4"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.debug.action.toggleRepl"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.panel.repl.view.active"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
 
 <h4 id="315-编辑区命令定义">3.1.5 编辑区命令定义</h4>
 
@@ -733,59 +425,6 @@ ctrl + w j ：将光标向下移动1屏
 ctrl + w h ：将光标向左移动1屏
 ctrl + w l ：将光标向右移动1屏
 </code></pre></div></div>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">editor</span><span class="w"> </span><span class="err">command</span><span class="w"> </span><span class="err">---</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">关闭当前选项卡或分屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+q"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.closeActiveEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">聚集在第一个选项卡中</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+e"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.focusFirstEditorGroup"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">切换到上一个选项卡</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+,"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.previousEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">切换到下一个选项卡</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.nextEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">拆分一个上下分屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w s"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.splitEditorDown"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">拆分一个左右分屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.splitEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">将光标向上动</span><span class="mi">0</span><span class="err">屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w k"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.focusAboveGroup"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">将光标向下动</span><span class="mi">0</span><span class="err">屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w j"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.focusBelowGroup"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">将光标向左移动</span><span class="mi">0</span><span class="err">屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w h"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.focusLeftGroup"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">将光标向右移动</span><span class="mi">0</span><span class="err">屏</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+w l"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.focusRightGroup"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
 
 <h4 id="316-代码编辑区命令定义">3.1.6 代码编辑区命令定义</h4>
 
@@ -816,199 +455,11 @@ alt + ,  ： Go backward
 alt + .  ： Go forward
 </code></pre></div></div>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">coding</span><span class="w"> </span><span class="err">command</span><span class="w">  </span><span class="err">---</span><span class="w"> 
-    </span><span class="err">//</span><span class="w"> </span><span class="err">触发帮助提示</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+h"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.showHover"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">触发参数提示</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+j"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.triggerParameterHints"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorHasSignatureHelpProvider &amp;&amp; editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+j"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"closeParameterHints"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorFocus &amp;&amp; parameterHintsVisible"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">触发建议提示</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+k"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.triggerSuggest"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorHasCompletionItemProvider &amp;&amp; textInputFocus &amp;&amp; !editorReadonly"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+k"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hideSuggestWidget"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"suggestWidgetVisible &amp;&amp; textInputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">移动到下一个建议</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+n"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selectNextSuggestion"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"suggestWidgetMultipleSuggestions &amp;&amp; suggestWidgetVisible &amp;&amp; textInputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">移动到上一个建议</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+p"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selectPrevSuggestion"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"suggestWidgetMultipleSuggestions &amp;&amp; suggestWidgetVisible &amp;&amp; textInputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">快速修正</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.quickFix"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorHasCodeActionsProvider &amp;&amp; editorTextFocus &amp;&amp; !editorReadonly"</span><span class="p">,</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">格式化代码</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+alt+l"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.formatDocument"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorHasDocumentFormattingProvider &amp;&amp; editorTextFocus &amp;&amp; !editorReadonly &amp;&amp; !inCompositeEditor"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">放大字体</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+="</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.fontZoomIn"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">缩小字体</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+-"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.fontZoomOut"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">快速缩进</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+["</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tab"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">快速退格</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+]"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"outdent"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">编辑模式</span><span class="w"> </span><span class="err">-</span><span class="w"> </span><span class="err">光标下、上、左、右移</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+j"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cursorDown"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+k"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cursorUp"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+h"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cursorLeft"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+l"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cursorRight"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">Go</span><span class="w"> </span><span class="err">back/forward</span><span class="w">
-    </span><span class="p">{</span><span class="w"> 
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+,"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.navigateBack"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"canNavigateBack"</span><span class="w"> 
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w"> 
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.action.navigateForward"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"canNavigateForward"</span><span class="w"> 
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
 <h4 id="317-取消-vim-与-vscode-一些指令">3.1.7 取消 vim 与 vscode 一些指令</h4>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl+a    : 全选， 非 INSERT 模式不生效
 ctrl+c(v) : 复制（粘贴）， 非 INSERT 模式不生效
 </code></pre></div></div>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">取消一些vim插件的额外功能</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-a&gt; &amp;&amp; !inDebugRepl &amp;&amp; vim.mode != 'Insert'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+ctrl+down"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+alt+down"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; !inDebugRepl"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+ctrl+up"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+alt+up"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; !inDebugRepl"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.overrideCopy &amp;&amp; vim.use&lt;D-c&gt; &amp;&amp; !inDebugRepl"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-v&gt; &amp;&amp; vim.mode == ''CommandlineInProgress' !inDebugRepl' || editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-v&gt; &amp;&amp; !inDebugRepl &amp;&amp; vim.mode == 'SearchInProgressMode'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+d"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+d"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-d&gt; &amp;&amp; !inDebugRepl"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+left"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+left"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-left&gt; &amp;&amp; !inDebugRepl &amp;&amp; vim.mode != 'Insert'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+right"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-extension.vim_cmd+right"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editorTextFocus &amp;&amp; vim.active &amp;&amp; vim.use&lt;D-right&gt; &amp;&amp; !inDebugRepl &amp;&amp; vim.mode != 'Insert'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">取消或更改一些vscode键位</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">ctrl+a全选功能在非INSERT模式下不生效</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"editor.action.selectAll"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vim.mode != 'Normal' &amp;&amp; vim.mode != 'Visual' &amp;&amp; vim.mode != 'VisualLine' &amp;&amp; vim.mode != 'VisualBlock' &amp;&amp; vim.mode != 'CommandlineInProgress'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-editor.action.selectAll"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">ctrl+c或者cmd+v功能在非INSERT模式下不生效</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-editor.action.clipboardCopyAction"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-editor.action.clipboardPasteAction"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-execCopy"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+c"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"execCopy"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vim.mode != 'Normal' &amp;&amp; vim.mode != 'Visual' &amp;&amp; vim.mode != 'VisualLine' &amp;&amp; vim.mode != 'VisualBlock' &amp;&amp; vim.mode != 'CommandlineInProgress'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-execPaste"</span><span class="p">,</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ctrl+v"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"execPaste"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vim.mode != 'Normal' &amp;&amp; vim.mode != 'Visual' &amp;&amp; vim.mode != 'VisualLine' &amp;&amp; vim.mode != 'VisualBlock' &amp;&amp; vim.mode != 'CommandlineInProgress'"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
 
 <h2 id="4-资源管理配置">4. 资源管理配置</h2>
 
@@ -1028,64 +479,7 @@ y     ： 复制文件或目录
 p     ： 粘贴文件或目录
 </code></pre></div></div>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">---</span><span class="w"> </span><span class="err">资源管理器中对文件或目录的操作</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">折叠资源管理器文件夹</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alt+x"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.files.action.collapseExplorerFolders"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">新建文件</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"i"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorer.newFile"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">新建目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"o"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorer.newFolder"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">刷新资源管理器</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"r"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workbench.files.action.refreshFilesExplorer"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">重命名文件或目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"renameFile"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">删除文件或目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"d"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"deleteFile"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">" explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus "</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">剪切文件或目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"x"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"filesExplorer.cut"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">复制文件或目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"y"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"filesExplorer.copy"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceIsRoot &amp;&amp; !inputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">粘贴文件或目录</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"p"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"filesExplorer.paste"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"when"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorerViewletVisible &amp;&amp; filesExplorerFocus &amp;&amp; !explorerResourceReadonly &amp;&amp; !inputFocus"</span><span class="w">
-    </span><span class="p">}</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
-<h2 id="5-插件描述">5. 插件描述</h2>
+<h2 id="5-插件与定制化">5. 插件与定制化</h2>
 
 <h3 id="51-输入法切换">5.1 输入法切换</h3>
 
@@ -1118,42 +512,112 @@ p     ： 粘贴文件或目录
   </li>
 </ol>
 
-<h3 id="52-内置插件">5.2 内置插件</h3>
+<h3 id="52-emulated-plugins">5.2 Emulated Plugins</h3>
+
+<p>这里记录几个比较常用的 VSCodeVim 内置插件， 有些插件的功能感觉累赘就没用它了。</p>
+
+<dl>
+  <dt>vim-esaymotion</dt>
+  <dd>基于 <a href="https://github.com/easymotion/vim-easymotion">vim-easymotion</a> 它的作用是通过以下的按键组合， 你可以快速的定位到任何你想修改的行中， 这里就只列出几个常用的。</dd>
+</dl>
 
 <ul>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">vim-esaymotion</code>： 它的作用是通过以下的按键组合，你可以快速的定位到任何你想修改的行中。</p>
-
-    <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;leader&gt;&lt;leader&gt;</span>s<span class="nt">&lt;char&gt;</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">vim-surround</code>： 修改、或者删除符号。</p>
-
-    <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ds<span class="nt">&lt;existing&gt;</span>
-  cs<span class="nt">&lt;existing&gt;&lt;desired&gt;</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">vim-commentary</code>： 该插件能够快速的利用键盘进行行或者块的注释。</p>
-
-    <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  gcc ：行注释
-  gCC ：块注释
-</code></pre></div>    </div>
-  </li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;s&lt;char&gt;</code>： 在当前文件查找 <code class="language-plaintext highlighter-rouge">&lt;char&gt;</code> 字符。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;f&lt;char&gt;</code>： 在当前文件向前查找 <code class="language-plaintext highlighter-rouge">&lt;char&gt;</code> 字符。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;F&lt;char&gt;</code>： 在当前文件向后查找 <code class="language-plaintext highlighter-rouge">&lt;char&gt;</code> 字符。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;t&lt;char&gt;</code>： 在当前文件向前查找， 直到 <code class="language-plaintext highlighter-rouge">&lt;char&gt;</code> 字符，例如找了 <code class="language-plaintext highlighter-rouge">g</code>， 光标会落在 <code class="language-plaintext highlighter-rouge">g</code> 字符的前面。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;T&lt;char&gt;</code>： 在当前文件向后查找， 直到 <code class="language-plaintext highlighter-rouge">&lt;char&gt;</code> 字符， 例如找了 <code class="language-plaintext highlighter-rouge">g</code>， 光标会落在 <code class="language-plaintext highlighter-rouge">g</code> 字符的后面。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; j</code>： 向前定位行头部。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; k</code>： 向前定位行尾部。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; w</code>： 向前定位到单词的头部。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; b</code>： 向前定位到单词的尾部。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; e</code>： 向后定位到单词的头部。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt; ge</code>： 向后定位到单词的尾部。</li>
 </ul>
+
+<blockquote>
+  <p>类似 <code class="language-plaintext highlighter-rouge">&lt;leader&gt;&lt;leader&gt;2s&lt;char&gt;&lt;char&gt;</code> 这样加上数字也是可以的， 不同的是现在需要匹配两个字符。</p>
+</blockquote>
+
+<dl>
+  <dt>vim-surround</dt>
+  <dd>基于 <a href="https://github.com/tpope/vim-surround">surround.vim</a> 实现， 该插件用于处理括号、括号、引号和 XML 标记等周围的字符。</dd>
+</dl>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Surround Command</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">ds&lt;existing&gt;</code></td>
+      <td>删除 <code class="language-plaintext highlighter-rouge">existing</code> 符号， <code class="language-plaintext highlighter-rouge">ds"</code> 能删除 “test” 中的 <code class="language-plaintext highlighter-rouge">"</code></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">cs&lt;existing&gt;&lt;desired&gt;</code></td>
+      <td>将 <code class="language-plaintext highlighter-rouge">existing</code> 符号替换为 <code class="language-plaintext highlighter-rouge">desired</code> 符号， <code class="language-plaintext highlighter-rouge">cs"'</code> 能将 “test” 变更为 ‘test’</td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">ys&lt;motion&gt;&lt;desired&gt;</code></td>
+      <td>通过 <code class="language-plaintext highlighter-rouge">motion</code> 给特定的文本添加 <code class="language-plaintext highlighter-rouge">desired</code> 符号， <code class="language-plaintext highlighter-rouge">ysiw)</code> 会给光标所在单词添加符号 <code class="language-plaintext highlighter-rouge">)</code>， <code class="language-plaintext highlighter-rouge">yss)</code> 则给当前行添加符号 <code class="language-plaintext highlighter-rouge">)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>注： “ys” 的意思就是 “your surround”， 相关使用说明参考 <a href="https://github.com/tpope/vim-surround/blob/master/doc/surround.txt">surround.txt</a></p>
+</blockquote>
+
+<dl>
+  <dt>vim-commentary</dt>
+  <dd>与 <a href="https://github.com/tpope/vim-commentary">vim-commentary</a> 类似， 该插件能够快速的利用键盘进行行或者块的注释。</dd>
+</dl>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">gc</code>： 行注释， 使用 <code class="language-plaintext highlighter-rouge">gcc</code> 可切换当前行的注释， <code class="language-plaintext highlighter-rouge">gc2j</code> 能对当前行以及下两行切换注释。</li>
+  <li><code class="language-plaintext highlighter-rouge">gC</code>： 块注释， 使用 <code class="language-plaintext highlighter-rouge">gCi)</code> 能够对圆括号内的所有代码进行注释。</li>
+</ul>
+
+<dl>
+  <dt>CamelCaseMotion</dt>
+  <dd>基于 <a href="https://github.com/bkad/CamelCaseMotion">CamelCaseMotion</a> 的实现， 可以在 camelCase 以及 snake_case 的单词之间移动。</dd>
+</dl>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;w</code>： 向前移动到下一个 camelCase 或者 snake_case 单词段的开头。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;e</code>： 向前移动到下一个 camelCase 或者 snake_case 单词段的末尾。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt;b</code>： 向后移动到最开始的 camelCase 或者 snake_case 单词段。</li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;operator&gt;i&lt;leader&gt;w</code>： 选择/更改/删除/…当前的 camelCase 或者 snake_case 单词段， 例如 <code class="language-plaintext highlighter-rouge">di&lt;leader&gt;w</code> 这个操作会删除 <code class="language-plaintext highlighter-rouge">camelCase</code> 前半部分的 <code class="language-plaintext highlighter-rouge">Camel</code>。</li>
+</ul>
+
+<blockquote>
+  <p>具体的实现效果推荐自己尝试观察， 会发现这个工具真的是完美解决单词选择痛点。</p>
+</blockquote>
 
 <h3 id="53-快捷指令">5.3 快捷指令</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gd ： 跳转到函数定义或引用处，搭配 ctrl+i/ctrl+o 查看源码很方便
-gh ： 触发帮助提示
-gb ： 开启多光标模式，选中和当前单词相同的单词
-</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">gd</code>： 跳转到函数定义或引用处。</li>
+  <li><code class="language-plaintext highlighter-rouge">gh</code>： 触发帮助提示， 和鼠标悬浮查看类型以及错误信息的实现完全一致！</li>
+  <li><code class="language-plaintext highlighter-rouge">gq</code>： 在 Visual 模式下可以合并选中的注释并保留其样式， 在格式化注释时非常有用。</li>
+  <li><code class="language-plaintext highlighter-rouge">gb</code>： 在 Visual 模式下开启多光标模式， 匹配与当前光标所在位置相同的下一词并将其添加入光标选中。</li>
+  <li><code class="language-plaintext highlighter-rouge">af</code>： 在 Visual 模式下不断扩大选中的文本框， 但扩大的范围受到括号的限制。</li>
+</ul>
 
 <h2 id="6-参考">6. 参考</h2>
 
 <ul>
-  <li><a href="https://zhuanlan.zhihu.com/p/430603620#circle=on">vscode + vim 全键盘操作高效搭配方案， 云崖君</a></li>
+  <li><a href="https://marketplace.visualstudio.com/items?itemName=vscodevim.vim">VSCodeVim - microsoft</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/430603620#circle=on">vscode + vim 全键盘操作高效搭配方案 - 云崖君</a></li>
+  <li><a href="https://xie.infoq.cn/article/654e137365b09e217f57bc965">vscode + vim : vscode 全键盘使用方案 - InfoQ</a></li>
+  <li><a href="https://zhouyanlt.github.io/vim/2019/09/20/vscode-vim-best-practices.html">VSCodeVim 最佳实践</a></li>
 </ul>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -2001,7 +1465,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s03s14svsvim-keyborad-setting.html';
-      var title = "vscode(win): vim keyboard mapping";
+      var title = "VSCodeVim 配置指南";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s03s14svsvim-keyborad-setting.html']").text(view);
       });
