@@ -293,11 +293,11 @@
                 href="/blog/archive.html?tag=vim">vim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 14, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 5529 words </span>
+                <span> Total 6018 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 16 mins </span>
+                <span> About 17 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s14svsvim-keyborad-setting.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-14T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,vscode,vim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -317,17 +317,19 @@
 <h3 id="11-operators">1.1 Operators</h3>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">~</code>: 转换大小写。</li>
-  <li><code class="language-plaintext highlighter-rouge">gu</code>： 转为小写。</li>
-  <li><code class="language-plaintext highlighter-rouge">gU</code>： 转为大写。</li>
+  <li><code class="language-plaintext highlighter-rouge">~</code>: 转换大小写</li>
+  <li><code class="language-plaintext highlighter-rouge">gu</code>： 转为小写</li>
+  <li><code class="language-plaintext highlighter-rouge">gU</code>： 转为大写</li>
 </ul>
 
 <h3 id="12-motions">1.2 Motions</h3>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">ge</code>： <code class="language-plaintext highlighter-rouge">e</code> 跳转到单词的最后一个字符， <code class="language-plaintext highlighter-rouge">ge</code> 的作用是跳转到上一个单词的最后一个字符。</li>
-  <li><code class="language-plaintext highlighter-rouge">aw</code>： “a word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 包括它边上的空格。</li>
-  <li><code class="language-plaintext highlighter-rouge">iw</code>： “in word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 但不包括它边上的空格。</li>
+  <li><code class="language-plaintext highlighter-rouge">ge</code>： <code class="language-plaintext highlighter-rouge">e</code> 跳转到单词的最后一个字符， <code class="language-plaintext highlighter-rouge">ge</code> 的作用是跳转到上一个单词的最后一个字符</li>
+  <li><code class="language-plaintext highlighter-rouge">aw</code>： “a word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 包括它边上的空格</li>
+  <li><code class="language-plaintext highlighter-rouge">aW</code>： “a word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词 （包含标点）， 包括它边上的空格</li>
+  <li><code class="language-plaintext highlighter-rouge">iw</code>： “in word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词， 但不包括它边上的空格</li>
+  <li><code class="language-plaintext highlighter-rouge">iW</code>： “in word” 的缩写， 这个指令需要和操作符联合使用， 选择一整个单词 （包含标点）， 但不包括它边上的空格</li>
 </ul>
 
 <h3 id="13-quick-editor">1.3 Quick Editor</h3>
@@ -348,15 +350,15 @@
 <ul>
   <li><strong>Normal, Non-recursive</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">&lt;C-nh&gt;</code>： 取消搜索高亮。</li>
-      <li><code class="language-plaintext highlighter-rouge">g[</code>： 跳转到上一个问题。</li>
-      <li><code class="language-plaintext highlighter-rouge">g]</code>： 跳转到下一个问题。</li>
+      <li><code class="language-plaintext highlighter-rouge">&lt;C-nh&gt;</code>： 取消搜索高亮</li>
+      <li><code class="language-plaintext highlighter-rouge">g[</code>： 跳转到上一个问题</li>
+      <li><code class="language-plaintext highlighter-rouge">g]</code>： 跳转到下一个问题</li>
     </ul>
   </li>
   <li><strong>Visual, Recursive</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">&gt;</code>： 向右缩进。</li>
-      <li><code class="language-plaintext highlighter-rouge">&lt;</code>： 向左缩进。</li>
+      <li><code class="language-plaintext highlighter-rouge">&gt;</code>： 向右缩进</li>
+      <li><code class="language-plaintext highlighter-rouge">&lt;</code>： 向左缩进</li>
     </ul>
   </li>
 </ul>
@@ -402,7 +404,8 @@
 
 <h3 id="31-侧边栏命令定义">3.1 侧边栏命令定义</h3>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-n&gt; t ： 切换侧边栏显示状态
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-n&gt; <span class="o">[</span> ： 切换侧边栏显示状态
+&lt;C-n&gt; <span class="o">]</span> ： 切换第二侧边栏显示状态
 &lt;C-n&gt; 1 ： 显示文件资源管理器
 &lt;C-n&gt; 2 ： 显示全局搜索
 &lt;C-n&gt; 3 ： 显示版本控制
@@ -413,7 +416,7 @@
 &lt;C-n&gt; 8 ： 显示 <span class="nb">test </span>资源管理器
 </code></pre></div></div>
 
-<h2 id="32-文件管理器配置">3.2 文件管理器配置</h2>
+<h3 id="32-文件管理器配置">3.2 文件管理器配置</h3>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># default</span>
 j       ： 向下移动
@@ -434,6 +437,11 @@ x       ： 剪切文件或目录
 y       ： 复制文件或目录
 p       ： 粘贴文件或目录
 /       ： 在当前光标所指的文件夹内进行文件搜索
+
+<span class="c"># panels</span>
+&lt;C-k&gt; e ： 打开 Open Editors 面板
+&lt;C-k&gt; t ： 打开 Timeline 面板
+&lt;C-k&gt; o ： 打开 Outline 面板
 </code></pre></div></div>
 
 <h3 id="33-代码编辑区命令定义">3.3 代码编辑区命令定义</h3>
@@ -499,16 +507,33 @@ p       ： 粘贴文件或目录
 &lt;C-p&gt; 5 ： 显示 GitLens
 </code></pre></div></div>
 
-<h3 id="37-取消-vim-与-vscode-的一些指令">3.7 取消 vim 与 vscode 的一些指令</h3>
+<h3 id="38-取消-vim-与-vscode-的一些指令">3.8 取消 vim 与 vscode 的一些指令</h3>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-a&gt;   ： 全选， 非 INSERT 模式不生效
 &lt;C-c&gt;   ： 复制， 非 INSERT 模式不生效
 &lt;C-v&gt;   ： 复制， 非 INSERT 模式不生效
 </code></pre></div></div>
 
-<h2 id="5-插件与定制化">5. 插件与定制化</h2>
+<h3 id="39-bookmark">3.9 Bookmark</h3>
 
-<h3 id="51-输入法切换">5.1 输入法切换</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-m&gt; t     ： 创建或消除书签
+&lt;C-m&gt; n     ： 跳转到下一个书签
+&lt;C-m&gt; p     ： 跳转到上一个书签
+&lt;C-m&gt; l     ： 列出当前文件的所有书签 
+&lt;C-m&gt; &lt;A-l&gt; ： 列出所有文件的所有书签 
+&lt;C-m&gt; c     ： 列出当前文件的所有书签 
+&lt;C-m&gt; &lt;A-c&gt; ： 清除所有文件的所有书签 
+</code></pre></div></div>
+
+<h3 id="310-markdown-preview">3.10 Markdown Preview</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-k&gt; v     ： 在侧边打开/关闭 Markdown Preview
+&lt;C-k&gt; &lt;A-v&gt; ： 打开/关闭 Markdown Preview
+</code></pre></div></div>
+
+<h2 id="4-插件与定制化">4. 插件与定制化</h2>
+
+<h3 id="41-输入法切换">4.1 输入法切换</h3>
 
 <p>设置 NORMAL 模式下的输入法为英文， 方便进行 vim 指令操作。</p>
 
@@ -539,7 +564,7 @@ p       ： 粘贴文件或目录
   </li>
 </ol>
 
-<h3 id="52-emulated-plugins">5.2 Emulated Plugins</h3>
+<h3 id="42-emulated-plugins">4.2 Emulated Plugins</h3>
 
 <p>这里记录几个比较常用的 VSCodeVim 内置插件， 有些插件的功能感觉累赘就没用它了。</p>
 
@@ -628,7 +653,7 @@ p       ： 粘贴文件或目录
   <p>具体的实现效果推荐自己尝试观察， 会发现这个工具真的是完美解决单词选择痛点。</p>
 </blockquote>
 
-<h3 id="53-快捷指令">5.3 快捷指令</h3>
+<h3 id="43-快捷指令">4.3 快捷指令</h3>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">gd</code>： 跳转到函数定义或引用处。</li>
@@ -638,7 +663,7 @@ p       ： 粘贴文件或目录
   <li><code class="language-plaintext highlighter-rouge">af</code>： 在 Visual 模式下不断扩大选中的文本框， 但扩大的范围受到括号的限制。</li>
 </ul>
 
-<h2 id="6-参考">6. 参考</h2>
+<h2 id="5-参考">5. 参考</h2>
 
 <ul>
   <li><a href="https://marketplace.visualstudio.com/items?itemName=vscodevim.vim">VSCodeVim - microsoft</a></li>
