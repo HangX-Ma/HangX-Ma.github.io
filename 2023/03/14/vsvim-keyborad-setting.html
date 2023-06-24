@@ -14,7 +14,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>VSCodeVim 配置指南 - 一只豆腐</title>
 
-<meta name="description" content="个人定制 VSCodeVim 的配置， 配置文件可见 setting.json 以及 keybindings.json， 鉴于目前 VSCodeVim 尚且不支持在 .vimrc 中进行设置 （仅支持 keymapping）， 还是需要使用 keybindings.json 配置键位映射。 而且有些 VSCode...">
+<meta name="description" content="个人定制 VSCodeVim 的配置， 配置文件可见 setting.json 以及 keybindings.json。 鉴于目前 VSCodeVim 尚且不支持在 .vimrc 中进行设置 （仅支持 keymapping）， 还是需要使用 keybindings.json 配置键位映射。 而且有些 VSCode...">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/03/14/vsvim-keyborad-setting.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -293,18 +293,21 @@
                 href="/blog/archive.html?tag=vim">vim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 14, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 4683 words </span>
+                <span> Total 5529 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 14 mins </span>
+                <span> About 16 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s14svsvim-keyborad-setting.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-14T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,vscode,vim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>个人定制 VSCodeVim 的配置， 配置文件可见 <code class="language-plaintext highlighter-rouge">setting.json</code> 以及 <code class="language-plaintext highlighter-rouge">keybindings.json</code>， 鉴于目前 VSCodeVim 尚且不支持在 <code class="language-plaintext highlighter-rouge">.vimrc</code> 中进行设置 （仅支持 keymapping）， 还是需要使用 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 配置键位映射。 而且有些 VSCode 特有的界面也是需要通过这种方式实现的。 vscode 热键映射命令可以在 <code class="language-plaintext highlighter-rouge">Preference: Open Keyboard Shortcuts</code> 中复制命令的 ID 即可获得。</p>
+<div class="article__content" itemprop="articleBody"><p>个人定制 VSCodeVim 的配置， 配置文件可见 <code class="language-plaintext highlighter-rouge">setting.json</code> 以及 <code class="language-plaintext highlighter-rouge">keybindings.json</code>。 鉴于目前 VSCodeVim 尚且不支持在 <code class="language-plaintext highlighter-rouge">.vimrc</code> 中进行设置 （仅支持 keymapping）， 还是需要使用 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 配置键位映射。 而且有些 VSCode 特有的界面也是需要通过这种方式实现的。
+<!-- more --></p>
+<blockquote>
+  <p>vscode 热键映射命令可以在 <code class="language-plaintext highlighter-rouge">Preference: Open Keyboard Shortcuts</code> 中复制命令的 ID 即可获得。</p>
+</blockquote>
 
-<!--more-->
 <p><a href="https://github.com/HangX-Ma/dotfiles/blob/main/vscode/vim/settings.json" class="button button--outline-primary button--pill">setting.json</a> <a href="https://github.com/HangX-Ma/dotfiles/blob/main/vscode/vim/keybindings.json" class="button button--outline-primary button--pill">keybindings.json</a></p>
 
 <h2 id="1-vim-基础指令说明">1. vim 基础指令说明</h2>
@@ -329,6 +332,8 @@
 
 <h3 id="13-quick-editor">1.3 Quick Editor</h3>
 
+<p>通过下面两个指令可以实现编辑界面的快速切换， 有时候我们使用了 <strong>Goto Definition</strong> 会跳转到另外一个文件中， 这时候这个指令就非常有用了。</p>
+
 <ul>
   <li><code class="language-plaintext highlighter-rouge">&lt;C-i&gt;</code>： 回到上一个编辑点。</li>
   <li><code class="language-plaintext highlighter-rouge">&lt;C-o&gt;</code>： 前进到下一个编辑点。</li>
@@ -336,147 +341,169 @@
 
 <h2 id="2-基础配置项-settingsjson">2. 基础配置项 (settings.json)</h2>
 
+<p>对于非代码编辑区的热键将其定义在 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 中， 对于代码编辑区且属于 vim 的热键将其定义在 <code class="language-plaintext highlighter-rouge">settings.json</code> 文件中。</p>
+
 <h3 id="21-代码控制区域热键方案">2.1 代码控制区域热键方案</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zz       ： 切换代码折叠（原生vim的zz不是切换折叠）
-<span class="nt">&lt;c-n&gt;</span>    ： 取消搜索高亮
-g[       ： 跳转到上一个问题
-g]       ： 跳转到下一个问题
-</code></pre></div></div>
+<ul>
+  <li><strong>Normal, Non-recursive</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">&lt;C-nh&gt;</code>： 取消搜索高亮。</li>
+      <li><code class="language-plaintext highlighter-rouge">g[</code>： 跳转到上一个问题。</li>
+      <li><code class="language-plaintext highlighter-rouge">g]</code>： 跳转到下一个问题。</li>
+    </ul>
+  </li>
+  <li><strong>Visual, Recursive</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">&gt;</code>： 向右缩进。</li>
+      <li><code class="language-plaintext highlighter-rouge">&lt;</code>： 向左缩进。</li>
+    </ul>
+  </li>
+</ul>
 
 <h3 id="22-热键配置区域说明">2.2 热键配置区域说明</h3>
 
 <p>基本上 vim 的所有模式都可以配置在下面的 4 个选项中。 用过 Makefile 应该知道 Recursive Parse 和 NonRecursive Parse， 一般来说用非递归模式可以避免很多奇怪的错误， 推荐用非递归模式。</p>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">//</span><span class="w"> </span><span class="err">普通模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.normalModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">插入模式下的递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.insertModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">命令模式下的非递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.commandLineModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
-    </span><span class="err">//</span><span class="w"> </span><span class="err">可视模式下的递归按键绑定</span><span class="w">
-    </span><span class="nl">"vim.visualModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">//</span><span class="w"> </span><span class="err">普通模式下的非递归按键绑定</span><span class="w">
+</span><span class="nl">"vim.normalModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
+</span><span class="err">//</span><span class="w"> </span><span class="err">插入模式下的递归按键绑定</span><span class="w">
+</span><span class="nl">"vim.insertModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
+</span><span class="err">//</span><span class="w"> </span><span class="err">命令模式下的非递归按键绑定</span><span class="w">
+</span><span class="nl">"vim.commandLineModeKeyBindingsNonRecursive"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
+</span><span class="err">//</span><span class="w"> </span><span class="err">可视模式下的递归按键绑定</span><span class="w">
+</span><span class="nl">"vim.visualModeKeyBindings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="err">,</span><span class="w">
 </span></code></pre></div></div>
+
+<p>配置项的内容与解释如下：</p>
+
+<ul>
+  <li>
+    <p><strong>Vim 相关</strong></p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="nl">"vim.useSystemClipboard"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">use</span><span class="w"> </span><span class="err">system</span><span class="w"> </span><span class="err">clipboard</span><span class="w"> </span><span class="err">as</span><span class="w"> </span><span class="err">vim</span><span class="w"> </span><span class="err">registers</span><span class="w">
+  </span><span class="nl">"vim.useCtrlKeys"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">vim</span><span class="w"> </span><span class="err">will</span><span class="w"> </span><span class="err">take</span><span class="w"> </span><span class="err">over</span><span class="w"> </span><span class="err">&lt;C-any&gt;</span><span class="w"> </span><span class="err">rather</span><span class="w"> </span><span class="err">than</span><span class="w"> </span><span class="err">vscode</span><span class="w">
+  </span><span class="nl">"vim.hlsearch"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">           </span><span class="err">//</span><span class="w"> </span><span class="err">highlight</span><span class="w"> </span><span class="err">all</span><span class="w"> </span><span class="err">matched</span><span class="w"> </span><span class="err">text</span><span class="w">
+  </span><span class="nl">"vim.smartcase"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">          </span><span class="err">//</span><span class="w"> </span><span class="err">This</span><span class="w"> </span><span class="err">group</span><span class="w"> </span><span class="err">will</span><span class="w"> </span><span class="err">cause</span><span class="w"> </span><span class="err">case</span><span class="w"> </span><span class="err">sensitive</span><span class="w"> </span><span class="err">when</span><span class="w"> </span><span class="err">only</span><span class="w"> </span><span class="err">one</span><span class="w"> </span><span class="err">capital</span><span class="w"> </span><span class="err">character</span><span class="w"> </span><span class="err">exists</span><span class="w">
+  </span><span class="nl">"vim.ignorecase"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
+  </span><span class="nl">"vim.leader"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;space&gt;"</span><span class="err">,</span><span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">bind</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">'leader'</span><span class="w"> </span><span class="err">key</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Vim 无关</strong></p>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">"editor.lineNumbers": "relative"</code>： 设置相对行号， 这在我们进行多行删除/注释等操作的时候非常有用， 否则自己去计算行数会很麻烦。</li>
+      <li><code class="language-plaintext highlighter-rouge">"workbench.editor.enablePreviewFromQuickOpen": false</code>： 用 <code class="language-plaintext highlighter-rouge">&lt;C-p&gt;</code> 打开的文件默认是处于预览状态的， 重新预览其他文件时就没了，要双击标签才会固定住， 这个设置就是解决这个问题的。</li>
+    </ul>
+  </li>
+</ul>
 
 <h2 id="3-自定义热键方案-keybindingsjson">3. 自定义热键方案 (keybindings.json)</h2>
 
-<p><strong>vim+vscode 全键盘热键方案</strong> - 对于非代码编辑区的热键将其定义在 <code class="language-plaintext highlighter-rouge">keybindings.json</code> 中，对于代码编辑区且属于 vim 的热键将其定义在 <code class="language-plaintext highlighter-rouge">settings.json</code> 文件中。</p>
+<h3 id="31-侧边栏命令定义">3.1 侧边栏命令定义</h3>
 
-<h3 id="31-全局配置">3.1 全局配置</h3>
-
-<h4 id="311-全局命令定义">3.1.1 全局命令定义</h4>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">c</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">显示命令面板</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">s</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">打开设置页面</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">p</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">工作空间文件快速打开</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">m</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">打开一个目录</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">f</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">打开一个文件</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">h</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">打开最近记录</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">n</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">新建vscode实例</span><span class="w">
-</span><span class="err">ctrl</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="err">g</span><span class="w"> </span><span class="err">q</span><span class="w"> </span><span class="err">：</span><span class="w"> </span><span class="err">关闭vscode示例</span><span class="w">
-</span></code></pre></div></div>
-
-<h4 id="312-文件命令定义">3.1.2 文件命令定义</h4>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + f n ： 新建文件
-ctrl + f o ： 打开文件
-ctrl + f e ： 另存为文件
-ctrl + f s ： 保存文件
-ctrl + f w ： 保存所有文件
-ctrl + f q ： 关闭文件
-ctrl + f a ： 关闭所有文件
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-n&gt; t ： 切换侧边栏显示状态
+&lt;C-n&gt; 1 ： 显示文件资源管理器
+&lt;C-n&gt; 2 ： 显示全局搜索
+&lt;C-n&gt; 3 ： 显示版本控制
+&lt;C-n&gt; 4 ： 显示 debug
+&lt;C-n&gt; 5 ： 显示插件商店
+&lt;C-n&gt; 6 ： 显示 TODO Tree
+&lt;C-n&gt; 7 ： 显示 Bookmark
+&lt;C-n&gt; 8 ： 显示 <span class="nb">test </span>资源管理器
 </code></pre></div></div>
 
-<h4 id="313-侧边栏命令定义">3.1.3 侧边栏命令定义</h4>
+<h2 id="32-文件管理器配置">3.2 文件管理器配置</h2>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + n [ ： 切换侧边栏显示状态
-ctrl + n 1 ： 显示文件资源管理器
-ctrl + n 2 ： 显示全局搜索
-ctrl + n 3 ： 显示版本控制
-ctrl + n 4 ： 显示debug
-ctrl + n 5 ： 显示插件商店
-ctrl + n 6 ： 显示TODO Tree
-ctrl + n 7 ： 显示Bookmark
-​ctrl + n 7 ： 显示cnblog account
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># default</span>
+j       ： 向下移动
+k       ： 向上移动
+&lt;C-d&gt;   ： 向下翻页
+&lt;C-u&gt;   ： 向上翻页
+space   ： 打开文件或目录
+&lt;S-A-r&gt; ： 打开操作系统下当前目录的资源管理器
+
+<span class="c"># user defined​</span>
+z       ： 折叠文件夹
+a       ： 新增文件
+o       ： 新增目录
+f       ： 刷新目录
+r       ： 重命名文件或目录
+d       ： 删除文件或目录
+x       ： 剪切文件或目录
+y       ： 复制文件或目录
+p       ： 粘贴文件或目录
+/       ： 在当前光标所指的文件夹内进行文件搜索
 </code></pre></div></div>
 
-<h4 id="314-面板命令定义">3.1.4 面板命令定义</h4>
+<h3 id="33-代码编辑区命令定义">3.3 代码编辑区命令定义</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + p [ ： 切换面板显示状态
-ctrl + p 1 ： 显示问题
-ctrl + p 2 ： 显示输出
-ctrl + p 3 ： 显示终端
-ctrl + p 4 ： 显示调试控制台
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-h&gt; h ： 触发帮助提示
+<span class="c"># Insert mode</span>
+&lt;C-h&gt; a ： 触发参数提示
+&lt;C-h&gt; s ： 触发建议提示
+&lt;C-n&gt;   ： 移动到下一个建议
+&lt;C-p&gt;   ： 移动到上一个建议
+
+&lt;C-<span class="se">\&gt;</span>   ： 快速修复问题
+&lt;C-<span class="o">=&gt;</span>   ： 放大字体
+&lt;C--&gt;   ： 缩小字体
 </code></pre></div></div>
 
-<h4 id="315-编辑区命令定义">3.1.5 编辑区命令定义</h4>
+<h3 id="34-编辑区命令定义">3.4 编辑区命令定义</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + q ：关闭当前选项卡或分屏
-ctrl + e ：聚焦在第一个选项卡中
-ctrl + , ：切换到上一个选项卡
-ctrl + . ：切换到下一个选项卡
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-q&gt;   ：关闭当前选项卡或分屏
+&lt;C-e&gt;   ：聚焦在第一个选项卡中
+&lt;C-,&gt;   ：切换到上一个选项卡
+&lt;C-.&gt;   ：切换到下一个选项卡
 ​
-ctrl + w s ：拆分一个上下分屏
-ctrl + w v ：拆分一个左右分屏
+&lt;C-w&gt; s ：拆分一个上下分屏
+&lt;C-w&gt; v ：拆分一个左右分屏
 ​
-ctrl + w k ：将光标向上移动1屏
-ctrl + w j ：将光标向下移动1屏
+&lt;C-w&gt; k ：将光标向上移动1屏
+&lt;C-w&gt; j ：将光标向下移动1屏
 ​
-ctrl + w h ：将光标向左移动1屏
-ctrl + w l ：将光标向右移动1屏
+&lt;C-w&gt; h ：将光标向左移动1屏
+&lt;C-w&gt; l ：将光标向右移动1屏
 </code></pre></div></div>
 
-<h4 id="316-代码编辑区命令定义">3.1.6 代码编辑区命令定义</h4>
+<h3 id="35-文件命令定义">3.5 文件命令定义</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl + h ： 触发帮助提示
-ctrl + j ： 触发参数提示
-ctrl + k ： 触发建议提示
-ctrl + n ： 移动到下一个建议
-ctrl + p ： 移动到上一个建议
-ctrl + <span class="se">\ </span>： 快速修正
-tab      ： 选择下一个建议
-enter    ： 选择当前建议
-
-ctrl + alt + l ： 格式化代码（个人习惯）
- ​
-ctrl + = ： 放大字体
-ctrl + - ： 缩小字体
-
-ctrl + [ ： 快速缩进
-ctrl + ] ： 快速退格
-
-// 编辑模式
-alt + j  ： 光标上移
-alt + k  ： 光标下移
-alt + h  ： 光标左移
-alt + l  ： 光标右移
-
-alt + ,  ： Go backward
-alt + .  ： Go forward
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-f&gt; n ： 新建文件
+&lt;C-f&gt; o ： 打开文件
+&lt;C-f&gt; f ： 打开文件夹
+&lt;C-f&gt; e ： 另存为文件
+&lt;C-f&gt; s ： 保存文件
+&lt;C-f&gt; w ： 保存所有文件
+&lt;C-f&gt; q ： 关闭文件
+&lt;C-f&gt; a ： 关闭所有文件
 </code></pre></div></div>
 
-<h4 id="317-取消-vim-与-vscode-一些指令">3.1.7 取消 vim 与 vscode 一些指令</h4>
+<h3 id="36-全局命令定义">3.6 全局命令定义</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl+a    : 全选， 非 INSERT 模式不生效
-ctrl+c(v) : 复制（粘贴）， 非 INSERT 模式不生效
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-g&gt; c ： 显示命令面板
+&lt;C-g&gt; s ： 打开设置页面
+&lt;C-g&gt; p ： 快速打开文件 
+&lt;C-g&gt; r ： 打开最近记录
+&lt;C-g&gt; n ： 新建 vscode 窗口
+&lt;C-g&gt; q ： 关闭 vscode 窗口
 </code></pre></div></div>
 
-<h2 id="4-资源管理配置">4. 资源管理配置</h2>
+<h3 id="37-面板命令定义">3.7 面板命令定义</h3>
 
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>j     ： 向下移动
-k     ： 向上移动
-space ： 打开文件或目录
-​
-新增：​
-alt+x ： 折叠文件夹
-i     ： 新增文件
-o     ： 新增目录
-r     ： 刷新目录
-a     ： 重命名文件或目录
-d     ： 删除文件或目录
-x     ： 剪切文件或目录
-y     ： 复制文件或目录
-p     ： 粘贴文件或目录
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-p&gt; <span class="o">[</span> ： 切换面板显示状态
+&lt;C-p&gt; 1 ： 显示问题
+&lt;C-p&gt; 2 ： 显示输出
+&lt;C-p&gt; 3 ： 显示终端
+&lt;C-p&gt; 4 ： 显示调试控制台
+&lt;C-p&gt; 5 ： 显示 GitLens
+</code></pre></div></div>
+
+<h3 id="37-取消-vim-与-vscode-的一些指令">3.7 取消 vim 与 vscode 的一些指令</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-a&gt;   ： 全选， 非 INSERT 模式不生效
+&lt;C-c&gt;   ： 复制， 非 INSERT 模式不生效
+&lt;C-v&gt;   ： 复制， 非 INSERT 模式不生效
 </code></pre></div></div>
 
 <h2 id="5-插件与定制化">5. 插件与定制化</h2>
@@ -503,11 +530,11 @@ p     ： 粘贴文件或目录
   <li>
     <p>然后再到 settings.json 中加入以下配置项即可完成输入法在 INSERT 模式以及 NORMAL 模式下的自动切换。</p>
 
-    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">     </span><span class="err">//</span><span class="w"> </span><span class="err">自动切换输入法</span><span class="w">
-     </span><span class="nl">"vim.autoSwitchInputMethod.enable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
-     </span><span class="nl">"vim.autoSwitchInputMethod.defaultIM"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1033"</span><span class="err">,</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">这里输入你刚刚获得的英文输入法名称</span><span class="w">
-     </span><span class="nl">"vim.autoSwitchInputMethod.obtainIMCmd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:/Users/User/scoop/apps/im-select/current/im-select.exe"</span><span class="err">,</span><span class="w">
-     </span><span class="nl">"vim.autoSwitchInputMethod.switchIMCmd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:/Users/User/scoop/apps/im-select/current/im-select.exe {im}"</span><span class="w">
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">自动切换输入法</span><span class="w">
+ </span><span class="nl">"vim.autoSwitchInputMethod.enable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">,</span><span class="w">
+ </span><span class="nl">"vim.autoSwitchInputMethod.defaultIM"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1033"</span><span class="err">,</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">这里输入你刚刚获得的英文输入法名称</span><span class="w">
+ </span><span class="nl">"vim.autoSwitchInputMethod.obtainIMCmd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:/Users/User/scoop/apps/im-select/current/im-select.exe"</span><span class="err">,</span><span class="w">
+ </span><span class="nl">"vim.autoSwitchInputMethod.switchIMCmd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:/Users/User/scoop/apps/im-select/current/im-select.exe {im}"</span><span class="w">
 </span></code></pre></div>    </div>
   </li>
 </ol>
