@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 2420 words </span>
+                <span> Total 3833 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 7 mins </span>
+                <span> About 11 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -316,7 +316,7 @@
 
 <p>第二章需要实现实现一个 <code class="language-plaintext highlighter-rouge">邓氏鱼</code> 操作系统， 它能够感知多个应用程序的存在， 并一个接一个地运行这些应用程序， 当一个应用程序执行完毕后， 会启动下一个应用程序， 直到所有的应用程序都执行完毕。</p>
 
-<h2 id="实现应用程序---代码解析与提要">实现应用程序 - 代码解析与提要</h2>
+<h2 id="1-实现应用程序---代码解析与提要">1. 实现应用程序 - 代码解析与提要</h2>
 
 <ol>
   <li>
@@ -339,9 +339,9 @@
   </li>
 </ol>
 
-<h2 id="实现批处理操作系统">实现批处理操作系统</h2>
+<h2 id="2-实现批处理操作系统">2. 实现批处理操作系统</h2>
 
-<h3 id="1-build-构建脚本">1. build 构建脚本</h3>
+<h3 id="21-build-构建脚本">2.1 build 构建脚本</h3>
 
 <p><a href="https://course.rs/cargo/reference/build-script/intro.html">Rust语言圣经(Rust Course) - 9.3.10</a> 描述了 rust 中的构建脚本的作用， 一言以蔽之， 构建脚本会在项目被构建之前 Cargo 会编译构建脚本生成可执行文件并执行相应的任务， 其多用于 C 依赖库构建， 或指定依赖库， 以及进行平台的配置等预处理过程。 在 rCore 的项目中， os 项目工程的根目录下的 <code class="language-plaintext highlighter-rouge">build.rs</code> 主要完成的是链接功能性的二进制工具， 静态链接这些测试文件以在后续运行时动态调用。</p>
 
@@ -351,13 +351,64 @@
   <p><a href="https://course.rs/basic/compound-type/string-slice.html">Rust语言圣经(Rust Course) - 2.4.1</a></p>
 </blockquote>
 
-<h3 id="2-批处理模块">2. 批处理模块</h3>
+<h3 id="22-批处理模块">2.2 批处理模块</h3>
 
 <p>讲到这个章节的时候对 Rust 的 Crate, Module, Package, <code class="language-plaintext highlighter-rouge">use</code> 这些细节产生了疑问， 之前初学 Rust 走马观花过了一遍书没有实际案例分析， 对相关概念了解不深， <strong>Rust Course</strong> 以及 <strong>Rust学习笔记</strong> 分别用理论以及具体案例讲解和分析了相关内容， 非常的清晰。 在 rCore 的构建中， 对功能模块进行分级归类我觉得很重要， 不能一股脑的使用新的模块导入方式， 既然 Rust 1.3.0 以后提供了新的选择， 就不妨做好取舍。</p>
 
 <blockquote>
   <p><a href="https://course.rs/basic/crate-module/intro.html">Rust语言圣经(Rust Course) - 2.12 包和模块</a><br />
 <a href="https://skyao.io/learning-rust/docs/build/module/rust-module-system-explanation.html">对Rust的模块系统的清晰解释 - Rust 学习笔记</a></p>
+</blockquote>
+
+<h2 id="实现特权级的切换">实现特权级的切换</h2>
+
+<p>批处理操作系统被设计为运行在内核态特权级（RISC-V 的 S 模式）而应用程序被设计为运行在用户态特权级（RISC-V 的 U 模式）， 在 AEE(Application Execution Environment) 中受到操作系统监管， 执行过程中需要切换特权级。 Context 即上下文需要在特权级切换前后保持不变， 内核态和用户态的上下文信息需要保存在不通的栈中以保证数据的隔离。 rCore 保存上下文信息的栈是这样设计的， <code class="language-plaintext highlighter-rouge">get_sp</code> 返回数组结尾地址， 即栈顶位置（栈空的时候栈底就是栈顶）。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(align(</span><span class="mi">4096</span><span class="nd">))]</span>
+<span class="k">struct</span> <span class="n">UserStack</span> <span class="p">{</span>
+    <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">USER_STACK_SIZE</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">UserStack</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.data</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">USER_STACK_SIZE</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>未初始化的全局变量和局部静态变量默认值都是 0， 一般来说会将这部分信息存放在 .bss 段并预留未定义的全局变量符号。 这里声明了一个全局静态变量并强制 4096 对齐。 通过 <code class="language-plaintext highlighter-rouge">readelf -t os/target/riscv64gc-unknown-none-elf/release/os</code> 读取编译出的 ELF 文件， <code class="language-plaintext highlighter-rouge">.rodata</code> 段被 4096 对齐了， 更改栈的大小也能确认 <code class="language-plaintext highlighter-rouge">KernelStack</code> 以及 <code class="language-plaintext highlighter-rouge">UserStack</code> 被放在了 <code class="language-plaintext highlighter-rouge">.rodata</code> 中。 初始化为 0 的全局变量和未初始化的全局变量的性质应当一致， 但这里出现了例外。 Rust 中的 static 变量实际声明了一段固定的内存空间且其中的内容不可变， 猜测 Rust 编译器倾向于将只读部分的预留内存保存在 <code class="language-plaintext highlighter-rouge">.rodata</code> 段。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>There are 20 section headers, starting at offset 0x187ca0:
+
+Section Headers:
+  <span class="o">[</span>Nr] Name
+       Type              Address          Offset            Link
+       Size              EntSize          Info              Align
+       Flags
+  <span class="o">[</span> 0]
+       NULL             0000000000000000  0000000000000000  0
+       0000000000000000 0000000000000000  0                 0
+       <span class="o">[</span>0000000000000000]:
+  <span class="o">[</span> 1] .text
+       PROGBITS         0000000080200000  0000000000001000  0
+       00000000000033ce 0000000000000000  0                 4
+       <span class="o">[</span>0000000000000006]: ALLOC, EXEC
+  <span class="o">[</span> 2] .rodata
+       PROGBITS         0000000080204000  0000000000005000  0
+       00000000000062d0 0000000000000000  0                 4096
+       <span class="o">[</span>0000000000000012]: ALLOC, MERGE
+  <span class="o">[</span> 3] .data
+       PROGBITS         000000008020b000  000000000000c000  0
+       0000000000007430 0000000000000000  0                 8
+       <span class="o">[</span>0000000000000003]: WRITE, ALLOC
+  <span class="o">[</span> 4] .bss
+       NOBITS           0000000080213000  0000000000013430  0
+       00000000000100c0 0000000000000000  0                 8
+       <span class="o">[</span>0000000000000003]: WRITE, ALLOC
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://course.rs/advance/global-variable.html">Rust语言圣经(Rust Course) - 4.7 全局变量</a></p>
 </blockquote>
 
 <h2 id="调试记录">调试记录</h2>
