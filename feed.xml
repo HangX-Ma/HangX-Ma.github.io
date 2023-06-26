@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-26T16:54:50+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-26T17:23:03+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
   <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
 </blockquote>
@@ -276,7 +276,9 @@ vim ~/.bashrc
 <a href="https://skyao.io/learning-rust/docs/build/module/rust-module-system-explanation.html">对Rust的模块系统的清晰解释 - Rust 学习笔记</a></p>
 </blockquote>
 
-<h2 id="实现特权级的切换">实现特权级的切换</h2>
+<h2 id="3-实现特权级的切换">3 实现特权级的切换</h2>
+
+<h3 id="31-关于-userstack-与-kernelstack">3.1 关于 UserStack 与 KernelStack</h3>
 
 <p>批处理操作系统被设计为运行在内核态特权级（RISC-V 的 S 模式）而应用程序被设计为运行在用户态特权级（RISC-V 的 U 模式）， 在 AEE(Application Execution Environment) 中受到操作系统监管， 执行过程中需要切换特权级。 Context 即上下文需要在特权级切换前后保持不变， 内核态和用户态的上下文信息需要保存在不通的栈中以保证数据的隔离。 rCore 保存上下文信息的栈是这样设计的， <code class="language-plaintext highlighter-rouge">get_sp</code> 返回数组结尾地址， 即栈顶位置（栈空的时候栈底就是栈顶）。</p>
 
@@ -327,9 +329,21 @@ Section Headers:
   <p><a href="https://course.rs/advance/global-variable.html">Rust语言圣经(Rust Course) - 4.7 全局变量</a></p>
 </blockquote>
 
-<h2 id="调试记录">调试记录</h2>
+<h3 id="32-关于-trap">3.2 关于 trap</h3>
 
-<h3 id="x1-no_std-引入的错误">x.1 <em>no_std</em> 引入的错误</h3>
+<p>在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 中， 对于 <code class="language-plaintext highlighter-rouge">Exception::UserEnvCall</code> 异常， 有一个更新 <code class="language-plaintext highlighter-rouge">sepc</code> 寄存器信息的指令为 <code class="language-plaintext highlighter-rouge">cx.sepc += 4</code>， 根据 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1573703987">issue</a> 中的一条回答是这样解释的：</p>
+
+<blockquote>
+  <p>中断和异常的触发方式不同， 因此硬件设置的“默认执行的下一条指令的地址”也不同。 异常是由于一条指令的执行触发的， 此时硬件默认会将 <code class="language-plaintext highlighter-rouge">sepc</code> 仍然设置为这条指令的地址， 等内核处理完之后再执行一次， 期待这次指令能够正常执行； 而中断是在一条指令执行完毕之后， CPU 检测到了中断， 此时硬件会将 <code class="language-plaintext highlighter-rouge">sepc</code> 设置为下一条指令的地址， 因为没有任何理由再执行一次刚刚执行完的指令。</p>
+</blockquote>
+
+<h2 id="4-课后练习">4 课后练习</h2>
+
+<h3 id="41-编程题">4.1 编程题</h3>
+
+<h2 id="5-调试记录">5 调试记录</h2>
+
+<h3 id="51-no_std-引入的错误">5.1 <em>no_std</em> 引入的错误</h3>
 
 <p>使用了 <code class="language-plaintext highlighter-rouge">#![no_std]</code> 之后 rust-analyzer 会注释一个 “can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>” 错误， 看着突兀的红色警告很是不爽。 rCore-Tutorial-v3 的 <code class="language-plaintext highlighter-rouge">.vscode/setting.json</code> 通过更改 rust-analyzer 的配置来尝试解决问题， 但是我在尝试 Google 搜索的所有结果后都没有解决问题。 但在 rust 社区我找到了一条帖子 <a href="https://users.rust-lang.org/t/error-e0463-cant-find-crate-for-test/73098">[error[E0463]: can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>]</a>， 确实能消除这类报错并且不会对编译以及输出产生影响。 而我们所要做的更改也非常简单， 只需要在根文件 <code class="language-plaintext highlighter-rouge">main.rs</code> 中加入以下代码即可。</p>
 
@@ -340,46 +354,7 @@ Section Headers:
 <span class="k">pub</span> <span class="k">fn</span> <span class="nf">test_runner</span><span class="p">(</span><span class="n">_test</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nb">i32</span><span class="p">])</span> <span class="p">{</span>
     <span class="k">loop</span> <span class="p">{}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="课后练习">课后练习</h2>
-
-<h3 id="编程题">编程题</h3>
-
-<h3 id="问答题">问答题</h3>
-
-<ol>
-  <li>
-    <p><em>函数调用与系统调用有何区别？</em></p>
-  </li>
-  <li>
-    <p><em>为了方便操作系统处理， Ｍ 态软件会将 S 态异常/中断委托给 S 态软件， 请指出有哪些寄存器记录了委托信息， rustsbi 委托了哪些异常/中断？（也可以直接给出寄存器的值）</em></p>
-  </li>
-  <li>
-    <p><em>如果操作系统以应用程序库的形式存在， 应用程序可以通过哪些方式破坏操作系统？</em></p>
-  </li>
-  <li>
-    <p><em>编译器/操作系统/处理器如何合作， 可采用哪些方法来保护操作系统不受应用程序的破坏？</em></p>
-  </li>
-  <li>
-    <p><em>RISC-V 处理器的S态特权指令有哪些， 其大致含义是什么， 有啥作用？</em></p>
-  </li>
-  <li>
-    <p><em>RISC-V 处理器在用户态执行特权指令后的硬件层面的处理过程是什么？</em></p>
-  </li>
-  <li>
-    <p><em>操作系统在完成 用户态 &lt;–&gt; 内核态 双向切换中的一般处理过程是什么？</em></p>
-  </li>
-  <li>
-    <p><em>程序陷入内核的原因有中断、 异常和陷入（系统调用）， 请问 riscv64 支持哪些中断/异常？ 如何判断进入内核是由于中断还是异常？ 描述陷入内核时的几个重要寄存器及其值。</em></p>
-  </li>
-  <li>
-    <p><em>在哪些情况下会出现特权级切换： 用户态 –&gt; 内核态， 以及内核态 –&gt; 用户态？</em></p>
-  </li>
-  <li>
-    <p><em>Trap 上下文的含义是啥？ 在本章的操作系统中， Trap 上下文的具体内容是啥？ 如果不进行 Trap 上下文的保存于恢复， 会出现什么情况？</em></p>
-  </li>
-</ol>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
   <li>rCore 第一章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch1">Github</a> 中。</li>
   <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
   <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
