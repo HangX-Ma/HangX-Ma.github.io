@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 666 words </span>
+                <span> Total 2420 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 2 mins </span>
+                <span> About 7 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -313,6 +313,67 @@
     <br />
     <font size="2" color="#999"><u>Batch OS Details, rCore</u></font>
 </div>
+
+<p>第二章需要实现实现一个 <code class="language-plaintext highlighter-rouge">邓氏鱼</code> 操作系统， 它能够感知多个应用程序的存在， 并一个接一个地运行这些应用程序， 当一个应用程序执行完毕后， 会启动下一个应用程序， 直到所有的应用程序都执行完毕。</p>
+
+<h2 id="实现应用程序---代码解析与提要">实现应用程序 - 代码解析与提要</h2>
+
+<ol>
+  <li>
+    <p>根据 <a href="https://rustwiki.org/zh-CN/book/ch19-01-unsafe-rust.html#%E4%BB%8E%E5%85%B6%E5%AE%83%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8-rust-%E5%87%BD%E6%95%B0">Rust 程序设计语言</a> 中的描述， 创建一个允许其他语言调用 Rust 函数需要添加 <code class="language-plaintext highlighter-rouge">extern</code> 标识。 另外 <code class="language-plaintext highlighter-rouge">#[no_mangle]</code> 能保证 Rust 函数名不会被编译器处理变得难以阅读与定位， 使其保留原有的名称方便被其他语言指定与链接。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nd">#[no_mangle]</span>
+ <span class="nd">#[link_section</span> <span class="nd">=</span> <span class="s">".text.entry"</span><span class="nd">]</span>
+ <span class="k">pub</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">_start</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="o">!</span> <span class="p">{</span>
+     <span class="nf">clear_bss</span><span class="p">();</span>
+     <span class="nf">exit</span><span class="p">(</span><span class="nf">main</span><span class="p">());</span>
+     <span class="nd">panic!</span><span class="p">(</span><span class="s">"unreachable after sys_exit!"</span><span class="p">);</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><a href="https://marcin.juszkiewicz.com.pl/download/tables/syscalls.html">Linux kernel system calls for all architectures</a> 中可以查阅 RISCV-64 规约的系统函数调用的接口与调用的 ID 号。</p>
+  </li>
+  <li>
+    <p><a href="https://wangchujiang.com/rust-cn-document-for-docker/edition-guide/rust-2018/macros/macro-changes.html">Rust 版本指南</a> 中提及了 macro 的变化， 在 Rust 2015 版本， 当我们要导入外部 crate 的宏， 必须要使用 <code class="language-plaintext highlighter-rouge">#[macro_use]</code> 属性， 最直接的例子是在 <code class="language-plaintext highlighter-rouge">user/src/lang_items.rs</code> 中的 <code class="language-plaintext highlighter-rouge">println</code> 宏的使用， 我们可以通过在 <code class="language-plaintext highlighter-rouge">user/src/lib.rs</code> 在通过 <code class="language-plaintext highlighter-rouge">mod console;</code> 导入 console crate 前使用 <code class="language-plaintext highlighter-rouge">#[macro_use]</code> 就能在 user 被管理的各个 crate 中使用 console 提供的宏了（前提是宏需要用 <code class="language-plaintext highlighter-rouge">#[macro_export]</code> 修饰）。</p>
+  </li>
+</ol>
+
+<h2 id="实现批处理操作系统">实现批处理操作系统</h2>
+
+<h3 id="1-build-构建脚本">1. build 构建脚本</h3>
+
+<p><a href="https://course.rs/cargo/reference/build-script/intro.html">Rust语言圣经(Rust Course) - 9.3.10</a> 描述了 rust 中的构建脚本的作用， 一言以蔽之， 构建脚本会在项目被构建之前 Cargo 会编译构建脚本生成可执行文件并执行相应的任务， 其多用于 C 依赖库构建， 或指定依赖库， 以及进行平台的配置等预处理过程。 在 rCore 的项目中， os 项目工程的根目录下的 <code class="language-plaintext highlighter-rouge">build.rs</code> 主要完成的是链接功能性的二进制工具， 静态链接这些测试文件以在后续运行时动态调用。</p>
+
+<p>值得一提的是， Rust 的构建脚本是通过 <code class="language-plaintext highlighter-rouge">println!</code> 宏与 Cargo 进行通信的， 通信内容是以 <code class="language-plaintext highlighter-rouge">cargo:</code> 开头的一系列字符串。 在我们撰写 chapter 2 的 <code class="language-plaintext highlighter-rouge">build.rs</code> 时， 使用 <code class="language-plaintext highlighter-rouge">wrtieln!</code> 宏写入信息需要注意使用 <code class="language-plaintext highlighter-rouge">r#"..."#</code> 取消转义， 以免导致不必要的麻烦。</p>
+
+<blockquote>
+  <p><a href="https://course.rs/basic/compound-type/string-slice.html">Rust语言圣经(Rust Course) - 2.4.1</a></p>
+</blockquote>
+
+<h3 id="2-批处理模块">2. 批处理模块</h3>
+
+<p>讲到这个章节的时候对 Rust 的 Crate, Module, Package, <code class="language-plaintext highlighter-rouge">use</code> 这些细节产生了疑问， 之前初学 Rust 走马观花过了一遍书没有实际案例分析， 对相关概念了解不深， <strong>Rust Course</strong> 以及 <strong>Rust学习笔记</strong> 分别用理论以及具体案例讲解和分析了相关内容， 非常的清晰。 在 rCore 的构建中， 对功能模块进行分级归类我觉得很重要， 不能一股脑的使用新的模块导入方式， 既然 Rust 1.3.0 以后提供了新的选择， 就不妨做好取舍。</p>
+
+<blockquote>
+  <p><a href="https://course.rs/basic/crate-module/intro.html">Rust语言圣经(Rust Course) - 2.12 包和模块</a><br />
+<a href="https://skyao.io/learning-rust/docs/build/module/rust-module-system-explanation.html">对Rust的模块系统的清晰解释 - Rust 学习笔记</a></p>
+</blockquote>
+
+<h2 id="调试记录">调试记录</h2>
+
+<h3 id="x1-no_std-引入的错误">x.1 <em>no_std</em> 引入的错误</h3>
+
+<p>使用了 <code class="language-plaintext highlighter-rouge">#![no_std]</code> 之后 rust-analyzer 会注释一个 “can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>” 错误， 看着突兀的红色警告很是不爽。 rCore-Tutorial-v3 的 <code class="language-plaintext highlighter-rouge">.vscode/setting.json</code> 通过更改 rust-analyzer 的配置来尝试解决问题， 但是我在尝试 Google 搜索的所有结果后都没有解决问题。 但在 rust 社区我找到了一条帖子 <a href="https://users.rust-lang.org/t/error-e0463-cant-find-crate-for-test/73098">[error[E0463]: can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>]</a>， 确实能消除这类报错并且不会对编译以及输出产生影响。 而我们所要做的更改也非常简单， 只需要在根文件 <code class="language-plaintext highlighter-rouge">main.rs</code> 中加入以下代码即可。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![reexport_test_harness_main</span> <span class="nd">=</span> <span class="s">"test_main"</span><span class="nd">]</span>
+<span class="nd">#![feature(custom_test_frameworks)]</span>
+<span class="nd">#![test_runner(test_runner)]</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">test_runner</span><span class="p">(</span><span class="n">_test</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nb">i32</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">loop</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h2 id="课后练习">课后练习</h2>
 
