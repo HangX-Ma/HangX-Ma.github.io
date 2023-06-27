@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 5251 words </span>
+                <span> Total 6315 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 15 mins </span>
+                <span> About 18 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -443,7 +443,7 @@ Section Headers:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>在此处 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1186485130">issue - whfuyn</a> 提出到了两个问题， <code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__alltraps</code> 段在最后调用了 <code class="language-plaintext highlighter-rouge">trap_handler</code> 以处理 <code class="language-plaintext highlighter-rouge">trap</code> 的内容， 但 Rust ABI 是 unstable 的， 我在这篇文章 <a href="https://viruta.org/rust-stable-abi.html">“Rust does not have a stable ABI” - Federico’s Blog</a> 中找到了相应的解释， 虽然对 ABI 的作用还是理解不是很深刻， 但也理解了为什么 <code class="language-plaintext highlighter-rouge">src/context.rs</code> 中的 <code class="language-plaintext highlighter-rouge">TrapContext</code> 会写成下面这种形式。</p>
+<p>在此处 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1186485130">issue - whfuyn</a> 提出了两个问题， <code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__alltraps</code> 段在最后调用了 <code class="language-plaintext highlighter-rouge">trap_handler</code> 以处理 <code class="language-plaintext highlighter-rouge">trap</code> 的内容， 但 Rust ABI 是 unstable 的， 我在这篇文章 <a href="https://viruta.org/rust-stable-abi.html">“Rust does not have a stable ABI” - Federico’s Blog</a> 中找到了相应的解释， 虽然对 ABI 的作用还是理解不是很深刻， 但也理解了为什么 <code class="language-plaintext highlighter-rouge">src/context.rs</code> 中的 <code class="language-plaintext highlighter-rouge">TrapContext</code> 会写成下面这种形式。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(C)]</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TrapContext</span> <span class="p">{</span>
@@ -477,13 +477,41 @@ Section Headers:
 
 <h3 id="33-static-mut-与-unsafecell">3.3 static mut 与 UnSafeCell</h3>
 
+<p>同样是 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1186485130">issue - whfuyn</a> 提出的问题， 可以看到原来的 <code class="language-plaintext highlighter-rouge">KernelStack</code> 结构体实现了 <code class="language-plaintext highlighter-rouge">fn get_sp</code> 以及 <code class="language-plaintext highlighter-rouge">pub fn push_context</code> 两个函数， 但是这两个函数都使用 <code class="language-plaintext highlighter-rouge">&amp;self</code> 共享不可变引用。 毫无疑问 <code class="language-plaintext highlighter-rouge">self.data</code> 访问了 <code class="language-plaintext highlighter-rouge">KernelStack</code> 的内部量， 并且在 <code class="language-plaintext highlighter-rouge">push_context</code> 中我们将指针的地址强制转换为了一个 <strong>可变裸指针</strong>， 裸指针的解引用是不安全的， 没有借用和声明周期的检查。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">KernelStack</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.data</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">KERNEL_STACK_SIZE</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">push_context</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">cx_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="k">self</span><span class="nf">.get_sp</span><span class="p">()</span> <span class="o">-</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TrapContext</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">;</span>
+        <span class="k">unsafe</span> <span class="p">{</span>
+            <span class="o">*</span><span class="n">cx_ptr</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">unsafe</span> <span class="p">{</span> <span class="n">cx_ptr</span><span class="nf">.as_mut</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<dl>
+  <dt><strong>The Rust Reference</strong> 对内部可变性的定义是这样的：</dt>
+  <dt>interior mutability</dt>
+  <dd>A type has interior mutability if its internal state can be changed through a shared reference to it.</dd>
+</dl>
+
+<p>显然这违反了共享引用（类似 <code class="language-plaintext highlighter-rouge">&amp;self</code>）所指向的值不变的要求。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 是唯一允许的方式达到内部可变性， <code class="language-plaintext highlighter-rouge">Cell&lt;T&gt;</code> 的内部实现也是通过 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 达到的。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 使用了 <code class="language-plaintext highlighter-rouge">#[lang = "unsafe_cell"]</code> 宏以让编译器对其进行特殊处理， 使其不具备声明周期的 <strong>协/逆变</strong> 特性。 因而我们要实现内部可变性必须通过 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 以避免未定义行为， 我们无法处理生命周期的问题。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 能够实现从不可变引用到 <strong>可变裸指针</strong> 的安全转换， 我们尽可能多的将安全检查问题交给编译器。</p>
+
+<p>原来的 <code class="language-plaintext highlighter-rouge">batch.rs</code> 使用 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 后的版本可查看 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/8fbb8e0f506d23ae958414bf085a2580b29e4472">commit#8fbb8e0</a>。</p>
+
 <blockquote>
   <p><a href="https://github.com/rust-lang-nursery/lazy-static.rs/issues/117">(soundness regression) static mut could be avoided. #117 - rust-lang-nursery/lazy-static.rs</a><br />
 <a href="https://github.com/rust-lang/rust/issues/53639">Consider deprecation of UB-happy static mut #53639 - rust-lang/rust</a><br />
 <a href="https://zhuanlan.zhihu.com/p/598708941">关于 Rust 的 UnsafeCell、Cell 与 RefCell - 知乎</a><br />
 <a href="https://course.rs/too-many-lists/unsafe-queue/miri.html">Rust语言圣经(Rust Course) - 13.6.3 Miri</a><br />
 <a href="https://course.rs/too-many-lists/unsafe-queue/stacked-borrow.html">Rust语言圣经(Rust Course) - 13.6.4 栈借用</a><br />
-<a href="https://course.rs/too-many-lists/unsafe-queue/testing-stacked-borrow.html">Rust语言圣经(Rust Course) - 13.6.5 测试栈借用</a></p>
+<a href="https://course.rs/too-many-lists/unsafe-queue/testing-stacked-borrow.html">Rust语言圣经(Rust Course) - 13.6.5 测试栈借用</a><br />
+<a href="https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/core/cell/struct.UnsafeCell.html">Struct core::cell::UnsafeCell</a><br />
+<a href="https://doc.rust-lang.org/stable/reference/interior-mutability.html">The Rust Reference - 10.4. Interior mutability</a></p>
 </blockquote>
 
 <h3 id="34-关于-trap">3.4 关于 trap</h3>
