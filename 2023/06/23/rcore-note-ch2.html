@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6315 words </span>
+                <span> Total 9055 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 18 mins </span>
+                <span> About 26 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -364,7 +364,7 @@
 
 <h3 id="31-关于-userstack-与-kernelstack">3.1 关于 UserStack 与 KernelStack</h3>
 
-<p>批处理操作系统被设计为运行在内核态特权级（RISC-V 的 S 模式）而应用程序被设计为运行在用户态特权级（RISC-V 的 U 模式）， 在 AEE(Application Execution Environment) 中受到操作系统监管， 执行过程中需要切换特权级。 Context 即上下文需要在特权级切换前后保持不变， 内核态和用户态的上下文信息需要保存在不通的栈中以保证数据的隔离。 rCore 保存上下文信息的栈是这样设计的， <code class="language-plaintext highlighter-rouge">get_sp</code> 返回数组结尾地址， 即栈顶位置（栈空的时候栈底就是栈顶）。</p>
+<p>批处理操作系统被设计为运行在内核态特权级（RISC-V 的 S 模式）而应用程序被设计为运行在用户态特权级（RISC-V 的 U 模式）， 在 AEE(Application Execution Environment) 中受到操作系统监管， 执行过程中需要切换特权级。 Context 即上下文需要在特权级切换前后保持不变， 内核态和用户态的上下文信息需要保存在不通的栈中以保证数据的隔离。 rCore 保存上下文信息的栈是这样设计的， <code class="language-plaintext highlighter-rouge">get_sp</code> 返回数组结尾地址， 即栈底位置（栈由上向下生长， 栈底的地址比栈顶高， 除非像当前这样栈为空栈底和栈顶处于同一个地址）。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(align(</span><span class="mi">4096</span><span class="nd">))]</span>
 <span class="k">struct</span> <span class="n">UserStack</span> <span class="p">{</span>
@@ -527,6 +527,129 @@ Section Headers:
 
 <h3 id="41-编程题">4.1 编程题</h3>
 
+<ol>
+  <li><em>实现一个裸机应用程序 A， 能打印调用栈。</em>
+    <div align="center">
+     <img src="/norobots/images/2023-06-23-rcore-note-ch2/StackFrame.png" alt="Stack Frame, rCore" width="600" />
+     <br />
+     <font size="2" color="#999"><u>Stack Frame, rCore</u></font>
+ </div>
+
+    <p>根据 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter1/5support-func-call.html">第一章 - 为内核支持函数调用</a> 描述的 RISC-V 的栈帧结构， 对第一章的编程题进行更改实现即可。</p>
+  </li>
+</ol>
+
+<h3 id="42-实验练习">4.2 实验练习</h3>
+
+<h4 id="421-sys_write-安全检查">4.2.1 sys_write 安全检查</h4>
+
+<p>相关实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch2-lab">ch2-lab</a>， 主要想法就是检查当前传入的 <code class="language-plaintext highlighter-rouge">buf</code> 地址的合法性。</p>
+
+<dl>
+  <dt>应用空间合法性</dt>
+  <dd>app 经过 <code class="language-plaintext highlighter-rouge">load_app</code> 函数已经加载到了指定的内存空间中， 因而我们需要检查传入的 <code class="language-plaintext highlighter-rouge">buf</code> 指针所处位置是否在 <strong>[APP_BASE_ADDRESS, APP_BASE_ADDRESS + APP_SIZE_LIMIT]</strong> 之间， 即检查应用空间的合法性。</dd>
+  <dt>用户栈空间合法性</dt>
+  <dd>需要注意的是， 栈是从上往下生长的， 因而获取栈指针之后， 我们需要检查 <code class="language-plaintext highlighter-rouge">buf</code> 可能在用户栈的范围是 <strong>[USER_STACK_PTR_ADDR - USER_STACK_SIZE, USER_STACK_PTR_ADDR]</strong>。</dd>
+</dl>
+
+<h4 id="422-问答题">4.2.2 问答题</h4>
+
+<ol>
+  <li>
+    <p><em>正确进入 U 态后，程序的特征还应有：使用 S 态特权指令，访问 S 态寄存器后会报错。请自行测试这些内容 (运行 Rust 三个 bad 测例 ) ，描述程序出错行为，注明你使用的 sbi 及其版本。</em></p>
+
+    <blockquote>
+      <p><code class="language-plaintext highlighter-rouge">bad_address.rs</code>， <code class="language-plaintext highlighter-rouge">bad_instruction.rs</code>， <code class="language-plaintext highlighter-rouge">bad_register.rs</code> 运行的结果如下：</p>
+
+      <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># SBI及其版本信息： RustSBI version 0.3.0-alpha.4, adapting to RISC-V SBI v1.0.0</span>
+<span class="o">[</span>kernel] Loading app_5
+<span class="o">[</span>kernel] PageFault <span class="k">in </span>application, kernel killed it.
+<span class="o">[</span>kernel] Loading app_6
+<span class="o">[</span>kernel] IllegalInstruction <span class="k">in </span>application, kernel killed it.
+<span class="o">[</span>kernel] Loading app_7
+<span class="o">[</span>kernel] IllegalInstruction <span class="k">in </span>application, kernel killed it.
+</code></pre></div>      </div>
+
+      <ul>
+        <li><code class="language-plaintext highlighter-rouge">bad_address.rs</code> 出现 <code class="language-plaintext highlighter-rouge">PageFault</code> 是因为非法访问了 0 地址空间并尝试对其进行值写入， 而程序的起始地址是 <code class="language-plaintext highlighter-rouge">0x80400000</code>。</li>
+        <li><code class="language-plaintext highlighter-rouge">bad_instruction.rs</code> 以及 <code class="language-plaintext highlighter-rouge">bad_register.rs</code> 分别因为在 U Mode 调用了 <code class="language-plaintext highlighter-rouge">sret</code> S 特权级指令以及访问了 <code class="language-plaintext highlighter-rouge">sstatus</code> S 特权级寄存器而出错。</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>
+    <p><em>请结合用例理解 <a href="https://github.com/rcore-os/rCore-Tutorial-v3/blob/ch2/os/src/trap/trap.S">trap.S</a> 中两个函数 <code class="language-plaintext highlighter-rouge">__alltraps</code> 和 <code class="language-plaintext highlighter-rouge">__restore</code> 的作用，并回答如下几个问题:</em></p>
+
+    <ul>
+      <li><em>L40： 刚进入 <code class="language-plaintext highlighter-rouge">__restore</code> 时， <code class="language-plaintext highlighter-rouge">a0</code> 代表了什么值。请指出 <code class="language-plaintext highlighter-rouge">__restore</code> 的两种使用情景。</em>
+        <blockquote>
+          <p>这个问题我在 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1611036350">chapter2 issues</a> 中有进行回答， 应当为 kernel 的 <code class="language-plaintext highlighter-rouge">sp</code>。</p>
+
+          <ul>
+            <li><code class="language-plaintext highlighter-rouge">__restore</code> 可以初始化内核栈以及用户栈指针地址， 进行用户态程序的加载， S Mode =&gt; U Mode；</li>
+            <li>除此之外， 可以进行 trap 后的上下文恢复回到用户态。</li>
+          </ul>
+        </blockquote>
+      </li>
+      <li><em>L46-L51： 这几行汇编代码特殊处理了哪些寄存器？ 这些寄存器的的值对于进入用户态有何意义？ 请分别解释。</em>
+        <blockquote>
+
+          <pre><code class="language-asm">ld t0, 32*8(sp)   # 从内核栈中读取 sstatus 值
+ld t1, 33*8(sp)   # 从内核栈中读取 spec 值
+ld t2, 2*8(sp)    # 从内核栈中读取 sscratch 值
+# 以下分别将读取的值写入对应的 CSR 特殊寄存器中
+csrw sstatus, t0
+csrw sepc, t1
+csrw sscratch, t2
+</code></pre>
+
+          <ul>
+            <li><code class="language-plaintext highlighter-rouge">sstatus</code> 表示程序状态， 其中的 SPP 指明了上一个状态时 U Mode， 可以帮助我们恢复到用户态。</li>
+            <li><code class="language-plaintext highlighter-rouge">sepc</code> 其实就是 S Mode 下的 <code class="language-plaintext highlighter-rouge">pc</code>， 可以指定用户态的程序的入口位置。</li>
+            <li><code class="language-plaintext highlighter-rouge">sscratch</code> 可以用来交换内核态与用户态的 <code class="language-plaintext highlighter-rouge">sp</code> 寄存器的值。</li>
+          </ul>
+        </blockquote>
+      </li>
+      <li><em>L53-L59： 为何跳过了 <code class="language-plaintext highlighter-rouge">x2</code> 和 <code class="language-plaintext highlighter-rouge">x4</code>？</em>
+        <blockquote>
+          <p><code class="language-plaintext highlighter-rouge">sp(x2)</code> 是栈指针， 我们需要使用栈指针来定位缓存在内核栈和用户栈中的寄存器的位置； <code class="language-plaintext highlighter-rouge">tp(x4)</code> 是线程指针寄存器， 对于 uni-processor 而言用不到。</p>
+        </blockquote>
+      </li>
+      <li><em>L63：该指令之后， <code class="language-plaintext highlighter-rouge">sp</code> 和 <code class="language-plaintext highlighter-rouge">sscratch</code> 中的值分别有什么意义？</em>
+        <blockquote>
+          <p><code class="language-plaintext highlighter-rouge">sp</code> 中存储的是用户栈栈顶的 <code class="language-plaintext highlighter-rouge">sp</code>， <code class="language-plaintext highlighter-rouge">sscratch</code> 中存储的是内核栈栈顶的 <code class="language-plaintext highlighter-rouge">sp</code>。</p>
+        </blockquote>
+      </li>
+      <li><em><code class="language-plaintext highlighter-rouge">__restore</code> 中发生状态切换在哪一条指令？ 为何该指令执行之后会进入用户态？</em>
+        <blockquote>
+          <p>状态切换发生在 <code class="language-plaintext highlighter-rouge">sret</code> 指令。<code class="language-plaintext highlighter-rouge">csrw sstatus, t0</code> 中将特权级设置为 U， <code class="language-plaintext highlighter-rouge">sstatus</code> 的 <code class="language-plaintext highlighter-rouge">SPP</code> 等字段给出 Trap 发生之前 CPU 处在哪个特权级（S/U）等信息， 可以从多个方面控制 S 特权级的 CPU 行为和执行状态。 在 <code class="language-plaintext highlighter-rouge">sret</code> 执行后硬件会做这两件事：</p>
+
+          <ul>
+            <li>CPU 会将当前的特权级按照 <code class="language-plaintext highlighter-rouge">sstatus</code> 的 <code class="language-plaintext highlighter-rouge">SPP</code> 字段设置为 U；</li>
+            <li>CPU 会跳转到 <code class="language-plaintext highlighter-rouge">sepc</code> 寄存器指向的那条指令， 然后继续执行。</li>
+          </ul>
+        </blockquote>
+      </li>
+      <li><em>L13：该指令之后， <code class="language-plaintext highlighter-rouge">sp</code> 和 <code class="language-plaintext highlighter-rouge">sscratch</code> 中的值分别有什么意义？</em>
+        <blockquote>
+          <p>与 L63 行为正好相反。</p>
+        </blockquote>
+      </li>
+      <li><em>从 U 态进入 S 态是哪一条指令发生的？</em>
+        <blockquote>
+          <p>进入 Trap 之前会有 syscall， 而 syscall 的第一句就是 <code class="language-plaintext highlighter-rouge">ecall</code>， 调用完就切换状态了。</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><em>对于任何中断， <code class="language-plaintext highlighter-rouge">__alltraps</code> 中都需要保存所有寄存器吗？ 你有没有想到一些加速 <code class="language-plaintext highlighter-rouge">__alltraps</code> 的方法？ 简单描述你的想法。</em></p>
+
+    <blockquote>
+      <p>可以仅保存内核态中断服务程序所必须的状态， 包括CPU寄存器、 内核堆栈、 硬件中断等参数。 <a href="https://www.cnblogs.com/mysky007/p/12306407.html">[参考]</a></p>
+    </blockquote>
+  </li>
+</ol>
+
 <h2 id="5-调试记录">5 调试记录</h2>
 
 <h3 id="51-no_std-引入的错误">5.1 <em>no_std</em> 引入的错误</h3>
@@ -541,6 +664,40 @@ Section Headers:
     <span class="k">loop</span> <span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
+<h3 id="52-在-no_std-环境下增加-test-用例">5.2 在 no_std 环境下增加 test 用例</h3>
+
+<p>挖的坑还是要填的， 知其然知其所以然， 写 chapter2 的编程题的时候就在想可能得用到测试用例测试函数， 不然堆在主干代码中非常难管理。 所幸有人已经在如何实现 <strong>自定义框架测试</strong> 这块进行了研究了， 照着知乎这篇文章按流程操作就行。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/main.rs</span>
+<span class="nd">#![reexport_test_harness_main</span> <span class="nd">=</span> <span class="s">"test_main"</span><span class="nd">]</span> <span class="c1">// 创建新的 test 的入口函数</span>
+<span class="nd">#![feature(custom_test_frameworks)]</span> <span class="c1">// 自定义 test 框架的属性声明</span>
+<span class="nd">#![test_runner(test_runner)]</span> <span class="c1">// test 执行函数为 test_runner</span>
+<span class="nd">#[no_mangle]</span> <span class="c1">// avoid compiler confusion</span>
+<span class="k">fn</span> <span class="nf">rust_main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="nd">#[cfg(test)]</span>
+    <span class="nf">test_main</span><span class="p">();</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="nd">#[cfg(test)]</span> <span class="c1">// 保证该函数仅在 test 情形下生成</span>
+<span class="k">fn</span> <span class="nf">test_runner</span><span class="p">(</span><span class="n">tests</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="k">dyn</span> <span class="nf">Fn</span><span class="p">()])</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"Running {} tests"</span><span class="p">,</span> <span class="n">tests</span><span class="nf">.len</span><span class="p">());</span>
+    <span class="k">for</span> <span class="n">test</span> <span class="k">in</span> <span class="n">tests</span> <span class="p">{</span>
+        <span class="nf">test</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: Add bootimage crate</li>
+</ul>
+
+<blockquote>
+  <p><a href="https://os.phil-opp.com/testing/">Writing an OS in Rust - Testing, Philipp Oppermann’s blog</a><br />
+<a href="https://zhuanlan.zhihu.com/p/90758552">使用Rust编写操作系统（四）：内核测试 - 知乎</a></p>
+</blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
