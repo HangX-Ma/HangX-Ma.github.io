@@ -281,12 +281,13 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Jun 30, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 9055 words </span>
+                <span> Total 10207 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 26 mins </span>
+                <span> About 29 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 2</h1></header></div><p class="overlay__excerpt">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -528,14 +529,46 @@ Section Headers:
 <h3 id="41-编程题">4.1 编程题</h3>
 
 <ol>
-  <li><em>实现一个裸机应用程序 A， 能打印调用栈。</em>
+  <li><em><strong>实现一个裸机应用程序 A， 能打印调用栈。</strong></em>
     <div align="center">
      <img src="/norobots/images/2023-06-23-rcore-note-ch2/StackFrame.png" alt="Stack Frame, rCore" width="600" />
      <br />
      <font size="2" color="#999"><u>Stack Frame, rCore</u></font>
  </div>
 
-    <p>根据 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter1/5support-func-call.html">第一章 - 为内核支持函数调用</a> 描述的 RISC-V 的栈帧结构， 对第一章的编程题进行更改实现即可。</p>
+    <p>根据 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter1/5support-func-call.html">第一章 - 为内核支持函数调用</a> 描述的 RISC-V 的栈帧结构， 对第一章的编程题进行更改实现即可， 主要改动还是 <code class="language-plaintext highlighter-rouge">asm</code> 中的内容。 具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/blob/main/os/src/stack_btrace.rs">stack_btrace.rs</a>。</p>
+  </li>
+  <li>
+    <p><em><strong>扩展内核， 实现新系统调用 <code class="language-plaintext highlighter-rouge">get_taskinfo</code>， 能显示当前 task 的 id 和 task name； 实现一个裸机应用程序 B， 能访问 <code class="language-plaintext highlighter-rouge">get_taskinfo</code> 系统调用。</strong></em></p>
+
+    <p>这部分真的折磨， 实在是想不到裸机情况下怎么获取 bin 文件的 prefix 名称， 考虑过添加 bin 文件 header 的方式但想想还是奇怪。 主要思路是考虑在 <code class="language-plaintext highlighter-rouge">APP_MANAGER</code> 中就把这部分信息填好， 能力有限不搞了。</p>
+  </li>
+  <li>
+    <p><em><strong>扩展内核， 能够统计多个应用的执行过程中系统调用编号和访问此系统调用的次数。</strong></em></p>
+
+    <p>这部分第一个想法就是用哈希表， 找了挺久发现一个 <a href="https://crates.io/crates/hashbrown">hashbrown</a> 库是能用在 no_std 环境的。 我实现了 <code class="language-plaintext highlighter-rouge">os/src/syscall/stats.rs</code> 提供了两个函数分别是 <code class="language-plaintext highlighter-rouge">stats_update</code>（放在 trap_handler 的 <code class="language-plaintext highlighter-rouge">UserEnvCall</code> 异常） 以及 <code class="language-plaintext highlighter-rouge">stats_clear_and_print</code>（放在 <code class="language-plaintext highlighter-rouge">run_next_app</code> 之前）。 但是遇到一个问题， 但是当前的 OS 实现下是不能使用 heap 存储 static 变量的信息的， 需要之后再进行测试。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> error: no global memory allocator found but one is required<span class="p">;</span>
+ <span class="nb">link </span>to std or add <span class="sb">`</span><span class="c">#[global_allocator]` to a static item that implements the GlobalAlloc trait</span>
+</code></pre></div>    </div>
+
+    <blockquote>
+      <p><a href="https://juejin.cn/s/rust%20no%20std%20hash_map">rust no std hash_map - 稀土掘金</a></p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em><strong>扩展内核， 能够统计每个应用执行后的完成时间。</strong></em></p>
+
+    <p>原来想用 <a href="https://crates.io/crates/embedded-time">embedded-time</a> 这个库替代标准库中的 time crate， 但是那个 Clock Trait 需要知悉硬件的信息才能实现就放弃了这个想法。 记得在第一章作业的 comment 有人提了一嘴有 time 相关的寄存器， 而且在 qemu 中这个 time 相关的时钟频率是 10 KHz。 所幸 riscv 库提供了这部分寄存器的读写， 只要在 <code class="language-plaintext highlighter-rouge">run_next_app</code> 函数的开始记录程序开始的时刻， 另外就是在异常退出或者 exit 函数调用中的 <code class="language-plaintext highlighter-rouge">run_next_app</code> 函数前获取时间间隔即可。</p>
+
+    <blockquote>
+      <p>需要注意 u64 整数溢出以及可能出现的时刻点信息未获取为空的情况， 可以考虑使用 <code class="language-plaintext highlighter-rouge">Option</code>。 具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/ce558ec5c6a6cf1610e8e74e7a5c57fe1b4db6bb">comment#ce558ec</a></p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em><strong>扩展内核， 统计执行异常的程序的异常情况（主要是各种特权级涉及的异常）， 能够打印异常程序的出错的地址和指令等信息。</strong></em></p>
+
+    <p>编程题的设计好奇怪啊， 各种穿插， 直接仿照参考部分加上一些异常情况的处理， 具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d7f16c747fdd5b5e38bb97a87486f8a80bac9a27">commit#d7f16c7</a>。</p>
   </li>
 </ol>
 
@@ -667,7 +700,10 @@ csrw sscratch, t2
 
 <h3 id="52-在-no_std-环境下增加-test-用例">5.2 在 no_std 环境下增加 test 用例</h3>
 
-<p>挖的坑还是要填的， 知其然知其所以然， 写 chapter2 的编程题的时候就在想可能得用到测试用例测试函数， 不然堆在主干代码中非常难管理。 所幸有人已经在如何实现 <strong>自定义框架测试</strong> 这块进行了研究了， 照着知乎这篇文章按流程操作就行。</p>
+<p>挖的坑还是要填的， 知其然知其所以然， 写 chapter2 的编程题的时候就在想可能得用到测试用例测试函数， 不然堆在主干代码中非常难管理。 所幸有人已经在如何实现 <strong>自定义框架测试</strong> 这块进行了研究了， 照着知乎这篇文章按流程分析， 我找到了 <a href="https://github.com/rust-osdev/bootimage">rust-osdev/bootimage</a> 这个库， 它几乎能满足 qemu 创建 test 的所有需求但是目前仅支持 x86 架构， 这意味当前 rCore 使用 test 测试的构想落空了。</p>
+<blockquote>
+  <p>不枉我耗了一个晚上去找资料， 只能用朴素的办法了。</p>
+</blockquote>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/main.rs</span>
 <span class="nd">#![reexport_test_harness_main</span> <span class="nd">=</span> <span class="s">"test_main"</span><span class="nd">]</span> <span class="c1">// 创建新的 test 的入口函数</span>
@@ -689,10 +725,6 @@ csrw sscratch, t2
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: Add bootimage crate</li>
-</ul>
 
 <blockquote>
   <p><a href="https://os.phil-opp.com/testing/">Writing an OS in Rust - Testing, Philipp Oppermann’s blog</a><br />
