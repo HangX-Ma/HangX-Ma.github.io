@@ -1,5 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-06-30T19:07:46+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-01T23:43:10+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第三章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch3-lab">[ch3-lab]</a></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>隔了这么就才整到第三章， 毕竟最近杂活儿有点多， 另外第二章的编程题也是安排很不合理， 把后面的内容提前扔给读者结果第三章实验部分要推倒重来太浪费时间了。 更新这章的 OS 框架的时候变动的地方有些多， 尤其是 <code class="language-plaintext highlighter-rouge">Makefile</code> 部分以及 <code class="language-plaintext highlighter-rouge">build.rs</code> 部分和 <em>rCore-Tutorial-Guide-2023S</em> 中进行了同步以及微调。</p>
+</blockquote>
+
+<h2 id="1-multi-program-os">1. Multi-program OS</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-01-rcore-note-ch3/multiprog-os-detail.png" alt="Multi-program OS Details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Multi-program OS Details, rCore</u></font>
+</div>
+
+<h2 id="2-cooperative-os">2. Cooperative OS</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-01-rcore-note-ch3/more-task-multiprog-os-detail.png" alt="Cooperative OS Details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Cooperative OS Details, rCore</u></font>
+</div>
+
+<h2 id="3-timesharing-os">3. Timesharing OS</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-01-rcore-note-ch3/time-task-multiprog-os-detail.png" alt="Timesharing OS Details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Timesharing OS Details, rCore</u></font>
+</div>
+
+<h2 id="4-课后练习">4. 课后练习</h2>
+
+<p>这章的编程题还是有必要提前做一下的， 汲取了上一章的教训这次先看了 lab 部分， 发现 lab 有个要求是记录当前的正在运行的 task 的运行总时长， 这部分时间既包括内核态与用户态两部分的运行时间， 正好编程题包括了。 这部分可以选择性的完成几个基础练习， 难的部分再好好研究一下。</p>
+
+<h2 id="41-编程题">4.1 编程题</h2>
+
+<ol>
+  <li><em><strong>扩展内核， 能够显示操作系统切换任务的过程。</strong></em></li>
+</ol>
+
+<h3 id="42-实验练习">4.2 实验练习</h3>
+
+<h3 id="421-获取任务信息">4.2.1 获取任务信息</h3>
+
+<h3 id="422-问答题">4.2.2 问答题</h3>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
   <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
 </blockquote>
 
@@ -217,20 +288,42 @@ vim ~/.bashrc
 <ul>
   <li><a href="https://zhuanlan.zhihu.com/p/617522665">从零开始：使用Neovim搭建Rust开发IDE - 知乎</a></li>
   <li><a href="https://zhuanlan.zhihu.com/p/467428462">我的现代化 NeoVim 配置介绍/教程</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 2</title><link href="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 2" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/rcore-note-ch2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html"><![CDATA[<ul>
-  <li>rCore 第二章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch2">Github</a> 中。</li>
-  <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
-  <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-  <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-</ul>
-
-<div align="center">
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 2</title><link href="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 2" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/rcore-note-ch2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html"><![CDATA[<div align="center">
     <img src="/norobots/images/2023-06-23-rcore-note-ch2/batchos-details.png" alt="Batch OS Details, rCore" width="600" />
     <br />
     <font size="2" color="#999"><u>Batch OS Details, rCore</u></font>
 </div>
 
 <p>第二章需要实现实现一个 <code class="language-plaintext highlighter-rouge">邓氏鱼</code> 操作系统， 它能够感知多个应用程序的存在， 并一个接一个地运行这些应用程序， 当一个应用程序执行完毕后， 会启动下一个应用程序， 直到所有的应用程序都执行完毕。</p>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第二章相关内容的实现可查看 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch2-lab">[ch2-lab]</a> <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch2-pro">[ch2-pro]</a></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
 
 <h2 id="1-实现应用程序---代码解析与提要">1. 实现应用程序 - 代码解析与提要</h2>
 
@@ -644,11 +737,33 @@ csrw sscratch, t2
 <blockquote>
   <p><a href="https://os.phil-opp.com/testing/">Writing an OS in Rust - Testing, Philipp Oppermann’s blog</a><br />
 <a href="https://zhuanlan.zhihu.com/p/90758552">使用Rust编写操作系统（四）：内核测试 - 知乎</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<ul>
-  <li>rCore 第一章相关内容的实现记录在 <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch1">Github</a> 中。</li>
-  <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S</a></li>
-  <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-  <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 1</title><link href="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 1" /><published>2023-06-19T00:00:00+08:00</published><updated>2023-06-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/19/rcore-note-ch1</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/19/rcore-note-ch1.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第一章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch1">[ch1]</a></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
 </ul>
 
 <h2 id="1-为内核支持函数调用">1. 为内核支持函数调用</h2>
@@ -1683,209 +1798,4 @@ Test project /home/cs144/minnow/build
 100% tests passed, 0 tests failed out of 2
 
 Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  20.29 sec
-</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 3: the TCP sender</title><link href="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 3: the TCP sender" /><published>2023-05-24T00:00:00+08:00</published><updated>2023-05-24T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/24/cs144-lab3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/24/cs144-lab3.html"><![CDATA[<p>记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。
-<!--more--></p>
-<ul>
-  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
-  <li>CS144 Spring 2023 Lab3 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check3.pdf">Lab Checkpoint 3: the TCP sender</a>。</li>
-  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
-</ul>
-
-<h2 id="1-内容简述">1. 内容简述</h2>
-
-<p>Lab3 将实现 TCP 中的 <em><strong>TCPSender</strong></em>， 其需要完成的功能有：</p>
-
-<ul>
-  <li>跟踪 Receiver 的 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 信息， 通过将 <em><strong>ByteStream</strong></em> 的数据以 TCP Segments 的格式不断发送， 尽可能地填满 window， 直到 window 满了或者 <em><strong>ByteStream</strong></em> 中没有任何东西可以发送。</li>
-  <li>跟踪那些已经发送但还没有被接收的 segments， 通常将这些数据被称为 “outstanding segments”。</li>
-  <li>若是这些 segments 在足够长的时间后没有没接收， 则重传这些 segments 数据。</li>
-</ul>
-
-<p>这些功能实现了 “automatic repeat request (ARQ)” 机制， <em><strong>TCPSender</strong></em> 的任务就是确保 <em><strong>TCPReceiver</strong></em> 能收到每个字节至少一次。</p>
-
-<h2 id="2-tcpsender-如何监测丢包">2. TCPSender 如何监测丢包</h2>
-
-<p><em><strong>TCPSender</strong></em> 会跟踪那些 outstanding segments 的状态， 周期性调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数以指示这些 segments 自发出以来所经过的时间。 <em><strong>TCPSender</strong></em> 会在内部的存储空间存储 <code class="language-plaintext highlighter-rouge">TCPSenderMessages</code> 的信息并遍历这个集合， 找出那些 <strong>已发出但经过时间太久但还未被接收</strong> 的 segments 进行 <strong>数据超时重传</strong>， 直到所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都被接收。</p>
-
-<p>那么如何界定 <strong>已发出但经过时间太久</strong> 这个定义就尤为重要， 太长的等待时间会增加通信延时， 而太短的等待时间则会浪费网络存储空间以及增大开销。 需要注意如下几点：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">tick</code> 函数每隔几毫秒需要调用一次， 记录自上一次调用以来经过的时间， 并以此记录 <em><strong>TCPSender</strong></em> 存在的总时长。 <code class="language-plaintext highlighter-rouge">time</code> 以及 <code class="language-plaintext highlighter-rouge">clock</code> 这类与操作系统和 CPU 相关的函数不允许调用， 否则会导致 TCP 工作异常。</li>
-  <li><strong>retransmission timeout (RTO)</strong> 在 <em><strong>TCPSender</strong></em> 初始化时会初始化 <code class="language-plaintext highlighter-rouge">_initial_retransmission_timeout</code>， 该值始终不变而 RTO 会不断改变 （可能为初值的两倍， 或者等于初值） 以记录 outstanding segments 在超时重传前所经过的时间。</li>
-  <li>重传定时器 timer 以 tick 为时间单位， timer 会在某个时间启动， 在经过 RTO 时间后失效。</li>
-  <li>包含数据的 segment 被传输后 timer 会被启动， 直到经过 RTO 毫秒后 timer 会失效。</li>
-  <li>当所有的 outstanding 数据都被接收后， 服务于重传机制的 timer 将会被停止。</li>
-  <li>
-    <p><a href="#func_tick">以下信息与 <em>tick</em> 函数的实现密切相关</a></p>
-
-    <p>若是 <code class="language-plaintext highlighter-rouge">tick</code> 被调用而 timer 已经失效了：</p>
-
-    <ol>
-      <li>将时间最早的未被接收的 segment 进行重传 （<code class="language-plaintext highlighter-rouge">seqno</code> 最小的那个）。</li>
-      <li>若此时 window size 非零：
-        <ul>
-          <li>跟踪记录连续 <strong>重传的数量</strong>， 并在每次重传后进行累加， <em><strong>TCPConnection</strong></em> 会使用这个信息用以判断 TCP 连接的可靠性， 太多连续的重传意味着 TCP 连接不稳定需要终止。</li>
-          <li>设置 RTO 值为原来的两倍。 “exponential backoff” 以降低较差网络的重传速度， 避免加深网络的拥堵。</li>
-        </ul>
-      </li>
-      <li>重置 timer 并启动， 使其在 RTO 毫秒之后失效 （需要考虑 RTO 已经翻倍）。</li>
-    </ol>
-  </li>
-  <li>
-    <p><a href="#func_receive">以下信息与 <em>receive</em> 函数的实现密切相关</a></p>
-
-    <p>当接收方给发送方传输了 <code class="language-plaintext highlighter-rouge">ackno</code> 表示成功接收了新的数据 （这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比之前任何一个的 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 都要大）:</p>
-
-    <ol>
-      <li>需要将 RTO 设置为其初始值。</li>
-      <li>如果发送方仍有 outstanding 的数据， timer 需要重启并将会在 RTO 毫秒后失效。</li>
-      <li>重置前述的 <strong>连续重传数量</strong> 为 0。</li>
-    </ol>
-  </li>
-</ul>
-
-<h2 id="3-tcp-sender-实现">3. TCP Sender 实现</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-05-24-cs144-lab3/space-structure.png" alt="space structure" width="600" />
-    <br />
-    <font size="2" color="#999"><u>space structure, HangX-Ma</u></font>
-</div>
-
-<p>需要实现以下 5 个接口并增添自己所需的变量以及 helper functions。 上图是 Sender 端所看到的内存结构以及 <code class="language-plaintext highlighter-rouge">seqno</code> 的分布。</p>
-
-<ol>
-  <li>
-    <p><em><strong>push:</strong></em> 不断读取新的字节， 并组装生成 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。 需要使满足 window 尺寸的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 尽可能大， 但上限是 <code class="language-plaintext highlighter-rouge">TCPConfig::MAX PAYLOAD SIZE (1452 bytes)</code>。 <code class="language-plaintext highlighter-rouge">TCPSenderMessage::sequence length()</code> 会用以计量该 segment 占用的 <code class="language-plaintext highlighter-rouge">seqno</code> 的尺寸， SYN 和 FIN 都需要计算在内。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="cm">/* Push bytes from the outbound stream */</span>
- <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="n">Reader</span> <span class="o">&amp;</span><span class="n">outbound_stream</span><span class="p">);</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>这里也是需要注意 window size 最小应当为 1。 另外我们需要两个布尔变量来记录是否需要给传输的 <em><strong>TCPSenderMessage</strong></em> 增加 SYN 标志或者 FIN 标志。 我们以如下顺序对 msg 进行组装： SYN， payload， FIN。 需要注意的是， FIN 标志设定有一定的条件限制：</p>
-
-      <ul>
-        <li>FIN 之前没设定过；</li>
-        <li>Reader 已经没有数据了；</li>
-        <li>塞完 SYN 和 payload 之后我们的 window size 还能容纳一个 FIN 的位置
-如果本次 FIN 没有传输， 就下次传输， 不会有什么影响。</li>
-      </ul>
-
-      <p>另外， 只有在 outstanding segments 清空后我们才需要在传输新的 <em><strong>TCPSenderMessage</strong></em> 时重置 timer， 否则 timer 将在很大程度上失去其基本作用。 每次传输都需要更新 outstanding segments 集合以及发送的 <code class="language-plaintext highlighter-rouge">seqno</code> 数量， <code class="language-plaintext highlighter-rouge">next_seqno</code> 等信息。</p>
-    </blockquote>
-
-    <p class="info">cs144 指导书特地说明了 window size 为零的情况， 仅适用于 <code class="language-plaintext highlighter-rouge">push()</code> 函数。 这时 <em><strong>TCPSender</strong></em> 仍需要发送一个独立的字节， 虽然会被 <em><strong>TCPReceiver</strong></em> 拒绝接收但 <em><strong>TCPReceiver</strong></em> 会返回一个 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 数据， 这个信息可以告知 <em><strong>TCPSender</strong></em> window 中是否有新用于传输的空间。 否则 <em><strong>TCPSender</strong></em> 将无法确定何时发送新的 segment。</p>
-  </li>
-  <li>
-    <p><em><strong>maybe_send:</strong></em> 必要时发送 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 或者为空。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">TCPSenderMessage</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>我们需要额外创建一个队列变量 <code class="language-plaintext highlighter-rouge">segments_out_</code> 来管理需要发送的 segments， 使用队列可以保证传输的先后顺序。 仅在这个队列的元素数量不为零且收到 SYN 信号才返回队列头部的那个数据， 并将其从队列头部移除。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>receive:</strong></em> <a id="func_receive"></a> 接收的 window 范围是 \([ackno, ackno + window size]\)。 <em><strong>TCPSender</strong></em> 需要遍历 outstanding segments 集合将其中已经被 ACK 的部分移除 （<code class="language-plaintext highlighter-rouge">ackno</code> 比 segments 中所有的 <code class="language-plaintext highlighter-rouge">seqno</code> 都要大的那些 segments）。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="cm">/* Receive an act on a TCPReceiverMessage from the peer's receiver */</span>
- <span class="kt">void</span> <span class="nf">receive</span><span class="p">(</span><span class="k">const</span> <span class="n">TCPReceiverMessage</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>我们只需要按照 <a href="#2-tcpsender-如何监测丢包">2.TCPSender 如何监测丢包</a> 中的最后一条逻辑写代码就行。</p>
-
-      <p>这里需要注意， 接收的 <code class="language-plaintext highlighter-rouge">TCPReceiveMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 可能为空， 这时候不能直接返回， 有可能是我们传输了一个 <em><strong>empty message</strong></em> 去获取 window size 而返回的一个包。 因此， 我们需要更新 <code class="language-plaintext highlighter-rouge">window_size_</code> 变量， 除此之外就什么都不做了。</p>
-
-      <p>或者收到的这个 <code class="language-plaintext highlighter-rouge">ackno</code> 比我们当前保存的 <code class="language-plaintext highlighter-rouge">next_seqno</code> 都要大， 这可能是一个错误信息需要丢弃这段数据。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>tick:</strong></em> <a id="func_tick"></a> 计时单位， 得到与上次该函数被调用的时间间隔。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="cm">/* Time has passed by the given # of milliseconds since the last time the tick() method was called. */</span>
- <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>除了要创建一个 <code class="language-plaintext highlighter-rouge">timer_</code> 变量存储时间外， 在 tick 中还需要做 <a href="#2-tcpsender-如何监测丢包">2.TCPSender 如何监测丢包</a> 中的几件事：</p>
-
-      <ol>
-        <li>若 outstanding segments 存在且 timer 失效， 重传时间最早的那个 segments。</li>
-        <li>window size 非零时累加连续重传数量， 并进行 “exponential backoff”。</li>
-        <li>重置 timer 的值为 0， 为下一次重传准备。</li>
-      </ol>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>send_empty_message:</strong></em> 长度为零并且 <code class="language-plaintext highlighter-rouge">seqno</code> 正确的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>， 在 <em><strong>TCPReceiver</strong></em> 希望通过 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code> 获取一些特定信息的时候特别有用， 这个和 <code class="language-plaintext highlighter-rouge">push</code> 中的那个想法很类似。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="cm">/* Generate an empty TCPSenderMessage */</span>
- <span class="n">TCPSenderMessage</span> <span class="n">send_empty_message</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p>这种长度为 0 的 segments 不需要被监测并纳入 outstanding segments 用以重传。 我们只需要返回一个仅有 <code class="language-plaintext highlighter-rouge">ackno</code> 被赋值为下一个需要接收的字节的 <code class="language-plaintext highlighter-rouge">seqno</code> 的 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code>。</p>
-    </blockquote>
-  </li>
-</ol>
-
-<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
-
-<h3 id="helper-functions">Helper Functions</h3>
-
-<p>简化 <code class="language-plaintext highlighter-rouge">seqno</code> 与 <code class="language-plaintext highlighter-rouge">abs_seqno</code> 转换， 使用如下两个 helper functions 即可满足需求。 之后在给 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 中的 <code class="language-plaintext highlighter-rouge">ackno</code> 赋值就很方便了。</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint64_t</span> <span class="n">get_next_abs_seqno_</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
-<span class="n">Wrap32</span> <span class="n">get_next_seqno</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">isn_</span> <span class="o">+</span> <span class="n">next_abs_seqno_</span><span class="p">;</span> <span class="p">};</span>
-</code></pre></div></div>
-
-<h2 id="4-坑点记录">4. 坑点记录</h2>
-
-<h3 id="41-the-test-retx-syn-twice-at-the-right-times-then-ack-failed">4.1 <em>The test “Retx SYN twice at the right times, then ack” failed.</em></h3>
-
-<p>这个问题是初始化 window size 不正确导致的， 在文档里的 FAQs 部分有这么一段：</p>
-
-<p class="info"><strong>Q:</strong> <em>What should my TCPSender assume as the receiver’s window size before I’ve gotten an ACK from the receiver?</em>
-<br />
-<strong>A:</strong> One.</p>
-
-<p>当时我将 <code class="language-plaintext highlighter-rouge">window_size_</code> 初始化为 0， 结果在调用 <code class="language-plaintext highlighter-rouge">tick</code> 函数后 <code class="language-plaintext highlighter-rouge">window_size_ &gt; 0</code> 这条条件判断语句永远不满足， <code class="language-plaintext highlighter-rouge">RTO_timeout_</code> 永远无法进行翻倍。 正确的做法是将 window size 初始化为 1。</p>
-
-<h3 id="42-the-test-retx-syn-until-too-many-retransmissions-failed">4.2 <em>The test “Retx SYN until too many retransmissions” failed.</em></h3>
-
-<p><code class="language-plaintext highlighter-rouge">RTO_timeout</code> 翻倍， 但我以为是初始值翻倍就直接设定成了 <code class="language-plaintext highlighter-rouge">RTO_timeout = 2 * initial_RTO_ms_</code>， 实际上指导书就是说 <em><strong>Double the value of RTO</strong></em> 并且说明是 <em><strong>exponential backoff</strong></em> （给的提示很明显 :joy:）。</p>
-
-<h3 id="5-测试结果">5. 测试结果</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
-      Start 28: send_connect
-27/36 Test <span class="c">#28: send_connect .....................   Passed    0.09 sec</span>
-      Start 29: send_transmit
-28/36 Test <span class="c">#29: send_transmit ....................   Passed    1.11 sec</span>
-      Start 30: send_retx
-29/36 Test <span class="c">#30: send_retx ........................   Passed    0.08 sec</span>
-      Start 31: send_window
-30/36 Test <span class="c">#31: send_window ......................   Passed    0.35 sec</span>
-      Start 32: send_ack
-31/36 Test <span class="c">#32: send_ack .........................   Passed    0.08 sec</span>
-      Start 33: send_close
-32/36 Test <span class="c">#33: send_close .......................   Passed    0.09 sec</span>
-      Start 34: send_extra
-33/36 Test <span class="c">#34: send_extra .......................   Passed    0.16 sec</span>
-      Start 36: compile with optimization
-34/36 Test <span class="c">#36: compile with optimization ........   Passed   18.01 sec</span>
-      Start 37: byte_stream_speed_test
-             ByteStream throughput: 1.02 Gbit/s
-35/36 Test <span class="c">#37: byte_stream_speed_test ...........   Passed    0.45 sec</span>
-      Start 38: reassembler_speed_test
-             Reassembler throughput: 1.83 Gbit/s
-36/36 Test <span class="c">#38: reassembler_speed_test ...........   Passed    0.85 sec</span>
-
-100% tests passed, 0 tests failed out of 36
-
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span> 170.63 sec
-Built target check3
-</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab3: the TCP sender 的思路与实践难点。 前面一些内容看起来像翻译， 但其实也是做一遍逻辑梳理， 之后落实思路会更清晰一些。]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。]]></summary></entry></feed>
