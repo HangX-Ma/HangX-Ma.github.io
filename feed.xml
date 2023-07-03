@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-03T00:13:54+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-03T19:46:14+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
@@ -110,7 +110,7 @@
 
 <p>这章的编程题还是有必要提前做一下的， 汲取了上一章的教训这次先看了 lab 部分， 发现 lab 有个要求是记录当前的正在运行的 task 的运行总时长， 这部分时间既包括内核态与用户态两部分的运行时间， 正好编程题包括了。 这部分可以选择性的完成几个基础练习， 难的部分再好好研究一下。</p>
 
-<h2 id="41-编程题">4.1 编程题</h2>
+<h3 id="41-编程题">4.1 编程题</h3>
 
 <ol>
   <li>
@@ -190,13 +190,75 @@
   <li>
     <p><em><strong>编写应用程序或扩展内核， 能够统计任务切换的大致开销。</strong></em></p>
 
-    <p>这里的参考答案是有问题的， TODO</p>
+    <p>这里的参考答案是有问题的， <code class="language-plaintext highlighter-rouge">__switch</code> 之后会跳转到 <code class="language-plaintext highlighter-rouge">__restore</code> 恢复到用户态，后面那句只有下一次用户态 trap 后才会执行。 虽然不对我还是测试了一下， 发现 context switch 要花费几百毫秒， 这肯定是不可能的。 可行的办法是更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 函数， 将每个 <code class="language-plaintext highlighter-rouge">__switch</code> 调用的返回地址更改为 <code class="language-plaintext highlighter-rouge">__pre_restore</code> 并在这里插入一个更新 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中的 <code class="language-plaintext highlighter-rouge">switch_time</code> 的值， 这样才能统计不同的 task 的 switch context 开销。</p>
+
+    <ul>
+      <li>
+        <p>首先需要在 <code class="language-plaintext highlighter-rouge">os/src/task/task.rs</code> 的 <code class="language-plaintext highlighter-rouge">struct TaskControlBlock</code> 中插入统计每个 task 任务切换上下文开销的变量。</p>
+
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/task/rs</span>
+  <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
+  <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
+      <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
+      <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
+      <span class="k">pub</span> <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
+      <span class="k">pub</span> <span class="n">switch_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+      <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+      <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+  <span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>更新 <code class="language-plaintext highlighter-rouge">trap.S</code> 并在尾部插入如下代码， 相应的需要更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 中 <code class="language-plaintext highlighter-rouge">ra</code> 地址为 <code class="language-plaintext highlighter-rouge">__pre_restore</code>。</p>
+
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">__pre_restore</span><span class="p">:</span>
+      <span class="n">mv</span> <span class="n">a0</span><span class="p">,</span> <span class="n">sp</span>
+      <span class="n">call</span> <span class="n">switch_cost</span>
+      <span class="n">mv</span> <span class="n">sp</span><span class="p">,</span> <span class="n">a0</span>
+      <span class="n">j</span> <span class="n">__restore</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>context switch 的开销统计的相关函数如下。</p>
+
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/mod.rs</span>
+  <span class="k">pub</span> <span class="k">static</span> <span class="k">mut</span> <span class="n">SWITCH_TASK_START</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">SWITCH_TASK_START</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
+      <span class="nn">switch</span><span class="p">::</span><span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_switch_cost</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+      <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
+      <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.switch_time</span> <span class="o">+=</span> <span class="n">cost</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// os/src/trap/mod.rs</span>
+  <span class="nd">#[no_mangle]</span>
+  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">switch_cost</span> <span class="p">(</span><span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
+      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span> 
+      <span class="n">cx</span>
+  <span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+    </ul>
+
+    <blockquote>
+      <p>具体的实现和细节可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4e9425855a85e601fa02070c41da72b5a4f1b7c1">commit#4e9425</a>。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><em><strong>扩展内核，支持在内核态响应中断。</strong></em></p>
+  </li>
+  <li>
+    <p><em><strong>扩展内核，支持在内核运行的任务（简称内核任务），并支持内核任务的抢占式切换。</strong></em></p>
   </li>
 </ol>
 
 <h3 id="42-实验练习">4.2 实验练习</h3>
 
-<h3 id="421-获取任务信息">4.2.1 获取任务信息</h3>
+<h4 id="获取任务信息">获取任务信息</h4>
 
 <p>做完编程题的第二个就跑来做 lab 了， 事情比我想得要复杂一些。 这里需要声明一下 <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/index.html">rCore-Tutorial-Guide 2023</a> 实验指导书对应的 <a href="https://github.com/LearningOS/rCore-Tutorial-Test-2023S">test repo</a> 和当前的 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/index.html">rCore-Tutorial-Book-v3 3.6.0-alpha.1 文档</a> 是有差异的， 如果你和我一样是按照 tutorial 一步步搭起来的 OS 请注意以下这些细节。</p>
 
@@ -271,9 +333,7 @@
 </blockquote>
 
 <p>需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。
-{.error}</p>
-
-<h3 id="422-问答题">4.2.2 问答题</h3>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
+{.error}</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
   <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
 </blockquote>
 
