@@ -283,7 +283,7 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 01, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jun 30, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 7747 words </span>
+                <span> Total 7757 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -489,6 +489,8 @@
   </li>
   <li>
     <p><em><strong>编写浮点应用程序A， 并扩展内核， 支持面向浮点应用的正常切换与抢占。</strong></em></p>
+
+    <p>这块没怎么搞懂， 看起来要加很多东西。</p>
   </li>
   <li>
     <p><em><strong>编写应用程序或扩展内核， 能够统计任务切换的大致开销。</strong></em></p>
@@ -635,8 +637,7 @@
   <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d5f55551e5e3428ca7c17026329c2d84fe9bde4f">commit#d5f5555</a>, 但该 commit 中我还对之前的 <code class="language-plaintext highlighter-rouge">sys_write</code> 的 checker 函数进行了更新。</p>
 </blockquote>
 
-<p>需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。
-{.error}</p>
+<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">

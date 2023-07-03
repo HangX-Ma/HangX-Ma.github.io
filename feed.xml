@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-03T19:46:14+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-03T19:48:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
@@ -186,6 +186,8 @@
   </li>
   <li>
     <p><em><strong>编写浮点应用程序A， 并扩展内核， 支持面向浮点应用的正常切换与抢占。</strong></em></p>
+
+    <p>这块没怎么搞懂， 看起来要加很多东西。</p>
   </li>
   <li>
     <p><em><strong>编写应用程序或扩展内核， 能够统计任务切换的大致开销。</strong></em></p>
@@ -332,8 +334,7 @@
   <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d5f55551e5e3428ca7c17026329c2d84fe9bde4f">commit#d5f5555</a>, 但该 commit 中我还对之前的 <code class="language-plaintext highlighter-rouge">sys_write</code> 的 checker 函数进行了更新。</p>
 </blockquote>
 
-<p>需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。
-{.error}</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
+<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
   <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
 </blockquote>
 
