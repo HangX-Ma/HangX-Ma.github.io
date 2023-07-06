@@ -12,10 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 3 - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 4 - 一只豆腐</title>
 
-<meta name="description" content="第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
-<link rel="canonical" href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -280,15 +280,14 @@
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 01, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 03, 2023</span>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 04, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 7753 words </span>
+                <span> Total 6601 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 22 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s01srcore-note-ch3.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 3</h1></header></div><p class="overlay__excerpt">第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+                <span> About 19 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s04srcore-note-ch4.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 4</h1></header></div><p class="overlay__excerpt">第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -298,11 +297,21 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 3"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-01T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 4"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-04T00:00:00+08:00">
     <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="0-资料汇总">0. 资料汇总</h2>
+<div class="article__content" itemprop="articleBody"><p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
+
+<p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-os-detail.png" alt="Address Space OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Address Space OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><strong>RISC-V</strong>
@@ -323,7 +332,7 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第三章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch3">[ch3]</a></li>
+      <li>rCore 第四章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/">[ch4]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -331,313 +340,215 @@
   </li>
 </ul>
 
-<blockquote>
-  <p>隔了这么就才整到第三章， 毕竟最近杂活儿有点多， 另外第二章的编程题也是安排很不合理， 把后面的内容提前扔给读者结果第三章实验部分要推倒重来太浪费时间了。 更新这章的 OS 框架的时候变动的地方有些多， 尤其是 <code class="language-plaintext highlighter-rouge">Makefile</code> 部分以及 <code class="language-plaintext highlighter-rouge">build.rs</code> 部分和 <em>rCore-Tutorial-Guide-2023S</em> 中进行了同步以及微调。</p>
-</blockquote>
-
-<h2 id="1-multi-program-os">1. Multi-program OS</h2>
+<h2 id="1-sv39-多级页表的机制">1. Sv39 多级页表的机制</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/multiprog-os-detail.png" alt="Multi-program OS Details, rCore" width="600" />
+    <a id="translation-details"></a>
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/address-translation.png" alt="RISC-V address translation details, MIT xv6" width="600" />
     <br />
-    <font size="2" color="#999"><u>Multi-program OS Details, rCore</u></font>
+    <font size="2" color="#999"><u>RISC-V address translation details, MIT xv6</u></font>
 </div>
 
-<p>要满足 <strong>任务切换</strong> 的要求， 所以程序需要预先被加载到一个固定的内存地址， 而不是所有程序共用一个入口地址。 rCore 添加了 <code class="language-plaintext highlighter-rouge">user/build.py</code> 读取 <code class="language-plaintext highlighter-rouge">os/src/link_app.S</code> 并对每个程序的地址空间进行更改以适应前述要求。</p>
-
-<p>与 Trap 不同， Mult-program OS 中的任务切换发生在内核态 （S Mode） 且不涉及特权级切换， 通过 <code class="language-plaintext highlighter-rouge">__switch</code> 函数实现两个不同的 <code class="language-plaintext highlighter-rouge">Task Context</code> 的切换。</p>
+<p>rCore 和 xv6 都使用了 Sv39 模式， 这意味着 64-bit 的 <strong>VA (Virtual Address)</strong> 仅有低端的 39 bits 是被使用的。 而这 39 位又被划分为两部分， 被称为 <strong>VPN (Virtual Page Number)</strong> 的高 27 位用于索引 <strong>PTE (Page Table Entry)</strong>， PTE 是存放在每个应用的 Page Table 中， 由 44 位的 <strong>PPN (Physical Page Number)</strong>  与 10 位标志位组成， 这 PTE 实际构成了虚拟地址与物理地址的索引关系。 另外低 12 位是表示页内的偏移量， 这是因为我们使用 <strong>分页内存管理</strong>， 最小的内存单位是 <em>页</em>， 这低 12 位最终会与 PPN 组合成为实际的 56 位物理地址。</p>
 
 <blockquote>
-  <p><strong>为什么 <code class="language-plaintext highlighter-rouge">__switch</code> 需要通过汇编的完成主要功能？</strong><br />
-由于任务切换不涉及特权级的改变， 因而需要保存的上下文就比较少， 仅需要保存 <code class="language-plaintext highlighter-rouge">ra</code> 入口地址， <code class="language-plaintext highlighter-rouge">sp</code> 栈指针， 以及 Callee 负责寄存器 <code class="language-plaintext highlighter-rouge">s0~s11</code> 即可。 高级程序语言会在函数中自己使用一些通用的寄存器， 可能会发生意料之外的控制流， 另外 <code class="language-plaintext highlighter-rouge">__switch</code> 函数仅作为 label 存在不会被 Rust/C 编译器处理， 这些都是使用汇编完成 <code class="language-plaintext highlighter-rouge">__switch</code> 主体功能的原因。</p>
+  <p>需要明确的是 \(One Page: 2^{12} = 4096\)， 因而虚拟地址的低 12 位才被称作是页内的偏移量， 因为 12 位正好构成了一个页的大小。</p>
 </blockquote>
 
-<h2 id="2-cooperative-os">2. Cooperative OS</h2>
+<p>上图描述了三级页表的查询方式， Sv48 可以使用四级页表， 具体的设计依具体情况而定。 多级页表的构建是为了节省内存开销， 我们只需要按需增添 PTE。 我们可以通过三级页表进行逐级索引， 依据上图由 <em>L2</em> 的 512 个一级页表可以索引， <em>L1</em> 的 \(512\times{512}\) 个二级页表， 这样的开销会比直接映射的页表小得多。 例如我们当前仅需要建立一个地址映射， 那么只需要各使用 <em>L2</em>， <em>L1</em>， <em>L0</em> 三级页表中的一个 PTE， 我们节省了 511 个 <em>L1</em> PTE， \(511\times{512}\) 个 <em>L0</em> PTE。</p>
+
+<p>如果每个地址映射都需要经历三级查表效率肯定会低， 因而 MMU 会提供 <strong>TLB (Translation Look-Aside Buffer)</strong> 缓存来加快映射查询， 但需要注意的是， 映射关系发生改变后缓存就失效了， 我们需要通过 <code class="language-plaintext highlighter-rouge">sfence.vma</code> 指令刷新 TLB。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/more-task-multiprog-os-detail.png" alt="Cooperative OS Details, rCore" width="600" />
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/page-table.png" alt="Translation process, rCore" width="600" />
     <br />
-    <font size="2" color="#999"><u>Cooperative OS Details, rCore</u></font>
+    <font size="2" color="#999"><u>Translation process, rCore</u></font>
 </div>
 
-<p>Multi-program OS 仅仅介绍了任务切换中的 <strong>换栈</strong> 需求， 任务切换还需要指示任务的状态， 维护这一信息。 这里我仅记录初始化流程中的几个自己困惑的细节。</p>
+<p>在 rCore 中， 虚拟地址 <strong>(VA, Virtual Address)</strong> 中的最小单位被称为 <em>Page</em>， 其对应的物理地址 <strong>(PA, Physical Address)</strong> 中的最小单位被称为 <em>Frame</em>， 这二者的关系可以从上图可以窥见一斑， 二者大小一样都是 4096 Bytes。</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="k">in</span> <span class="n">tasks</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">task</span><span class="py">.task_cx</span> <span class="o">=</span> <span class="nn">TaskContext</span><span class="p">::</span><span class="nf">goto_restore</span><span class="p">(</span><span class="nf">init_app_cx</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
-    <span class="n">task</span><span class="py">.task_status</span> <span class="o">=</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Ready</span><span class="p">;</span>
+<h2 id="2-sv39-分页管理设计">2. Sv39 分页管理设计</h2>
+
+<h3 id="21-frame-allocator---物理页帧管理">2.1 frame allocator - 物理页帧管理</h3>
+
+<p>rCore 中内核直接管理了虚拟内存和物理内存。 <em>Frame</em> 所在的空间位于 <code class="language-plaintext highlighter-rouge">ekernel</code> 与 <code class="language-plaintext highlighter-rouge">MEMORY_END</code> 之间。 rCore 使用 <code class="language-plaintext highlighter-rouge">struct StackFrameAllocator</code> 实现 <strong>FRAME_ALLOCATOR</strong>， 并开放给其他内核模块两个用以分配和回收物理地址 <em>frame</em> 的接口： <code class="language-plaintext highlighter-rouge">frame_alloc</code> 以及 <code class="language-plaintext highlighter-rouge">frame_dealloc</code>。 值得注意的是 <code class="language-plaintext highlighter-rouge">frame_alloc</code> 返回的类型是封装 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 的 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 类型， 该类型实现了 <code class="language-plaintext highlighter-rouge">Drop</code> Trait， 这是一种 RAII 的思想， 当 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的声明周期结束， 其包裹的 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 能通过编译器自动回收到 <code class="language-plaintext highlighter-rouge">FRAME_ALLOCATOR</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/frame_allocator.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FrameTracker</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1">// os/src/task/context.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">goto_restore</span><span class="p">(</span><span class="n">kstack_ptr</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
-    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
-        <span class="k">fn</span> <span class="nf">__restore</span><span class="p">();</span>
-    <span class="p">}</span>
-    <span class="k">Self</span> <span class="p">{</span>
-        <span class="n">ra</span><span class="p">:</span> <span class="n">__restore</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span>
-        <span class="n">sp</span><span class="p">:</span> <span class="n">kstack_ptr</span><span class="p">,</span>
-        <span class="n">s</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">12</span><span class="p">],</span>
+<span class="k">impl</span> <span class="nb">Drop</span> <span class="k">for</span> <span class="n">FrameTracker</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">frame_dealloc</span><span class="p">(</span><span class="k">self</span><span class="py">.ppn</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">TASK_MANAGER</code> 通过 <code class="language-plaintext highlighter-rouge">init_app_cx</code> 函数初始化了每个 task 的内核栈， 而 <code class="language-plaintext highlighter-rouge">goto_restore</code> 的设计就非常巧妙， 这里并没有进入 <code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__restore</code> 标签处， 而是将任务栈的 <code class="language-plaintext highlighter-rouge">ra</code> 初始化为 <code class="language-plaintext highlighter-rouge">__restore</code> 地址， 这样当 <code class="language-plaintext highlighter-rouge">__switch</code> 完成后 <code class="language-plaintext highlighter-rouge">ret</code> 就能直接进入<code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__restore</code> 恢复到用户态继续执行任务。 相应的其中的 <code class="language-plaintext highlighter-rouge">sp</code> 指针被初始化为内核栈指针。</p>
+<p><b>内核访问物理页帧</b></p>
+
+<p>为了让内核能访问实际的物理地址， rCore 设计了三种粒度的访问方式： 基于 PTE， 基于 Bytes， 基于变量类型。 至此， 物理地址空间的分配以及访问的框架已经建成， 后续需要做的就是构建虚拟地址与物理地址映射的 <strong>页表(Page Table)</strong>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
+
+<span class="k">impl</span> <span class="n">PhysPageNum</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_pte_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="n">PageTableEntry</span><span class="p">];</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_bytes_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">];</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">get_mut</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">T</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="22-page-table---映射表构建">2.2 Page Table - 映射表构建</h3>
+
+<p>构建页表的基本单元就是 <strong>PTE(Page Table Entry)</strong>， 这里有个关键概念需要澄清， 页表的存储位置。 其实从 xv6 的那张 <a href="#translation-details"><em>RISC-V address translation details, MIT xv6</em></a> 也可以看出， 通过索引从 <em>Lx</em> 定位到的 PPN 会指向下一级 Page Table， 这意味着 Page Table 实际上也是存储在具体的物理页帧上的， 并且每个 PTE 对应唯一的一个 PPN。 因而 rCore 对 Page Table 的数据结构的设计就包括了定位 Page Table 的 <code class="language-plaintext highlighter-rouge">root_ppn</code> 以及 Page Table 中包含的各个 PTE 项 <code class="language-plaintext highlighter-rouge">frames</code>。</p>
 
 <blockquote>
-  <p><strong>丢失的 <code class="language-plaintext highlighter-rouge">mv sp, a0</code></strong></p>
-
-  <ul>
-    <li>
-      <p>可以顺着控制流梳理一遍， 第一次用到 <code class="language-plaintext highlighter-rouge">__switch</code> 是初始化时运行 <code class="language-plaintext highlighter-rouge">run_first_task</code> 函数。 <code class="language-plaintext highlighter-rouge">__switch</code> 将 <code class="language-plaintext highlighter-rouge">unused</code> 中的垃圾数据保存在了程序栈后切换到了第一个 task （此后就是内核栈和用户栈之间的切换了）， 通过 <code class="language-plaintext highlighter-rouge">ra</code> 指向的 <code class="language-plaintext highlighter-rouge">__restore</code> 进行上下文恢复， 对于 task 而并不需要再次更新 <code class="language-plaintext highlighter-rouge">sp</code>， 该值已经在 <code class="language-plaintext highlighter-rouge">__switch</code> 中被恢复成该任务对应的内核指针了。</p>
-    </li>
-    <li>
-      <p>另一个就是进入 trap 之后， <code class="language-plaintext highlighter-rouge">__alltrap</code> 最后进入 <code class="language-plaintext highlighter-rouge">trap_handler</code> 函数， 该函数最后会在返回参数的 <code class="language-plaintext highlighter-rouge">a0</code> 中保存之前存入的 <code class="language-plaintext highlighter-rouge">TrapContext</code>， 而在此之前有这么两句指令说明了 <code class="language-plaintext highlighter-rouge">sp</code> 就是这个 <code class="language-plaintext highlighter-rouge">TrapContext</code>。 因而无需再进行重复保存。</p>
-
-      <div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w"> </span><span class="c1"># set input argument of trap_handler(cx: &amp;mut TrapContext)</span><span class="w">
- </span><span class="n">mv</span><span class="w"> </span><span class="n">a0</span><span class="p">,</span><span class="w"> </span><span class="n">sp</span><span class="w">
- </span><span class="n">call</span><span class="w"> </span><span class="n">trap_handler</span><span class="w">
-</span></code></pre></div>      </div>
-    </li>
-  </ul>
+  <p>估计是为了让 <code class="language-plaintext highlighter-rouge">root_ppn</code> 和 <code class="language-plaintext highlighter-rouge">frames</code> 的指向和含义统一才把 PTE 命名为 frame， 个人感觉直接用 PTE 会清晰很多。 这里 rCore 又提及 RAII 的思想， <code class="language-plaintext highlighter-rouge">frames</code> 内部变量通过 <code class="language-plaintext highlighter-rouge">Vec</code> 数据结构绑定 <code class="language-plaintext highlighter-rouge">FrameTracker</code>， 可以保证声明周期结束后对 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的内存自动回收。</p>
 </blockquote>
 
-<h2 id="3-timesharing-os">3. Timesharing OS</h2>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="n">root_ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
+    <span class="n">frames</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样就不难理解 <code class="language-plaintext highlighter-rouge">struct PageTable</code> 初始化的流程了， 每个 Page Table 都需要向 frame allocator 先申请一个物理页帧将其 PPN 作为 <code class="language-plaintext highlighter-rouge">root_ppn</code> 唯一标识。</p>
+
+<h3 id="23-建立-va-与-pa-的映射关系">2.3 建立 VA 与 PA 的映射关系</h3>
+
+<p>Page Table 必然是动态变化的， 程序运行的时候会通过 <code class="language-plaintext highlighter-rouge">Page Fault</code> Trap 来实现对内存页的按需分配。 当我们知道虚拟地址空间的某个 VA 的时候， 需要通过前述的 Page Table 找到或建立一个关于物理页帧映射。 Xv6 中是通过 <code class="language-plaintext highlighter-rouge">walk</code> 函数实现的， rCore 提供了两个基础函数 <code class="language-plaintext highlighter-rouge">find_pte_create</code> 以及 <code class="language-plaintext highlighter-rouge">find_pte</code>， 区别就在于是否在某一级页表的 PTE 未创建时创建一个新的 PTE。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
+
+<span class="k">impl</span> <span class="n">VirtPageNum</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">indexes</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">[</span><span class="nb">usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">]</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">vpn</span> <span class="o">=</span> <span class="k">self</span><span class="na">.0</span><span class="p">;</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">];</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="mi">3</span><span class="p">)</span><span class="nf">.rev</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vpn</span> <span class="o">&amp;</span> <span class="mi">511</span><span class="p">;</span>
+            <span class="n">vpn</span> <span class="o">&gt;&gt;=</span> <span class="mi">9</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">idx</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">find_pte_create</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">find_pte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>rCore 通过 <code class="language-plaintext highlighter-rouge">indexes</code> 解析 VPN (Virtual Page Number)， 找到三级页表每一级中的 leaf PTE 的索引号。 这里会用到 PTE 中的 Flags 部分的信息。 标志位 <code class="language-plaintext highlighter-rouge">V</code> 表示当前的 PTE 为合法有效的， 在建立新的 PTE 的时候需要更新该标志位， 否则会引起 Page Fault。 基于这几个函数， rCore 封装了两个更便利的函数方便 Page Table 的维护， 用 <code class="language-plaintext highlighter-rouge">map/unmap</code> 为当前的 Page Table 增加或删除 PTE。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="n">PTEFlags</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte_create</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="nd">assert!</span><span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is mapped before mapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ppn</span><span class="p">,</span> <span class="n">flags</span> <span class="p">|</span> <span class="nn">PTEFlags</span><span class="p">::</span><span class="n">V</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">unmap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="nd">assert!</span><span class="p">(</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is invalid before unmapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">empty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>手动页表查询</strong>： Page Table 还实现了两个特殊的函数模仿 MMU 获取 Page Table。 <code class="language-plaintext highlighter-rouge">from_token</code> 直接读取 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器中的 PPN 段获取一个 Page Table， 之后就能直接通过 <code class="language-plaintext highlighter-rouge">translate</code> 函数得到 VPN 对应的第三级的 PTE。</p>
+</blockquote>
+
+<h2 id="3-地址空间与抽象">3. 地址空间与抽象</h2>
+
+<p>rCore 抽象了两种概念来管理整个虚拟内存及其映射的物理内存。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/time-task-multiprog-os-detail.png" alt="Timesharing OS Details, rCore" width="600" />
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-abstract.png" alt="Address space abstraction, HangX-Ma" width="600" />
     <br />
-    <font size="2" color="#999"><u>Timesharing OS Details, rCore</u></font>
+    <font size="2" color="#999"><u>Address space abstraction, HangX-Ma</u></font>
 </div>
 
-<h2 id="4-课后练习">4. 课后练习</h2>
-
-<p>这章的编程题还是有必要提前做一下的， 汲取了上一章的教训这次先看了 lab 部分， 发现 lab 有个要求是记录当前的正在运行的 task 的运行总时长， 这部分时间既包括内核态与用户态两部分的运行时间， 正好编程题包括了。 这部分可以选择性的完成几个基础练习， 难的部分再好好研究一下。</p>
-
-<h3 id="41-编程题">4.1 编程题</h3>
-
-<ol>
+<ul>
   <li>
-    <p><em><strong>扩展内核， 能够显示操作系统切换任务的过程。</strong></em></p>
+    <p><strong>逻辑段： 一段连续地址的虚拟内存</strong></p>
 
-    <p>只用在 <code class="language-plaintext highlighter-rouge">os/src/task/mod.rs</code> 的 <code class="language-plaintext highlighter-rouge">run_next_task</code> 以及 <code class="language-plaintext highlighter-rouge">mark_current_exited</code>， <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 加入打印就行， 另外在这里我对任务切换的流程进行了优化， 仅在当前 <code class="language-plaintext highlighter-rouge">current != next</code> 时才进行 <code class="language-plaintext highlighter-rouge">Task Context</code> 交换以及打印相关的信息， 这样能减少内核开销。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// os/src/task/mod.rs</span>
- <span class="k">fn</span> <span class="nf">run_next_task</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-     <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">next</span><span class="p">)</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_next_task</span><span class="p">()</span> <span class="p">{</span>
-         <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="k">self</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-         <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-         <span class="o">...</span>
-         <span class="c1">// ch3-pro1</span>
-         <span class="k">if</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">next</span> <span class="p">{</span>
-             <span class="nd">println!</span><span class="p">(</span><span class="s">"[kernel] task switch from {} to {}"</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">next</span><span class="p">);</span>
-             <span class="k">unsafe</span> <span class="p">{</span>
-                 <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
-             <span class="p">}</span>
-         <span class="p">}</span>
-     <span class="p">}</span>
-     <span class="o">...</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>除此之外 <code class="language-plaintext highlighter-rouge">struct TaskManagerInner</code> 中我添加了 <code class="language-plaintext highlighter-rouge">alive_task_num</code> 用以记录仍在 <code class="language-plaintext highlighter-rouge">Ready</code> 以及 <code class="language-plaintext highlighter-rouge">Running</code> 的 task 的数量， 仅在 <code class="language-plaintext highlighter-rouge">alive_task_num &gt; 1</code> 的时候才在 <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 中添加打印以保持输出面板整洁以及系统开销最小。</p>
-
-    <blockquote>
-      <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4f1dd08bae3e884a06e2a8141bf0fa4d6909310a">commit#4f1dd08</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/208d86306ee7bba5149fbd38acfb62f6d08e9d84">commit#208d863</a></p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 能够统计每个应用执行后的完成时间： 用户态完成时间和内核态完成时间。</strong></em></p>
-
-    <p>lab 相关的重点， <code class="language-plaintext highlighter-rouge">sys_task_info</code> 大部分信息其实都需要 task module 的支持。 另外， 每个 task 都是独立的， 因而需要在 <code class="language-plaintext highlighter-rouge">struct TaskControlBlock</code> 中增加记录 task 运行时间的变量。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
- <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-     <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>之后比较关键的是如何记录这个时间， 这个我在之前 chapter2 实现了类似的函数， 基本思路就是利用 riscv 的 mtime 寄存器， 需要有个特定的变量存储 mtime 寄存器的值并在每次进入该 task 时计算与现在的 mtime 的插值获取时间信息的变更。</p>
-    <blockquote>
-      <p>lab 中要求时间单位为 ms， 可以使用 <code class="language-plaintext highlighter-rouge">timer.rs</code> 的 <code class="language-plaintext highlighter-rouge">get_time_ms</code> 函数。</p>
-    </blockquote>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskManagerInner</span> <span class="p">{</span>
-     <span class="cd">/// task list</span>
-     <span class="n">tasks</span><span class="p">:</span> <span class="p">[</span><span class="n">TaskControlBlock</span><span class="p">;</span> <span class="n">MAX_APP_NUM</span><span class="p">],</span>
-     <span class="cd">/// id of current `Running` task</span>
-     <span class="n">current_task</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="cd">/// the number of tasks that have not exit</span>
-     <span class="n">alive_task_num</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="cd">/// record time point</span>
-     <span class="n">checkpoint</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <dl>
-      <dt>内核态时间</dt>
-      <dd>在 <code class="language-plaintext highlighter-rouge">run_first_task</code> 以及 <code class="language-plaintext highlighter-rouge">mark_current_exited</code>， <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 中更新信息， 另外需要在 task 退出时打印耗时。</dd>
-      <dt>用户态时间</dt>
-      <dd>用户态和内核态的分界处就是 trap， 因而在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 的起始位置和末尾位置可分别作为 user time 的开始以及 user time 的结束。</dd>
-    </dl>
-
-    <blockquote>
-      <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5904c2fcb253a5bfa694ab94e0c7e3006f510238">commit#5904c2f</a> 以及课后参考答案部分。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>编写浮点应用程序A， 并扩展内核， 支持面向浮点应用的正常切换与抢占。</strong></em></p>
-
-    <p>这块没怎么搞懂， 看起来要加很多东西。</p>
-  </li>
-  <li>
-    <p><em><strong>编写应用程序或扩展内核， 能够统计任务切换的大致开销。</strong></em></p>
-
-    <p>这里的参考答案是有问题的， <code class="language-plaintext highlighter-rouge">__switch</code> 之后会跳转到 <code class="language-plaintext highlighter-rouge">__restore</code> 恢复到用户态，后面那句只有下一次用户态 trap 后才会执行。 虽然不对我还是测试了一下， 发现 context switch 要花费几百毫秒， 这肯定是不可能的。 可行的办法是更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 函数， 将每个 <code class="language-plaintext highlighter-rouge">__switch</code> 调用的返回地址更改为 <code class="language-plaintext highlighter-rouge">__pre_restore</code> 并在这里插入一个更新 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中的 <code class="language-plaintext highlighter-rouge">switch_time</code> 的值， 这样才能统计不同的 task 的 switch context 开销。</p>
+    <p>rCore 使用 <code class="language-plaintext highlighter-rouge">sruct MapArea</code> 表示逻辑段。</p>
 
     <ul>
+      <li><code class="language-plaintext highlighter-rouge">vpn_range</code> 表明该逻辑段的在虚拟地址的范围以及长度；</li>
+      <li><code class="language-plaintext highlighter-rouge">map_type</code> 则表示了虚拟地址和物理地址的映射办法， 直接映射 （<code class="language-plaintext highlighter-rouge">MapType::Identical</code>） 又或是通过 <strong>FRAME_ALLOCATOR</strong> 随机分配物理帧 （<code class="language-plaintext highlighter-rouge">MapType::Framed</code>） （外设地址都是直接映射的， 这样区分有助于后续的应用拓展）；</li>
+      <li>既然区分了映射方式， 存储映射关系的数据结构也会不同， <code class="language-plaintext highlighter-rouge">data_frames</code> 用于存储 leaf PTE 的 PPN 与其对应的 VPN 之间的关系， 仅用在 <code class="language-plaintext highlighter-rouge">Framed</code> 映射办法。</li>
       <li>
-        <p>首先需要在 <code class="language-plaintext highlighter-rouge">os/src/task/task.rs</code> 的 <code class="language-plaintext highlighter-rouge">struct TaskControlBlock</code> 中插入统计每个 task 任务切换上下文开销的变量。</p>
+        <p>最后的 <code class="language-plaintext highlighter-rouge">map_perm</code> 其实就和 Linux 系统的 RWXU 的含义基本接近了。</p>
 
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/task/rs</span>
-  <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-  <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-      <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-      <span class="k">pub</span> <span class="n">switch_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-  <span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>更新 <code class="language-plaintext highlighter-rouge">trap.S</code> 并在尾部插入如下代码， 相应的需要更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 中 <code class="language-plaintext highlighter-rouge">ra</code> 地址为 <code class="language-plaintext highlighter-rouge">__pre_restore</code>。</p>
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/memory_set.rs</span>
 
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">__pre_restore</span><span class="p">:</span>
-      <span class="n">mv</span> <span class="n">a0</span><span class="p">,</span> <span class="n">sp</span>
-      <span class="n">call</span> <span class="n">switch_cost</span>
-      <span class="n">mv</span> <span class="n">sp</span><span class="p">,</span> <span class="n">a0</span>
-      <span class="n">j</span> <span class="n">__restore</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>context switch 的开销统计的相关函数如下。</p>
-
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/mod.rs</span>
-  <span class="k">pub</span> <span class="k">static</span> <span class="k">mut</span> <span class="n">SWITCH_TASK_START</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
-      <span class="n">SWITCH_TASK_START</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
-      <span class="nn">switch</span><span class="p">::</span><span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_switch_cost</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-      <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-      <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.switch_time</span> <span class="o">+=</span> <span class="n">cost</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="c1">// os/src/trap/mod.rs</span>
-  <span class="nd">#[no_mangle]</span>
-  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">switch_cost</span> <span class="p">(</span><span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
-      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span> 
-      <span class="n">cx</span>
-  <span class="p">}</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">MapArea</span> <span class="p">{</span>
+    <span class="n">vpn_range</span><span class="p">:</span> <span class="n">VPNRange</span><span class="p">,</span>
+    <span class="n">data_frames</span><span class="p">:</span> <span class="n">BTreeMap</span><span class="o">&lt;</span><span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">map_type</span><span class="p">:</span> <span class="n">MapType</span><span class="p">,</span>
+    <span class="n">map_perm</span><span class="p">:</span> <span class="n">MapPermission</span><span class="p">,</span>
+<span class="p">}</span>
 </code></pre></div>        </div>
       </li>
     </ul>
-
-    <blockquote>
-      <p>具体的实现和细节可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4e9425855a85e601fa02070c41da72b5a4f1b7c1">commit#4e9425</a>。</p>
-    </blockquote>
   </li>
   <li>
-    <p><em><strong>扩展内核，支持在内核态响应中断。</strong></em></p>
+    <p><strong>地址空间：一系列有关联的逻辑段</strong></p>
+
+    <p>rCore 通过 <code class="language-plaintext highlighter-rouge">struct MemorySet</code> 封装这些逻辑段， 这是因为虽然逻辑段本身是连续的一段虚拟地址， 但多个逻辑段之间可能并不是连续的。 注意这里的 <code class="language-plaintext highlighter-rouge">page_table</code> 是一个 <em>Root Page Table</em>， 包含了该所有的 PTE 的物理页帧， 而 <code class="language-plaintext highlighter-rouge">areas</code> 则包含了数据所在的物理页帧， 这样的的设计构成了一个地址空间所需的所有的物理页帧。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
+
+  <span class="k">pub</span> <span class="k">struct</span> <span class="n">MemorySet</span> <span class="p">{</span>
+      <span class="n">page_table</span><span class="p">:</span> <span class="n">PageTable</span><span class="p">,</span>
+      <span class="n">areas</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">MapArea</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
   </li>
-  <li>
-    <p><em><strong>扩展内核，支持在内核运行的任务（简称内核任务），并支持内核任务的抢占式切换。</strong></em></p>
-  </li>
-</ol>
+</ul>
 
-<h3 id="42-实验练习">4.2 实验练习</h3>
+<h3 id="31-内核地址空间">3.1 内核地址空间</h3>
 
-<h4 id="获取任务信息">获取任务信息</h4>
+<p>Sv39 规定 64 位虚拟地址的 [63:39] 这 25 位必须和第 38 位相同， 否则 MMU 会直接认定它是一个不合法的虚拟地址。 因而虚拟地址空间可以被划分为低地址的 \(2^{39}\) bytes (512 GB)， 以及当第 38 位为 1 时的 512 GB， 分别称为 <em>High Half</em> 以及 <em>Low Half</em>。 rCore 设计的内核空间如下图所示。</p>
 
-<p>做完编程题的第二个就跑来做 lab 了， 事情比我想得要复杂一些。 这里需要声明一下 <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/index.html">rCore-Tutorial-Guide 2023</a> 实验指导书对应的 <a href="https://github.com/LearningOS/rCore-Tutorial-Test-2023S">test repo</a> 和当前的 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/index.html">rCore-Tutorial-Book-v3 3.6.0-alpha.1 文档</a> 是有差异的， 如果你和我一样是按照 tutorial 一步步搭起来的 OS 请注意以下这些细节。</p>
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-high.png" alt="Kernel address space high half, rCore" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Kernel address space high half, rCore</u></font>
+</div>
 
-<p>Guide 2023S 中提供的接口函数是如下形式， 在具体实现的时候由于 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 中存在一个数组结构， 需要添加 <code class="language-plaintext highlighter-rouge">#[derive(Clone, Copy)]</code>， 如果添加了 <code class="language-plaintext highlighter-rouge">#[repr(C)]</code> 修饰， 后续在 user 目录下的 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 需要保持声明的一致性， 否则 os 部分的 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 将无法正确赋值。</p>
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-low.png" alt="Kernel address space low half, rCore" width="300" />
+    <br />
+    <font size="2" color="#999"><u>Kernel address space low half, rCore</u></font>
+</div>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
-<span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span>
+<h3 id="32-应用地址空间">3.2 应用地址空间</h3>
 
-<span class="k">struct</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-    <span class="n">status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-    <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-    <span class="n">time</span><span class="p">:</span> <span class="nb">usize</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<p>rCore 设计的内核空间如下图所示， 具体含义和解释见 rCore Tutorial 相关章节的内容。 需要注意的是， 几个具有不同访问权限的逻辑段之间需要通过页面对齐进行限制与区分。</p>
 
-<p>我最开始设想在 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 外在包裹一个 <code class="language-plaintext highlighter-rouge">TaskInfoWrapper</code>， 并将其声明为如下 case1 形式， 但问题也随之而来， 程序运行会出现 <em><strong>PageFault</strong></em> 错误。 而 case2 这样试图将 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 作为可变量用 <code class="language-plaintext highlighter-rouge">UPSafeCell</code> 保护， 之后再通过 <code class="language-plaintext highlighter-rouge">lazy_static!</code> 宏声明一个 <code class="language-plaintext highlighter-rouge">[TaskInfoWrapper;MAX_APP_NUM]</code> 全局数组变量则会遇到 Copy Trait 未实现的问题。</p>
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/app-as-full.png" alt="Application address space, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Application address space, rCore</u></font>
+</div>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// case1</span>
-<span class="k">struct</span> <span class="n">TaskInfoWrapper</span> <span class="p">{</span>
-    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="p">[</span><span class="n">TaskInfo</span><span class="p">;</span> <span class="n">MAX_APP_NUM</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="c1">// case2</span>
-<span class="k">struct</span> <span class="n">TaskInfoWrapper</span> <span class="p">{</span>
-    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">TaskInfo</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<h2 id="4-于地址空间的分时多任务">4. 于地址空间的分时多任务</h2>
 
-<p>因而我想现阶段我没办法找到一种合适的办法构造一个全局数组变量去存储每个 task info， 那不如利用现有的资源， 每个 task 都维护了一个 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 变量， 此前的编程题作业在这里面添加了 <code class="language-plaintext highlighter-rouge">kernel_time</code> 以及 <code class="language-plaintext highlighter-rouge">user_time</code>， 不如再增加一个 <code class="language-plaintext highlighter-rouge">syscall_times</code> 数组变量（与所给测例一致）。</p>
+<h3 id="41-trampoline">4.1 Trampoline</h3>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-    <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-plaintext highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
 
-<p>剩下的事情就比较简单了， 给 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 提供一个可以获取当前 task 的 <code class="language-plaintext highlighter-rouge">TaskCOntrolBlock</code> 的函数， 以及一个可以在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 的 syscall 之前调用的增加 <code class="language-plaintext highlighter-rouge">syscall_times</code> 值的函数就能基本满足题干的要求， 我是这么实现的。</p>
+<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_current_task_block</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="nf">.clone</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_task_syscall_times</span><span class="p">(</span><span class="n">syscall_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.syscall_times</span><span class="p">[</span><span class="n">syscall_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// os/src/syscall/process.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">task_block</span> <span class="o">=</span> <span class="nf">get_current_task_block</span><span class="p">();</span>
-    <span class="k">unsafe</span> <span class="p">{</span>
-        <span class="o">*</span><span class="n">ti</span> <span class="o">=</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-            <span class="n">status</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.task_status</span><span class="p">,</span>
-            <span class="n">syscall_times</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.syscall_times</span><span class="p">,</span>
-            <span class="n">time</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.kernel_time</span> <span class="o">+</span> <span class="n">task_block</span><span class="py">.user_time</span><span class="p">,</span>
-        <span class="p">};</span>
-    <span class="p">}</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d5f55551e5e3428ca7c17026329c2d84fe9bde4f">commit#d5f5555</a>, 但该 commit 中我还对之前的 <code class="language-plaintext highlighter-rouge">sys_write</code> 的 checker 函数进行了更新。</p>
-</blockquote>
-
-<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
@@ -697,7 +608,7 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-01T00:00:00+08:00"><!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-04T00:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -708,7 +619,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/06/23/rcore-note-ch2.html">rCore OS Note - Chapter 2</a></div><div class="next"><span>NEXT</span><a href="/2023/07/04/rcore-note-ch4.html">rCore OS Note - Chapter 4</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/01/rcore-note-ch3.html">rCore OS Note - Chapter 3</a></div></div></div>
 
 </div>
 
@@ -751,7 +662,7 @@ function toggle() {
 				repo: 'HangX-Ma.github.io',
 				owner: 'HangX-Ma',
 				admin: ['HangX-Ma'],
-				id: '/2023/07/01/rcore-note-ch3',
+				id: '/2023/07/04/rcore-note-ch4',
                 labels: 'gitalk'.split(',').filter(l => l),
                 perPage: '15',
                 proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
@@ -1484,10 +1395,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      var key =   's2023s07s01srcore-note-ch3.html';
-      var title = "rCore OS Note - Chapter 3";
+      var key =   's2023s07s04srcore-note-ch4.html';
+      var title = "rCore OS Note - Chapter 4";
       pageview.increase(key, title, function(view) {
-        $("[data-page-key='s2023s07s01srcore-note-ch3.html']").text(view);
+        $("[data-page-key='s2023s07s04srcore-note-ch4.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {

@@ -1,5 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-03T19:48:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-06T13:57:16+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
+
+<p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-os-detail.png" alt="Address Space OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Address Space OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><strong>RISC-V</strong>
@@ -20,7 +30,243 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第三章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch3-lab">[ch3-lab]</a></li>
+      <li>rCore 第四章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/">[ch4]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-sv39-多级页表的机制">1. Sv39 多级页表的机制</h2>
+
+<div align="center">
+    <a id="translation-details"></a>
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/address-translation.png" alt="RISC-V address translation details, MIT xv6" width="600" />
+    <br />
+    <font size="2" color="#999"><u>RISC-V address translation details, MIT xv6</u></font>
+</div>
+
+<p>rCore 和 xv6 都使用了 Sv39 模式， 这意味着 64-bit 的 <strong>VA (Virtual Address)</strong> 仅有低端的 39 bits 是被使用的。 而这 39 位又被划分为两部分， 被称为 <strong>VPN (Virtual Page Number)</strong> 的高 27 位用于索引 <strong>PTE (Page Table Entry)</strong>， PTE 是存放在每个应用的 Page Table 中， 由 44 位的 <strong>PPN (Physical Page Number)</strong>  与 10 位标志位组成， 这 PTE 实际构成了虚拟地址与物理地址的索引关系。 另外低 12 位是表示页内的偏移量， 这是因为我们使用 <strong>分页内存管理</strong>， 最小的内存单位是 <em>页</em>， 这低 12 位最终会与 PPN 组合成为实际的 56 位物理地址。</p>
+
+<blockquote>
+  <p>需要明确的是 \(One Page: 2^{12} = 4096\)， 因而虚拟地址的低 12 位才被称作是页内的偏移量， 因为 12 位正好构成了一个页的大小。</p>
+</blockquote>
+
+<p>上图描述了三级页表的查询方式， Sv48 可以使用四级页表， 具体的设计依具体情况而定。 多级页表的构建是为了节省内存开销， 我们只需要按需增添 PTE。 我们可以通过三级页表进行逐级索引， 依据上图由 <em>L2</em> 的 512 个一级页表可以索引， <em>L1</em> 的 \(512\times{512}\) 个二级页表， 这样的开销会比直接映射的页表小得多。 例如我们当前仅需要建立一个地址映射， 那么只需要各使用 <em>L2</em>， <em>L1</em>， <em>L0</em> 三级页表中的一个 PTE， 我们节省了 511 个 <em>L1</em> PTE， \(511\times{512}\) 个 <em>L0</em> PTE。</p>
+
+<p>如果每个地址映射都需要经历三级查表效率肯定会低， 因而 MMU 会提供 <strong>TLB (Translation Look-Aside Buffer)</strong> 缓存来加快映射查询， 但需要注意的是， 映射关系发生改变后缓存就失效了， 我们需要通过 <code class="language-plaintext highlighter-rouge">sfence.vma</code> 指令刷新 TLB。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/page-table.png" alt="Translation process, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Translation process, rCore</u></font>
+</div>
+
+<p>在 rCore 中， 虚拟地址 <strong>(VA, Virtual Address)</strong> 中的最小单位被称为 <em>Page</em>， 其对应的物理地址 <strong>(PA, Physical Address)</strong> 中的最小单位被称为 <em>Frame</em>， 这二者的关系可以从上图可以窥见一斑， 二者大小一样都是 4096 Bytes。</p>
+
+<h2 id="2-sv39-分页管理设计">2. Sv39 分页管理设计</h2>
+
+<h3 id="21-frame-allocator---物理页帧管理">2.1 frame allocator - 物理页帧管理</h3>
+
+<p>rCore 中内核直接管理了虚拟内存和物理内存。 <em>Frame</em> 所在的空间位于 <code class="language-plaintext highlighter-rouge">ekernel</code> 与 <code class="language-plaintext highlighter-rouge">MEMORY_END</code> 之间。 rCore 使用 <code class="language-plaintext highlighter-rouge">struct StackFrameAllocator</code> 实现 <strong>FRAME_ALLOCATOR</strong>， 并开放给其他内核模块两个用以分配和回收物理地址 <em>frame</em> 的接口： <code class="language-plaintext highlighter-rouge">frame_alloc</code> 以及 <code class="language-plaintext highlighter-rouge">frame_dealloc</code>。 值得注意的是 <code class="language-plaintext highlighter-rouge">frame_alloc</code> 返回的类型是封装 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 的 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 类型， 该类型实现了 <code class="language-plaintext highlighter-rouge">Drop</code> Trait， 这是一种 RAII 的思想， 当 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的声明周期结束， 其包裹的 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 能通过编译器自动回收到 <code class="language-plaintext highlighter-rouge">FRAME_ALLOCATOR</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/frame_allocator.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FrameTracker</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="nb">Drop</span> <span class="k">for</span> <span class="n">FrameTracker</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">frame_dealloc</span><span class="p">(</span><span class="k">self</span><span class="py">.ppn</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><b>内核访问物理页帧</b></p>
+
+<p>为了让内核能访问实际的物理地址， rCore 设计了三种粒度的访问方式： 基于 PTE， 基于 Bytes， 基于变量类型。 至此， 物理地址空间的分配以及访问的框架已经建成， 后续需要做的就是构建虚拟地址与物理地址映射的 <strong>页表(Page Table)</strong>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
+
+<span class="k">impl</span> <span class="n">PhysPageNum</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_pte_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="n">PageTableEntry</span><span class="p">];</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_bytes_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">];</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">get_mut</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">T</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="22-page-table---映射表构建">2.2 Page Table - 映射表构建</h3>
+
+<p>构建页表的基本单元就是 <strong>PTE(Page Table Entry)</strong>， 这里有个关键概念需要澄清， 页表的存储位置。 其实从 xv6 的那张 <a href="#translation-details"><em>RISC-V address translation details, MIT xv6</em></a> 也可以看出， 通过索引从 <em>Lx</em> 定位到的 PPN 会指向下一级 Page Table， 这意味着 Page Table 实际上也是存储在具体的物理页帧上的， 并且每个 PTE 对应唯一的一个 PPN。 因而 rCore 对 Page Table 的数据结构的设计就包括了定位 Page Table 的 <code class="language-plaintext highlighter-rouge">root_ppn</code> 以及 Page Table 中包含的各个 PTE 项 <code class="language-plaintext highlighter-rouge">frames</code>。</p>
+
+<blockquote>
+  <p>估计是为了让 <code class="language-plaintext highlighter-rouge">root_ppn</code> 和 <code class="language-plaintext highlighter-rouge">frames</code> 的指向和含义统一才把 PTE 命名为 frame， 个人感觉直接用 PTE 会清晰很多。 这里 rCore 又提及 RAII 的思想， <code class="language-plaintext highlighter-rouge">frames</code> 内部变量通过 <code class="language-plaintext highlighter-rouge">Vec</code> 数据结构绑定 <code class="language-plaintext highlighter-rouge">FrameTracker</code>， 可以保证声明周期结束后对 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的内存自动回收。</p>
+</blockquote>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="n">root_ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
+    <span class="n">frames</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样就不难理解 <code class="language-plaintext highlighter-rouge">struct PageTable</code> 初始化的流程了， 每个 Page Table 都需要向 frame allocator 先申请一个物理页帧将其 PPN 作为 <code class="language-plaintext highlighter-rouge">root_ppn</code> 唯一标识。</p>
+
+<h3 id="23-建立-va-与-pa-的映射关系">2.3 建立 VA 与 PA 的映射关系</h3>
+
+<p>Page Table 必然是动态变化的， 程序运行的时候会通过 <code class="language-plaintext highlighter-rouge">Page Fault</code> Trap 来实现对内存页的按需分配。 当我们知道虚拟地址空间的某个 VA 的时候， 需要通过前述的 Page Table 找到或建立一个关于物理页帧映射。 Xv6 中是通过 <code class="language-plaintext highlighter-rouge">walk</code> 函数实现的， rCore 提供了两个基础函数 <code class="language-plaintext highlighter-rouge">find_pte_create</code> 以及 <code class="language-plaintext highlighter-rouge">find_pte</code>， 区别就在于是否在某一级页表的 PTE 未创建时创建一个新的 PTE。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
+
+<span class="k">impl</span> <span class="n">VirtPageNum</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">indexes</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">[</span><span class="nb">usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">]</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">vpn</span> <span class="o">=</span> <span class="k">self</span><span class="na">.0</span><span class="p">;</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">];</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="mi">3</span><span class="p">)</span><span class="nf">.rev</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vpn</span> <span class="o">&amp;</span> <span class="mi">511</span><span class="p">;</span>
+            <span class="n">vpn</span> <span class="o">&gt;&gt;=</span> <span class="mi">9</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">idx</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">find_pte_create</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">find_pte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>rCore 通过 <code class="language-plaintext highlighter-rouge">indexes</code> 解析 VPN (Virtual Page Number)， 找到三级页表每一级中的 leaf PTE 的索引号。 这里会用到 PTE 中的 Flags 部分的信息。 标志位 <code class="language-plaintext highlighter-rouge">V</code> 表示当前的 PTE 为合法有效的， 在建立新的 PTE 的时候需要更新该标志位， 否则会引起 Page Fault。 基于这几个函数， rCore 封装了两个更便利的函数方便 Page Table 的维护， 用 <code class="language-plaintext highlighter-rouge">map/unmap</code> 为当前的 Page Table 增加或删除 PTE。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
+
+<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="n">PTEFlags</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte_create</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="nd">assert!</span><span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is mapped before mapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ppn</span><span class="p">,</span> <span class="n">flags</span> <span class="p">|</span> <span class="nn">PTEFlags</span><span class="p">::</span><span class="n">V</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">unmap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="nd">assert!</span><span class="p">(</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is invalid before unmapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">empty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>手动页表查询</strong>： Page Table 还实现了两个特殊的函数模仿 MMU 获取 Page Table。 <code class="language-plaintext highlighter-rouge">from_token</code> 直接读取 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器中的 PPN 段获取一个 Page Table， 之后就能直接通过 <code class="language-plaintext highlighter-rouge">translate</code> 函数得到 VPN 对应的第三级的 PTE。</p>
+</blockquote>
+
+<h2 id="3-地址空间与抽象">3. 地址空间与抽象</h2>
+
+<p>rCore 抽象了两种概念来管理整个虚拟内存及其映射的物理内存。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-abstract.png" alt="Address space abstraction, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Address space abstraction, HangX-Ma</u></font>
+</div>
+
+<ul>
+  <li>
+    <p><strong>逻辑段： 一段连续地址的虚拟内存</strong></p>
+
+    <p>rCore 使用 <code class="language-plaintext highlighter-rouge">sruct MapArea</code> 表示逻辑段。</p>
+
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">vpn_range</code> 表明该逻辑段的在虚拟地址的范围以及长度；</li>
+      <li><code class="language-plaintext highlighter-rouge">map_type</code> 则表示了虚拟地址和物理地址的映射办法， 直接映射 （<code class="language-plaintext highlighter-rouge">MapType::Identical</code>） 又或是通过 <strong>FRAME_ALLOCATOR</strong> 随机分配物理帧 （<code class="language-plaintext highlighter-rouge">MapType::Framed</code>） （外设地址都是直接映射的， 这样区分有助于后续的应用拓展）；</li>
+      <li>既然区分了映射方式， 存储映射关系的数据结构也会不同， <code class="language-plaintext highlighter-rouge">data_frames</code> 用于存储 leaf PTE 的 PPN 与其对应的 VPN 之间的关系， 仅用在 <code class="language-plaintext highlighter-rouge">Framed</code> 映射办法。</li>
+      <li>
+        <p>最后的 <code class="language-plaintext highlighter-rouge">map_perm</code> 其实就和 Linux 系统的 RWXU 的含义基本接近了。</p>
+
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/memory_set.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">MapArea</span> <span class="p">{</span>
+    <span class="n">vpn_range</span><span class="p">:</span> <span class="n">VPNRange</span><span class="p">,</span>
+    <span class="n">data_frames</span><span class="p">:</span> <span class="n">BTreeMap</span><span class="o">&lt;</span><span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">map_type</span><span class="p">:</span> <span class="n">MapType</span><span class="p">,</span>
+    <span class="n">map_perm</span><span class="p">:</span> <span class="n">MapPermission</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>地址空间：一系列有关联的逻辑段</strong></p>
+
+    <p>rCore 通过 <code class="language-plaintext highlighter-rouge">struct MemorySet</code> 封装这些逻辑段， 这是因为虽然逻辑段本身是连续的一段虚拟地址， 但多个逻辑段之间可能并不是连续的。 注意这里的 <code class="language-plaintext highlighter-rouge">page_table</code> 是一个 <em>Root Page Table</em>， 包含了该所有的 PTE 的物理页帧， 而 <code class="language-plaintext highlighter-rouge">areas</code> 则包含了数据所在的物理页帧， 这样的的设计构成了一个地址空间所需的所有的物理页帧。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
+
+  <span class="k">pub</span> <span class="k">struct</span> <span class="n">MemorySet</span> <span class="p">{</span>
+      <span class="n">page_table</span><span class="p">:</span> <span class="n">PageTable</span><span class="p">,</span>
+      <span class="n">areas</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">MapArea</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="31-内核地址空间">3.1 内核地址空间</h3>
+
+<p>Sv39 规定 64 位虚拟地址的 [63:39] 这 25 位必须和第 38 位相同， 否则 MMU 会直接认定它是一个不合法的虚拟地址。 因而虚拟地址空间可以被划分为低地址的 \(2^{39}\) bytes (512 GB)， 以及当第 38 位为 1 时的 512 GB， 分别称为 <em>High Half</em> 以及 <em>Low Half</em>。 rCore 设计的内核空间如下图所示。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-high.png" alt="Kernel address space high half, rCore" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Kernel address space high half, rCore</u></font>
+</div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-low.png" alt="Kernel address space low half, rCore" width="300" />
+    <br />
+    <font size="2" color="#999"><u>Kernel address space low half, rCore</u></font>
+</div>
+
+<h3 id="32-应用地址空间">3.2 应用地址空间</h3>
+
+<p>rCore 设计的内核空间如下图所示， 具体含义和解释见 rCore Tutorial 相关章节的内容。 需要注意的是， 几个具有不同访问权限的逻辑段之间需要通过页面对齐进行限制与区分。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-04-rcore-note-ch4/app-as-full.png" alt="Application address space, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Application address space, rCore</u></font>
+</div>
+
+<h2 id="4-于地址空间的分时多任务">4. 于地址空间的分时多任务</h2>
+
+<h3 id="41-trampoline">4.1 Trampoline</h3>
+
+<p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-plaintext highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
+
+<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第三章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rcore-sp23/tree/ch3">[ch3]</a></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -1920,146 +2166,4 @@ Test project /home/cs144/minnow/build
 
 Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  45.41 sec
 Built target check5
-</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)</title><link href="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 4: down the stack (the network interface)" /><published>2023-05-27T00:00:00+08:00</published><updated>2023-05-27T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/27/cs144-lab4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/27/cs144-lab4.html"><![CDATA[<p>记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 <em><strong>TCPReceiver</strong></em> 和 <em><strong>TCPSender</strong></em> 结合起来）。
-<!--more--></p>
-<ul>
-  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
-  <li>CS144 Spring 2023 Lab4 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check4.pdf">Lab Checkpoint 4: down the stack (the network interface)</a>。</li>
-  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
-</ul>
-
-<h2 id="1-内容简述">1. 内容简述</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-05-27-cs144-lab4/check4-structure.png" alt="network interface structure" width="300" />
-    <br />
-    <font size="2" color="#999"><u>network interface structure</u></font>
-</div>
-
-<p>Lab4 要求实现网络接口部分， 打通网络数据报 （Internet datagrams） 和链路层的以太网帧（link-layer Ethernet frames） 之间的桥梁。 之前的实验实现了 TCP segments 在使用 TCP 协议的设备之间的传输， 而 TCP 报文是如何传递的？ TCP报文有三种方式可被传送至远程服务器：</p>
-
-<ul>
-  <li>
-    <p><em><strong>TCP-in-UDP-in-IP：</strong></em> TCP 报文会被置于用户的数据报的 payload 中， 在用户空间下这是最简单的实现方式： Linux 提供接口 （如 <em><strong>UDPSocket</strong></em>）， 而用户侧仅需要提供 payload， 目标地址， Linux 内核会负责将 UDP 报部， IP 报头， 以太网报头组装起来， 将这个网络包发向下一个 hop。 <strong>Linux 内核会保证每个 socket 会有独立的本地与远端地址以及端口号， 并且保证这些数据在应用层的相互隔离</strong>。</p>
-  </li>
-  <li>
-    <p><em><strong>TCP-in-IP：</strong></em> 一般情况下， TCP 报文会直接放在 Internet datagrams 中， 这通常被成为 “TCP/IP”。 Linux 会提供一个 TUN 设备接口， 需要应用层提供整个 Internet datagram， 而 Linux 内核则会处理剩下的部分。 但此时应用层需要自己构建整个 IP 报头以及 payload 部分。</p>
-  </li>
-  <li>
-    <p><em><strong>TCP-in-IP-in-Ethernet：</strong></em> 以上的方法依赖Linux内核来实现的协议栈操作， 每次用户向 TUN 设备写入 IP datagrams 时， Linux 都需要构建正确的带有 IP datagrams 的以太网帧作为 payload。 这意味着 Linux 需要知悉下一个 hop 的以太网目的地址， 给出其 IP 地址。 否则 Linux 会以广播的形式请求这些信息。</p>
-
-    <p>这些功能是由 <em><strong>Network Interface</strong></em> 实现的， 该组件能将 IP 数据报转义成以太网帧等等， 之后会传入 TAP 设备 （类似 TUN 设备但更底层）， 实现对 link-layer 的数据帧的传输。</p>
-  </li>
-</ul>
-
-<p>网络接口的大部分工作是， <strong>为每个下一跳 IP 地址查找(和缓存)以太网地址</strong>。而这种协议被称为 <strong>地址解析协议 ARP （Address Resolution Protocol）</strong>。</p>
-
-<blockquote>
-  <p><a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">Address Resolution Protocol - wiki</a></p>
-</blockquote>
-
-<h2 id="2-network-interface-实现">2. Network Interface 实现</h2>
-
-<h3 id="21-默认接口">2.1 默认接口</h3>
-
-<p>在 Lab4 的 <em><strong>Network Interface</strong></em> 中我们需要实现以下几个部分， 维护一个 IP 地址到 Ethernet 地址的映射表。 这个映射类似缓存， 能提高网络栈的传输效率。</p>
-
-<ol>
-  <li><strong>send datagram：</strong> 该方法被 TCPConnection 或者 router 所调用， 这个接口就是将待发送的 Internet(IP) datagrams 转义为以太网帧并最终发送出去。
-    <ul>
-      <li>如果以太网目的地址是已知的就直接发送， 创建以太网帧 （<code class="language-plaintext highlighter-rouge">type = EthernetHeader::TYPE IPv4</code>）， 将 payload 设置为串行的数据报文， 并设置源地址和目标地址。</li>
-      <li>如果以太网目的地址未知， 广播下一跳的以太网地址的 ARP 请求， 并将 IP 报文放入队列中待 ARP 回复收到后能将其发送出去。
-        <blockquote>
-          <p>需要间隔 5 秒再发送相同的 ARP 请求， 并且只有在收到目的以太网地址后再将数据报放入队列中。 若没有收到目的以太网地址， 我们需要将 dgrams 以及其对应的 Address 都暂存在列表中， 以供之后收到 ARP reply 后再进行发送， 否则这部分数据就会丢失了。</p>
-        </blockquote>
-      </li>
-    </ul>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">send_datagram</span><span class="p">(</span><span class="k">const</span> <span class="n">InternetDatagram</span> <span class="o">&amp;</span><span class="n">dgram</span><span class="p">,</span> <span class="k">const</span> <span class="n">Address</span> <span class="o">&amp;</span><span class="n">next_hop</span><span class="p">);</span>
-</code></pre></div>    </div>
-  </li>
-  <li><strong>recv frame：</strong> 该方法接收来自网络的以太网帧， 但需要忽略任何目的地址非网络接口部分的帧 （广播地址或者存储在 <code class="language-plaintext highlighter-rouge">_ethernet_address</code> 中的接口自身的以太网地址）。
-    <ul>
-      <li>若为 IPv4 帧就将其以 <em><strong>InternetDatagramF</strong></em> 进行解析， 若成功的就将结果的 <em><strong>InternetDatagramF</strong></em> 返回给调用者。</li>
-      <li>若为 ARP 帧就将其以 <em><strong>ARPMessage</strong></em>  进行解析， 若成功则缓存发送方 IP 地址与以太网帧的映射 30 秒。 若这个 ARP 请求是询问我们的 IP 地址， 就回复正确的 ARP 答复。
-        <blockquote>
-          <p>根据 FAQs 中的答疑， 我们需要自行创建一个用以存储映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>。</p>
-        </blockquote>
-      </li>
-    </ul>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">InternetDatagram</span><span class="o">&gt;</span> <span class="n">recv_frame</span><span class="p">(</span><span class="k">const</span> <span class="n">EthernetFrame</span> <span class="o">&amp;</span><span class="n">frame</span><span class="p">);</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><strong>maybe send：</strong> 该方法在必要时发送 <em><strong>EthernetFrame</strong></em>。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">EthernetFrame</span><span class="o">&gt;</span> <span class="n">maybe_send</span><span class="p">();</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><strong>tick：</strong> 记录时间， 以使得任何已经过期的 IP 地址到 Ethernet 地址的映射失效。</p>
-
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">ms_since_last_tick</span><span class="p">);</span>
-</code></pre></div>    </div>
-  </li>
-</ol>
-
-<p class="warning"><em><strong>FAQs and special cases</strong></em> 中的信息都很有帮助， 可以当作一种提供解题思路的 Hints。</p>
-
-<h3 id="22-额外说明">2.2 额外说明</h3>
-
-<h4 id="ethernet-frames">Ethernet Frames</h4>
-
-<p><em><strong>EthernetFrame</strong></em> 是我们需要传输给 TAP 设备的数据， 根据已有信息， 我们只需要将组装好的 <em><strong>EthernetFrame</strong></em> 用 <code class="language-plaintext highlighter-rouge">queue</code> 数据结构封装即可。</p>
-
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// outbound Ethernet frames which will be sent by the Network Interface</span>
-<span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">EthernetFrame</span><span class="o">&gt;</span> <span class="n">outbound_frames_</span> <span class="p">{};</span>
-</code></pre></div></div>
-
-<h4 id="arp-table">ARP Table</h4>
-
-<p>从以上接口的描述可以看出， 我们需要建立一个存储 ARP 映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>， IP-To-Ethernet。 根据 <a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">wiki</a> 关于 ARP 原理章节的阐述， 这个表中的 ARP 数据需要有一个变量存储 <em><strong>EthernetFrame</strong></em> 表示映射目标， 以及 <em><strong>ttl (time-to-live)</strong></em> 表示该条 ARP 信息的生命周期 （默认是 30s）。 另外，在 FAQs 中有这么一句：</p>
-
-<p class="info"><strong>Q:</strong> <em>How do I convert an IP address that comes in the form of an Address object, into a raw 32-bit integer that I can write into the ARP message?</em>
-<br />
-<strong>A:</strong> Use the <code class="language-plaintext highlighter-rouge">Address::ipv4 numeric()</code> method.</p>
-
-<p>这说明 ARP 的映射应当是 <code class="language-plaintext highlighter-rouge">uint32_t</code> 类型到 <code class="language-plaintext highlighter-rouge">arp_t</code> 类型， 我们可以用一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储映射信息。 除此之外我们还注意到， 同一个 ARP 的 ARP 请求的间隔需要 5s， 那么除了映射信息外， 我们还需要一个 <code class="language-plaintext highlighter-rouge">list</code> 结构用以存储绑定 <em><strong>InternetDatagram</strong></em> 和 <em><strong>Address</strong></em> 的等待列表 <code class="language-plaintext highlighter-rouge">arp_datagrams_waiting_list_</code>。 另外， 为了记录 ARP 请求的声明周期， 我们还需要一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储 <em><strong>numeric IP</strong></em> 与该条 ARP 请求的声明周期的映射 <code class="language-plaintext highlighter-rouge">arp_requests_lifetime_</code>。</p>
-
-<blockquote>
-  <p>这里使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构是头文件中已经包含了相关的库文件， 另外这部分信息具有时效的不确定性， 我们并不清楚 ARP 请求究竟哪一个会在下一刻返回， 所以在这部分信息我们需要逐个遍历， 将已经获取目标以太网地址的数据包组装后放入发送队列中， 并从 <code class="language-plaintext highlighter-rouge">list</code> 中移除。 故而使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构能够利用链表插入/移除数据的快速性的优势， 而不用考虑查询带来的负面影响。</p>
-</blockquote>
-
-<p>这样关于 ARP Table 的数据结构就可以按如下格式创建。 需要注意的是 TTL 的时间单位是 ‘毫秒’， 而我们设定的边界值都是以 ‘秒’ 为单位。</p>
-
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ARP will be stored for 30s at most, which can reduce the length of ARP table,</span>
-<span class="c1">// increasing the enquiry speed. What's more, </span>
-<span class="k">const</span> <span class="kt">size_t</span> <span class="n">ARP_DEFAULT_TTL</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
-<span class="k">const</span> <span class="kt">size_t</span> <span class="n">ARP_REQUEST_DEFAULT_TTL</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">arp</span> <span class="p">{</span>
-    <span class="n">EthernetAddress</span> <span class="n">eth_addr</span><span class="p">;</span> <span class="c1">// mac address</span>
-    <span class="kt">size_t</span> <span class="n">ttl</span><span class="p">;</span> <span class="c1">// time to live</span>
-<span class="p">}</span> <span class="n">arp_t</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="cm">/* ipv4 numeric */</span><span class="p">,</span> <span class="n">arp_t</span><span class="o">&gt;</span> <span class="n">arp_table_</span> <span class="p">{};</span>
-<span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">Address</span><span class="p">,</span> <span class="n">InternetDatagram</span><span class="o">&gt;&gt;</span> <span class="n">arp_requests_waiting_list_</span> <span class="p">{};</span>
-</code></pre></div></div>
-
-<h4 id="内存泄漏">内存泄漏</h4>
-
-<p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-plaintext highlighter-rouge">erase</code> 函数之后又用了 <code class="language-plaintext highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-plaintext highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-plaintext highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
-
-<h2 id="3-测试结果">3. 测试结果</h2>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check4
-<span class="o">[</span>1/1] <span class="nb">cd</span> /home/cs144/minnow/build <span class="o">&amp;&amp;</span> /usr/bin/ctest <span class="nt">--output-on-failure</span> <span class="nt">--stop-on-failure</span> <span class="nt">--timeout</span> 12 <span class="nt">-R</span> <span class="s1">'^net_interface'</span>
-Test project /home/cs144/minnow/build
-    Start  1: compile with bug-checkers
-1/2 Test  <span class="c">#1: compile with bug-checkers ........   Passed   20.14 sec</span>
-    Start 35: net_interface
-2/2 Test <span class="c">#35: net_interface ....................   Passed    0.15 sec</span>
-
-100% tests passed, 0 tests failed out of 2
-
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  20.29 sec
-</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab4: down the stack (the network interface) 的思路与实践难点。 与以往实验不同的是， spring 2023 版本没有要求实现 TCP Connection 部分 （将 TCPReceiver 和 TCPSender 结合起来）。]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab5: building an IP router 的思路与实践难点。]]></summary></entry></feed>
