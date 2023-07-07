@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-06T13:57:16+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-07T10:05:55+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
 
 <p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
@@ -239,13 +239,172 @@
     <font size="2" color="#999"><u>Application address space, rCore</u></font>
 </div>
 
-<h2 id="4-于地址空间的分时多任务">4. 于地址空间的分时多任务</h2>
+<h2 id="4-基于地址空间的分时多任务">4. 基于地址空间的分时多任务</h2>
 
 <h3 id="41-trampoline">4.1 Trampoline</h3>
 
 <p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-plaintext highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
 
-<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>
+
+<h3 id="42-改进-syscall">4.2 改进 syscall</h3>
+
+<p>rCore 的手册更改了 <code class="language-plaintext highlighter-rouge">sys_write</code> 系统调用， 通过 <code class="language-plaintext highlighter-rouge">translated_byte_buffer</code> 在内核空间中开辟了一个可以访问应用数据的区域（实际上是将应用数据从用户态虚拟地址空间拷贝到了内核态虚拟地址空间以供内核访问）。 相应的， 前述章节需要访问应用态数据的系统调用均需要通过这种间接的方式进行数据的访问与更改。 这也就是 <code class="language-plaintext highlighter-rouge">sys_get_time</code> 以及 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 在第四章失效的原因。</p>
+
+<h2 id="5-课后练习">5. 课后练习</h2>
+
+<h3 id="51-编程练习">5.1 编程练习</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
+</ul>
+
+<h3 id="52-实验练习">5.2 实验练习</h3>
+
+<h4 id="重写-sys_get_time-和-sys_task_info">重写 <em>sys_get_time</em> 和 <em>sys_task_info</em></h4>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_get_time</span><span class="p">(</span><span class="n">ts</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TimeVal</span><span class="p">,</span> <span class="n">_tz</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">us</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">dst_vec</span> <span class="o">=</span> <span class="nf">translated_byte_buffer</span><span class="p">(</span>
+        <span class="nf">current_user_token</span><span class="p">(),</span>
+        <span class="n">ts</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TimeVal</span><span class="o">&gt;</span><span class="p">()</span>
+    <span class="p">);</span>
+    <span class="k">let</span> <span class="k">ref</span> <span class="n">time_val</span> <span class="o">=</span> <span class="n">TimeVal</span> <span class="p">{</span>
+            <span class="n">sec</span><span class="p">:</span> <span class="n">us</span> <span class="o">/</span> <span class="mi">1_000_000</span><span class="p">,</span>
+            <span class="n">usec</span><span class="p">:</span> <span class="n">us</span> <span class="o">%</span> <span class="mi">1_000_000</span><span class="p">,</span>
+    <span class="p">};</span>
+    <span class="k">let</span> <span class="n">src_ptr</span> <span class="o">=</span> <span class="n">time_val</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">TimeVal</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span> <span class="k">in</span> <span class="n">dst_vec</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">unit_len</span> <span class="o">=</span> <span class="n">dst</span><span class="nf">.len</span><span class="p">();</span>
+        <span class="k">unsafe</span> <span class="p">{</span>
+            <span class="n">dst</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span>
+                <span class="n">src_ptr</span><span class="nf">.wrapping_byte_add</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="n">unit_len</span><span class="p">)</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span>
+                <span class="n">unit_len</span><span class="p">)</span>
+            <span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="mi">0</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">dst_vec</span> <span class="o">=</span> <span class="nf">translated_byte_buffer</span><span class="p">(</span>
+        <span class="nf">current_user_token</span><span class="p">(),</span>
+        <span class="n">ti</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TaskInfo</span><span class="o">&gt;</span><span class="p">()</span>
+    <span class="p">);</span>
+    <span class="k">let</span> <span class="k">ref</span> <span class="n">task_info</span> <span class="o">=</span> <span class="n">TaskInfo</span> <span class="p">{</span>
+        <span class="n">status</span><span class="p">:</span> <span class="nf">get_current_task_status</span><span class="p">(),</span>
+        <span class="n">syscall_times</span><span class="p">:</span> <span class="nf">get_current_task_syscall_times</span><span class="p">(),</span>
+        <span class="n">time</span><span class="p">:</span> <span class="nf">get_current_task_time_cost</span><span class="p">(),</span>
+    <span class="p">};</span>
+    <span class="c1">// println!("[kernel]: time {} syscall_time {}", task_info.time, task_info.syscall_times[super::SYSCALL_GET_TIME]);</span>
+    <span class="k">let</span> <span class="n">src_ptr</span> <span class="o">=</span> <span class="n">task_info</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskInfo</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span> <span class="k">in</span> <span class="n">dst_vec</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">unit_len</span> <span class="o">=</span> <span class="n">dst</span><span class="nf">.len</span><span class="p">();</span>
+        <span class="k">unsafe</span> <span class="p">{</span>
+            <span class="n">dst</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span>
+                <span class="n">src_ptr</span><span class="nf">.wrapping_byte_add</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="n">unit_len</span><span class="p">)</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span>
+                <span class="n">unit_len</span><span class="p">)</span>
+            <span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="mi">0</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/b1ac23ab6103d75398e859fe68df01789950cf0e">commit#b1ac23a</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/db314555940997712b4afba2c19ce41c5c8c26ed">commit#db31455</a></p>
+</blockquote>
+
+<h4 id="mmap-和-munmap-匿名映射"><em>mmap</em> 和 <em>munmap</em> 匿名映射</h4>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
+
+<span class="cd">/// port: page permission [2:0] X|W|R</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_mmap</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">%</span> <span class="n">PAGE_SIZE</span> <span class="o">!=</span> <span class="mi">0</span> <span class="cm">/* start need to be page aligned */</span> <span class="p">||</span> 
+        <span class="n">port</span> <span class="o">&amp;</span> <span class="o">!</span><span class="mi">0x7</span> <span class="o">!=</span> <span class="mi">0</span> <span class="cm">/* other bits of port needs to be zero */</span> <span class="p">||</span>
+        <span class="n">port</span> <span class="o">&amp;</span> <span class="mi">0x7</span> <span class="o">==</span><span class="mi">0</span> <span class="cm">/* No permission set, meaningless */</span> <span class="p">||</span>
+        <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">MAXVA</span> <span class="cm">/* mapping range should be an legal address */</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// check the range [start, start + len)</span>
+    <span class="k">let</span> <span class="n">start_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="nf">.floor</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">end_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">len</span><span class="p">)</span><span class="nf">.ceil</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">vpns</span> <span class="o">=</span> <span class="nn">VPNRange</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">start_vpn</span><span class="p">,</span> <span class="n">end_vpn</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">vpn</span> <span class="k">in</span> <span class="n">vpns</span> <span class="p">{</span>
+       <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">pte</span><span class="p">)</span> <span class="o">=</span> <span class="nf">get_current_task_page_table</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// we find a pte that has been mapped</span>
+            <span class="k">if</span> <span class="n">pte</span><span class="nf">.is_valid</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+       <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c1">// all ptes in range has pass the test</span>
+    <span class="nf">create_new_map_area</span><span class="p">(</span>
+        <span class="n">start_vpn</span><span class="nf">.into</span><span class="p">(),</span>
+        <span class="n">end_vpn</span><span class="nf">.into</span><span class="p">(),</span>
+        <span class="nn">MapPermission</span><span class="p">::</span><span class="nf">from_bits_truncate</span><span class="p">((</span><span class="n">port</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">|</span> <span class="nn">MapPermission</span><span class="p">::</span><span class="n">U</span>
+    <span class="p">);</span>
+    <span class="mi">0</span>
+<span class="p">}</span>
+
+
+<span class="cd">/// munmap the mapped virtual addresses</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_munmap</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">MAXVA</span> <span class="p">||</span> <span class="n">start</span> <span class="o">%</span> <span class="n">PAGE_SIZE</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// avoid undefined situation</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">mlen</span> <span class="o">=</span> <span class="n">len</span><span class="p">;</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">MAXVA</span> <span class="o">-</span> <span class="n">len</span> <span class="p">{</span>
+        <span class="n">mlen</span> <span class="o">=</span> <span class="n">MAXVA</span> <span class="o">-</span> <span class="n">start</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nf">unmap_consecutive_area</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">mlen</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
+
+<span class="c1">//* ch4-lab2, mmap, munmap</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_current_task_page_table</span><span class="p">(</span><span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">PageTableEntry</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
+    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.translate</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">create_new_map_area</span><span class="p">(</span><span class="n">start_va</span><span class="p">:</span> <span class="n">VirtAddr</span><span class="p">,</span> <span class="n">end_va</span><span class="p">:</span> <span class="n">VirtAddr</span><span class="p">,</span> <span class="n">perm</span><span class="p">:</span> <span class="n">MapPermission</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
+    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.insert_framed_area</span><span class="p">(</span><span class="n">start_va</span><span class="p">,</span> <span class="n">end_va</span><span class="p">,</span> <span class="n">perm</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">unmap_consecutive_area</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
+    <span class="k">let</span> <span class="n">start_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="nf">.floor</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">end_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">len</span><span class="p">)</span><span class="nf">.ceil</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">vpns</span> <span class="o">=</span> <span class="nn">VPNRange</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">start_vpn</span><span class="p">,</span> <span class="n">end_vpn</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">vpn</span> <span class="k">in</span> <span class="n">vpns</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">pte</span><span class="p">)</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.translate</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="o">!</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.get_page_table</span><span class="p">()</span><span class="nf">.unmap</span><span class="p">(</span><span class="n">vpn</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// Also unmapped if no PTE found</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="mi">0</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5e57b472225f7d037535038ba6c037e9566cfeb3">commit#5e57b47</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/165bda860fb29ab4c3af68e308b3f82080825031">commit#165bda8</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><strong>RISC-V</strong>
