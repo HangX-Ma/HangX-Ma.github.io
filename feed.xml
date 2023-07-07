@@ -1,5 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-07T10:16:58+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-07T18:22:28+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<div align="center">
+    <img src="/norobots/images/2023-07-07-rcore-note-ch5/process-os-detail.png" alt="Process OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Process OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><strong>RISC-V</strong>

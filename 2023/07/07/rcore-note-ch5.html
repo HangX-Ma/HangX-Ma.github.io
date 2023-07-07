@@ -12,7 +12,7 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 4 - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 5 - 一只豆腐</title>
 
 <meta name="description" content="第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
@@ -282,12 +282,12 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 07, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 920 words </span>
+                <span> Total 942 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
                 <span> About 3 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s07srcore-note-ch5.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 4</h1></header></div><p class="overlay__excerpt">第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s07srcore-note-ch5.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 5</h1></header></div><p class="overlay__excerpt">第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -297,11 +297,17 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 4"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-07T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 5"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-07T00:00:00+08:00">
     <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="0-资料汇总">0. 资料汇总</h2>
+<div class="article__content" itemprop="articleBody"><div align="center">
+    <img src="/norobots/images/2023-07-07-rcore-note-ch5/process-os-detail.png" alt="Process OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Process OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><strong>RISC-V</strong>
@@ -1178,7 +1184,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s07s07srcore-note-ch5.html';
-      var title = "rCore OS Note - Chapter 4";
+      var title = "rCore OS Note - Chapter 5";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s07s07srcore-note-ch5.html']").text(view);
       });
