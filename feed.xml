@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-08T23:11:57+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-09T12:53:12+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
 
 <div align="center">
@@ -28,7 +28,7 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第五章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch5]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore 第五章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch5">[ch5]</a></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -416,7 +416,71 @@
   <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/74015ec9fd1e41526fe855d4d9744f59657d9d85">commit#74015ec</a></p>
 </blockquote>
 
-<h4 id="stride-调度算法">stride 调度算法</h4>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
+<h4 id="stride-调度算法">stride 调度算法</h4>
+
+<p>stride 调度需要存储两个变量， 一个是 <code class="language-plaintext highlighter-rouge">stride</code>， 表示当前的进程已经运行的 “长度”， 这个长度是以 <code class="language-plaintext highlighter-rouge">pass</code> 为单位进行更新的。 那么第二个变量就是 <code class="language-plaintext highlighter-rouge">priority</code>， 表示调度的优先级， 于是有公式成立：</p>
+
+\[pass = BIG\_STRIDE/priority\]
+
+<p>其中 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 被定义为一个预定义的极大常数， 则该调度方案为每个进程分配的时间将与其优先级成正比。 实验中对这些变量还有以下的规约：</p>
+
+<ul>
+  <li>stride 调度要求进程优先级 \(\ge{2}\) ，所以设定进程优先级 \(\le{1}\) 会导致错误。</li>
+  <li>进程初始 stride 设置为 0。</li>
+  <li>进程初始优先级设置为 16。</li>
+</ul>
+
+<p>由于 priority \(\ge\) 2， 因而 pass \(\le\) BIG_STRIDE/2， 在不考虑溢出的情况下，  <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code>， 始终成立， 这一点用反证法可以证明。 但现实中必然需要考虑溢出， 那么这里可以利用符号整数的特性， 避免在溢出后某些本应延后调度的进程因为 <code class="language-plaintext highlighter-rouge">stride</code> 值溢出后从小值开始的缘故被优先调度。 所以， 可以将 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 设置为 <code class="language-plaintext highlighter-rouge">u64</code> 类型最大值， 结合 <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code> 亦会有 <code class="language-plaintext highlighter-rouge">STRIDE_MIN – STRIDE_STRIDE &gt;= -BigStride / 2</code>， 这个与 <code class="language-plaintext highlighter-rouge">i64</code> 的表示方式非常相似， 因而可以这样设计 stride 的比较方式：</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">cmp</span><span class="p">::</span><span class="n">Ordering</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="nf">Stride</span><span class="p">(</span><span class="nb">u64</span><span class="p">);</span>
+
+<span class="k">impl</span> <span class="nb">PartialOrd</span> <span class="k">for</span> <span class="n">Stride</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">partial_cmp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Ordering</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="nf">Some</span><span class="p">((</span><span class="k">self</span><span class="na">.0</span> <span class="k">as</span> <span class="nb">i64</span><span class="p">)</span><span class="nf">.cmp</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">other</span><span class="na">.0</span> <span class="k">as</span> <span class="nb">i64</span><span class="p">)))</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="nb">PartialEq</span> <span class="k">for</span> <span class="n">Stride</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">eq</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">bool</span> <span class="p">{</span>
+        <span class="k">false</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>我自己尝试了去实现 BinaryHeap 进行调度， 但是程序会卡死在 initproc 中， 作为一个 Rust 新手以及确实很久没接触算法了， 不知道什么地方除了问题， 于是就用了最简单的思路， 在每次 <code class="language-plaintext highlighter-rouge">fetch</code> 下一个 task 之前对这个队列中的 task 做检查， 找到最小的 stride。 这里每次将初始最小值设定为 <code class="language-plaintext highlighter-rouge">0x7FFF_FFFF</code> 是为了解决前述的溢出问题， 本质上利用有符号整数的思想就是把大于 <code class="language-plaintext highlighter-rouge">MAX/2</code> 等价为负数。 这样 TIPs 中说明的 <em>使用 8 bits 存储 stride, BIG_STRIDE = 255, 则: <code class="language-plaintext highlighter-rouge">(125 &lt; 255) == false</code>, <code class="language-plaintext highlighter-rouge">(129 &lt; 255) == true</code></em> 就好理解了。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/manager.rs</span>
+<span class="cd">/// A simple FIFO scheduler.</span>
+<span class="k">impl</span> <span class="n">TaskManager</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="cd">/// Take a process out of the ready queue</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">fetch</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">min_index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">min_stride</span> <span class="o">=</span> <span class="mi">0x7FFF_FFFF</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="k">in</span> <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+            <span class="k">if</span> <span class="n">inner</span><span class="nf">.get_status</span><span class="p">()</span> <span class="o">==</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Ready</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="n">inner</span><span class="py">.stride</span> <span class="o">&lt;</span> <span class="n">min_stride</span> <span class="p">{</span>
+                    <span class="n">min_stride</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.stride</span><span class="p">;</span>
+                    <span class="n">min_index</span> <span class="o">=</span> <span class="n">idx</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.get</span><span class="p">(</span><span class="n">min_index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
+            <span class="n">inner</span><span class="py">.stride</span> <span class="o">+=</span> <span class="n">BIG_STRIDE</span> <span class="o">/</span> <span class="n">inner</span><span class="py">.priority</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.remove</span><span class="p">(</span><span class="n">min_index</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5abe01a7d69f4f0486888c78acf065e4ee296989">commit#5abe01a</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
 
 <p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
 
