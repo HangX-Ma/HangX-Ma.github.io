@@ -1,5 +1,264 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-09T12:53:12+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-10T19:54:46+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
+  <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
+
+<dl>
+  <dt>磁盘块设备接口层</dt>
+  <dd>定义了以块大小为单位对磁盘块设备进行读写的 trait 接口</dd>
+  <dt>块缓存层</dt>
+  <dd>在内存中缓存磁盘块的数据， 避免频繁读写磁盘</dd>
+  <dt>磁盘数据结构层</dt>
+  <dd>磁盘上的超级块、 位图、 索引节点、 数据块、 目录项等核心数据结构和相关处理</dd>
+  <dt>磁盘块管理器层</dt>
+  <dd>合并了上述核心数据结构和磁盘布局所形成的磁盘文件系统数据结构， 以及基于这些结构进行文件系统的创建等操作， 以及对磁盘块进行分配和回收处理</dd>
+  <dt>索引节点层</dt>
+  <dd>管理索引节点（即文件控制块）数据结构， 并实现文件创建/文件打开/文件读写等成员函数， 以向上支持文件操作相关的系统调用</dd>
+</dl>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/fsos-fsdisk.png" alt="Filesystem OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Filesystem OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第六章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch6]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-文件系统">1. 文件系统</h2>
+
+<p>文件系统交互的主要对象是磁盘这类的存储器， 这类存储器和 RAM 的管理方式不同， 这类存储器以扇区 （一般为 512 bytes） 进行读写， 以块为单位进行存储 （一个块为由多个扇区组成）。 文件系统的职责就是将逻辑上的目录树结构映射存储到这类存储器中并进行管理。 另外， 为了适配管理多个文件系统， 在此基础上抽象出一层 <strong>虚拟文件系统（VFS, Virtual File System）</strong> 提供统一的接口和目录树的通用格式方便进行管理。</p>
+
+<h2 id="2-块设备接口层">2. 块设备接口层</h2>
+
+<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-plaintext highlighter-rouge">Send</code>， <code class="language-plaintext highlighter-rouge">Sync</code>， <code class="language-plaintext highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
+
+<ul>
+  <li><em>A type is Send if it is safe to send it to another thread.</em></li>
+  <li><em>A type is Sync if it is safe to share between threads (<code class="language-plaintext highlighter-rouge">T</code> is Sync if and only if <code class="language-plaintext highlighter-rouge">&amp;T</code> is Send).</em></li>
+</ul>
+
+<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-plaintext highlighter-rouge">Arc&lt;dyn BlockDevice&gt;</code> 表明该 trait 类型， 被 <code class="language-plaintext highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-plaintext highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-plaintext highlighter-rouge">dyn</code> 关键字。</p>
+
+<p>用到 <code class="language-plaintext highlighter-rouge">Any</code> 与 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-plaintext highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-plaintext highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_dev.rs</span>
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">BlockDevice</span> <span class="p">:</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span> <span class="o">+</span> <span class="n">Any</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">read_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
+    <span class="k">fn</span> <span class="nf">write_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://doc.rust-lang.org/nomicon/send-and-sync.html">The Rustonomicon - 8.2. Send and Sync</a><br />
+<a href="https://rustwiki.org/zh-CN/rust-by-example/trait/dyn.html">通过例子学 Rust 中文版 - 16.2. 使用 dyn 返回 trait</a><br />
+<a href="https://www.jianshu.com/p/28386b52c607">Rust std-any 模块详解</a></p>
+</blockquote>
+
+<h2 id="3-块缓存层">3. 块缓存层</h2>
+
+<p>块缓存层的存在是为了减少块设备频繁读写的开销， 相较于直接从 RAM 中获取数据， 读写磁盘的速度还是太慢了， 因而我们在软件层面实现块的缓存以加快数据的读写。 但缓存还得解决缓存一致性以及同步性等问题， rCore 使用块缓存全局管理器解决这些问题， 并通过该管理器一次性让更多的块合并操作， 这是因为连续的块的操作能够加速存取速度。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCache</span> <span class="p">{</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">],</span>
+    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">modified</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
+</blockquote>
+
+<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
+    <span class="n">queue</span><span class="p">:</span> <span class="n">VecDeque</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">usize</span><span class="p">,</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="4-磁盘布局及磁盘上数据结构">4. 磁盘布局及磁盘上数据结构</h2>
+
+<p>前面几个部分比较好理解， 个人认为这个小节和 inode 小节最为关键且复杂。 要理解磁盘布局先得理解几个概念：</p>
+
+<dl>
+  <dt>索引节点(Inode, Index Node)</dt>
+  <dd>Inode 编码了文件/目录的底层编号， 这个数据结构包含文件大小， 访问权限， 文件类型等信息， 还包含对数据的索引信息， 通过这些索引信息就能够找到数据块存储在磁盘上的位置。</dd>
+  <dt>位图(Bitmap)</dt>
+  <dd>位图用以标注索引节点以及数据块的分配情况， 通过位图能够方便分配和回收在磁盘上的存储资源。</dd>
+</dl>
+
+<p>rCore 中的磁盘布局如下图所示， 他们是以 Block ID 顺序排布的， 后续根据这个顺序对关键数据结构进行阐述。 这里需要注意的是， rCore 的假定内核仅管理一个块设备， 否则仅以 Block ID 作为标识， 在访问多个不同的块设备的时候会引起歧义。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/layouts.png" alt="Disk Layouts, HangX-Ma" width="800" /><a id="disk-layouts"></a>
+    <br />
+    <font size="2" color="#999"><u>Disk Layouts, HangX-Ma</u></font>
+</div>
+
+<h3 id="41-super-block">4.1 Super Block</h3>
+
+<p>一句话可以概括， Super Block 存储了后续四个分区占用的 <strong>块数量</strong>， 并利用 <strong>MAGIC</strong> 验证文件系统的合法性。</p>
+
+<h3 id="42-inodedata-bitmap">4.2 Inode/Data Bitmap</h3>
+
+<p>从磁盘布局可以看出， rCore 通过 <strong>Inode Bitmap</strong> 和 <strong>Data Bitmap</strong> 分别管理索引节点和数据块。 每个 Bitmap 可以占据多个块， 在 rCore 中一个块的大小和一个扇区的大小一致都是 512 bytes， 相当于每个 Bitmap 实际上可以管理 \(4096 \times n\) 个索引节点或数据块。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/bitmap.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Bitmap</span> <span class="p">{</span>
+    <span class="n">start_block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">blocks</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">BitmapBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u64</span><span class="p">;</span> <span class="mi">64</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>rCore 教程中的 <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-plaintext highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 中的 <code class="language-plaintext highlighter-rouge">alloc</code> 和 <code class="language-plaintext highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            start_block_id(Start ID)
+                  v
+        ----------+---------------------+--------
+                  |//// Bitmap Area ////|
+        ----------+---------------------+--------
+                                        ^
+                             start_block_id + blocks(End ID)
+        Block ID =&gt; 
+        (increase)
+</code></pre></div></div>
+
+<h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
+
+<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+
+<span class="k">const</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">28</span><span class="p">;</span>
+
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">DiskInode</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">size</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">direct</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">],</span>
+    <span class="k">pub</span> <span class="n">indirect1</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">indirect2</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">DiskInodeType</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nd">#[derive(PartialEq)]</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">DiskInodeType</span> <span class="p">{</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">Directory</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里的多级索引是这样理解的， 分为直接索引 (direct) 和 间接索引 (indirect1/indirect2)。</p>
+
+<ul>
+  <li><strong>直接索引</strong> <code class="language-plaintext highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-plaintext highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/direct-index.png" alt="Direct Index, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Direct Index, HangX-Ma</u></font>
+</div>
+
+<ul>
+  <li><strong>间接索引</strong>
+    <ul>
+      <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
+      <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 让一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样就能额外索引 8 MiB 的额外内容。</li>
+    </ul>
+  </li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/indirect-index.png" alt="Indirect Index, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
+</div>
+
+<p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
+
+<h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
+
+<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+<span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-plaintext highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-plaintext highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-plaintext highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+<span class="k">const</span> <span class="n">NAME_LENGTH_LIMIT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">DirEntry</span> <span class="p">{</span>
+    <span class="n">name</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">NAME_LENGTH_LIMIT</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">inode_number</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">const</span> <span class="n">DIRENT_SZ</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
+
+<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">inode_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">data_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
+    <span class="n">inode_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">data_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="6-索引节点">6. 索引节点</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
+    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">block_offset</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">fs</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">EasyFileSystem</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-07-rcore-note-ch5/process-os-detail.png" alt="Process OS details, rCore" width="600" />
@@ -2479,189 +2738,4 @@ Do not communicate by sharing memory; instead, share memory by communicating
   <li><a href="https://www.totalphase.com/support/articles/200349206-mdio-background/">MDIO Background</a></li>
   <li><a href="https://grouper.ieee.org/groups/802/3/ae/public/jul00/law_1_0700.pdf">IEEE P802.3ae 10Gb/s Ethernet MDC/MDIO Proposal</a></li>
   <li><a href="https://www.cnblogs.com/jason-lu/articles/3195473.html">网口扫盲三:以太网芯片MAC和PHY的关系</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Network" /><category term="Linux" /><summary type="html"><![CDATA[介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。]]></summary></entry><entry><title type="html">cs144-sp23, Lab Checkpoint 6: putting it all together</title><link href="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html" rel="alternate" type="text/html" title="cs144-sp23, Lab Checkpoint 6: putting it all together" /><published>2023-05-31T00:00:00+08:00</published><updated>2023-05-31T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/05/31/cs144-lab6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/05/31/cs144-lab6.html"><![CDATA[<p>记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。
-<!--more--></p>
-<ul>
-  <li>CS144 Spring 2023 实验仓库 <a href="https://github.com/CS144/minnow">CS144/minnow</a>， 备份为 <a href="https://github.com/HangX-Ma/minnow">HangX-Ma/minnow</a> 进行版本回退即可。</li>
-  <li>CS144 Spring 2023 Lab6 项目指导书 - <a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/assignment-notes/check6.pdf">Lab Checkpoint 6: putting it all together</a>。</li>
-  <li>具体的项目实现在个人的 <a href="https://github.com/HangX-Ma/cs144-sp23">Github</a>。</li>
-</ul>
-
-<h2 id="1-内容简介">1. 内容简介</h2>
-
-<p>Lab6 是一个选择性的实验， 在前 6 个实验中我们已经完成了网络的框架， Checkpoint 0 (a reliable byte stream), Checkpoints 1–3 (the Transmission Control Protocol), Checkpoint 4 (an IP/Ethernet network interface) 以及 Checkpoint 5 (an IP router)， 该实验的目的是使用前述的网络栈实现真实的网络通信， 这需要我们有个 partner， 一人分饰两角也是可以的。</p>
-
-<h2 id="2-the-network">2. The Network</h2>
-
-<p>在该实验中需要一对可行的网络栈组合成一个真实的网络通信环境， 两方都需要构建 host 和 router， 网络拓扑如下图所示：</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-05-31-cs144-lab6/the-network.png" alt="The Network" width="600" />
-    <br />
-    <font size="2" color="#999"><u>The Network</u></font>
-</div>
-
-<ol>
-  <li>对于个人而言， 需要使用同一套代码在不同的终端中启用 server 以及 client。</li>
-  <li>为了使用 relay， 我们需要选择任意的一个 1024 到 64000 之间的偶数以区分不同的 group。 我们可以选择 “4088”。</li>
-  <li>
-    <p>server 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend server cs144.keithw.org 4088</code>， 若顺利的话 server 端会打印如下信息：</p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend server cs144.keithw.org 4088
- DEBUG: Network interface has Ethernet address 02:00:00:91:a1:8f and IP address 172.16.0.1
- DEBUG: Network interface has Ethernet address 02:00:00:bf:ba:0e and IP address 10.0.0.172
- DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
- DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
- DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> 10.0.0.192 on interface 1
- DEBUG: Network interface has Ethernet address 9a:c0:ea:b5:88:82 and IP address 172.16.0.100
- DEBUG: Listening <span class="k">for </span>incoming connection...
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>client 端在 build 文件夹下输入 <code class="language-bash highlight highlighter-rouge">./apps/endtoend client cs144.keithw.org 4089</code>， 若顺利的话 client 端会打印如下信息：</p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend client cs144.keithw.org 4089
- DEBUG: Network interface has Ethernet address 02:00:00:e0:84:14 and IP address 192.168.0.1
- DEBUG: Network interface has Ethernet address 02:00:00:e8:1a:da and IP address 10.0.0.192
- DEBUG: adding route 192.168.0.0/16 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 0
- DEBUG: adding route 10.0.0.0/8 <span class="o">=&gt;</span> <span class="o">(</span>direct<span class="o">)</span> on interface 1
- DEBUG: adding route 172.16.0.0/12 <span class="o">=&gt;</span> 10.0.0.172 on interface 1
- DEBUG: Network interface has Ethernet address 7e:fa:65:55:c7:4e and IP address 192.168.0.50
- DEBUG: Connecting from 192.168.0.50:7907...
- DEBUG: Connecting to 172.16.0.100:1234...
- Successfully connected to 172.16.0.100:1234.
-</code></pre></div>    </div>
-
-    <p>并且 server 端会额外打印一条信息：</p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> New connection from 192.168.0.50:7907.
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p>若以上信息都能正确打印， 则意味着 TCP 握手成功， 若有问题则需要在之前的命令后加上 <code class="language-plaintext highlighter-rouge">debug</code> 进入 debug 模式进行调试。</p>
-
-    <ul>
-      <li>我们可以在 server 或者 client 任意一端输入数据， 就能在相应的另一端看到数据。
-        <blockquote>
-          <p>经过测试发现需要在 Terminal 输入需要发送的数据后按下 Ctrl-D 才能发送数据并在 remote 端看到。</p>
-        </blockquote>
-      </li>
-      <li>可以使用 Ctrl-D 关闭链接。 server 或 client 关闭链接后会终止那一端的 ByteStream 的输出， 但仍会持续接收数据直到另一端也关闭了 ByteStream 的输出， 我们需要验证这点。
-        <blockquote>
-          <p>首先需要确保 Terminal 中已经没有数据了， 此时我们按下 Ctrl-D 才会断开 TCP 的链接。</p>
-        </blockquote>
-        <ul>
-          <li>
-            <p><em><strong>server</strong></em></p>
-
-            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c"># press Ctrl-D at server</span>
-  DEBUG: Outbound stream to 192.168.0.50:36742 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span>
-  <span class="c"># press Ctrl-D at client</span>
-  DEBUG: Inbound stream from 192.168.0.50:36742 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown...
-  DEBUG: Outbound stream to 192.168.0.50:36742 has been fully acknowledged.
-  DEBUG: TCP connection finished cleanly.
-  <span class="k">done</span><span class="nb">.</span>
-  Exiting... <span class="k">done</span><span class="nb">.</span>
-</code></pre></div>            </div>
-          </li>
-          <li>
-            <p><em><strong>client</strong></em></p>
-
-            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c"># press Ctrl-D at server</span>
-  <span class="c">######## Nothing ########</span>
-  <span class="c"># press Ctrl-D at client</span>
-  DEBUG: Outbound stream to 172.16.0.100:1234 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
-  DEBUG: Inbound stream from 172.16.0.100:1234 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown...
-  DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
-  DEBUG: TCP connection finished cleanly.
-  <span class="k">done</span><span class="nb">.</span>
-  Exiting... <span class="k">done</span><span class="nb">.</span>
-</code></pre></div>            </div>
-          </li>
-        </ul>
-      </li>
-      <li>当 server 和 client 都关闭 ByteStream 输出后并且一端又持续存在数秒后， 两边的程序应该会正常退出。</li>
-    </ul>
-  </li>
-</ol>
-
-<h2 id="3-文件传输">3. 文件传输</h2>
-
-<h3 id="31-操作流程">3.1 操作流程</h3>
-
-<p>当基本的通信功能实现之后就可以通过网络进行文件的传输。</p>
-
-<ul>
-  <li>
-    <p>将 1M 大小的随机数写入文件 <code class="language-plaintext highlighter-rouge">/tmp/big.txt</code>。</p>
-
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">dd </span><span class="k">if</span><span class="o">=</span>/dev/urandom <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span>1 <span class="nv">of</span><span class="o">=</span>/tmp/big.txt
-</code></pre></div>      </div>
-    </div>
-  </li>
-  <li>
-    <p>让 server 端在接受连接后立刻发送文件。</p>
-
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./apps/endtoend server cs144.keithw.org 4088 &lt; /tmp/big.txt
-</code></pre></div>      </div>
-    </div>
-  </li>
-  <li>
-    <p>让 client 端关闭输出数据流并下载文件。</p>
-
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  &lt;/dev/null ./apps/endtoend client cs144.keithw.org 4089 <span class="o">&gt;</span> /tmp/big-received.txt
-</code></pre></div>      </div>
-    </div>
-  </li>
-  <li>
-    <p>比较两个文件确保二者一致</p>
-
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sha256sum</span> /tmp/big.txt
-  <span class="nb">sha256sum</span> /tmp/big-received.txt
-</code></pre></div>      </div>
-    </div>
-  </li>
-</ul>
-
-<p>如果 SHA-256 哈希值都能匹配上， 那我们就可以确定文件被正确传输了。</p>
-
-<h3 id="32-输出打印">3.2 输出打印</h3>
-
-<ul>
-  <li>
-    <p><em><strong>server</strong></em></p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  DEBUG: Inbound stream from 192.168.0.50:27200 finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown...
-  DEBUG: Outbound stream to 192.168.0.50:27200 finished <span class="o">(</span>63000 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
-  DEBUG: Outbound stream to 192.168.0.50:27200 has been fully acknowledged.
-  DEBUG: TCP connection finished cleanly.
-  <span class="k">done</span><span class="nb">.</span>
-  Exiting... <span class="k">done</span><span class="nb">.</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><em><strong>client</strong></em></p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  DEBUG: Outbound stream to 172.16.0.100:1234 finished <span class="o">(</span>0 seqnos still <span class="k">in </span>flight<span class="o">)</span><span class="nb">.</span>
-  DEBUG: Outbound stream to 172.16.0.100:1234 has been fully acknowledged.
-  DEBUG: Inbound stream from 172.16.0.100:1234 finished cleanly.
-  DEBUG: TCP connection finished cleanly.
-  DEBUG: Waiting <span class="k">for </span>clean shutdown... <span class="k">done</span><span class="nb">.</span>
-  Exiting... <span class="k">done</span><span class="nb">.</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><em><strong>SHA-256</strong></em></p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  e0462e19b156c6a02c9f89f4069b624b4eefd1a4837c5d71397db3253d469ce1  /tmp/big.txt
-  e0462e19b156c6a02c9f89f4069b624b4eefd1a4837c5d71397db3253d469ce1  /tmp/big-received.txt
-</code></pre></div>    </div>
-  </li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs144" /><summary type="html"><![CDATA[记录 cs144 Spring-23 Lab6: putting it all together 的思路与实践难点。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Network" /><category term="Linux" /><summary type="html"><![CDATA[介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。]]></summary></entry></feed>

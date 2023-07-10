@@ -1,0 +1,1545 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 6 - 一只豆腐</title>
+
+<meta name="description" content="第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA"><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:linear-gradient(135deg, rgba(34, 139, 87 , .4), rgba(90, 60, 139, .4)),url(/assets/images/bg/rcore/keyboard.jpg);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=rust">rust</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=rCore">rCore</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 10, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 6176 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 18 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s10srcore-note-ch6.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 6</h1></header></div><p class="overlay__excerpt">第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 6"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-10T00:00:00+08:00">
+    <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><blockquote>
+  <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
+
+<dl>
+  <dt>磁盘块设备接口层</dt>
+  <dd>定义了以块大小为单位对磁盘块设备进行读写的 trait 接口</dd>
+  <dt>块缓存层</dt>
+  <dd>在内存中缓存磁盘块的数据， 避免频繁读写磁盘</dd>
+  <dt>磁盘数据结构层</dt>
+  <dd>磁盘上的超级块、 位图、 索引节点、 数据块、 目录项等核心数据结构和相关处理</dd>
+  <dt>磁盘块管理器层</dt>
+  <dd>合并了上述核心数据结构和磁盘布局所形成的磁盘文件系统数据结构， 以及基于这些结构进行文件系统的创建等操作， 以及对磁盘块进行分配和回收处理</dd>
+  <dt>索引节点层</dt>
+  <dd>管理索引节点（即文件控制块）数据结构， 并实现文件创建/文件打开/文件读写等成员函数， 以向上支持文件操作相关的系统调用</dd>
+</dl>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/fsos-fsdisk.png" alt="Filesystem OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Filesystem OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第六章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch6]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-文件系统">1. 文件系统</h2>
+
+<p>文件系统交互的主要对象是磁盘这类的存储器， 这类存储器和 RAM 的管理方式不同， 这类存储器以扇区 （一般为 512 bytes） 进行读写， 以块为单位进行存储 （一个块为由多个扇区组成）。 文件系统的职责就是将逻辑上的目录树结构映射存储到这类存储器中并进行管理。 另外， 为了适配管理多个文件系统， 在此基础上抽象出一层 <strong>虚拟文件系统（VFS, Virtual File System）</strong> 提供统一的接口和目录树的通用格式方便进行管理。</p>
+
+<h2 id="2-块设备接口层">2. 块设备接口层</h2>
+
+<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-plaintext highlighter-rouge">Send</code>， <code class="language-plaintext highlighter-rouge">Sync</code>， <code class="language-plaintext highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
+
+<ul>
+  <li><em>A type is Send if it is safe to send it to another thread.</em></li>
+  <li><em>A type is Sync if it is safe to share between threads (<code class="language-plaintext highlighter-rouge">T</code> is Sync if and only if <code class="language-plaintext highlighter-rouge">&amp;T</code> is Send).</em></li>
+</ul>
+
+<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-plaintext highlighter-rouge">Arc&lt;dyn BlockDevice&gt;</code> 表明该 trait 类型， 被 <code class="language-plaintext highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-plaintext highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-plaintext highlighter-rouge">dyn</code> 关键字。</p>
+
+<p>用到 <code class="language-plaintext highlighter-rouge">Any</code> 与 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-plaintext highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-plaintext highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_dev.rs</span>
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">BlockDevice</span> <span class="p">:</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span> <span class="o">+</span> <span class="n">Any</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">read_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
+    <span class="k">fn</span> <span class="nf">write_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://doc.rust-lang.org/nomicon/send-and-sync.html">The Rustonomicon - 8.2. Send and Sync</a><br />
+<a href="https://rustwiki.org/zh-CN/rust-by-example/trait/dyn.html">通过例子学 Rust 中文版 - 16.2. 使用 dyn 返回 trait</a><br />
+<a href="https://www.jianshu.com/p/28386b52c607">Rust std-any 模块详解</a></p>
+</blockquote>
+
+<h2 id="3-块缓存层">3. 块缓存层</h2>
+
+<p>块缓存层的存在是为了减少块设备频繁读写的开销， 相较于直接从 RAM 中获取数据， 读写磁盘的速度还是太慢了， 因而我们在软件层面实现块的缓存以加快数据的读写。 但缓存还得解决缓存一致性以及同步性等问题， rCore 使用块缓存全局管理器解决这些问题， 并通过该管理器一次性让更多的块合并操作， 这是因为连续的块的操作能够加速存取速度。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCache</span> <span class="p">{</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">],</span>
+    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">modified</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
+</blockquote>
+
+<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
+    <span class="n">queue</span><span class="p">:</span> <span class="n">VecDeque</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">usize</span><span class="p">,</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="4-磁盘布局及磁盘上数据结构">4. 磁盘布局及磁盘上数据结构</h2>
+
+<p>前面几个部分比较好理解， 个人认为这个小节和 inode 小节最为关键且复杂。 要理解磁盘布局先得理解几个概念：</p>
+
+<dl>
+  <dt>索引节点(Inode, Index Node)</dt>
+  <dd>Inode 编码了文件/目录的底层编号， 这个数据结构包含文件大小， 访问权限， 文件类型等信息， 还包含对数据的索引信息， 通过这些索引信息就能够找到数据块存储在磁盘上的位置。</dd>
+  <dt>位图(Bitmap)</dt>
+  <dd>位图用以标注索引节点以及数据块的分配情况， 通过位图能够方便分配和回收在磁盘上的存储资源。</dd>
+</dl>
+
+<p>rCore 中的磁盘布局如下图所示， 他们是以 Block ID 顺序排布的， 后续根据这个顺序对关键数据结构进行阐述。 这里需要注意的是， rCore 的假定内核仅管理一个块设备， 否则仅以 Block ID 作为标识， 在访问多个不同的块设备的时候会引起歧义。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/layouts.png" alt="Disk Layouts, HangX-Ma" width="800" /><a id="disk-layouts"></a>
+    <br />
+    <font size="2" color="#999"><u>Disk Layouts, HangX-Ma</u></font>
+</div>
+
+<h3 id="41-super-block">4.1 Super Block</h3>
+
+<p>一句话可以概括， Super Block 存储了后续四个分区占用的 <strong>块数量</strong>， 并利用 <strong>MAGIC</strong> 验证文件系统的合法性。</p>
+
+<h3 id="42-inodedata-bitmap">4.2 Inode/Data Bitmap</h3>
+
+<p>从磁盘布局可以看出， rCore 通过 <strong>Inode Bitmap</strong> 和 <strong>Data Bitmap</strong> 分别管理索引节点和数据块。 每个 Bitmap 可以占据多个块， 在 rCore 中一个块的大小和一个扇区的大小一致都是 512 bytes， 相当于每个 Bitmap 实际上可以管理 \(4096 \times n\) 个索引节点或数据块。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/bitmap.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Bitmap</span> <span class="p">{</span>
+    <span class="n">start_block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">blocks</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">BitmapBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u64</span><span class="p">;</span> <span class="mi">64</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>rCore 教程中的 <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-plaintext highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 中的 <code class="language-plaintext highlighter-rouge">alloc</code> 和 <code class="language-plaintext highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            start_block_id(Start ID)
+                  v
+        ----------+---------------------+--------
+                  |//// Bitmap Area ////|
+        ----------+---------------------+--------
+                                        ^
+                             start_block_id + blocks(End ID)
+        Block ID =&gt; 
+        (increase)
+</code></pre></div></div>
+
+<h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
+
+<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+
+<span class="k">const</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">28</span><span class="p">;</span>
+
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">DiskInode</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">size</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">direct</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">],</span>
+    <span class="k">pub</span> <span class="n">indirect1</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">indirect2</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">DiskInodeType</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nd">#[derive(PartialEq)]</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">DiskInodeType</span> <span class="p">{</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">Directory</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里的多级索引是这样理解的， 分为直接索引 (direct) 和 间接索引 (indirect1/indirect2)。</p>
+
+<ul>
+  <li><strong>直接索引</strong> <code class="language-plaintext highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-plaintext highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/direct-index.png" alt="Direct Index, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Direct Index, HangX-Ma</u></font>
+</div>
+
+<ul>
+  <li><strong>间接索引</strong>
+    <ul>
+      <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
+      <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 让一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样就能额外索引 8 MiB 的额外内容。</li>
+    </ul>
+  </li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/indirect-index.png" alt="Indirect Index, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
+</div>
+
+<p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
+
+<h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
+
+<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+<span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-plaintext highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-plaintext highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-plaintext highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
+<span class="k">const</span> <span class="n">NAME_LENGTH_LIMIT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">DirEntry</span> <span class="p">{</span>
+    <span class="n">name</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">NAME_LENGTH_LIMIT</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">inode_number</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">const</span> <span class="n">DIRENT_SZ</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
+
+<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">inode_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">data_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
+    <span class="n">inode_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">data_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="6-索引节点">6. 索引节点</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
+    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">block_offset</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">fs</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">EasyFileSystem</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-10T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/07/rcore-note-ch5.html">rCore OS Note - Chapter 5</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/07/10/rcore-note-ch6',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying"><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline">
+    <li></li><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" title="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" title="github" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" title="input"/>
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s07s10srcore-note-ch6.html';
+      var title = "rCore OS Note - Chapter 6";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s07s10srcore-note-ch6.html']").text(view);
+      });
+    });
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+	clipboardSnippets.on('success', function(e) {
+		e.clearSelection();
+		showTooltip(e.trigger, 'Copied!');
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
+
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+
