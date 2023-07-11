@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 10, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6176 words </span>
+                <span> Total 10086 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 18 mins </span>
+                <span> About 29 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s10srcore-note-ch6.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 6</h1></header></div><p class="overlay__excerpt">第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -398,6 +398,29 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
+<p>每个 BlockCache 缓存一个磁盘块， 这是一个最小单位， rCore 提供了一些对缓存管理的方法：</p>
+
+<ul>
+  <li><strong>new</strong>： <code class="language-plaintext highlighter-rouge">BlockCache</code> 实现了 <code class="language-plaintext highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-plaintext highlighter-rouge">cache</code> 被设置为 <code class="language-plaintext highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
+  <li><strong>addr_of_offset</strong>： 获取 <code class="language-plaintext highlighter-rouge">cache</code> 数组偏移 <code class="language-plaintext highlighter-rouge">offset</code> 大小的字节地址。</li>
+  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-plaintext highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
+</ul>
+
+<p>rCore 将 <code class="language-plaintext highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-plaintext highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-plaintext highlighter-rouge">BlockCache::read</code> 以及 <code class="language-plaintext highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-plaintext highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+
+<span class="k">impl</span> <span class="n">BlockCache</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">read</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
+        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_ref</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">modify</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
+        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
 <blockquote>
   <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
 </blockquote>
@@ -407,6 +430,16 @@
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
     <span class="n">queue</span><span class="p">:</span> <span class="n">VecDeque</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">usize</span><span class="p">,</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-plaintext highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 获取 <code class="language-plaintext highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code> 调用者还需要通过 <code class="language-plaintext highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-plaintext highlighter-rouge">BlockCache</code> 进行操作。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_cache</span><span class="p">(</span>
+    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span>
+<span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+    <span class="n">BLOCK_CACHE_MANAGER</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.get_block_cache</span><span class="p">(</span><span class="n">block_id</span><span class="p">,</span> <span class="n">block_device</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -460,6 +493,52 @@
         (increase)
 </code></pre></div></div>
 
+<p>这里结合 <code class="language-plaintext highlighter-rouge">alloc</code> 函数阐明 <code class="language-plaintext highlighter-rouge">BlockCache</code> 提供的 <code class="language-plaintext highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-plaintext highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-plaintext highlighter-rouge">&amp;mut BitmapBlock</code> 这样 <code class="language-plaintext highlighter-rouge">modify</code> 中才能将泛型 <code class="language-plaintext highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-plaintext highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-plaintext highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-plaintext highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
+
+<span class="k">impl</span> <span class="n">BlockCache</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">modify</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
+        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// easy-fs/src/bitmap.rs</span>
+
+<span class="k">const</span> <span class="n">BLOCK_BITS</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="n">BLOCK_SZ</span> <span class="o">*</span> <span class="mi">8</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="n">Bitmap</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">alloc</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="n">block_id</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="k">self</span><span class="py">.blocks</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">pos</span> <span class="o">=</span> <span class="nf">get_block_cache</span><span class="p">(</span>
+                <span class="n">block_id</span> <span class="o">+</span> <span class="k">self</span><span class="py">.start_block_id</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span>
+                <span class="nn">Arc</span><span class="p">::</span><span class="nf">clone</span><span class="p">(</span><span class="n">block_device</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="nf">.lock</span><span class="p">()</span>
+            <span class="nf">.modify</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> 
+            <span class="p">|</span><span class="n">bitmap_block</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">BitmapBlock</span><span class="p">|</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">((</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">inner_pos</span><span class="p">))</span> <span class="o">=</span> <span class="n">bitmap_block</span>
+                    <span class="nf">.iter</span><span class="p">()</span>
+                    <span class="nf">.enumerate</span><span class="p">()</span>
+                    <span class="nf">.find</span><span class="p">(|(</span><span class="n">_</span><span class="p">,</span> <span class="n">bits64</span><span class="p">)|</span> <span class="o">**</span><span class="n">bits64</span> <span class="o">!=</span> <span class="nn">u64</span><span class="p">::</span><span class="n">MAX</span><span class="p">)</span>
+                    <span class="nf">.map</span><span class="p">(|(</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">bits64</span><span class="p">)|</span> <span class="p">{</span>
+                        <span class="p">(</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">bits64</span><span class="nf">.trailing_ones</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span>
+                    <span class="p">})</span> <span class="p">{</span>
+                    <span class="c1">// modify cache</span>
+                    <span class="n">bitmap_block</span><span class="p">[</span><span class="n">bits64_pos</span><span class="p">]</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1u64</span> <span class="o">&lt;&lt;</span> <span class="n">inner_pos</span><span class="p">;</span>
+                    <span class="nf">Some</span><span class="p">(</span><span class="n">block_id</span> <span class="o">*</span> <span class="n">BLOCK_BITS</span> <span class="o">+</span> <span class="n">bits64_pos</span> <span class="o">*</span> <span class="mi">64</span> <span class="o">+</span> <span class="n">inner_pos</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nb">None</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+            <span class="k">if</span> <span class="n">pos</span><span class="nf">.is_some</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">pos</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="nb">None</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
 <h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
 
 <p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
@@ -500,7 +579,7 @@
   <li><strong>间接索引</strong>
     <ul>
       <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
-      <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 让一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样就能额外索引 8 MiB 的额外内容。</li>
+      <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 通过二级索引先找到一级索引块的 Block ID， 这些一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样再通过一级索引就能确定最终的数据块， 这种设计能额外索引 8 MiB 的额外内容。</li>
     </ul>
   </li>
 </ul>
@@ -511,11 +590,31 @@
     <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
 </div>
 
+<p><code class="language-plaintext success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DiskInode</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">inner_id</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u32</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>基于直接索引和间接索引， <code class="language-plaintext highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-plaintext highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-plaintext highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-plaintext highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-plaintext highlighter-rouge">Inode</code> 中的 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code> 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
+<blockquote>
+  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-plaintext highlighter-rouge">struct Inode</code> 提供了 <code class="language-plaintext highlighter-rouge">create</code> 方法。</p>
+</blockquote>
+
+<p>对于 <code class="language-plaintext highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-plaintext highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-plaintext highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-plaintext highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-plaintext highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-10-rcore-note-ch6/inner-id.png" alt="Inner ID, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Inner ID, HangX-Ma</u></font>
+</div>
+
 <p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
 
 <h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
 
-<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。</p>
+<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-plaintext highlighter-rouge">read_at</code> 以及 <code class="language-plaintext highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 <span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
@@ -537,21 +636,23 @@
 
 <h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
 
-<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。</p>
+<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
     <span class="k">pub</span> <span class="n">inode_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
     <span class="k">pub</span> <span class="n">data_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
-    <span class="n">inode_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-    <span class="n">data_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">inode_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="c1">// inode 区域的起始 block id</span>
+    <span class="n">data_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="c1">// data 区域的起始 block id</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
 <h2 id="6-索引节点">6. 索引节点</h2>
 
-<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。</p>
+<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-plaintext highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
+
+<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-plaintext highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可表示， <code class="language-plaintext highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
@@ -561,6 +662,42 @@
     <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
+<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-plaintext highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-plaintext highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-plaintext highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-plaintext highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-plaintext highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code>， 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
+<span class="cd">/// Increase the size of a disk inode</span>
+<span class="k">fn</span> <span class="nf">increase_size</span><span class="p">(</span>
+    <span class="o">&amp;</span><span class="k">self</span><span class="p">,</span>
+    <span class="n">new_size</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">disk_inode</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">DiskInode</span><span class="p">,</span>
+    <span class="n">fs</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">MutexGuard</span><span class="o">&lt;</span><span class="n">EasyFileSystem</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">new_size</span> <span class="o">&lt;</span> <span class="n">disk_inode</span><span class="py">.size</span> <span class="p">{</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">let</span> <span class="n">blocks_needed</span> <span class="o">=</span> <span class="n">disk_inode</span><span class="nf">.blocks_num_needed</span><span class="p">(</span><span class="n">new_size</span><span class="p">);</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">v</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">blocks_needed</span> <span class="p">{</span>
+        <span class="n">v</span><span class="nf">.push</span><span class="p">(</span><span class="n">fs</span><span class="nf">.alloc_data</span><span class="p">());</span>
+    <span class="p">}</span>
+    <span class="n">disk_inode</span><span class="nf">.increase_size</span><span class="p">(</span><span class="n">new_size</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.block_device</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="7-课后练习">7. 课后练习</h2>
+
+<h3 id="71-编程练习">7.1 编程练习</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
+</ul>
+
+<h3 id="72-实验练习">7.2 实验练习</h3>
+
+<h4 id="硬链接">硬链接</h4>
+
+<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-plaintext highlighter-rouge">sys_linkat</code>， <code class="language-plaintext highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_stat</code>。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
