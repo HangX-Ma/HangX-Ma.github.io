@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 10, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 10086 words </span>
+                <span> Total 11042 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 29 mins </span>
+                <span> About 31 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s10srcore-note-ch6.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 6</h1></header></div><p class="overlay__excerpt">第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -698,6 +698,30 @@
 <h4 id="硬链接">硬链接</h4>
 
 <p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-plaintext highlighter-rouge">sys_linkat</code>， <code class="language-plaintext highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_stat</code>。</p>
+
+<p>硬链接需要新的 Inode 的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-plaintext highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-plaintext highlighter-rouge">DirEntry</code> 中的 <code class="language-plaintext highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-plaintext highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-plaintext highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-plaintext highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-plaintext highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-plaintext highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
+
+<p>对于 <code class="language-plaintext highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-plaintext highlighter-rouge">buf</code> 中查看 <code class="language-plaintext highlighter-rouge">buf</code> 对应的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
+
+<p><code class="language-plaintext highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-plaintext highlighter-rouge">fd_table</code> 获取的到的 <code class="language-plaintext highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-plaintext highlighter-rouge">&amp;dyn Any</code> 再通过 <code class="language-plaintext highlighter-rouge">downcast_ref::&lt;OSInode&gt;()</code> 强制转换为 <code class="language-plaintext highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-plaintext highlighter-rouge">OSInode</code> 增加 <code class="language-plaintext highlighter-rouge">get_inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">get_inode_pos</code> 获取 <code class="language-plaintext highlighter-rouge">inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_id</code> 和 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-plaintext highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-plaintext highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">any</span><span class="p">::</span><span class="n">Any</span><span class="p">;</span>
+
+<span class="cd">/// convert current type to &amp;dyn Any</span>
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">AnyConvertor</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">as_any</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Any</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="k">'static</span><span class="o">&gt;</span> <span class="n">AnyConvertor</span> <span class="k">for</span> <span class="n">T</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">as_any</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Any</span> <span class="p">{</span>
+        <span class="k">self</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/1b6c70b223719a7207a786fdc49e09eccce51480">commit#1b6c70b</a></p>
+</blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
