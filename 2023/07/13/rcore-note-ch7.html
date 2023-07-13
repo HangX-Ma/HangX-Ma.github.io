@@ -1,0 +1,1663 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 7 - 一只豆腐</title>
+
+<meta name="description" content="第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA"><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:linear-gradient(135deg, rgba(34, 139, 87 , .4), rgba(90, 60, 139, .4)),url(/assets/images/bg/rcore/keyboard.jpg);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=rust">rust</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=rCore">rCore</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 13, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 8232 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 23 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s13srcore-note-ch7.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 7</h1></header></div><p class="overlay__excerpt">第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 7"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-13T00:00:00+08:00">
+    <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+
+<dl>
+  <dt>管道</dt>
+  <dd>一种数据交换的机制， 管道可被视为一种特殊的内存文件， 在进程被打开的 <em><strong>fd_table</strong></em> 中被管理。 管道通过复用文件读写的系统函数调用可以方便地进行数据交换。</dd>
+  <dt>信号</dt>
+  <dd>进程间通信的一种异步通知机制， 可以看成是一个应用发出某种信号， 希望另外一个应用能及时响应。</dd>
+</dl>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/ipc-os-detail-2.png" alt="IPC OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>IPC OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第七章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch7]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-文件抽象">1. 文件抽象</h2>
+
+<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-plaintext highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
+
+<p>一般来说， 文件的会涉及到， <code class="language-plaintext highlighter-rouge">open</code>， <code class="language-plaintext highlighter-rouge">close</code>， <code class="language-plaintext highlighter-rouge">read</code>， <code class="language-plaintext highlighter-rouge">write</code> 这些基本操作。</p>
+
+<p>另外， 进程被创建的时候内核会默认打开三个缺省的文件， 这个设计对于后续的 I/O 重定向而言非常重要。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">fd: 0</code> 标准输入</li>
+  <li><code class="language-plaintext highlighter-rouge">fd: 1</code> 标准输出</li>
+  <li><code class="language-plaintext highlighter-rouge">fd: 2</code> 标准错误输出</li>
+</ul>
+
+<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-plaintext highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
+
+<h2 id="2-管道">2. 管道</h2>
+
+<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-plaintext highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-plaintext highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
+
+<p>rCore 对管道的设计分为端口设计与缓存设计。</p>
+
+<ul>
+  <li><strong>端口设计</strong> <code class="language-plaintext highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-plaintext highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
+  <li><strong>缓存设计</strong> <code class="language-plaintext highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-plaintext highlighter-rouge">struct Pipe</code> 用 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;PipeRingBuffer&gt;&gt;</code> 维护对 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-plaintext highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
+</ul>
+
+<blockquote>
+  <p>只有写端都被关闭后才能保证没有数据被遗漏， 此时读端的关闭才是安全的。 另外， 写端实际是对读端存在依赖的， 若仅有一个写端， pipe 的缓冲区一定会耗尽， 而只存在一个读端却没什么问题， 大不了每次读返回都是 0。</p>
+</blockquote>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/fs/pipe.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Pipe</span> <span class="p">{</span>
+    <span class="n">readable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">writable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">buffer</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">PipeRingBuffer</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">PipeRingBuffer</span> <span class="p">{</span>
+    <span class="n">arr</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">RING_BUFFER_SIZE</span><span class="p">],</span>
+    <span class="n">head</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">tail</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">RingBufferStatus</span><span class="p">,</span>
+    <span class="n">write_end</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Weak</span><span class="o">&lt;</span><span class="n">Pipe</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nd">#[derive(Copy,</span> <span class="nd">Clone,</span> <span class="nd">PartialEq)]</span>
+<span class="k">enum</span> <span class="n">RingBufferStatus</span> <span class="p">{</span>
+    <span class="n">FULL</span><span class="p">,</span>
+    <span class="n">EMPTY</span><span class="p">,</span>
+    <span class="n">NORMAL</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="3-标准-io-重定向">3. 标准 I/O 重定向</h2>
+
+<p>重定向的想法在于对 <code class="language-plaintext highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-plaintext highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-plaintext highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-plaintext highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-plaintext highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/fs.rs</span>
+
+<span class="cd">/// 功能：将进程中一个已经打开的文件复制一份并分配到一个新的文件描述符中。</span>
+<span class="cd">/// 参数：fd 表示进程中一个已经打开的文件的文件描述符。</span>
+<span class="cd">/// 返回值：如果出现了错误则返回 -1，否则能够访问已打开文件的新文件描述符。</span>
+<span class="cd">/// 可能的错误原因是：传入的 fd 并不对应一个合法的已打开文件。</span>
+<span class="cd">/// syscall ID：24</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_dup</span><span class="p">(</span><span class="n">fd</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">task</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.acquire_inner_lock</span><span class="p">();</span>
+    <span class="k">if</span> <span class="n">fd</span> <span class="o">&gt;=</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.is_none</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">let</span> <span class="n">new_fd</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.alloc_fd</span><span class="p">();</span>
+    <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">new_fd</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">clone</span><span class="p">(</span><span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.as_ref</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()));</span>
+    <span class="n">new_fd</span> <span class="k">as</span> <span class="nb">isize</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>为了能让用户端使用重定向， rCore 对 <code class="language-plaintext highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-plaintext highlighter-rouge">args_vec: Vec&lt;String&gt;</code> 中作为参数传入 <code class="language-plaintext highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-plaintext highlighter-rouge">aa</code> 和 <code class="language-plaintext highlighter-rouge">bb</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+
+<span class="k">impl</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">exec</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">elf_data</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">],</span> <span class="n">args</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="c1">// push arguments on user stack</span>
+        <span class="n">user_sp</span> <span class="o">-=</span> <span class="p">(</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="k">let</span> <span class="n">argv_base</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">argv</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">..=</span><span class="n">args</span><span class="nf">.len</span><span class="p">())</span>
+            <span class="nf">.map</span><span class="p">(|</span><span class="n">arg</span><span class="p">|</span> <span class="p">{</span>
+                <span class="nf">translated_refmut</span><span class="p">(</span>
+                    <span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span>
+                    <span class="p">(</span><span class="n">argv_base</span> <span class="o">+</span> <span class="n">arg</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">usize</span>
+                <span class="p">)</span>
+            <span class="p">})</span>
+            <span class="nf">.collect</span><span class="p">();</span>
+        <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">args</span><span class="nf">.len</span><span class="p">()]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="k">in</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.as_bytes</span><span class="p">()</span> <span class="p">{</span>
+                <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+                <span class="n">p</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">// make the user_sp aligned to 8B for k210 platform</span>
+        <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">user_sp</span> <span class="o">%</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="o">...</span>
+        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="nf">.len</span><span class="p">();</span>
+        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">argv_base</span><span class="p">;</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack1.png" alt="Push stack process 1, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Push stack process 1, HangX-Ma</u></font>
+</div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack2.png" alt="Push stack process 2, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Push stack process 2, HangX-Ma</u></font>
+</div>
+
+<p>压栈完成后 rCore 将 <code class="language-plaintext highlighter-rouge">TrapContext</code>中的 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-plaintext highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-plaintext highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-plaintext highlighter-rouge">&amp;[&amp;str]</code> 的形式。</p>
+
+<h2 id="4-信号">4. 信号</h2>
+
+<p>信号机制补足了单向事件通知的机制， 这是一种类似于硬件中断的软件级异步通知机制， 使得进程在接收到特定事件的时候能够暂停当前的工作并及时响应事件， 并在响应事件之后可以恢复当前工作继续执行。 如果进程没有接收到任何事件， 它可以执行自己的任务。 这里的暂停与恢复的工作， 都由操作系统来完成， 应用程序只需设置好响应某事件的事件处理例程就够了。</p>
+
+<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-plaintext highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
+
+<ul>
+  <li>
+    <p><strong>忽略</strong>：就像信号没有发生过一样。</p>
+  </li>
+  <li>
+    <p><strong>捕获</strong>：进程会调用相应的处理函数进行处理。</p>
+  </li>
+  <li>
+    <p><strong>终止</strong>：终止进程。</p>
+  </li>
+</ul>
+
+<p>而信号的 <strong>发送方</strong> 有两个：</p>
+
+<ul>
+  <li><strong>异步信号</strong>： 进程在正常执行， 此时可能内核或者其他进程给它发送了一个信号， 这些就属于异步信号。</li>
+  <li><strong>同步信号</strong>： 由进程自身的执行触发， 在处理 Trap 的时候内核会将相应的信号直接附加到进程控制块中， 这种属于同步信号。</li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/signal.png" alt="Signal process, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Signal process, rCore</u></font>
+</div>
+
+<p>内核会在 Trap 处理完成即将返回用户态之前检查要返回到的进程是否还有信号待处理。 如果需要处理的话，取决于进程是否提供该种信号的处理函数， 若没有提供该函数内核会接管进行默认处理， 整体流程如上图所示。</p>
+
+<h3 id="41-信号相关的数据结构">4.1 信号相关的数据结构</h3>
+
+<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">bitflags!</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalFlags</span><span class="p">:</span> <span class="nb">i32</span> <span class="p">{</span>
+        <span class="k">const</span> <span class="n">SIGDEF</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Default signal handling</span>
+        <span class="k">const</span> <span class="n">SIGHUP</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">const</span> <span class="n">SIGINT</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="o">...</span>
+        <span class="k">const</span> <span class="n">SIGSYS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>另外为了处理收到的信号， rCore 定义了 <code class="language-plaintext highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-plaintext highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-plaintext highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// Action for a signal</span>
+<span class="nd">#[repr(C,</span> <span class="nd">align(</span><span class="mi">16</span><span class="nd">))]</span>
+<span class="nd">#[derive(Debug,</span> <span class="nd">Clone,</span> <span class="nd">Copy)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalAction</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">handler</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="42-信号的产生">4.2 信号的产生</h3>
+
+<p>如前所述， 信号产生有异步信号和同步信号， rCore 将其分作三类， 前两类是异步信号， 最后一类是同步信号。</p>
+
+<ol>
+  <li>进程通过 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
+  <li>内核检测到某些事件给某个进程发送信号， 但这个事件与接收信号的进程的执行无关。</li>
+  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-plaintext highlighter-rouge">SIGILL</code> 非法指令。</li>
+</ol>
+
+<h4 id="kill-系统调用">kill 系统调用</h4>
+
+<p>实现 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-plaintext highlighter-rouge">manager.rs</code> 中增添 <code class="language-plaintext highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-plaintext highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-plaintext highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-plaintext highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">pub</span> <span class="n">signals</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_kill</span><span class="p">(</span><span class="n">pid</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">pid2task</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// insert the signal if legal</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">task_ref</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
+            <span class="k">if</span> <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.contains</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.insert</span><span class="p">(</span><span class="n">flag</span><span class="p">);</span>
+            <span class="mi">0</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="o">-</span><span class="mi">1</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>需要注意的是， 如果 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
+
+<h4 id="内核信号生成">内核信号生成</h4>
+
+<p>就是将之前说的 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 以及 <code class="language-plaintext highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
+
+<h3 id="43-信号的处理">4.3 信号的处理</h3>
+
+<p>与信号处理相关的系统调用则有三个：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
+  <li><code class="language-plaintext highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
+  <li><code class="language-plaintext highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
+</ul>
+
+<p>需要在 TCB 中增加 <code class="language-plaintext highlighter-rouge">signal_mask</code> 以及 <code class="language-plaintext highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-plaintext highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-plaintext highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-plaintext highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">pub</span> <span class="n">signal_mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">signal_actions</span><span class="p">:</span> <span class="n">SignalActions</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="c1">// os/src/task/action.rs</span>
+<span class="nd">#[derive(Clone)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalActions</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">table</span><span class="p">:</span> <span class="p">[</span><span class="n">SignalAction</span><span class="p">;</span> <span class="n">MAX_SIG</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>进程可以通过 <code class="language-plaintext highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-plaintext highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-plaintext highlighter-rouge">old_action</code> 中， 而将 <code class="language-plaintext highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigaction</span><span class="p">(</span>
+      <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+      <span class="n">action</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">SignalAction</span><span class="p">,</span>
+      <span class="n">old_action</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">SignalAction</span><span class="p">,</span>
+  <span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+      <span class="o">...</span>
+      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">if</span> <span class="nf">check_sigaction_error</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">old_action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
+              <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="k">let</span> <span class="n">prev_action</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">];</span>
+          <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">old_action</span><span class="p">)</span> <span class="o">=</span> <span class="n">prev_action</span><span class="p">;</span>
+          <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">]</span> <span class="o">=</span> <span class="o">*</span><span class="nf">translated_ref</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
+          <span class="mi">0</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="o">-</span><span class="mi">1</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-plaintext highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-plaintext highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-plaintext highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/syscall/process.rs</span>
+
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigreturn</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span> <span class="p">{</span>
+          <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
+          <span class="n">inner</span><span class="py">.handling_sig</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+          <span class="c1">// restore the trap context</span>
+          <span class="k">let</span> <span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.get_trap_cx</span><span class="p">();</span>
+          <span class="o">*</span><span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.trap_ctx_backup</span><span class="nf">.unwrap</span><span class="p">();</span>
+          <span class="n">trap_ctx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="k">as</span> <span class="nb">isize</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="o">-</span><span class="mi">1</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>关于 <code class="language-plaintext highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
+
+<h2 id="5-课后练习">5. 课后练习</h2>
+
+<h3 id="51-编程练习">5.1 编程练习</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
+</ul>
+
+<h3 id="52-实验练习">5.2 实验练习</h3>
+
+<h4 id="进程通信邮箱">进程通信：邮箱</h4>
+
+<p>没有测例也不知道写的对不对， 基本上就是魔改一下 Pipe 的环形缓冲队列就整完了。</p>
+
+<blockquote>
+  <p>具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e9b19e5f19851f12bcae83531a050d60230abd08">commit#e9b19e5</a></p>
+</blockquote>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-13T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/10/rcore-note-ch6.html">rCore OS Note - Chapter 6</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/07/13/rcore-note-ch7',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying"><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline">
+    <li></li><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" title="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" title="github" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" title="input"/>
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s07s13srcore-note-ch7.html';
+      var title = "rCore OS Note - Chapter 7";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s07s13srcore-note-ch7.html']").text(view);
+      });
+    });
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+	clipboardSnippets.on('success', function(e) {
+		e.clearSelection();
+		showTooltip(e.trigger, 'Copied!');
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
+
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+

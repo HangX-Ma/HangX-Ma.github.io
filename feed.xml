@@ -1,5 +1,382 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-12T13:53:20+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-13T19:30:12+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+
+<dl>
+  <dt>管道</dt>
+  <dd>一种数据交换的机制， 管道可被视为一种特殊的内存文件， 在进程被打开的 <em><strong>fd_table</strong></em> 中被管理。 管道通过复用文件读写的系统函数调用可以方便地进行数据交换。</dd>
+  <dt>信号</dt>
+  <dd>进程间通信的一种异步通知机制， 可以看成是一个应用发出某种信号， 希望另外一个应用能及时响应。</dd>
+</dl>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/ipc-os-detail-2.png" alt="IPC OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>IPC OS Details, rCore</u></font>
+</div>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第七章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch7]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-文件抽象">1. 文件抽象</h2>
+
+<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-plaintext highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
+
+<p>一般来说， 文件的会涉及到， <code class="language-plaintext highlighter-rouge">open</code>， <code class="language-plaintext highlighter-rouge">close</code>， <code class="language-plaintext highlighter-rouge">read</code>， <code class="language-plaintext highlighter-rouge">write</code> 这些基本操作。</p>
+
+<p>另外， 进程被创建的时候内核会默认打开三个缺省的文件， 这个设计对于后续的 I/O 重定向而言非常重要。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">fd: 0</code> 标准输入</li>
+  <li><code class="language-plaintext highlighter-rouge">fd: 1</code> 标准输出</li>
+  <li><code class="language-plaintext highlighter-rouge">fd: 2</code> 标准错误输出</li>
+</ul>
+
+<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-plaintext highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
+
+<h2 id="2-管道">2. 管道</h2>
+
+<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-plaintext highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-plaintext highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
+
+<p>rCore 对管道的设计分为端口设计与缓存设计。</p>
+
+<ul>
+  <li><strong>端口设计</strong> <code class="language-plaintext highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-plaintext highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
+  <li><strong>缓存设计</strong> <code class="language-plaintext highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-plaintext highlighter-rouge">struct Pipe</code> 用 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;PipeRingBuffer&gt;&gt;</code> 维护对 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-plaintext highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
+</ul>
+
+<blockquote>
+  <p>只有写端都被关闭后才能保证没有数据被遗漏， 此时读端的关闭才是安全的。 另外， 写端实际是对读端存在依赖的， 若仅有一个写端， pipe 的缓冲区一定会耗尽， 而只存在一个读端却没什么问题， 大不了每次读返回都是 0。</p>
+</blockquote>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/fs/pipe.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Pipe</span> <span class="p">{</span>
+    <span class="n">readable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">writable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">buffer</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">PipeRingBuffer</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">PipeRingBuffer</span> <span class="p">{</span>
+    <span class="n">arr</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">RING_BUFFER_SIZE</span><span class="p">],</span>
+    <span class="n">head</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">tail</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">RingBufferStatus</span><span class="p">,</span>
+    <span class="n">write_end</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Weak</span><span class="o">&lt;</span><span class="n">Pipe</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nd">#[derive(Copy,</span> <span class="nd">Clone,</span> <span class="nd">PartialEq)]</span>
+<span class="k">enum</span> <span class="n">RingBufferStatus</span> <span class="p">{</span>
+    <span class="n">FULL</span><span class="p">,</span>
+    <span class="n">EMPTY</span><span class="p">,</span>
+    <span class="n">NORMAL</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="3-标准-io-重定向">3. 标准 I/O 重定向</h2>
+
+<p>重定向的想法在于对 <code class="language-plaintext highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-plaintext highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-plaintext highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-plaintext highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-plaintext highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/fs.rs</span>
+
+<span class="cd">/// 功能：将进程中一个已经打开的文件复制一份并分配到一个新的文件描述符中。</span>
+<span class="cd">/// 参数：fd 表示进程中一个已经打开的文件的文件描述符。</span>
+<span class="cd">/// 返回值：如果出现了错误则返回 -1，否则能够访问已打开文件的新文件描述符。</span>
+<span class="cd">/// 可能的错误原因是：传入的 fd 并不对应一个合法的已打开文件。</span>
+<span class="cd">/// syscall ID：24</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_dup</span><span class="p">(</span><span class="n">fd</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">task</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.acquire_inner_lock</span><span class="p">();</span>
+    <span class="k">if</span> <span class="n">fd</span> <span class="o">&gt;=</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.is_none</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">let</span> <span class="n">new_fd</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.alloc_fd</span><span class="p">();</span>
+    <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">new_fd</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">clone</span><span class="p">(</span><span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.as_ref</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()));</span>
+    <span class="n">new_fd</span> <span class="k">as</span> <span class="nb">isize</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>为了能让用户端使用重定向， rCore 对 <code class="language-plaintext highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-plaintext highlighter-rouge">args_vec: Vec&lt;String&gt;</code> 中作为参数传入 <code class="language-plaintext highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-plaintext highlighter-rouge">aa</code> 和 <code class="language-plaintext highlighter-rouge">bb</code>。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+
+<span class="k">impl</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">exec</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">elf_data</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">],</span> <span class="n">args</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="c1">// push arguments on user stack</span>
+        <span class="n">user_sp</span> <span class="o">-=</span> <span class="p">(</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="k">let</span> <span class="n">argv_base</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">argv</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">..=</span><span class="n">args</span><span class="nf">.len</span><span class="p">())</span>
+            <span class="nf">.map</span><span class="p">(|</span><span class="n">arg</span><span class="p">|</span> <span class="p">{</span>
+                <span class="nf">translated_refmut</span><span class="p">(</span>
+                    <span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span>
+                    <span class="p">(</span><span class="n">argv_base</span> <span class="o">+</span> <span class="n">arg</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">usize</span>
+                <span class="p">)</span>
+            <span class="p">})</span>
+            <span class="nf">.collect</span><span class="p">();</span>
+        <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">args</span><span class="nf">.len</span><span class="p">()]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="k">in</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.as_bytes</span><span class="p">()</span> <span class="p">{</span>
+                <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+                <span class="n">p</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">// make the user_sp aligned to 8B for k210 platform</span>
+        <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">user_sp</span> <span class="o">%</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="o">...</span>
+        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="nf">.len</span><span class="p">();</span>
+        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">argv_base</span><span class="p">;</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack1.png" alt="Push stack process 1, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Push stack process 1, HangX-Ma</u></font>
+</div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack2.png" alt="Push stack process 2, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Push stack process 2, HangX-Ma</u></font>
+</div>
+
+<p>压栈完成后 rCore 将 <code class="language-plaintext highlighter-rouge">TrapContext</code>中的 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-plaintext highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-plaintext highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-plaintext highlighter-rouge">&amp;[&amp;str]</code> 的形式。</p>
+
+<h2 id="4-信号">4. 信号</h2>
+
+<p>信号机制补足了单向事件通知的机制， 这是一种类似于硬件中断的软件级异步通知机制， 使得进程在接收到特定事件的时候能够暂停当前的工作并及时响应事件， 并在响应事件之后可以恢复当前工作继续执行。 如果进程没有接收到任何事件， 它可以执行自己的任务。 这里的暂停与恢复的工作， 都由操作系统来完成， 应用程序只需设置好响应某事件的事件处理例程就够了。</p>
+
+<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-plaintext highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
+
+<ul>
+  <li>
+    <p><strong>忽略</strong>：就像信号没有发生过一样。</p>
+  </li>
+  <li>
+    <p><strong>捕获</strong>：进程会调用相应的处理函数进行处理。</p>
+  </li>
+  <li>
+    <p><strong>终止</strong>：终止进程。</p>
+  </li>
+</ul>
+
+<p>而信号的 <strong>发送方</strong> 有两个：</p>
+
+<ul>
+  <li><strong>异步信号</strong>： 进程在正常执行， 此时可能内核或者其他进程给它发送了一个信号， 这些就属于异步信号。</li>
+  <li><strong>同步信号</strong>： 由进程自身的执行触发， 在处理 Trap 的时候内核会将相应的信号直接附加到进程控制块中， 这种属于同步信号。</li>
+</ul>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-13-rcore-note-ch7/signal.png" alt="Signal process, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Signal process, rCore</u></font>
+</div>
+
+<p>内核会在 Trap 处理完成即将返回用户态之前检查要返回到的进程是否还有信号待处理。 如果需要处理的话，取决于进程是否提供该种信号的处理函数， 若没有提供该函数内核会接管进行默认处理， 整体流程如上图所示。</p>
+
+<h3 id="41-信号相关的数据结构">4.1 信号相关的数据结构</h3>
+
+<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">bitflags!</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalFlags</span><span class="p">:</span> <span class="nb">i32</span> <span class="p">{</span>
+        <span class="k">const</span> <span class="n">SIGDEF</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Default signal handling</span>
+        <span class="k">const</span> <span class="n">SIGHUP</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">const</span> <span class="n">SIGINT</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="o">...</span>
+        <span class="k">const</span> <span class="n">SIGSYS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>另外为了处理收到的信号， rCore 定义了 <code class="language-plaintext highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-plaintext highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-plaintext highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// Action for a signal</span>
+<span class="nd">#[repr(C,</span> <span class="nd">align(</span><span class="mi">16</span><span class="nd">))]</span>
+<span class="nd">#[derive(Debug,</span> <span class="nd">Clone,</span> <span class="nd">Copy)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalAction</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">handler</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="42-信号的产生">4.2 信号的产生</h3>
+
+<p>如前所述， 信号产生有异步信号和同步信号， rCore 将其分作三类， 前两类是异步信号， 最后一类是同步信号。</p>
+
+<ol>
+  <li>进程通过 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
+  <li>内核检测到某些事件给某个进程发送信号， 但这个事件与接收信号的进程的执行无关。</li>
+  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-plaintext highlighter-rouge">SIGILL</code> 非法指令。</li>
+</ol>
+
+<h4 id="kill-系统调用">kill 系统调用</h4>
+
+<p>实现 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-plaintext highlighter-rouge">manager.rs</code> 中增添 <code class="language-plaintext highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-plaintext highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-plaintext highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-plaintext highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">pub</span> <span class="n">signals</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_kill</span><span class="p">(</span><span class="n">pid</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">pid2task</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// insert the signal if legal</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">task_ref</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
+            <span class="k">if</span> <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.contains</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.insert</span><span class="p">(</span><span class="n">flag</span><span class="p">);</span>
+            <span class="mi">0</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="o">-</span><span class="mi">1</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>需要注意的是， 如果 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
+
+<h4 id="内核信号生成">内核信号生成</h4>
+
+<p>就是将之前说的 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 以及 <code class="language-plaintext highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
+
+<h3 id="43-信号的处理">4.3 信号的处理</h3>
+
+<p>与信号处理相关的系统调用则有三个：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
+  <li><code class="language-plaintext highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
+  <li><code class="language-plaintext highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
+</ul>
+
+<p>需要在 TCB 中增加 <code class="language-plaintext highlighter-rouge">signal_mask</code> 以及 <code class="language-plaintext highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-plaintext highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-plaintext highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-plaintext highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">pub</span> <span class="n">signal_mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">signal_actions</span><span class="p">:</span> <span class="n">SignalActions</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="c1">// os/src/task/action.rs</span>
+<span class="nd">#[derive(Clone)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalActions</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">table</span><span class="p">:</span> <span class="p">[</span><span class="n">SignalAction</span><span class="p">;</span> <span class="n">MAX_SIG</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>进程可以通过 <code class="language-plaintext highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-plaintext highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-plaintext highlighter-rouge">old_action</code> 中， 而将 <code class="language-plaintext highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigaction</span><span class="p">(</span>
+      <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+      <span class="n">action</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">SignalAction</span><span class="p">,</span>
+      <span class="n">old_action</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">SignalAction</span><span class="p">,</span>
+  <span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+      <span class="o">...</span>
+      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">if</span> <span class="nf">check_sigaction_error</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">old_action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
+              <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="k">let</span> <span class="n">prev_action</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">];</span>
+          <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">old_action</span><span class="p">)</span> <span class="o">=</span> <span class="n">prev_action</span><span class="p">;</span>
+          <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">]</span> <span class="o">=</span> <span class="o">*</span><span class="nf">translated_ref</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
+          <span class="mi">0</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="o">-</span><span class="mi">1</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-plaintext highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-plaintext highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-plaintext highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/syscall/process.rs</span>
+
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigreturn</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span> <span class="p">{</span>
+          <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
+          <span class="n">inner</span><span class="py">.handling_sig</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+          <span class="c1">// restore the trap context</span>
+          <span class="k">let</span> <span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.get_trap_cx</span><span class="p">();</span>
+          <span class="o">*</span><span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.trap_ctx_backup</span><span class="nf">.unwrap</span><span class="p">();</span>
+          <span class="n">trap_ctx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="k">as</span> <span class="nb">isize</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="o">-</span><span class="mi">1</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>关于 <code class="language-plaintext highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
+
+<h2 id="5-课后练习">5. 课后练习</h2>
+
+<h3 id="51-编程练习">5.1 编程练习</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
+</ul>
+
+<h3 id="52-实验练习">5.2 实验练习</h3>
+
+<h4 id="进程通信邮箱">进程通信：邮箱</h4>
+
+<p>没有测例也不知道写的对不对， 基本上就是魔改一下 Pipe 的环形缓冲队列就整完了。</p>
+
+<blockquote>
+  <p>具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e9b19e5f19851f12bcae83531a050d60230abd08">commit#e9b19e5</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
   <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
 </blockquote>
 
@@ -45,7 +422,7 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第六章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch6]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore 第六章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch6">[ch6]</a></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -2822,81 +3199,4 @@ Do not communicate by sharing memory; instead, share memory by communicating
   <li><a href="https://course.rs/advance/concurrency-with-threads/message-passing.html#%E6%B6%88%E6%81%AF%E9%80%9A%E9%81%93">Rust Course: Channel</a></li>
 </ul>
 
-<p class="error">Thanks for Roberto Huertas providing the background image, you can find some from his blog: <a href="https://robertohuertas.com/2019/12/08/wallpapers-for-the-rust-of-us/">Wallpapers for the Rust of us</a></p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。]]></summary></entry><entry><title type="html">MDIO (Management Data Input/Output)</title><link href="https://hangx-ma.github.io/2023/06/06/net-mdio.html" rel="alternate" type="text/html" title="MDIO (Management Data Input/Output)" /><published>2023-06-06T00:00:00+08:00</published><updated>2023-06-06T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/06/net-mdio</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/06/net-mdio.html"><![CDATA[<h2 id="1-mdio-简介">1. MDIO 简介</h2>
-
-<p><a href="#ref-mdio-wiki">wiki</a> 中这样定于 <em><strong>MDIO（Management Data Input/Output）</strong></em>： <em>MDIO 是 IEEE 802.3 标准定义一种两线以太网串行总线用于 <strong>MII（Media Independent Interface）</strong>， 有时关于 MDIO 我们还会说到 <strong>SMI（Serial Management Interface）</strong> 或者 <strong>MIIM（Media Independent Interface Management）</strong></em>。SMI/MDIO 协议用来管理 <em><strong>MAC（Media Access Controller）</strong></em> 与 <em><strong>PHY（Physical）</strong></em> 两个网络层之间的数据传输。 控制 MDIO 总线的设备称为 <em><strong>STA（Station Management Entity）</strong></em> 而被 MDIO 总线管理的设备称为 <em><strong>MMD（MDIO Manageable Device）</strong></em>。</p>
-
-<blockquote>
-  <p>MDIO 上层是 MII 其有两个接口： 数据接口连接以太网 MAC 层， 用以发送和接收以太网帧数据； 另外一个 PHY 管理接口了， 也就是我们所说的 MDIO 接口。</p>
-</blockquote>
-
-<p>MMD 一般是指 PHY 设备这类 MDIO 从设备， MDIO 接口会连接控制单元控制 PHY 设备以及获取其状态 （读写寄存器）。 每个 PHY 设备能在执行操作之前监视， 在执行操作时则可通过寄存器监视其状态。 这些寄存器提供了状态和控制信息， 包括 <em>link status, speed ability and selection, power down for low power consumption, duplex mode (full or half), auto-negotiation, fault signalling, loopback</em>。 MDIO 协议的作用就是配置 PHY 层所需要的接收/发送的参量。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-06-06-net-mdio/mdio-interface-layout.png" alt="MDIO interface layout" width="600" />
-    <br />
-    <font size="2" color="#999"><u>MDIO interface layout</u></font>
-</div>
-
-<p>前述所说， MDIO 是一种双线协议， 其接口由两种信号构成：</p>
-
-<ul>
-  <li><strong>MDIO Data Clock（MDC）：</strong> 由 MAC 设备驱动的连接到 PHY 设备的时钟信号。</li>
-  <li><strong>MDIO Data：</strong> 双向的数据传输， 所有的设备都依据 MDC 同步 （synchronous） 传输。</li>
-</ul>
-
-<p>虽然 MDIO 的是一种最高仅有 2.5 MHz 的低速总线 （最新的 DP83640 已经能支持 25 MHz）， 最开始是由 IEEE 802.3 的 Clause 22 定义， 后为了满足对 10G 以太网的设备需求在 IEEE 802.3ae 定义了 Clause 45。 对于 MDIO 总线而言其仅有一个主设备， 但能有多达 32 个 PHY 从设备。</p>
-
-<blockquote>
-  <p>MDIO 主从设备的控制器有不同的协议适用要求：</p>
-
-  <ul>
-    <li>MDIO master controller: Clause 22 和 Clause 45 均可</li>
-    <li>MDIO slave controller: Clause 22</li>
-    <li>MDIO slave controller: Clause 45</li>
-  </ul>
-</blockquote>
-
-<h2 id="2-clause-22">2. Clause 22</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-06-06-net-mdio/clause22-frame-format.png" alt="Clause 22 format format" width="800" />
-    <br />
-    <font size="2" color="#999"><u>Clause 22 format format</u></font>
-</div>
-
-<p>Clause 22 的帧格式只允许 5 bit 物理层地址和寄存器地址， 这限制了 STA 可以连接的 MMD 的数量。 此外，Clause 22 MDIO 只支持限压 5V 的设备且不支持多设备的 PHY。</p>
-
-<h2 id="3-clause-45">3. Clause 45</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-06-06-net-mdio/clause45-frame-format.png" alt="Clause 45 format format" width="800" />
-    <br />
-    <font size="2" color="#999"><u>Clause 45 format format</u></font>
-</div>
-
-<p>Clause 45 更改了寄存器的读写模式， 不同于 Clause 22 将寄存器读写数据以及地址都放在一个独立帧， Clause 45 分成了两帧进行传输， 第一帧为地址帧确定 MMD 和 寄存器， 第二帧为数据帧进行数据的读写。 这种设计不仅向后兼容 Clause 22， 并且将地址从 5 bit 扩展到了 16 bit， 使得寄存器的访问数量从 32 个增加到了 65535 个。 另外 Clause 45 支持 32 个端口， 每个端口都能支持 32 个 MMD 设备。</p>
-
-<h2 id="4-mdio-与-phy-与-nic">4. MDIO 与 PHY 与 NIC</h2>
-
-<p>网卡 （NIC） 工作在 OSI 的最后两层， 物理层和数据链路层</p>
-
-<ul>
-  <li><strong>物理层</strong> 定义了数据传送与接收所需要的电与光信号、 线路状态、 时钟基准、 数据编码和电路等， 并向数据链路层设备提供标准接口。</li>
-  <li><strong>数据链路层</strong> 则提供寻址机制、 数据帧的构建、 数据差错检查、 传送控制、 向网络层提供标准的数据接口等功能。 以太网卡中数据链路层的芯片称之为 MAC 控制器。</li>
-</ul>
-
-<p>物理层的芯片称之为 PHY。 IEEE-802.3 标准定义了以太网 PHY。 包括 <em><strong>MII（Media Independent Interface）</strong></em> 子层， <em><strong>PCS（Physical Coding Sublayer）</strong></em>， <em><strong>PMA（Physical Medium Attachment）</strong></em> 子层， <em><strong>PMD（Physical Medium Dependent）</strong></em> 子层， <em><strong>MDI（Medium Dependent Interface）</strong></em> 子层， 符合 IEEE-802.3k 中用于 10BaseT 和 100BaseTX 的规范。</p>
-
-<p>PHY 和 MAC 之间通过 IEEE 定义的标准的 <em><strong>MII（Media Independent Interface）</strong></em> 连接 MAC 和 PHY。 MII 传递了网络的所有数据和数据的控制。 以太网接口实质是 MAC 通过 MII 总线控制 PHY 的过程。 按照前述内容可知， IEEE 定义了 MDIO 总线服务于 MII 用以与 PHY 的通信。</p>
-
-<h2 id="5-参考">5. 参考</h2>
-
-<ul>
-  <li><a href="https://en.wikipedia.org/wiki/Management_Data_Input/Output">Management Data Input/Output - wikipedia</a> <a id="ref-mdio-wiki"></a></li>
-  <li><a href="https://www.latticesemi.com/-/media/LatticeSemi/Documents/ReferenceDesigns/JM/MDIOMasterandSlaveControllersDocumentation.ashx?document_id=50604">MDIO Master and Slave Controllers - LATTICE-semiconductor</a></li>
-  <li><a href="https://prodigytechno.com/mdio-management-data-input-output/">MDIO ( Management Data Input/Output )</a></li>
-  <li><a href="https://www.totalphase.com/support/articles/200349206-mdio-background/">MDIO Background</a></li>
-  <li><a href="https://grouper.ieee.org/groups/802/3/ae/public/jul00/law_1_0700.pdf">IEEE P802.3ae 10Gb/s Ethernet MDC/MDIO Proposal</a></li>
-  <li><a href="https://www.cnblogs.com/jason-lu/articles/3195473.html">网口扫盲三:以太网芯片MAC和PHY的关系</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Network" /><category term="Linux" /><summary type="html"><![CDATA[介绍 MDIO 以及与其相关的 clause 22， clause 45 协议。]]></summary></entry></feed>
+<p class="error">Thanks for Roberto Huertas providing the background image, you can find some from his blog: <a href="https://robertohuertas.com/2019/12/08/wallpapers-for-the-rust-of-us/">Wallpapers for the Rust of us</a></p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。]]></summary></entry></feed>
