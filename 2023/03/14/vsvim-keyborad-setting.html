@@ -292,13 +292,13 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=vim">vim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Mar 14, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jun 24, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Jul 14, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6040 words </span>
+                <span> Total 6282 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 17 mins </span>
+                <span> About 18 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s03s14svsvim-keyborad-setting.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-03-14T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,vscode,vim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -356,8 +356,8 @@
   <li><strong>Normal, Non-recursive</strong>
     <ul>
       <li><code class="language-plaintext highlighter-rouge">&lt;leader&gt; nh</code>： 取消搜索高亮</li>
-      <li><code class="language-plaintext highlighter-rouge">g[</code>： 跳转到上一个问题</li>
-      <li><code class="language-plaintext highlighter-rouge">g]</code>： 跳转到下一个问题</li>
+      <li><code class="language-plaintext highlighter-rouge">g [</code>： 跳转到上一个问题</li>
+      <li><code class="language-plaintext highlighter-rouge">g ]</code>： 跳转到下一个问题</li>
     </ul>
   </li>
   <li><strong>Visual, Recursive</strong>
@@ -409,16 +409,17 @@
 
 <h3 id="31-侧边栏命令定义">3.1 侧边栏命令定义</h3>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-n&gt; <span class="o">[</span> ： 切换侧边栏显示状态
-&lt;C-n&gt; <span class="o">]</span> ： 切换第二侧边栏显示状态
-&lt;C-n&gt; 1 ： 显示文件资源管理器
-&lt;C-n&gt; 2 ： 显示全局搜索
-&lt;C-n&gt; 3 ： 显示版本控制
-&lt;C-n&gt; 4 ： 显示 debug
-&lt;C-n&gt; 5 ： 显示插件商店
-&lt;C-n&gt; 6 ： 显示 TODO Tree
-&lt;C-n&gt; 7 ： 显示 Bookmark
-&lt;C-n&gt; 8 ： 显示 <span class="nb">test </span>资源管理器
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-k&gt; <span class="o">[</span> ： 切换侧边栏显示状态
+&lt;C-k&gt; <span class="o">]</span> ： 切换第二侧边栏显示状态
+&lt;C-k&gt; 1 ： 显示文件资源管理器
+&lt;C-k&gt; 2 ： 显示全局搜索
+&lt;C-k&gt; 3 ： 显示版本控制
+&lt;C-k&gt; 4 ： 显示 debug
+&lt;C-k&gt; 5 ： 显示插件商店
+&lt;C-k&gt; 6 ： 显示 TODO Tree
+&lt;C-k&gt; 7 ： 显示 Bookmark
+&lt;C-k&gt; 8 ： 显示 <span class="nb">test </span>资源管理器
+&lt;C-k&gt; 9 ： 显示 Project Manager
 </code></pre></div></div>
 
 <h3 id="32-文件管理器配置">3.2 文件管理器配置</h3>
@@ -428,6 +429,8 @@ j       ： 向下移动
 k       ： 向上移动
 &lt;C-d&gt;   ： 向下翻页
 &lt;C-u&gt;   ： 向上翻页
+gg      ： 回到顶部
+G       ： 回到底部
 space   ： 打开文件或目录
 &lt;S-A-r&gt; ： 打开操作系统下当前目录的资源管理器
 
@@ -496,7 +499,7 @@ p       ： 粘贴文件或目录
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-g&gt; c ： 显示命令面板
 &lt;C-g&gt; s ： 打开设置页面
-&lt;C-g&gt; p ： 快速打开文件 
+&lt;C-g&gt; p ： 快速打开文件
 &lt;C-g&gt; r ： 打开最近记录
 &lt;C-g&gt; n ： 新建 vscode 窗口
 &lt;C-g&gt; q ： 关闭 vscode 窗口
@@ -519,18 +522,34 @@ p       ： 粘贴文件或目录
 &lt;C-v&gt;   ： 复制， 非 INSERT 模式不生效
 </code></pre></div></div>
 
-<h3 id="39-bookmark">3.9 Bookmark</h3>
+<h3 id="39-extensions">3.9 Extensions</h3>
+
+<h4 id="391--bookmark">3.9.1  Bookmark</h4>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-m&gt; t     ： 创建或消除书签
 &lt;C-m&gt; n     ： 跳转到下一个书签
 &lt;C-m&gt; p     ： 跳转到上一个书签
-&lt;C-m&gt; l     ： 列出当前文件的所有书签 
-&lt;C-m&gt; &lt;A-l&gt; ： 列出所有文件的所有书签 
-&lt;C-m&gt; c     ： 列出当前文件的所有书签 
-&lt;C-m&gt; &lt;A-c&gt; ： 清除所有文件的所有书签 
+&lt;C-m&gt; l     ： 列出当前文件的所有书签
+&lt;C-m&gt; &lt;A-l&gt; ： 列出所有文件的所有书签
+&lt;C-m&gt; c     ： 列出当前文件的所有书签
+&lt;C-m&gt; &lt;A-c&gt; ： 清除所有文件的所有书签
 </code></pre></div></div>
 
-<h3 id="310-markdown-preview">3.10 Markdown Preview</h3>
+<h4 id="392-project-manager">3.9.2 Project Manager</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;leader&gt; po ： 在当前窗口打开一个 project
+&lt;leader&gt; pn ： 在新的窗口打开一个 project
+</code></pre></div></div>
+
+<h4 id="393-search">3.9.3 Search</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;leader&gt; sf ： 在文件中查找
+&lt;leader&gt; sr ： 在文件中替换
+&lt;C-n&gt;       ： 聚焦下一个搜索结果
+&lt;C-p&gt;       ： 聚焦上一个搜索结果
+</code></pre></div></div>
+
+<h4 id="395-markdown-preview">3.9.5 Markdown Preview</h4>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;C-k&gt; v     ： 在侧边打开/关闭 Markdown Preview
 &lt;C-k&gt; &lt;A-v&gt; ： 打开/关闭 Markdown Preview
