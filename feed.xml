@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-14T20:15:56+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-15T15:56:24+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
 
 <dl>
@@ -35,7 +35,7 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第七章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch7]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore 第七章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch7">[ch7]</a></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
