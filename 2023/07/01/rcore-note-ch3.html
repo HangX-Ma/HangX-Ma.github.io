@@ -314,11 +314,11 @@
             </li>
 <li>
 <i class="fas fa-file-word"></i>
-                <span> Total 7808 words </span>
+                <span> Total 8052 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 22 mins </span>
+                <span> About 23 mins </span>
             </li>
 <li>
 <i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s01srcore-note-ch3.html">0</span> views</li>
@@ -598,6 +598,8 @@
   <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
       <span class="n">SWITCH_TASK_START</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
       <span class="nn">switch</span><span class="p">::</span><span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
+      <span class="c1">// 记录除了第一次运行外的 switch cost</span>
+      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_switch_cost</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
@@ -608,7 +610,7 @@
   <span class="c1">// os/src/trap/mod.rs</span>
   <span class="nd">#[no_mangle]</span>
   <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">switch_cost</span> <span class="p">(</span><span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
-      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span> 
+      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span>
       <span class="n">cx</span>
   <span class="p">}</span>
 </code></pre></div>        </div>
@@ -616,7 +618,7 @@
     </ul>
 
     <blockquote>
-      <p>具体的实现和细节可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4e9425855a85e601fa02070c41da72b5a4f1b7c1">commit#4e9425</a>。</p>
+      <p>具体的实现和细节可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4e9425855a85e601fa02070c41da72b5a4f1b7c1">commit#4e9425</a>， 但当时做的时候遗漏了 <code class="language-plaintext highlighter-rouge">__switch</code> 计时函数中的 <code class="language-plaintext highlighter-rouge">crate::task::update_switch_cost(get_time_us() - SWITCH_TASK_START);</code> 导致内核只能记载程序 <strong>switch to not running</strong> 即程序开始第一次运行前的开销。 具体可以参考 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/141#issuecomment-1637146452">Mars</a> 在 rCore 相关章节的留言。</p>
     </blockquote>
   </li>
   <li>
