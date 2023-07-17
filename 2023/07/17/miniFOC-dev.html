@@ -12,11 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Home - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>miniFOC Driver Development - 一只豆腐</title>
 
-<meta name="description" content="Code, life and embedded system...
-">
-<link rel="canonical" href="https://hangx-ma.github.io/blog/"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -266,135 +265,235 @@
 </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
       <div class="header__title">
-        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
 " href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
-        <ul><li class="navigation__item navigation__item--active"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
-</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
-
-              <div class="col-aside d-print-none js-col-aside"></div>
-
-              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
-
-<!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="HangX-Ma"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/17/miniFOC-dev.html"><h2 itemprop="headline" class="item__header">miniFOC Driver Development</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</div><p><a href="/2023/07/17/miniFOC-dev.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:linear-gradient(135deg, rgba(34, 139, 87 , .4), rgba(90, 60, 139, .4)),url(/assets/images/bg/foc/circuit-board.jpg);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=FOC">FOC</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-17T00:00:00+08:00">
-    <meta itemprop="keywords" content="FOC,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/13/rcore-note-ch7.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 7</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/13/rcore-note-ch7.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 13, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s13srcore-note-ch7.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-13T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/10/rcore-note-ch6.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 6</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/10/rcore-note-ch6.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 10, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s10srcore-note-ch6.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-10T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/07/rcore-note-ch5.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 5</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/07/rcore-note-ch5.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 07, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s07srcore-note-ch5.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-07T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/04/rcore-note-ch4.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 4</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/04/rcore-note-ch4.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 04, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s04srcore-note-ch4.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-04T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/01/rcore-note-ch3.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 3</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/01/rcore-note-ch3.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 01, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 03, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s01srcore-note-ch3.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-01T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/23/rcore-note-ch2.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 2</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/06/23/rcore-note-ch2.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rust">rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jun 30, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23srcore-note-ch2.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
-    <meta itemprop="keywords" content="rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/06/23/neovim-config.html"><h2 itemprop="headline" class="item__header">Start from scratch: Neovim for Rust</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim</div><p><a href="/2023/06/23/neovim-config.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Tool">Tool</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=neovim">neovim</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
-    <meta itemprop="keywords" content="Tool,neovim"></div>
-      </article></div>
-</div><div class="layout--home"><div class="pagination"><p>23 post articles, 3 pages.</p>
-    <div class="pagination__menu">
-      <ul class="menu menu--nowrap"><li><div class="button button--secondary button--circle disabled">
-            <i class="fas fa-angle-left"></i>
-          </div></li><li>
-              <div class="button button--primary button--circle focus"><span>1</span></div>
-            </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2"><span>2</span></a>
-              </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page3" href="/blog/page3"><span>3</span></a>
-              </li><li><a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2">
-            <i class="fas fa-angle-right"></i>
-          </a></li></ul>
-    </div>
-  </div></div>
-<script>/*(function () {
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 2081 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 6 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
 
-})();*/
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="miniFOC Driver Development"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-17T00:00:00+08:00">
+    <meta itemprop="keywords" content="FOC,STM32"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
+
+<blockquote>
+  <p>目前板子设计借鉴了 <a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.880.my_history.page.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">小男孩gugugu</a> Up 的这部分内容（视频标题太长啦！）， 不想自己从头找元件然后再一个个建模搭了， 太费时间了这样就本末倒置了。</p>
+</blockquote>
+
+<ul>
+  <li><strong>MCU:</strong> STM32F103C8T6</li>
+  <li><strong>Programmer:</strong> CMake + OpenOCD + STLink-v2</li>
+  <li><strong>PCB Design:</strong> Altium Designer 23</li>
+  <li><strong>Editor:</strong> VSCode</li>
+</ul>
+
+<p>项目地址 <a href="https://github.com/HangX-Ma/miniFOC">HangX-Ma/miniFOC</a>， 项目将持续更新， 这次挺有信心的！</p>
+
+<h2 id="1-sc60228-磁编码器">1. SC60228 磁编码器</h2>
+
+<p>SC60228 是一款非接触式高精度磁编码器芯片， 芯片中心内置了霍尔感应点矩阵， 可用以测量无刷电机的转子角度。 通过 PWM 或 SPI 的方式输出 12 bit 绝对式位置信息， 检测速率可达 20K rpm， 不难得知该款芯片能检测一周最多 4096 个位置。 相较读取 PWM 输出计算角度而言， 使用 SPI 协议读取数据的精度会更高， 代码编写也比较方便且具备通用性。</p>
+
+<blockquote>
+  <p>用这款芯片也是历史遗留问题了， 当时做了这个板子不忍心浪费， 网上有 Simple FOC 提供的 <a href="https://github.com/simplefoc/Arduino-FOC-drivers/tree/master/src/encoders/sc60228">SC60228 SimpleFOC driver</a> 可参考代码部分， 虽然看起来事情不多， 但理解数据手册进行配置和代码编写也对学习很有帮助。</p>
+</blockquote>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/encoder-spi-time-diagram.png" alt="Encoder SPI time diagram, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Encoder SPI time diagram, HangX-Ma</u></font>
+</div>
+
+<p>这款芯片只需要配置 SPI 口在主机接收数据即可， 不涉及双向数据传输。 可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
+
+<p>另外， 手册指出 <strong>\(t_{CLK}\)（SCLK 周期）</strong> 最小需要 100ns， 这里我查了一下 STM32CubeMX 配置中的 Baud Rate 的含义， 如果没理解错就相当于 SPI 中的 SCLK。 对于预设 72MHz 时钟频率的板子， 8 分频 9.0 MBits/s ≈ 111 ns， 另外 <strong>\(t_{DO}\)（SCLK 的上升沿到 MISO 数据有效之间的时间）</strong>_ 其值最大能达到 50 ns， 那么当前算是极限的速率配置了。 为了保险起见我选择设置 16 分频约 222 ns 周期， 防止数据出现丢失以及未定义的情况。</p>
+
+<blockquote>
+  <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
+</blockquote>
+
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。 片选信号的性质就不多提了， 低选， 高非选， 且需要保持电平特定的时间。</p>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/blogernice/articles/12531133.html">详解SPI中的极性CPOL和相位CPHA - blogernice 博客园</a><br />
+<a href="https://zhuanlan.zhihu.com/p/26509678">秒懂 奇偶校验码 - 车卡门 知乎</a><br />
+<a href="https://blog.csdn.net/ftswsfb/article/details/104321901">奇偶校验原理及C实现 - ftswsfb CSND</a><br />
+<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a></p>
+</blockquote>
+
+<h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
+
+<p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
+
+<h3 id="x1-tim1-配置-pwm-输出">X.1 TIM1 配置 PWM 输出</h3>
+
+<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Core/Src/tim.c</span>
+<span class="kt">void</span> <span class="nf">MX_TIM1_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Prescaler</span> <span class="o">=</span> <span class="mi">36</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Autoreload</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>另外， 要使能 TIM1 的输出， <code class="language-plaintext highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
+</blockquote>
+
+<h3 id="x2-spi1">X.2 SPI1</h3>
+
+<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
 </script>
 
+<script async src="https://static.addtoany.com/menu/page.js"></script>
 
-</div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-17T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/13/rcore-note-ch7.html">rCore OS Note - Chapter 7</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/07/17/miniFOC-dev',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
 
 <!-- end custom main bottom snippet -->
 </div>
@@ -952,6 +1051,68 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 
 })();*/
 </script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
   window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
     var $canvas = null, $this = null, _ctx = null, _text = '';
     $('.language-chart').each(function(){
@@ -1058,12 +1219,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      $('.js-pageview').each(function() {
-        var $this = $(this);
-        var key = $this.attr('data-page-key');
-        pageview.get(key, function(view) {
-          $this.attr('itemprop', 'userInteractionCount').attr('content', view).text(view);
-        });
+      var key =   's2023s07s17sminiFOC-dev.html';
+      var title = "miniFOC Driver Development";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s07s17sminiFOC-dev.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
@@ -1123,7 +1282,43 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 		}
 		return actionMsg;
 	}
-})();</script>
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];

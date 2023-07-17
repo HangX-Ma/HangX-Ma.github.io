@@ -1,5 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-17T09:15:09+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-17T22:17:23+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC Driver Development</title><link href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html" rel="alternate" type="text/html" title="miniFOC Driver Development" /><published>2023-07-17T00:00:00+08:00</published><updated>2023-07-17T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/17/miniFOC-dev</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><![CDATA[<p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
+
+<blockquote>
+  <p>目前板子设计借鉴了 <a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.880.my_history.page.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">小男孩gugugu</a> Up 的这部分内容（视频标题太长啦！）， 不想自己从头找元件然后再一个个建模搭了， 太费时间了这样就本末倒置了。</p>
+</blockquote>
+
+<ul>
+  <li><strong>MCU:</strong> STM32F103C8T6</li>
+  <li><strong>Programmer:</strong> CMake + OpenOCD + STLink-v2</li>
+  <li><strong>PCB Design:</strong> Altium Designer 23</li>
+  <li><strong>Editor:</strong> VSCode</li>
+</ul>
+
+<p>项目地址 <a href="https://github.com/HangX-Ma/miniFOC">HangX-Ma/miniFOC</a>， 项目将持续更新， 这次挺有信心的！</p>
+
+<h2 id="1-sc60228-磁编码器">1. SC60228 磁编码器</h2>
+
+<p>SC60228 是一款非接触式高精度磁编码器芯片， 芯片中心内置了霍尔感应点矩阵， 可用以测量无刷电机的转子角度。 通过 PWM 或 SPI 的方式输出 12 bit 绝对式位置信息， 检测速率可达 20K rpm， 不难得知该款芯片能检测一周最多 4096 个位置。 相较读取 PWM 输出计算角度而言， 使用 SPI 协议读取数据的精度会更高， 代码编写也比较方便且具备通用性。</p>
+
+<blockquote>
+  <p>用这款芯片也是历史遗留问题了， 当时做了这个板子不忍心浪费， 网上有 Simple FOC 提供的 <a href="https://github.com/simplefoc/Arduino-FOC-drivers/tree/master/src/encoders/sc60228">SC60228 SimpleFOC driver</a> 可参考代码部分， 虽然看起来事情不多， 但理解数据手册进行配置和代码编写也对学习很有帮助。</p>
+</blockquote>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/encoder-spi-time-diagram.png" alt="Encoder SPI time diagram, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Encoder SPI time diagram, HangX-Ma</u></font>
+</div>
+
+<p>这款芯片只需要配置 SPI 口在主机接收数据即可， 不涉及双向数据传输。 可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
+
+<p>另外， 手册指出 <strong>\(t_{CLK}\)（SCLK 周期）</strong> 最小需要 100ns， 这里我查了一下 STM32CubeMX 配置中的 Baud Rate 的含义， 如果没理解错就相当于 SPI 中的 SCLK。 对于预设 72MHz 时钟频率的板子， 8 分频 9.0 MBits/s ≈ 111 ns， 另外 <strong>\(t_{DO}\)（SCLK 的上升沿到 MISO 数据有效之间的时间）</strong>_ 其值最大能达到 50 ns， 那么当前算是极限的速率配置了。 为了保险起见我选择设置 16 分频约 222 ns 周期， 防止数据出现丢失以及未定义的情况。</p>
+
+<blockquote>
+  <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
+</blockquote>
+
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。 片选信号的性质就不多提了， 低选， 高非选， 且需要保持电平特定的时间。</p>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/blogernice/articles/12531133.html">详解SPI中的极性CPOL和相位CPHA - blogernice 博客园</a><br />
+<a href="https://zhuanlan.zhihu.com/p/26509678">秒懂 奇偶校验码 - 车卡门 知乎</a><br />
+<a href="https://blog.csdn.net/ftswsfb/article/details/104321901">奇偶校验原理及C实现 - ftswsfb CSND</a><br />
+<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a></p>
+</blockquote>
+
+<h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
+
+<p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
+
+<h3 id="x1-tim1-配置-pwm-输出">X.1 TIM1 配置 PWM 输出</h3>
+
+<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Core/Src/tim.c</span>
+<span class="kt">void</span> <span class="nf">MX_TIM1_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Prescaler</span> <span class="o">=</span> <span class="mi">36</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Autoreload</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>另外， 要使能 TIM1 的输出， <code class="language-plaintext highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
+</blockquote>
+
+<h3 id="x2-spi1">X.2 SPI1</h3>
+
+<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
 
 <dl>
   <dt>管道</dt>
@@ -3106,99 +3177,4 @@ csrw sscratch, t2
   <li><a href="https://www.youtube.com/watch?v=lJ3NC-R3gSI">Rust’s Journey to Async/Await - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-2019/">[Slide]</a></li>
   <li><a href="https://www.youtube.com/watch?v=NNwK5ZPAJCk">The Talk You’ve Been Await-ing for - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-async-await/">[Slide]</a></li>
   <li><a href="https://course.rs/advance/async/intro.html">Rust语言圣经(Rust Course) - 异步编程</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。]]></summary></entry><entry><title type="html">Async Programming in Rust： Channel</title><link href="https://hangx-ma.github.io/2023/06/11/rust-channel.html" rel="alternate" type="text/html" title="Async Programming in Rust： Channel" /><published>2023-06-11T00:00:00+08:00</published><updated>2023-06-11T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/11/rust-channel</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/11/rust-channel.html"><![CDATA[<blockquote>
-  <ul>
-    <li>CS110L Spring 2020 仓库： <a href="https://github.com/HangX-Ma/cs110l-sp20">https://github.com/HangX-Ma/cs110l-sp20</a></li>
-    <li>CS110L Spring 2020 课程网站： <a href="https://reberhardt.com/cs110l/spring-2020/">https://reberhardt.com/cs110l/spring-2020/</a></li>
-  </ul>
-</blockquote>
-
-<p>CS110L Spring20 课程的 Lecture 12 提及了 Rust 多线程间的数据共享的问题。 一般来说， 线程之间会通过一块共享内存传递数据， 并使用 <code class="language-plaintext highlighter-rouge">Arc</code> 以及 <code class="language-plaintext highlighter-rouge">Mutex</code> 避免数据竞争 (Race Condition)。</p>
-
-<p>但是 <strong>使用锁的办法是开销极大的</strong>。 假设内核调度时线程 A 遇到了上锁的数据， 虽然处理这一小段数据可能只需要几纳秒的时间， 但是剩余的时间片因为锁的原因而被浪费了， 而此时该线程又被内核放在了调度队列的末尾， 这意味着线程 A 真正运行时需要经历多轮调度等待很长时间。 那么最好的办法就是使用一种不上锁的数据结构。</p>
-
-<h2 id="1-channel-模型的提出">1. Channel 模型的提出</h2>
-
-<div align="center" style="font-weight: bold; font-style: italic;">
-
-Do not communicate by sharing memory; instead, share memory by communicating
-<p align="right">-- Effective Golang</p>
-</div>
-
-<p>早在 1978 年就已经提出了 Channel 的理论模型， 多个线程之间的通信以消息的方式传递， 由于没有使用共享内存， 因而不会产生数据竞争。 但消息传递并不意味着高效， 由于我们没有使用共享内存， 这需要我们将需要传递的数据拷贝进 <code class="language-plaintext highlighter-rouge">Message</code> 中， 这会造成极大的资源浪费和严重的效率问题。</p>
-
-<p>在 Rust 中可以通过浅拷贝达到数据共享的目的， 我们需要在 <code class="language-plaintext highlighter-rouge">Message</code> 中传递指针。 用以描述指针的数据结构所占的资源是极小的， 这种 <strong>Partial Shared Memory</strong> 的安全性也能得到保证。 由于 Rust 语言的特性， 指针的所有权会在传递时转移至 Channel 中， 编译器会保证我们在传递指针后无法再在除 Channel 外的任何地方使用这个指针。</p>
-
-<p>完美的 Channel 模型应当是 <em><strong>MPMC (multi-producer, multi-consumer)</strong></em> 类型， 简单的 <code class="language-plaintext highlighter-rouge">Mutex&lt;T&gt; + CondVar</code> 组合能够实现 MPMC 但正如前述所言， 使用锁会降低效率。 比如在 Go 语言中实现了基于锁的安全的 MPMC Channel， 虽然使用了 <strong>futex (fast userspace mutex)</strong> 但由于锁的存在而效率低下。 因而， 标准的 Rust 库中实现的是 <em><strong>MPSC (multi-producer, single-consumer)</strong></em>， 这种实现方式有如下优缺点：</p>
-
-<ul>
-  <li>优点
-    <ul>
-      <li>适用于归约数据汇总的场合， 多个线程需要将结果统一发送给一个单独的线程。</li>
-      <li>可以退化为 <em><strong>SPSC(single-producer, single-consumer)</strong></em> 进行线程与线程之间独立的通信。</li>
-    </ul>
-  </li>
-  <li>缺点
-    <ul>
-      <li>当我们想分发数据的时候即一对多时， 情况就比较难办且复杂了。</li>
-      <li>Rust 标准库中的 Channel 比较古老， 一些术语和标准没有统一， 不仅难用而且很有可能会被替代。</li>
-    </ul>
-  </li>
-</ul>
-
-<p><a href="https://docs.rs/crossbeam/0.7.3/crossbeam/">crossbeam</a> 是 Rust 官方指定的 Channel 的实现库， 实现了 MPMC 的特性， 改进了很多 API， 甚至比当前的标准库的实现还要快上不少。</p>
-
-<h2 id="2-crossbeam-channel">2. crossbeam Channel</h2>
-
-<p>这里使用 CS110L 课程的 farm v3.0 这个例子对 Channel 的使用进行解释说明。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="n">crossbeam_channel</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="n">num</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::{</span><span class="n">thread</span><span class="p">,</span> <span class="n">time</span><span class="p">};</span>
-
-<span class="k">fn</span> <span class="nf">factor_number</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-
-<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="c1">// unbounded 表示使用的内存是无上限的</span>
-    <span class="k">let</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">)</span> <span class="o">=</span> <span class="nn">crossbeam</span><span class="p">::</span><span class="nn">channel</span><span class="p">::</span><span class="nf">unbounded</span><span class="p">();</span>
-    
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">threads</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="nn">num_cpus</span><span class="p">::</span><span class="n">get</span> <span class="p">{</span>
-        <span class="c1">// 创建一个 receiver 的拷贝， 避免下一个线程因所有权转移而无法使用 receiver</span>
-        <span class="k">let</span> <span class="n">receiver</span> <span class="o">=</span> <span class="n">receiver</span><span class="nf">.clone</span><span class="p">();</span>
-        <span class="n">threads</span><span class="nf">.push</span><span class="p">(</span><span class="nn">thread</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="k">move</span> <span class="p">||</span> <span class="p">{</span>
-            <span class="k">while</span> <span class="k">let</span> <span class="nf">Ok</span><span class="p">(</span><span class="n">next_num</span><span class="p">)</span> <span class="o">=</span> <span class="n">receiver</span><span class="nf">.recv</span><span class="p">()</span> <span class="p">{</span>
-                <span class="nf">factor_number</span><span class="p">(</span><span class="n">next_num</span><span class="p">);</span>
-            <span class="p">}</span>
-        <span class="p">}));</span>
-    <span class="p">}</span>
-
-    <span class="k">let</span> <span class="n">stdin</span> <span class="o">=</span> <span class="nn">std</span><span class="p">::</span><span class="nn">io</span><span class="p">::</span><span class="nf">stdin</span><span class="p">();</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="k">in</span> <span class="n">stdin</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.lines</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">num</span> <span class="o">=</span> <span class="n">line</span><span class="nf">.unwrap</span><span class="p">()</span><span class="py">.parse</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">u32</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
-        <span class="n">sender</span>
-            <span class="nf">.send</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
-            <span class="nf">.expect</span><span class="p">(</span><span class="s">"Tried writing to channel, but there are no receivers!"</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="c1">// 如果没有调用 drop， 那么通道关闭的两个条件： 发送者全部 drop 或接收者被 drop 就无法满足。</span>
-    <span class="c1">// 那么对于子线程而言， 如果它想从 while 循环中跳出必须要让 recv() 返回一个 Err()， 只有提早</span>
-    <span class="c1">// 通过 drop 函数关闭了 sender 才能让 Channel 关闭， 让子线程完成处理。</span>
-    <span class="nf">drop</span><span class="p">(</span><span class="n">sender</span><span class="p">);</span>
-
-    <span class="k">for</span> <span class="n">thread</span> <span class="k">in</span> <span class="n">threads</span> <span class="p">{</span>
-        <span class="n">thread</span><span class="nf">.join</span><span class="p">()</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Panic occurred in thread"</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="3-参考">3. 参考</h2>
-
-<ul>
-  <li><a href="https://reberhardt.com/cs110l/spring-2020/slides/lecture-12.pdf">CS110L, Spring 2020: Channels</a></li>
-  <li><a href="https://reberhardt.com/cs110l/spring-2020/slides/lecture-11.pdf">CS110L, Spring 2020: Synchronization</a></li>
-  <li><a href="https://reberhardt.com/cs110l/spring-2020/lecture-notes/lecture-11/">CS110L, Spring 2020: Synchronization in Rust</a></li>
-  <li><a href="https://course.rs/advance/concurrency-with-threads/message-passing.html#%E6%B6%88%E6%81%AF%E9%80%9A%E9%81%93">Rust Course: Channel</a></li>
-</ul>
-
-<p class="error">Thanks for Roberto Huertas providing the background image, you can find some from his blog: <a href="https://robertohuertas.com/2019/12/08/wallpapers-for-the-rust-of-us/">Wallpapers for the Rust of us</a></p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[学习 CS110L Spring20 课程 Lecture 12： Channel， 总结相关原理及用法。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。]]></summary></entry></feed>
