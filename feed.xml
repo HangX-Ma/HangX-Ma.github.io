@@ -1,5 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-17T23:47:59+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC Driver Development</title><link href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html" rel="alternate" type="text/html" title="miniFOC Driver Development" /><published>2023-07-17T00:00:00+08:00</published><updated>2023-07-17T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/17/miniFOC-dev</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><![CDATA[<p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-18T20:50:54+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">OOP C Programming</title><link href="https://hangx-ma.github.io/2023/07/18/oopc.html" rel="alternate" type="text/html" title="OOP C Programming" /><published>2023-07-18T00:00:00+08:00</published><updated>2023-07-18T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/18/oopc</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/18/oopc.html"><![CDATA[<p>研究这部分内容的动机主要还是编写 STM32 的 C 代码的时候， 期望有一个固有的类能够管理其方法， 这样能够比较清晰的管理这些同属于一类的代码结构。 其实这里就涉及到了 <strong>面向对象</strong> 的编程思想， 将数据抽象为 <strong>类</strong> 和 <strong>方法</strong>， 类能表征数据的属性， 而方法则是数据属性及状态改变的一种行为。</p>
+
+<p>之前在接触 Linux 驱动的时候其实就浅浅地接触到了 C 面向对象的思想， 例如 MTD 层抽象接口提供给 Block， 我们直接从顶层通过代码索引的方式是没办法找到具体的 Block 调用方法的。 我们只能看到 MTD 抽象出来的接口， 这一定程度上提供了数据的私有化的能力。</p>
+
+<p>网上的相关文章众说纷纭， 但目前看来就是 <em><strong>C 现代编程</strong></em> 这本书讲的最清晰最明白， LW_OOPC 则是 高焕堂 以及其团队 MISOO 设计的方便 C 面向对象的宏定义模块， 能方便相关的开发。 其实这些文章读过来， 主要还是需要开发者用好 <code class="language-plaintext highlighter-rouge">struct</code>， <code class="language-plaintext highlighter-rouge">Macro</code>， <code class="language-plaintext highlighter-rouge">pointer</code>  这三类资源。 <code class="language-plaintext highlighter-rouge">struct</code> 可谓是重中之重， 可以看到在 C++ 中的 struct 和 class 仅在数据接口的私有性上存在差异， 而在 Rust 中则直接删除了 class 的定义， 转向了 struct + trait 的编程模式。</p>
+
+<p>这篇文章不定期更新 OOP C 的一些想法， 其实读 <em><strong>C 现代编程</strong></em> 还是有很多疑惑的， 但是没用到就没太深刻的印象， 有问题再好好研究记录！</p>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><a href="https://pan.baidu.com/s/1qf2VAPh5zU8PAToU9RHbCg?pwd=l9ry">C 现代编程 - 百度网盘</a>
+    <blockquote>
+      <p>这本书最关键， 下面的感觉写的都不如这本书详细清晰。</p>
+    </blockquote>
+  </li>
+  <li><a href="https://pan.baidu.com/s/1bda2tBK7KZxSOlMUcWMccQ?pwd=secu">UML+OOPC嵌入式C语言开发精讲 - 百度网盘</a></li>
+  <li><a href="https://github.com/Akagi201/lw_oopc/tree/master">lw_oopc - Github</a></li>
+  <li><a href="https://ooc-coding.sourceforge.net/">Object Oriented C - ooc</a></li>
+  <li><a href="https://mp.weixin.qq.com/s/V8xil48IoQE6QB82_5o2_w">真的可以，用C语言实现面向对象编程OOP - 李肖遥 WeChat</a></li>
+  <li><a href="https://www.cnblogs.com/kendoziyu/p/c_object-oriented_programming_example_by_struct.html">C语言使用结构体面向对象编程举例讲解 - 极客子羽 博客园</a></li>
+</ul>
+
+<h2 id="1-使用-struct-模块化编程">1. 使用 struct 模块化编程</h2>
+
+<p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-plaintext highlighter-rouge">static</code> 对 <code class="language-plaintext highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
+
+<h2 id="2-跨文件的全局变量">2. 跨文件的全局变量</h2>
+
+<p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-plaintext highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-plaintext highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
+
+<dl>
+  <dt>声明</dt>
+  <dd>向编译器说明一个变量或函数的信息，包括：名字、类型、初始值等，即声明变量、函数的属性细节， 包含该声明的模块在连接阶段从其它模块寻找外部函数和变量。</dd>
+  <dt>定义</dt>
+  <dd>指明变量、函数存储在哪里，当定义发生时，系统为变量或函数分配内存单元。</dd>
+</dl>
+
+<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-plaintext highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-plaintext highlighter-rouge">g_encoder</code>， 在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 中则通过 <code class="language-plaintext highlighter-rouge">extern</code> 声明 <code class="language-plaintext highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-plaintext highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-plaintext highlighter-rouge">config.h</code> 以及 <code class="language-plaintext highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-plaintext highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// encoder.c</span>
+<span class="n">Encoder</span> <span class="n">g_encoder</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// encoder.c</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">Encoder</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">}</span> <span class="n">Encoder</span><span class="p">;</span>
+<span class="k">extern</span> <span class="n">Encoder</span> <span class="n">g_encoder</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/wangh0802PositiveANDupward/archive/2012/08/06/2624827.html">C语言：全局变量在多个c文件中公用的方法 - 奔流聚海 博客园</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="C" /><summary type="html"><![CDATA[结合 OOP 思想进行 C 语言编程， 这篇文章并不从头介绍相关的知识， 而是记录个人学习的疑难点以及参考资料等资源。]]></summary></entry><entry><title type="html">miniFOC Driver Development</title><link href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html" rel="alternate" type="text/html" title="miniFOC Driver Development" /><published>2023-07-17T00:00:00+08:00</published><updated>2023-07-17T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/17/miniFOC-dev</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><![CDATA[<p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
 
 <blockquote>
   <p>目前板子设计借鉴了 <a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.880.my_history.page.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">小男孩gugugu</a> Up 的这部分内容（视频标题太长啦！）， 不想自己从头找元件然后再一个个建模搭了， 太费时间了这样就本末倒置了。</p>
@@ -22,27 +75,51 @@
   <p>用这款芯片也是历史遗留问题了， 当时做了这个板子不忍心浪费， 网上有 Simple FOC 提供的 <a href="https://github.com/simplefoc/Arduino-FOC-drivers/tree/master/src/encoders/sc60228">SC60228 SimpleFOC driver</a> 可参考代码部分， 虽然看起来事情不多， 但理解数据手册进行配置和代码编写也对学习很有帮助。</p>
 </blockquote>
 
+<h2 id="11-时序图与-spi-基本配置">1.1 时序图与 SPI 基本配置</h2>
+
 <div align="center">
     <img src="/norobots/images/2023-07-17-miniFOC-dev/encoder-spi-time-diagram.png" alt="Encoder SPI time diagram, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Encoder SPI time diagram, HangX-Ma</u></font>
 </div>
 
-<p>这款芯片只需要配置 SPI 口在主机接收数据即可， 不涉及双向数据传输。 可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
+<p>这款芯片只需要配置 SPI 口在主机接收 <strong>(Receive Only Master)</strong> 数据即可， 不涉及双向数据传输。 我原来计划使用 DMA 传输 SPI 的数据， 但实际上 DMA 在小数据量以及高速读取的情况下并不合适， 这里的位置信息仅 16 位， 有些多此一举了。</p>
+
+<p>可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
 
 <p>另外， 手册指出 <strong>\(t_{CLK}\)（SCLK 周期）</strong> 最小需要 100ns， 这里我查了一下 STM32CubeMX 配置中的 Baud Rate 的含义， 如果没理解错就相当于 SPI 中的 SCLK。 对于预设 72MHz 时钟频率的板子， 8 分频 9.0 MBits/s ≈ 111 ns， 另外 <strong>\(t_{DO}\)（SCLK 的上升沿到 MISO 数据有效之间的时间）</strong>_ 其值最大能达到 50 ns， 那么当前算是极限的速率配置了。 为了保险起见我选择设置 16 分频约 222 ns 周期， 防止数据出现丢失以及未定义的情况。</p>
+
+<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-plaintext highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-plaintext highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-plaintext highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/spi1-parameter-settings.png" alt="Encoder SPI1 parameter settings, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Encoder SPI1 parameter settings, HangX-Ma</u></font>
+</div>
 
 <blockquote>
   <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
 </blockquote>
 
-<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。 片选信号的性质就不多提了， 低选， 高非选， 且需要保持电平特定的时间。</p>
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
+
+<p>另外配置片选引脚的时候需要默认输出为高并且将其配置为上拉模式， 这是根据时序图所示， 芯片是在 CS 脚为低的时候工作的， 这样能保证在必要的时候选中相应的片选脚进行数据传输。</p>
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/blogernice/articles/12531133.html">详解SPI中的极性CPOL和相位CPHA - blogernice 博客园</a><br />
 <a href="https://zhuanlan.zhihu.com/p/26509678">秒懂 奇偶校验码 - 车卡门 知乎</a><br />
 <a href="https://blog.csdn.net/ftswsfb/article/details/104321901">奇偶校验原理及C实现 - ftswsfb CSND</a><br />
-<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a></p>
+<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a><br />
+<a href="https://zhuanlan.zhihu.com/p/632955358">STM32——DMA数据转运 - 柯宝最帅 知乎</a><br />
+<a href="https://blog.51cto.com/u_13682052/4990083">stm32利用通用定时器实现函数运行时间精确测量 - biao2488890051 51CTO</a></p>
+</blockquote>
+
+<h2 id="12-spi-片选的说明">1.2 SPI 片选的说明</h2>
+
+<p>SPI 片选对 SPI 设备是通用的， 不管是从机还是主机， 都需要配置片选引脚。 我在 CubeMX 中看到 NSS 引脚分为硬件和软件两种， NSS 就是平常所说的片选脚， 对于主机而言片选脚需要拉高的， 这样才能保证主机 SPI 处于工作状态。 如果选择软件配置， 那么在我们选择 STM32 作为主机的时候， LL 库自动帮我们配置了 SSI 引脚作为主机的片选。 而硬件配置则会根据芯片特定的 NSS 引脚决定相应的状态。</p>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/weixin_44509533/article/details/104110454">STM32 SPI的NSS引脚配置 - 星水天河 CSDN</a></p>
 </blockquote>
 
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
@@ -3171,10 +3248,4 @@ csrw sscratch, t2
 
 <blockquote>
   <p>Spring 2023 版的实验指导书精简了很多内容， 但提供了 ch3 到 ch6, 以及 ch8 这几个章节的 test 代码届时可以直接使用。</p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第一章：应用程序与基本执行环境， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Async Programming in Rust: Futures, Async/Await</title><link href="https://hangx-ma.github.io/2023/06/16/rust-async.html" rel="alternate" type="text/html" title="Async Programming in Rust: Futures, Async/Await" /><published>2023-06-16T00:00:00+08:00</published><updated>2023-06-16T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/16/rust-async</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/16/rust-async.html"><![CDATA[<h2 id="参考">参考</h2>
-
-<ul>
-  <li><a href="https://www.youtube.com/watch?v=lJ3NC-R3gSI">Rust’s Journey to Async/Await - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-2019/">[Slide]</a></li>
-  <li><a href="https://www.youtube.com/watch?v=NNwK5ZPAJCk">The Talk You’ve Been Await-ing for - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-async-await/">[Slide]</a></li>
-  <li><a href="https://course.rs/advance/async/intro.html">Rust语言圣经(Rust Course) - 异步编程</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><summary type="html"><![CDATA[Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。]]></summary></entry></feed>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第一章：应用程序与基本执行环境， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>

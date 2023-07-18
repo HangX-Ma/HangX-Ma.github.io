@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 2081 words </span>
+                <span> Total 2724 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 6 mins </span>
+                <span> About 8 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -324,27 +324,51 @@
   <p>用这款芯片也是历史遗留问题了， 当时做了这个板子不忍心浪费， 网上有 Simple FOC 提供的 <a href="https://github.com/simplefoc/Arduino-FOC-drivers/tree/master/src/encoders/sc60228">SC60228 SimpleFOC driver</a> 可参考代码部分， 虽然看起来事情不多， 但理解数据手册进行配置和代码编写也对学习很有帮助。</p>
 </blockquote>
 
+<h2 id="11-时序图与-spi-基本配置">1.1 时序图与 SPI 基本配置</h2>
+
 <div align="center">
     <img src="/norobots/images/2023-07-17-miniFOC-dev/encoder-spi-time-diagram.png" alt="Encoder SPI time diagram, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Encoder SPI time diagram, HangX-Ma</u></font>
 </div>
 
-<p>这款芯片只需要配置 SPI 口在主机接收数据即可， 不涉及双向数据传输。 可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
+<p>这款芯片只需要配置 SPI 口在主机接收 <strong>(Receive Only Master)</strong> 数据即可， 不涉及双向数据传输。 我原来计划使用 DMA 传输 SPI 的数据， 但实际上 DMA 在小数据量以及高速读取的情况下并不合适， 这里的位置信息仅 16 位， 有些多此一举了。</p>
+
+<p>可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
 
 <p>另外， 手册指出 <strong>\(t_{CLK}\)（SCLK 周期）</strong> 最小需要 100ns， 这里我查了一下 STM32CubeMX 配置中的 Baud Rate 的含义， 如果没理解错就相当于 SPI 中的 SCLK。 对于预设 72MHz 时钟频率的板子， 8 分频 9.0 MBits/s ≈ 111 ns， 另外 <strong>\(t_{DO}\)（SCLK 的上升沿到 MISO 数据有效之间的时间）</strong>_ 其值最大能达到 50 ns， 那么当前算是极限的速率配置了。 为了保险起见我选择设置 16 分频约 222 ns 周期， 防止数据出现丢失以及未定义的情况。</p>
+
+<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-plaintext highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-plaintext highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-plaintext highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/spi1-parameter-settings.png" alt="Encoder SPI1 parameter settings, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Encoder SPI1 parameter settings, HangX-Ma</u></font>
+</div>
 
 <blockquote>
   <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
 </blockquote>
 
-<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。 片选信号的性质就不多提了， 低选， 高非选， 且需要保持电平特定的时间。</p>
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
+
+<p>另外配置片选引脚的时候需要默认输出为高并且将其配置为上拉模式， 这是根据时序图所示， 芯片是在 CS 脚为低的时候工作的， 这样能保证在必要的时候选中相应的片选脚进行数据传输。</p>
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/blogernice/articles/12531133.html">详解SPI中的极性CPOL和相位CPHA - blogernice 博客园</a><br />
 <a href="https://zhuanlan.zhihu.com/p/26509678">秒懂 奇偶校验码 - 车卡门 知乎</a><br />
 <a href="https://blog.csdn.net/ftswsfb/article/details/104321901">奇偶校验原理及C实现 - ftswsfb CSND</a><br />
-<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a></p>
+<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a><br />
+<a href="https://zhuanlan.zhihu.com/p/632955358">STM32——DMA数据转运 - 柯宝最帅 知乎</a><br />
+<a href="https://blog.51cto.com/u_13682052/4990083">stm32利用通用定时器实现函数运行时间精确测量 - biao2488890051 51CTO</a></p>
+</blockquote>
+
+<h2 id="12-spi-片选的说明">1.2 SPI 片选的说明</h2>
+
+<p>SPI 片选对 SPI 设备是通用的， 不管是从机还是主机， 都需要配置片选引脚。 我在 CubeMX 中看到 NSS 引脚分为硬件和软件两种， NSS 就是平常所说的片选脚， 对于主机而言片选脚需要拉高的， 这样才能保证主机 SPI 处于工作状态。 如果选择软件配置， 那么在我们选择 STM32 作为主机的时候， LL 库自动帮我们配置了 SSI 引脚作为主机的片选。 而硬件配置则会根据芯片特定的 NSS 引脚决定相应的状态。</p>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/weixin_44509533/article/details/104110454">STM32 SPI的NSS引脚配置 - 星水天河 CSDN</a></p>
 </blockquote>
 
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
@@ -443,7 +467,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/13/rcore-note-ch7.html">rCore OS Note - Chapter 7</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/13/rcore-note-ch7.html">rCore OS Note - Chapter 7</a></div><div class="next"><span>NEXT</span><a href="/2023/07/18/oopc.html">OOP C Programming</a></div></div></div>
 
 </div>
 
