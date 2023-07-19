@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-19T20:52:21+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-19T23:04:31+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -187,7 +187,134 @@
 
 <h3 id="x3-spi1">X.3 SPI1</h3>
 
-<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
+  <p>这个章节整理完 Tutorial 还有一个与 I/O 设备管理相关的第九章， 准备之后慢慢琢磨然后不断扩展内核功能， 连续一个月高强度 rCore 的学习心理上有些浮躁了。 最近想把多年未竟的 FOC 项目捡起来好好研究一下， 顺带用上 FreeRTOS 用另一个角度看 OS。</p>
+</blockquote>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><strong>RISC-V</strong>
+    <ul>
+      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
+      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
+        <ul>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
+          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
+        </ul>
+      </li>
+      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
+      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
+    </ul>
+  </li>
+  <li><strong>rCore</strong>
+    <ul>
+      <li>rCore 第八章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch8]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
+      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
+      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-thread-coroutine-os">1. Thread Coroutine OS</h2>
+
+<p>Thread Coroutine OS 增加了在用户态管理的用户态线程/用户态协程， 以及在内核态管理的用户态线程。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-15-rcore-note-ch8/thread-coroutine-os-detail.png" alt="Thread Coroutine OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Thread Coroutine OS details, rCore</u></font>
+</div>
+
+<h3 id="11-线程">1.1 线程</h3>
+
+<p><strong>线程</strong> 能够将一个进程内多个可并行执行的任务通过能细粒度的方式被操作系统调度， 实现进程内的并发执行。 进程是线程的资源容器， 线程成为了程序的基本执行实体。 一个进程可以包含多个线程， 同属于一个进程的线程能够共享进程的资源， 如地址空间， 文件等。 线程基本上由线程ID、 执行状态、 当前指令指针(PC)、 寄存器集合和栈组成。</p>
+
+<p>线程能被操作系统或用户态调度器独立调度（Scheduling）， 分派（Dispatch）， 执行（Perform）， 并且由于同一个进程下多个线程同属于一块地址空间并共享资源， 相比较进程之间的 IPC 机制通信， 线程可以通过 <strong>共享内存</strong> 进程数据交互， 之前在做 CUDA 课程的大作业的时候深有感触， 用好线程 <strong>归约</strong> 能让计算效率几何倍提升。</p>
+<blockquote>
+  <p>基于 CUDA 语言的热扩散仿真模型： <a href="https://github.com/HangX-Ma/CUDA-HeatTransfer-3D">CUDA-HeatTransfer-3D</a>， 有兴趣的同学可以看看 <em>CUDA By Example</em> 这本书了解 CUDA 并行计算。</p>
+</blockquote>
+
+<p>但线程最大的问题就是需要 <strong>保持共享资源数据一致性</strong>， 修改数据可能会因为多个线程执行顺序的不可预知而产生 <strong>竞态条件（Race Condition）</strong>， 这是调度的不可控导致的， 而进程独享一片地址空间而不会与其他进程产生数据的地址交叉， 虽然也会被操作系统调度， 但不会遇到这样的问题。</p>
+
+<p>为了解决访问与改写共享资源带来的问题， 操作系统需要提供一些保障机制， 如 <strong>互斥锁（Mutex Lock）</strong>， <strong>信号量（Semaphore）</strong>， <strong>条件变量（Condition Variable）</strong> 等， 这也是这个章节 rCore 所需要解决的第二个问题 ———— 为线程提供上述保障。</p>
+
+<h3 id="12-用户态的线程管理">1.2 用户态的线程管理</h3>
+
+<p>用户态的线程管理不受操作系统的约束， 这种线程一般被称为 <strong>Green Threads</strong>， 这与协作式调度非常类似， 线程的管理权限全都交由用户。 rCore 这样设计了线程的基本结构：</p>
+
+<ul>
+  <li><strong>线程 ID</strong>： 用以标识与区分不同的线程。</li>
+  <li><strong>执行状态</strong>： 同样分为 <strong>空闲（Available）</strong>， <strong>Ready（就绪）</strong>， 以及 <strong>Running（正在执行）</strong>。</li>
+  <li><strong>栈</strong>： 为分配每个线程的运行函数栈。</li>
+  <li><strong>上下文</strong>： 根据 RISC-V 的函数调用约定需要保存 Callee 寄存器， 同时需要保存 PC 指针以保证执行地址的正常切换。</li>
+</ul>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Task</span> <span class="p">{</span>
+    <span class="n">id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>            <span class="c1">// 线程ID</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u8</span><span class="o">&gt;</span><span class="p">,</span>       <span class="c1">// 栈</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>     <span class="c1">// 当前指令指针(PC)和通用寄存器集合</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>         <span class="c1">// 执行状态</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">TaskContext</span> <span class="p">{</span>
+    <span class="c1">// 15 u64</span>
+    <span class="n">x1</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>  <span class="c1">//ra: return address，即当前正在执行线程的当前指令指针(PC)</span>
+    <span class="n">x2</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>  <span class="c1">//sp</span>
+    <span class="n">x8</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>  <span class="c1">//s0,fp</span>
+    <span class="n">x9</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>  <span class="c1">//s1</span>
+    <span class="n">x18</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span> <span class="c1">//x18-27: s2-11</span>
+    <span class="n">x19</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>
+    <span class="o">...</span>
+    <span class="n">x27</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span>
+    <span class="n">nx1</span><span class="p">:</span> <span class="nb">u64</span><span class="p">,</span> <span class="c1">//new return address, 即下一个要执行线程的当前指令指针(PC)</span>
+<span class="p">}</span>
+
+<span class="k">enum</span> <span class="n">State</span> <span class="p">{</span>
+    <span class="n">Available</span><span class="p">,</span> <span class="c1">// 初始态：线程空闲，可被分配一个任务去执行</span>
+    <span class="n">Running</span><span class="p">,</span>   <span class="c1">// 运行态：线程正在执行</span>
+    <span class="n">Ready</span><span class="p">,</span>     <span class="c1">// 就绪态：线程已准备好，可恢复执行</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>rCore 对用户态的线程管理通过如下几个函数完成：</p>
+
+<ul>
+  <li><strong>线程初始化</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Runtime::new</code>： 创建当前处于 <code class="language-plaintext highlighter-rouge">Running</code> 的一个主线程， 并将剩余的线程资源初始化为 <code class="language-plaintext highlighter-rouge">Available</code> 以向量的形式存储在 <code class="language-plaintext highlighter-rouge">Runtime</code> 结构体中方便后续的资源线程创建和管理。</li>
+      <li><code class="language-plaintext highlighter-rouge">Runtime::init</code>： 传递 Runtime 对象的地址至全局变量 <em>RUNTIME</em>， 方便其他函数获取相应的资源线程。</li>
+    </ul>
+  </li>
+  <li><strong>线程创建</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Runtime::spawn</code>： 在存储线程资源的向量中查找一个状态为 <code class="language-plaintext highlighter-rouge">Available</code> 的空闲线程， 为调度准备 <em>old return address</em> 以及 <em>new return address</em> 并分配新的空间并设置栈顶的位置， 在返回前将该线程状态设置为 <code class="language-plaintext highlighter-rouge">Ready</code>。
+        <blockquote>
+          <p>实际上这里的 <em>old return address</em> 被设置为了 <code class="language-plaintext highlighter-rouge">guard</code> 函数的地址， 该函数内部调用了 <code class="language-plaintext highlighter-rouge">t_return</code> 将当线程的状态重新设置为 <code class="language-plaintext highlighter-rouge">Available</code> 后会调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行线程的切换。 这种设计的作用在讲述 <strong>线程切换</strong> 后再详细说明。</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li><strong>线程切换</strong></li>
+</ul>
+
+<p>具体实现细节不表了， rCore 在 <code class="language-plaintext highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
+
+<h3 id="113-内核态的线程管理">1.1.3 内核态的线程管理</h3>
+
+<h2 id="2-sync-mutex-os">2. Sync Mutex OS</h2>
+
+<p>Sync Mutex OS 增加了 <strong>互斥锁（Mutex）</strong>、 <strong>信号量（Semaphore）</strong> 和 <strong>条件变量（Condvar）</strong> 这三种资源， 并提供了与这三种同步互斥资源相关的系统调用。 这样多线程应用就可以使用这三种同步互斥机制来解决各种同步互斥问题， 如生产者消费者问题、 哲学家问题、 读者写者问题等。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-15-rcore-note-ch8/syncmutex-os-detail.png" alt="Sync Mutex OS details, rCore" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Sync Mutex OS details, rCore</u></font>
+</div>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
 
 <dl>
   <dt>管道</dt>
@@ -2425,453 +2552,4 @@ vim ~/.bashrc
 <ul>
   <li><a href="https://zhuanlan.zhihu.com/p/617522665">从零开始：使用Neovim搭建Rust开发IDE - 知乎</a></li>
   <li><a href="https://zhuanlan.zhihu.com/p/467428462">我的现代化 NeoVim 配置介绍/教程</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 2</title><link href="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 2" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/rcore-note-ch2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/rcore-note-ch2.html"><![CDATA[<div align="center">
-    <img src="/norobots/images/2023-06-23-rcore-note-ch2/batchos-details.png" alt="Batch OS Details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Batch OS Details, rCore</u></font>
-</div>
-
-<p>第二章需要实现实现一个 <code class="language-plaintext highlighter-rouge">邓氏鱼</code> 操作系统， 它能够感知多个应用程序的存在， 并一个接一个地运行这些应用程序， 当一个应用程序执行完毕后， 会启动下一个应用程序， 直到所有的应用程序都执行完毕。</p>
-
-<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第二章相关内容的实现可查看 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch2-lab">[ch2-lab]</a> <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch2-pro">[ch2-pro]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="1-实现应用程序---代码解析与提要">1. 实现应用程序 - 代码解析与提要</h2>
-
-<ol>
-  <li>
-    <p>根据 <a href="https://rustwiki.org/zh-CN/book/ch19-01-unsafe-rust.html#%E4%BB%8E%E5%85%B6%E5%AE%83%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8-rust-%E5%87%BD%E6%95%B0">Rust 程序设计语言</a> 中的描述， 创建一个允许其他语言调用 Rust 函数需要添加 <code class="language-plaintext highlighter-rouge">extern</code> 标识。 另外 <code class="language-plaintext highlighter-rouge">#[no_mangle]</code> 能保证 Rust 函数名不会被编译器处理变得难以阅读与定位， 使其保留原有的名称方便被其他语言指定与链接。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nd">#[no_mangle]</span>
- <span class="nd">#[link_section</span> <span class="nd">=</span> <span class="s">".text.entry"</span><span class="nd">]</span>
- <span class="k">pub</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">_start</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="o">!</span> <span class="p">{</span>
-     <span class="nf">clear_bss</span><span class="p">();</span>
-     <span class="nf">exit</span><span class="p">(</span><span class="nf">main</span><span class="p">());</span>
-     <span class="nd">panic!</span><span class="p">(</span><span class="s">"unreachable after sys_exit!"</span><span class="p">);</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><a href="https://marcin.juszkiewicz.com.pl/download/tables/syscalls.html">Linux kernel system calls for all architectures</a> 中可以查阅 RISCV-64 规约的系统函数调用的接口与调用的 ID 号。</p>
-  </li>
-  <li>
-    <p><a href="https://wangchujiang.com/rust-cn-document-for-docker/edition-guide/rust-2018/macros/macro-changes.html">Rust 版本指南</a> 中提及了 macro 的变化， 在 Rust 2015 版本， 当我们要导入外部 crate 的宏， 必须要使用 <code class="language-plaintext highlighter-rouge">#[macro_use]</code> 属性， 最直接的例子是在 <code class="language-plaintext highlighter-rouge">user/src/lang_items.rs</code> 中的 <code class="language-plaintext highlighter-rouge">println</code> 宏的使用， 我们可以通过在 <code class="language-plaintext highlighter-rouge">user/src/lib.rs</code> 在通过 <code class="language-plaintext highlighter-rouge">mod console;</code> 导入 console crate 前使用 <code class="language-plaintext highlighter-rouge">#[macro_use]</code> 就能在 user 被管理的各个 crate 中使用 console 提供的宏了（前提是宏需要用 <code class="language-plaintext highlighter-rouge">#[macro_export]</code> 修饰）。</p>
-  </li>
-</ol>
-
-<h2 id="2-实现批处理操作系统">2. 实现批处理操作系统</h2>
-
-<h3 id="21-build-构建脚本">2.1 build 构建脚本</h3>
-
-<p><a href="https://course.rs/cargo/reference/build-script/intro.html">Rust语言圣经(Rust Course) - 9.3.10</a> 描述了 rust 中的构建脚本的作用， 一言以蔽之， 构建脚本会在项目被构建之前 Cargo 会编译构建脚本生成可执行文件并执行相应的任务， 其多用于 C 依赖库构建， 或指定依赖库， 以及进行平台的配置等预处理过程。 在 rCore 的项目中， os 项目工程的根目录下的 <code class="language-plaintext highlighter-rouge">build.rs</code> 主要完成的是链接功能性的二进制工具， 静态链接这些测试文件以在后续运行时动态调用。</p>
-
-<p>值得一提的是， Rust 的构建脚本是通过 <code class="language-plaintext highlighter-rouge">println!</code> 宏与 Cargo 进行通信的， 通信内容是以 <code class="language-plaintext highlighter-rouge">cargo:</code> 开头的一系列字符串。 在我们撰写 chapter 2 的 <code class="language-plaintext highlighter-rouge">build.rs</code> 时， 使用 <code class="language-plaintext highlighter-rouge">wrtieln!</code> 宏写入信息需要注意使用 <code class="language-plaintext highlighter-rouge">r#"..."#</code> 取消转义， 以免导致不必要的麻烦。</p>
-
-<blockquote>
-  <p><a href="https://course.rs/basic/compound-type/string-slice.html">Rust语言圣经(Rust Course) - 2.4.1</a></p>
-</blockquote>
-
-<h3 id="22-批处理模块">2.2 批处理模块</h3>
-
-<p>讲到这个章节的时候对 Rust 的 Crate, Module, Package, <code class="language-plaintext highlighter-rouge">use</code> 这些细节产生了疑问， 之前初学 Rust 走马观花过了一遍书没有实际案例分析， 对相关概念了解不深， <strong>Rust Course</strong> 以及 <strong>Rust学习笔记</strong> 分别用理论以及具体案例讲解和分析了相关内容， 非常的清晰。 在 rCore 的构建中， 对功能模块进行分级归类我觉得很重要， 不能一股脑的使用新的模块导入方式， 既然 Rust 1.3.0 以后提供了新的选择， 就不妨做好取舍。</p>
-
-<blockquote>
-  <p><a href="https://course.rs/basic/crate-module/intro.html">Rust语言圣经(Rust Course) - 2.12 包和模块</a><br />
-<a href="https://skyao.io/learning-rust/docs/build/module/rust-module-system-explanation.html">对Rust的模块系统的清晰解释 - Rust 学习笔记</a></p>
-</blockquote>
-
-<h2 id="3-实现特权级的切换">3 实现特权级的切换</h2>
-
-<h3 id="31-关于-userstack-与-kernelstack">3.1 关于 UserStack 与 KernelStack</h3>
-
-<p>批处理操作系统被设计为运行在内核态特权级（RISC-V 的 S 模式）而应用程序被设计为运行在用户态特权级（RISC-V 的 U 模式）， 在 AEE(Application Execution Environment) 中受到操作系统监管， 执行过程中需要切换特权级。 Context 即上下文需要在特权级切换前后保持不变， 内核态和用户态的上下文信息需要保存在不通的栈中以保证数据的隔离。 rCore 保存上下文信息的栈是这样设计的， <code class="language-plaintext highlighter-rouge">get_sp</code> 返回数组结尾地址， 即栈底位置（栈由上向下生长， 栈底的地址比栈顶高， 除非像当前这样栈为空栈底和栈顶处于同一个地址）。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(align(</span><span class="mi">4096</span><span class="nd">))]</span>
-<span class="k">struct</span> <span class="n">UserStack</span> <span class="p">{</span>
-    <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">USER_STACK_SIZE</span><span class="p">],</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">UserStack</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.data</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">USER_STACK_SIZE</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>未初始化的全局变量和局部静态变量默认值都是 0， 一般来说会将这部分信息存放在 .bss 段并预留未定义的全局变量符号。 这里声明了一个全局静态变量并强制 4096 对齐。 通过 <code class="language-plaintext highlighter-rouge">readelf -t os/target/riscv64gc-unknown-none-elf/release/os</code> 读取编译出的 ELF 文件， <code class="language-plaintext highlighter-rouge">.rodata</code> 段被 4096 对齐了， 更改栈的大小也能确认 <code class="language-plaintext highlighter-rouge">KernelStack</code> 以及 <code class="language-plaintext highlighter-rouge">UserStack</code> 被放在了 <code class="language-plaintext highlighter-rouge">.rodata</code> 中。 初始化为 0 的全局变量和未初始化的全局变量的性质应当一致， 但这里出现了例外。 Rust 中的 static 变量实际声明了一段固定的内存空间且其中的内容不可变， 猜测 Rust 编译器倾向于将只读部分的预留内存保存在 <code class="language-plaintext highlighter-rouge">.rodata</code> 段。</p>
-
-<blockquote>
-  <p><a href="https://doc.rust-lang.org/reference/items/static-items.html">The Rust Reference - 6.10 Static items</a><br />
-<em>Non-mut static items that contain a type that is not interior mutable may be placed in read-only memory.</em></p>
-</blockquote>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>There are 20 section headers, starting at offset 0x187ca0:
-
-Section Headers:
-  <span class="o">[</span>Nr] Name
-       Type              Address          Offset            Link
-       Size              EntSize          Info              Align
-       Flags
-  <span class="o">[</span> 0]
-       NULL             0000000000000000  0000000000000000  0
-       0000000000000000 0000000000000000  0                 0
-       <span class="o">[</span>0000000000000000]:
-  <span class="o">[</span> 1] .text
-       PROGBITS         0000000080200000  0000000000001000  0
-       00000000000033ce 0000000000000000  0                 4
-       <span class="o">[</span>0000000000000006]: ALLOC, EXEC
-  <span class="o">[</span> 2] .rodata
-       PROGBITS         0000000080204000  0000000000005000  0
-       00000000000062d0 0000000000000000  0                 4096
-       <span class="o">[</span>0000000000000012]: ALLOC, MERGE
-  <span class="o">[</span> 3] .data
-       PROGBITS         000000008020b000  000000000000c000  0
-       0000000000007430 0000000000000000  0                 8
-       <span class="o">[</span>0000000000000003]: WRITE, ALLOC
-  <span class="o">[</span> 4] .bss
-       NOBITS           0000000080213000  0000000000013430  0
-       00000000000100c0 0000000000000000  0                 8
-       <span class="o">[</span>0000000000000003]: WRITE, ALLOC
-</code></pre></div></div>
-
-<p>最简单的办法就是将 <code class="language-plaintext highlighter-rouge">USER_STACK</code> 以及 <code class="language-plaintext highlighter-rouge">KERNEL_STACK</code> 这两个变量声明为 <code class="language-plaintext highlighter-rouge">static mut</code> 类型， 就能将这两块内存初始化为 <code class="language-plaintext highlighter-rouge">.bss</code> 段。</p>
-
-<blockquote>
-  <p><a href="https://course.rs/advance/global-variable.html">Rust语言圣经(Rust Course) - 4.7 全局变量</a></p>
-</blockquote>
-
-<h2 id="32-non-stable-rust-abi">3.2 Non Stable Rust ABI</h2>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="k">mut</span> <span class="n">KERNEL_STACK</span><span class="p">:</span> <span class="n">KernelStack</span> <span class="o">=</span> <span class="n">KernelStack</span> <span class="p">{</span>
-    <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="n">KERNEL_STACK_SIZE</span><span class="p">],</span>
-<span class="p">};</span>
-<span class="k">static</span> <span class="k">mut</span> <span class="n">USER_STACK</span><span class="p">:</span> <span class="n">UserStack</span> <span class="o">=</span> <span class="n">UserStack</span> <span class="p">{</span>
-    <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="n">USER_STACK_SIZE</span><span class="p">],</span>
-<span class="p">};</span>
-
-<span class="k">impl</span> <span class="n">KernelStack</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.data</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">KERNEL_STACK_SIZE</span>
-    <span class="p">}</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">push_context</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">cx_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="k">self</span><span class="nf">.get_sp</span><span class="p">()</span> <span class="o">-</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TrapContext</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">;</span>
-        <span class="k">unsafe</span> <span class="p">{</span>
-            <span class="o">*</span><span class="n">cx_ptr</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">unsafe</span> <span class="p">{</span> <span class="n">cx_ptr</span><span class="nf">.as_mut</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span> <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>在此处 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1186485130">issue - whfuyn</a> 提出了两个问题， <code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__alltraps</code> 段在最后调用了 <code class="language-plaintext highlighter-rouge">trap_handler</code> 以处理 <code class="language-plaintext highlighter-rouge">trap</code> 的内容， 但 Rust ABI 是 unstable 的， 我在这篇文章 <a href="https://viruta.org/rust-stable-abi.html">“Rust does not have a stable ABI” - Federico’s Blog</a> 中找到了相应的解释， 虽然对 ABI 的作用还是理解不是很深刻， 但也理解了为什么 <code class="language-plaintext highlighter-rouge">src/context.rs</code> 中的 <code class="language-plaintext highlighter-rouge">TrapContext</code> 会写成下面这种形式。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(C)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TrapContext</span> <span class="p">{</span>
-    <span class="cd">/// general regs[0..31]</span>
-    <span class="k">pub</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="nb">usize</span><span class="p">;</span> <span class="mi">32</span><span class="p">],</span>
-    <span class="cd">/// CSR sstatus      </span>
-    <span class="k">pub</span> <span class="n">sstatus</span><span class="p">:</span> <span class="n">Sstatus</span><span class="p">,</span>
-    <span class="cd">/// CSR sepc</span>
-    <span class="k">pub</span> <span class="n">sepc</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">#[repr(C)]</code> 的声明使得字段的顺序、 大小以及对齐方式与 C 中完全一致。 <code class="language-plaintext highlighter-rouge">#[repr(C)]</code> 结构体使得结构体的对齐量为 <strong>最大对齐量的字段</strong>， 字段的尺寸和偏移量由以下算法决定：</p>
-
-<ol>
-  <li>
-    <p>把当前偏移量设为从 0 字节开始。</p>
-  </li>
-  <li>
-    <p>对于结构体中的每个字段， 按其声明的先后顺序， 首先确定其尺寸和对齐量； 如果当前偏移量不是对其齐量的整倍数， 则向当前偏移量添加填充字节， 直至其对齐量的倍数1； 至此， 当前字段的偏移量就是当前偏移量； 下一步再根据当前字段的尺寸增加当前偏移量。</p>
-  </li>
-  <li>
-    <p>最后， 整个结构体的尺寸就是当前偏移量向上取整到结构体对齐量的最小整数倍数。</p>
-  </li>
-</ol>
-
-<blockquote>
-  <p><a href="https://nomicon.purewhite.io/other-reprs.html">Rust 秘典（死灵书）- 2.3 可选的数据布局</a><br />
-<a href="https://rustwiki.org/zh-CN/reference/type-layout.html">Rust 参考手册 中文版 - 10.3 类型布局</a></p>
-</blockquote>
-
-<h3 id="33-static-mut-与-unsafecell">3.3 static mut 与 UnSafeCell</h3>
-
-<p>同样是 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1186485130">issue - whfuyn</a> 提出的问题， 可以看到原来的 <code class="language-plaintext highlighter-rouge">KernelStack</code> 结构体实现了 <code class="language-plaintext highlighter-rouge">fn get_sp</code> 以及 <code class="language-plaintext highlighter-rouge">pub fn push_context</code> 两个函数， 但是这两个函数都使用 <code class="language-plaintext highlighter-rouge">&amp;self</code> 共享不可变引用。 毫无疑问 <code class="language-plaintext highlighter-rouge">self.data</code> 访问了 <code class="language-plaintext highlighter-rouge">KernelStack</code> 的内部量， 并且在 <code class="language-plaintext highlighter-rouge">push_context</code> 中我们将指针的地址强制转换为了一个 <strong>可变裸指针</strong>， 裸指针的解引用是不安全的， 没有借用和声明周期的检查。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">KernelStack</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.data</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">KERNEL_STACK_SIZE</span>
-    <span class="p">}</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">push_context</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">cx_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="k">self</span><span class="nf">.get_sp</span><span class="p">()</span> <span class="o">-</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TrapContext</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">;</span>
-        <span class="k">unsafe</span> <span class="p">{</span>
-            <span class="o">*</span><span class="n">cx_ptr</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">unsafe</span> <span class="p">{</span> <span class="n">cx_ptr</span><span class="nf">.as_mut</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span> <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><strong>The Rust Reference</strong> 对内部可变性的定义是这样的：</p>
-
-<dl>
-  <dt>interior mutability</dt>
-  <dd>A type has interior mutability if its internal state can be changed through a shared reference to it.</dd>
-</dl>
-
-<p>显然这违反了共享引用（类似 <code class="language-plaintext highlighter-rouge">&amp;self</code>）所指向的值不变的要求。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 是唯一允许的方式达到内部可变性， <code class="language-plaintext highlighter-rouge">Cell&lt;T&gt;</code> 的内部实现也是通过 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 达到的。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 使用了 <code class="language-plaintext highlighter-rouge">#[lang = "unsafe_cell"]</code> 宏以让编译器对其进行特殊处理， 使其不具备声明周期的 <strong>协/逆变</strong> 特性。 因而我们要实现内部可变性必须通过 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 以避免未定义行为， 我们无法处理生命周期的问题。 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 能够实现从不可变引用到 <strong>可变裸指针</strong> 的安全转换， 我们尽可能多的将安全检查问题交给编译器。</p>
-
-<p>原来的 <code class="language-plaintext highlighter-rouge">batch.rs</code> 使用 <code class="language-plaintext highlighter-rouge">UnSafeCell&lt;T&gt;</code> 后的版本可查看 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/8fbb8e0f506d23ae958414bf085a2580b29e4472">commit#8fbb8e0</a>。</p>
-
-<blockquote>
-  <p><a href="https://github.com/rust-lang-nursery/lazy-static.rs/issues/117">(soundness regression) static mut could be avoided. #117 - rust-lang-nursery/lazy-static.rs</a><br />
-<a href="https://github.com/rust-lang/rust/issues/53639">Consider deprecation of UB-happy static mut #53639 - rust-lang/rust</a><br />
-<a href="https://zhuanlan.zhihu.com/p/598708941">关于 Rust 的 UnsafeCell、Cell 与 RefCell - 知乎</a><br />
-<a href="https://course.rs/too-many-lists/unsafe-queue/miri.html">Rust语言圣经(Rust Course) - 13.6.3 Miri</a><br />
-<a href="https://course.rs/too-many-lists/unsafe-queue/stacked-borrow.html">Rust语言圣经(Rust Course) - 13.6.4 栈借用</a><br />
-<a href="https://course.rs/too-many-lists/unsafe-queue/testing-stacked-borrow.html">Rust语言圣经(Rust Course) - 13.6.5 测试栈借用</a><br />
-<a href="https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/core/cell/struct.UnsafeCell.html">Struct core::cell::UnsafeCell</a><br />
-<a href="https://doc.rust-lang.org/stable/reference/interior-mutability.html">The Rust Reference - 10.4. Interior mutability</a></p>
-</blockquote>
-
-<h3 id="34-关于-trap">3.4 关于 trap</h3>
-
-<p>在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 中， 对于 <code class="language-plaintext highlighter-rouge">Exception::UserEnvCall</code> 异常， 有一个更新 <code class="language-plaintext highlighter-rouge">sepc</code> 寄存器信息的指令为 <code class="language-plaintext highlighter-rouge">cx.sepc += 4</code>， 根据 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1573703987">issue</a> 中的一条回答是这样解释的：</p>
-
-<blockquote>
-  <p>中断和异常的触发方式不同， 因此硬件设置的“默认执行的下一条指令的地址”也不同。 异常是由于一条指令的执行触发的， 此时硬件默认会将 <code class="language-plaintext highlighter-rouge">sepc</code> 仍然设置为这条指令的地址， 等内核处理完之后再执行一次， 期待这次指令能够正常执行； 而中断是在一条指令执行完毕之后， CPU 检测到了中断， 此时硬件会将 <code class="language-plaintext highlighter-rouge">sepc</code> 设置为下一条指令的地址， 因为没有任何理由再执行一次刚刚执行完的指令。</p>
-</blockquote>
-
-<h2 id="4-课后练习">4 课后练习</h2>
-
-<h3 id="41-编程题">4.1 编程题</h3>
-
-<ol>
-  <li><em><strong>实现一个裸机应用程序 A， 能打印调用栈。</strong></em>
-    <div align="center">
-     <img src="/norobots/images/2023-06-23-rcore-note-ch2/StackFrame.png" alt="Stack Frame, rCore" width="600" />
-     <br />
-     <font size="2" color="#999"><u>Stack Frame, rCore</u></font>
- </div>
-
-    <p>根据 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter1/5support-func-call.html">第一章 - 为内核支持函数调用</a> 描述的 RISC-V 的栈帧结构， 对第一章的编程题进行更改实现即可， 主要改动还是 <code class="language-plaintext highlighter-rouge">asm</code> 中的内容。 具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/blob/main/os/src/stack_btrace.rs">stack_btrace.rs</a>。</p>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 实现新系统调用 <code class="language-plaintext highlighter-rouge">get_taskinfo</code>， 能显示当前 task 的 id 和 task name； 实现一个裸机应用程序 B， 能访问 <code class="language-plaintext highlighter-rouge">get_taskinfo</code> 系统调用。</strong></em></p>
-
-    <p>这部分真的折磨， 实在是想不到裸机情况下怎么获取 bin 文件的 prefix 名称， 考虑过添加 bin 文件 header 的方式但想想还是奇怪。 主要思路是考虑在 <code class="language-plaintext highlighter-rouge">APP_MANAGER</code> 中就把这部分信息填好， 能力有限不搞了。</p>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 能够统计多个应用的执行过程中系统调用编号和访问此系统调用的次数。</strong></em></p>
-
-    <p>这部分第一个想法就是用哈希表， 找了挺久发现一个 <a href="https://crates.io/crates/hashbrown">hashbrown</a> 库是能用在 no_std 环境的。 我实现了 <code class="language-plaintext highlighter-rouge">os/src/syscall/stats.rs</code> 提供了两个函数分别是 <code class="language-plaintext highlighter-rouge">stats_update</code>（放在 trap_handler 的 <code class="language-plaintext highlighter-rouge">UserEnvCall</code> 异常） 以及 <code class="language-plaintext highlighter-rouge">stats_clear_and_print</code>（放在 <code class="language-plaintext highlighter-rouge">run_next_app</code> 之前）。 但是遇到一个问题， 但是当前的 OS 实现下是不能使用 heap 存储 static 变量的信息的， 需要之后再进行测试。</p>
-
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> error: no global memory allocator found but one is required<span class="p">;</span>
- <span class="nb">link </span>to std or add <span class="sb">`</span><span class="c">#[global_allocator]` to a static item that implements the GlobalAlloc trait</span>
-</code></pre></div>    </div>
-
-    <blockquote>
-      <p><a href="https://juejin.cn/s/rust%20no%20std%20hash_map">rust no std hash_map - 稀土掘金</a></p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 能够统计每个应用执行后的完成时间。</strong></em></p>
-
-    <p>原来想用 <a href="https://crates.io/crates/embedded-time">embedded-time</a> 这个库替代标准库中的 time crate， 但是那个 Clock Trait 需要知悉硬件的信息才能实现就放弃了这个想法。 记得在第一章作业的 comment 有人提了一嘴有 time 相关的寄存器， 而且在 qemu 中这个 time 相关的时钟频率是 10 KHz。 所幸 riscv 库提供了这部分寄存器的读写， 只要在 <code class="language-plaintext highlighter-rouge">run_next_app</code> 函数的开始记录程序开始的时刻， 另外就是在异常退出或者 exit 函数调用中的 <code class="language-plaintext highlighter-rouge">run_next_app</code> 函数前获取时间间隔即可。</p>
-
-    <blockquote>
-      <p>需要注意 u64 整数溢出以及可能出现的时刻点信息未获取为空的情况， 可以考虑使用 <code class="language-plaintext highlighter-rouge">Option</code>。 具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/ce558ec5c6a6cf1610e8e74e7a5c57fe1b4db6bb">comment#ce558ec</a></p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 统计执行异常的程序的异常情况（主要是各种特权级涉及的异常）， 能够打印异常程序的出错的地址和指令等信息。</strong></em></p>
-
-    <p>编程题的设计好奇怪啊， 各种穿插， 直接仿照参考部分加上一些异常情况的处理， 具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d7f16c747fdd5b5e38bb97a87486f8a80bac9a27">commit#d7f16c7</a>。</p>
-  </li>
-</ol>
-
-<h3 id="42-实验练习">4.2 实验练习</h3>
-
-<h4 id="421-sys_write-安全检查">4.2.1 sys_write 安全检查</h4>
-
-<p>相关实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch2-lab">ch2-lab</a>， 主要想法就是检查当前传入的 <code class="language-plaintext highlighter-rouge">buf</code> 地址的合法性。</p>
-
-<dl>
-  <dt>应用空间合法性</dt>
-  <dd>app 经过 <code class="language-plaintext highlighter-rouge">load_app</code> 函数已经加载到了指定的内存空间中， 因而我们需要检查传入的 <code class="language-plaintext highlighter-rouge">buf</code> 指针所处位置是否在 <strong>[APP_BASE_ADDRESS, APP_BASE_ADDRESS + APP_SIZE_LIMIT]</strong> 之间， 即检查应用空间的合法性。</dd>
-  <dt>用户栈空间合法性</dt>
-  <dd>需要注意的是， 栈是从上往下生长的， 因而获取栈指针之后， 我们需要检查 <code class="language-plaintext highlighter-rouge">buf</code> 可能在用户栈的范围是 <strong>[USER_STACK_PTR_ADDR - USER_STACK_SIZE, USER_STACK_PTR_ADDR]</strong>。</dd>
-</dl>
-
-<h4 id="422-问答题">4.2.2 问答题</h4>
-
-<ol>
-  <li>
-    <p><em>正确进入 U 态后，程序的特征还应有：使用 S 态特权指令，访问 S 态寄存器后会报错。请自行测试这些内容 (运行 Rust 三个 bad 测例 ) ，描述程序出错行为，注明你使用的 sbi 及其版本。</em></p>
-
-    <blockquote>
-      <p><code class="language-plaintext highlighter-rouge">bad_address.rs</code>， <code class="language-plaintext highlighter-rouge">bad_instruction.rs</code>， <code class="language-plaintext highlighter-rouge">bad_register.rs</code> 运行的结果如下：</p>
-
-      <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># SBI及其版本信息： RustSBI version 0.3.0-alpha.4, adapting to RISC-V SBI v1.0.0</span>
-<span class="o">[</span>kernel] Loading app_5
-<span class="o">[</span>kernel] PageFault <span class="k">in </span>application, kernel killed it.
-<span class="o">[</span>kernel] Loading app_6
-<span class="o">[</span>kernel] IllegalInstruction <span class="k">in </span>application, kernel killed it.
-<span class="o">[</span>kernel] Loading app_7
-<span class="o">[</span>kernel] IllegalInstruction <span class="k">in </span>application, kernel killed it.
-</code></pre></div>      </div>
-
-      <ul>
-        <li><code class="language-plaintext highlighter-rouge">bad_address.rs</code> 出现 <code class="language-plaintext highlighter-rouge">PageFault</code> 是因为非法访问了 0 地址空间并尝试对其进行值写入， 而程序的起始地址是 <code class="language-plaintext highlighter-rouge">0x80400000</code>。</li>
-        <li><code class="language-plaintext highlighter-rouge">bad_instruction.rs</code> 以及 <code class="language-plaintext highlighter-rouge">bad_register.rs</code> 分别因为在 U Mode 调用了 <code class="language-plaintext highlighter-rouge">sret</code> S 特权级指令以及访问了 <code class="language-plaintext highlighter-rouge">sstatus</code> S 特权级寄存器而出错。</li>
-      </ul>
-    </blockquote>
-  </li>
-  <li>
-    <p><em>请结合用例理解 <a href="https://github.com/rcore-os/rCore-Tutorial-v3/blob/ch2/os/src/trap/trap.S">trap.S</a> 中两个函数 <code class="language-plaintext highlighter-rouge">__alltraps</code> 和 <code class="language-plaintext highlighter-rouge">__restore</code> 的作用，并回答如下几个问题:</em></p>
-
-    <ul>
-      <li><em>L40： 刚进入 <code class="language-plaintext highlighter-rouge">__restore</code> 时， <code class="language-plaintext highlighter-rouge">a0</code> 代表了什么值。请指出 <code class="language-plaintext highlighter-rouge">__restore</code> 的两种使用情景。</em>
-        <blockquote>
-          <p>这个问题我在 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/17#issuecomment-1611036350">chapter2 issues</a> 中有进行回答， 应当为 kernel 的 <code class="language-plaintext highlighter-rouge">sp</code>。</p>
-
-          <ul>
-            <li><code class="language-plaintext highlighter-rouge">__restore</code> 可以初始化内核栈以及用户栈指针地址， 进行用户态程序的加载， S Mode =&gt; U Mode；</li>
-            <li>除此之外， 可以进行 trap 后的上下文恢复回到用户态。</li>
-          </ul>
-        </blockquote>
-      </li>
-      <li><em>L46-L51： 这几行汇编代码特殊处理了哪些寄存器？ 这些寄存器的的值对于进入用户态有何意义？ 请分别解释。</em>
-        <blockquote>
-
-          <pre><code class="language-asm">ld t0, 32*8(sp)   # 从内核栈中读取 sstatus 值
-ld t1, 33*8(sp)   # 从内核栈中读取 spec 值
-ld t2, 2*8(sp)    # 从内核栈中读取 sscratch 值
-# 以下分别将读取的值写入对应的 CSR 特殊寄存器中
-csrw sstatus, t0
-csrw sepc, t1
-csrw sscratch, t2
-</code></pre>
-
-          <ul>
-            <li><code class="language-plaintext highlighter-rouge">sstatus</code> 表示程序状态， 其中的 SPP 指明了上一个状态时 U Mode， 可以帮助我们恢复到用户态。</li>
-            <li><code class="language-plaintext highlighter-rouge">sepc</code> 其实就是 S Mode 下的 <code class="language-plaintext highlighter-rouge">pc</code>， 可以指定用户态的程序的入口位置。</li>
-            <li><code class="language-plaintext highlighter-rouge">sscratch</code> 可以用来交换内核态与用户态的 <code class="language-plaintext highlighter-rouge">sp</code> 寄存器的值。</li>
-          </ul>
-        </blockquote>
-      </li>
-      <li><em>L53-L59： 为何跳过了 <code class="language-plaintext highlighter-rouge">x2</code> 和 <code class="language-plaintext highlighter-rouge">x4</code>？</em>
-        <blockquote>
-          <p><code class="language-plaintext highlighter-rouge">sp(x2)</code> 是栈指针， 我们需要使用栈指针来定位缓存在内核栈和用户栈中的寄存器的位置； <code class="language-plaintext highlighter-rouge">tp(x4)</code> 是线程指针寄存器， 对于 uni-processor 而言用不到。</p>
-        </blockquote>
-      </li>
-      <li><em>L63：该指令之后， <code class="language-plaintext highlighter-rouge">sp</code> 和 <code class="language-plaintext highlighter-rouge">sscratch</code> 中的值分别有什么意义？</em>
-        <blockquote>
-          <p><code class="language-plaintext highlighter-rouge">sp</code> 中存储的是用户栈栈顶的 <code class="language-plaintext highlighter-rouge">sp</code>， <code class="language-plaintext highlighter-rouge">sscratch</code> 中存储的是内核栈栈顶的 <code class="language-plaintext highlighter-rouge">sp</code>。</p>
-        </blockquote>
-      </li>
-      <li><em><code class="language-plaintext highlighter-rouge">__restore</code> 中发生状态切换在哪一条指令？ 为何该指令执行之后会进入用户态？</em>
-        <blockquote>
-          <p>状态切换发生在 <code class="language-plaintext highlighter-rouge">sret</code> 指令。<code class="language-plaintext highlighter-rouge">csrw sstatus, t0</code> 中将特权级设置为 U， <code class="language-plaintext highlighter-rouge">sstatus</code> 的 <code class="language-plaintext highlighter-rouge">SPP</code> 等字段给出 Trap 发生之前 CPU 处在哪个特权级（S/U）等信息， 可以从多个方面控制 S 特权级的 CPU 行为和执行状态。 在 <code class="language-plaintext highlighter-rouge">sret</code> 执行后硬件会做这两件事：</p>
-
-          <ul>
-            <li>CPU 会将当前的特权级按照 <code class="language-plaintext highlighter-rouge">sstatus</code> 的 <code class="language-plaintext highlighter-rouge">SPP</code> 字段设置为 U；</li>
-            <li>CPU 会跳转到 <code class="language-plaintext highlighter-rouge">sepc</code> 寄存器指向的那条指令， 然后继续执行。</li>
-          </ul>
-        </blockquote>
-      </li>
-      <li><em>L13：该指令之后， <code class="language-plaintext highlighter-rouge">sp</code> 和 <code class="language-plaintext highlighter-rouge">sscratch</code> 中的值分别有什么意义？</em>
-        <blockquote>
-          <p>与 L63 行为正好相反。</p>
-        </blockquote>
-      </li>
-      <li><em>从 U 态进入 S 态是哪一条指令发生的？</em>
-        <blockquote>
-          <p>进入 Trap 之前会有 syscall， 而 syscall 的第一句就是 <code class="language-plaintext highlighter-rouge">ecall</code>， 调用完就切换状态了。</p>
-        </blockquote>
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p><em>对于任何中断， <code class="language-plaintext highlighter-rouge">__alltraps</code> 中都需要保存所有寄存器吗？ 你有没有想到一些加速 <code class="language-plaintext highlighter-rouge">__alltraps</code> 的方法？ 简单描述你的想法。</em></p>
-
-    <blockquote>
-      <p>可以仅保存内核态中断服务程序所必须的状态， 包括CPU寄存器、 内核堆栈、 硬件中断等参数。 <a href="https://www.cnblogs.com/mysky007/p/12306407.html">[参考]</a></p>
-    </blockquote>
-  </li>
-</ol>
-
-<h2 id="5-调试记录">5 调试记录</h2>
-
-<h3 id="51-no_std-引入的错误">5.1 <em>no_std</em> 引入的错误</h3>
-
-<p>使用了 <code class="language-plaintext highlighter-rouge">#![no_std]</code> 之后 rust-analyzer 会注释一个 “can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>” 错误， 看着突兀的红色警告很是不爽。 rCore-Tutorial-v3 的 <code class="language-plaintext highlighter-rouge">.vscode/setting.json</code> 通过更改 rust-analyzer 的配置来尝试解决问题， 但是我在尝试 Google 搜索的所有结果后都没有解决问题。 但在 rust 社区我找到了一条帖子 <a href="https://users.rust-lang.org/t/error-e0463-cant-find-crate-for-test/73098">[error[E0463]: can’t find crate for <code class="language-plaintext highlighter-rouge">test</code>]</a>， 确实能消除这类报错并且不会对编译以及输出产生影响。 而我们所要做的更改也非常简单， 只需要在根文件 <code class="language-plaintext highlighter-rouge">main.rs</code> 中加入以下代码即可。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![reexport_test_harness_main</span> <span class="nd">=</span> <span class="s">"test_main"</span><span class="nd">]</span>
-<span class="nd">#![feature(custom_test_frameworks)]</span>
-<span class="nd">#![test_runner(test_runner)]</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">test_runner</span><span class="p">(</span><span class="n">_test</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nb">i32</span><span class="p">])</span> <span class="p">{</span>
-    <span class="k">loop</span> <span class="p">{}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="52-在-no_std-环境下增加-test-用例">5.2 在 no_std 环境下增加 test 用例</h3>
-
-<p>挖的坑还是要填的， 知其然知其所以然， 写 chapter2 的编程题的时候就在想可能得用到测试用例测试函数， 不然堆在主干代码中非常难管理。 所幸有人已经在如何实现 <strong>自定义框架测试</strong> 这块进行了研究了， 照着知乎这篇文章按流程分析， 我找到了 <a href="https://github.com/rust-osdev/bootimage">rust-osdev/bootimage</a> 这个库， 它几乎能满足 qemu 创建 test 的所有需求但是目前仅支持 x86 架构， 这意味当前 rCore 使用 test 测试的构想落空了。</p>
-<blockquote>
-  <p>不枉我耗了一个晚上去找资料， 只能用朴素的办法了。</p>
-</blockquote>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/main.rs</span>
-<span class="nd">#![reexport_test_harness_main</span> <span class="nd">=</span> <span class="s">"test_main"</span><span class="nd">]</span> <span class="c1">// 创建新的 test 的入口函数</span>
-<span class="nd">#![feature(custom_test_frameworks)]</span> <span class="c1">// 自定义 test 框架的属性声明</span>
-<span class="nd">#![test_runner(test_runner)]</span> <span class="c1">// test 执行函数为 test_runner</span>
-<span class="nd">#[no_mangle]</span> <span class="c1">// avoid compiler confusion</span>
-<span class="k">fn</span> <span class="nf">rust_main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="nd">#[cfg(test)]</span>
-    <span class="nf">test_main</span><span class="p">();</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-
-<span class="nd">#[cfg(test)]</span> <span class="c1">// 保证该函数仅在 test 情形下生成</span>
-<span class="k">fn</span> <span class="nf">test_runner</span><span class="p">(</span><span class="n">tests</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="k">dyn</span> <span class="nf">Fn</span><span class="p">()])</span> <span class="p">{</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Running {} tests"</span><span class="p">,</span> <span class="n">tests</span><span class="nf">.len</span><span class="p">());</span>
-    <span class="k">for</span> <span class="n">test</span> <span class="k">in</span> <span class="n">tests</span> <span class="p">{</span>
-        <span class="nf">test</span><span class="p">();</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://os.phil-opp.com/testing/">Writing an OS in Rust - Testing, Philipp Oppermann’s blog</a><br />
-<a href="https://zhuanlan.zhihu.com/p/90758552">使用Rust编写操作系统（四）：内核测试 - 知乎</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第二章：批处理系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
+</ul>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim]]></summary></entry></feed>
