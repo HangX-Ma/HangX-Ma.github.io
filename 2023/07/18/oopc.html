@@ -287,11 +287,11 @@
                 href="/blog/archive.html?tag=C">C</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 18, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 1422 words </span>
+                <span> Total 1465 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 4 mins </span>
+                <span> About 5 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s18soopc.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-18T00:00:00+08:00">
     <meta itemprop="keywords" content="C"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -334,7 +334,7 @@
   <dd>指明变量、函数存储在哪里，当定义发生时，系统为变量或函数分配内存单元。</dd>
 </dl>
 
-<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-plaintext highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-plaintext highlighter-rouge">g_encoder</code>， 在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 中则通过 <code class="language-plaintext highlighter-rouge">extern</code> 声明 <code class="language-plaintext highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-plaintext highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-plaintext highlighter-rouge">config.h</code> 以及 <code class="language-plaintext highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-plaintext highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。</p>
+<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-plaintext highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-plaintext highlighter-rouge">g_encoder</code>， 在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 中则通过 <code class="language-plaintext highlighter-rouge">extern</code> 声明 <code class="language-plaintext highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-plaintext highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-plaintext highlighter-rouge">config.h</code> 以及 <code class="language-plaintext highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-plaintext highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。 但我需要在 <code class="language-plaintext highlighter-rouge">config.h</code> 用注释说明这些全局变量的位置以及功能， 方便后续进行查阅检索。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// encoder.c</span>
 <span class="n">Encoder</span> <span class="n">g_encoder</span><span class="p">;</span>
@@ -420,7 +420,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/17/miniFOC-dev.html">miniFOC Driver Development</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/17/miniFOC-dev.html">miniFOC Driver Development</a></div><div class="next"><span>NEXT</span><a href="/2023/07/19/vofaplus.html">STM32F103 Vofa+ 配置与调试指南</a></div></div></div>
 
 </div>
 

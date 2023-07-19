@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 2724 words </span>
+                <span> Total 2987 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 8 mins </span>
+                <span> About 9 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -310,6 +310,7 @@
 <ul>
   <li><strong>MCU:</strong> STM32F103C8T6</li>
   <li><strong>Programmer:</strong> CMake + OpenOCD + STLink-v2</li>
+  <li><strong>Communication:</strong> Vofa+</li>
   <li><strong>PCB Design:</strong> Altium Designer 23</li>
   <li><strong>Editor:</strong> VSCode</li>
 </ul>
@@ -371,11 +372,23 @@
   <p><a href="https://blog.csdn.net/weixin_44509533/article/details/104110454">STM32 SPI的NSS引脚配置 - 星水天河 CSDN</a></p>
 </blockquote>
 
+<h2 id="2-cortex-m3-浮点计算优化">2. Cortex-M3 浮点计算优化</h2>
+
+<div align="center">
+[Qfplib: a family of floating-point libraries for ARM Cortex-M cores](https://www.quinapalus.com/qfplib.html)
+</div>
+
+<p>一年前就找到了这个库了， 一直没尝试用过。</p>
+
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 
 <p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
 
-<h3 id="x1-tim1-配置-pwm-输出">X.1 TIM1 配置 PWM 输出</h3>
+<h3 id="x1">X.1</h3>
+
+<p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
+
+<h3 id="x2-tim1-配置-pwm-输出">X.2 TIM1 配置 PWM 输出</h3>
 
 <p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
 
@@ -394,7 +407,7 @@
   <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
 </blockquote>
 
-<h3 id="x2-spi1">X.2 SPI1</h3>
+<h3 id="x3-spi1">X.3 SPI1</h3>
 
 <p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
