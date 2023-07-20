@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-19T23:04:31+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-20T13:25:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -299,12 +299,177 @@
       </li>
     </ul>
   </li>
-  <li><strong>线程切换</strong></li>
+  <li>
+    <p><strong>线程切换</strong>
+  线程切换应当是调度中最重要的一个模块， 主要功能由 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以及 <code class="language-plaintext highlighter-rouge">switch</code> 这两个函数提供。 之前提及的 <code class="language-plaintext highlighter-rouge">Runtime::t_return</code>， <code class="language-plaintext highlighter-rouge">Runtime::guard</code> 以及 <code class="language-plaintext highlighter-rouge">Runtime::yield_task</code> 都封装了 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以完成相应的调度的功能。</p>
+
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Runtime::t_yield</code>： 从当前位置开始查找一个状态为 <code class="language-plaintext highlighter-rouge">Ready</code> 的线程， 没找到会返回 false。 如果当前的线程不是 <code class="language-plaintext highlighter-rouge">Available</code>（说明在 <code class="language-plaintext highlighter-rouge">Running</code>） 就将当前的线程重新放到 <code class="language-plaintext highlighter-rouge">Ready</code> 数组中， 另外就是将找到的 <code class="language-plaintext highlighter-rouge">Ready</code> 线程切换为 <code class="language-plaintext highlighter-rouge">Running</code>。 最后调用 <code class="language-plaintext highlighter-rouge">switch</code> 交换新旧线程的上下文。</li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">switch</code>： 完成对 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 未进行切换的 <em>当前指令指针(PC)、 通用寄存器集合和栈</em> 的切换， 关键的任务切换在于如何对 PC 指针进行切换。 <code class="language-plaintext highlighter-rouge">x1(ra)</code> 寄存器保存着当前 <code class="language-plaintext highlighter-rouge">switch</code> 函数的返回地址， rCore 设计从 offset 为 0x00 到 0x68 的寄存器都按序存储， 其中也包括了 <code class="language-plaintext highlighter-rouge">ra</code>。 而在 offset 0x70 的位置又存储了一次 <code class="language-plaintext highlighter-rouge">ra</code>， 其作用也很明显， 后续 <code class="language-plaintext highlighter-rouge">ld t0, 0x70(a1)</code> 这句指令载入了新的 Context 中的 <code class="language-plaintext highlighter-rouge">ra</code>， 通过 <code class="language-plaintext highlighter-rouge">jr t0</code> 就能在 switch 之后直接跳转到新的指令运行的位置。</p>
+
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[naked]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">switch</span><span class="p">(</span><span class="n">old</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// a0: _old, a1: _new</span>
+    <span class="nd">asm!</span><span class="p">(</span>
+        <span class="s">"
+        sd x1, 0x00(a0)
+        ...
+        sd x1, 0x70(a0)
+
+        ld x1, 0x00(a1)
+        ...
+        ld t0, 0x70(a1)
+
+        jr t0
+    "</span><span class="p">,</span>
+        <span class="nf">options</span><span class="p">(</span><span class="n">noreturn</span><span class="p">)</span>
+    <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+  <li><strong>线程执行</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Runtime::run</code>： 用一个 while 循环调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行调度， 所有线程执行完后会退出。</li>
+    </ul>
+  </li>
 </ul>
+
+<p>从整体的 rCore 线程设计可以看出， 线程的调度几乎就是按序执行， 所以 <code class="language-plaintext highlighter-rouge">Runtime::spawn</code> 会放入一个 <code class="language-plaintext highlighter-rouge">guard</code> 函数地址作为 <em>old return address</em> 以释放线程资源， 因为当下一次线程位置又切换到这个线程的时候， 实际上该线程已处理完了。 这个设计只能等当前运行的线程主动让出处理器使用权后， 线程管理运行时才能切换检查。</p>
 
 <p>具体实现细节不表了， rCore 在 <code class="language-plaintext highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
 
-<h3 id="113-内核态的线程管理">1.1.3 内核态的线程管理</h3>
+<h3 id="13-内核态的线程管理">1.3 内核态的线程管理</h3>
+
+<p>内核态的线程管理扩展了时钟中断， 能基于时钟中断来直接打断当前用户态线程的运行， 实现对线程的调度和切换等。 rCore 在该章节对进程的结构进行了细化， 通过线程来表示对处理器的虚拟化， 使得进程成为了管理线程的容器。 虽然没有父子关系， 但多个线程中的第一个创建的线程一般被称为主线程， 并被分配 0 号进程标识符（TID）。</p>
+
+<p>除了主线程仍然是从程序入口点开始执行， 其余的 <strong>线程的生命周期都与一个函数进行一次绑定</strong>， 从这个角度而言， 主线程其实和进程的声明周期绑定了。</p>
+
+<p>除了具备前述用户态线程的基本特性， rCore 设计的线程模型额外具备如下功能：</p>
+
+<ul>
+  <li>线程有三种状态：就绪态、 运行态和阻塞态（阻塞这个知识点解答了我对 poll 函数的疑惑！）；</li>
+  <li>线程可以被操作系统调度以分时占用 CPU；</li>
+  <li>线程可动态创建与退出；</li>
+  <li>线程能通过系统调用获得操作系统的服务， 但 <strong>进程系统调用</strong> 和 <strong>线程系统调用</strong> 不能混用。</li>
+</ul>
+
+<blockquote>
+  <p>rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html">线程模型与重要系统调用</a> 章节对理解线程模型和设计非常关键。</p>
+</blockquote>
+
+<h4 id="131-线程系统调用">1.3.1 线程系统调用</h4>
+
+<ul>
+  <li>
+    <p><strong>线程创建</strong> 的系统调用 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 通过 <strong>TID(Thread Identifier)</strong> 区分不同线程， 与进程的 PID 设计很类似， 内核会为每个线程分配专属资源： 用户栈、 Trap 上下文还有内核栈， 前两个在进程地址空间中， 内核栈在内核地址空间中。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_thread_create</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span><span class="p">;</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>线程管理</strong> 通过 TID， <code class="language-plaintext highlighter-rouge">gettid</code> 系统调用能获取当前线程的 TID。</li>
+  <li><strong>线程退出</strong> 通过 <code class="language-plaintext highlighter-rouge">exit</code> 系统调用完成， 约定线程从绑定的函数返回的时候都需要调用 <code class="language-plaintext highlighter-rouge">exit</code> 通知操作系统进行资源回收， 更细粒度的线程取代了进程的作为操作系统的调度单元。</li>
+  <li><strong>线程资源回收</strong> 通过 <code class="language-plaintext highlighter-rouge">waittid</code> 回收收线程占用的用户态和内核态资源。 这个工作一般是进程/主线程完成， 但若是 <strong>主线程</strong> 调用了 <code class="language-plaintext highlighter-rouge">exit</code> <strong>其子线程</strong> 都会全部退出， 被 <strong>父进程</strong> 回收资源。</li>
+</ul>
+
+<p>rCore 之前描述的线程模型提到不能混用进程和线程的系统调用， 原因在于其设计对线程和进程进行了分离。 若是调用了 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 生成子线程就只考虑多个线程在一个进程内的交互， 如果涉及到父子进程的交互， 就等价为进程模型。</p>
+
+<h4 id="132-软硬件资源管理">1.3.2 软硬件资源管理</h4>
+
+<p>主要干了三件事儿。</p>
+
+<ol>
+  <li>
+    <p>把原来分配 PID 的数据结构用更通用的 <code class="language-plaintext highlighter-rouge">RecycleAllocator</code> 描述， 能为 PID 以及 TID 分配提供描述结构。 PID 的分配还是延续之前章节， 使用 <code class="language-plaintext highlighter-rouge">PID_ALLOCATOR</code> 这个全局变量。 而线程归属于进程容器， 所以在每个进程控制块的内部可变结构 <code class="language-plaintext highlighter-rouge">ProcessControlBlockInner</code> 中占据一个变量位置， 由进程控制块 <code class="language-plaintext highlighter-rouge">ProcessControlBlock</code> 进行管理。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// os/src/task/process.rs</span>
+
+ <span class="k">pub</span> <span class="k">struct</span> <span class="n">ProcessControlBlock</span> <span class="p">{</span>
+     <span class="c1">// immutable</span>
+     <span class="k">pub</span> <span class="n">pid</span><span class="p">:</span> <span class="n">PidHandle</span><span class="p">,</span>
+     <span class="c1">// mutable</span>
+     <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">ProcessControlBlockInner</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="p">}</span>
+
+ <span class="k">pub</span> <span class="k">struct</span> <span class="n">ProcessControlBlockInner</span> <span class="p">{</span>
+     <span class="o">...</span>
+     <span class="k">pub</span> <span class="n">task_res_allocator</span><span class="p">:</span> <span class="n">RecycleAllocator</span><span class="p">,</span>
+     <span class="o">...</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+
+    <p>除了 TID 之外， 每个线程都有自己独立的用户栈和 Trap 上下文， 且它们在所属进程的地址空间中的位置可由 TID 计算得到。 新的进程地址空间如下所示：</p>
+
+    <div align="center">
+     <img src="/norobots/images/2023-07-15-rcore-note-ch8/app-as-full-with-threads.png" alt="Process address space with threads, rCore" width="600" />
+     <br />
+     <font size="2" color="#999"><u>Process address space with threads, rCore</u></font>
+ </div>
+
+    <p>这个就和第三章的结构非常类似了， 为此 rCore 提供了 <code class="language-plaintext highlighter-rouge">trap_cx_bottom_from_tid</code> 以及 <code class="language-plaintext highlighter-rouge">ustack_bottom_from_tid</code> 这两个函数索引每个线程的用户栈以及 Trap 上下文的具体位置。</p>
+  </li>
+  <li>
+    <p>线程资源整合 <code class="language-plaintext highlighter-rouge">TaskUserRes</code>， 将线程的 TID 、用户栈和 Trap 上下文与线程打包， 由于声明周期一致， 能够进行统一的资源分配和回收。</p>
+  </li>
+  <li>
+    <p>内核栈不再与 PID 或 TID 挂钩， 而与 <code class="language-plaintext highlighter-rouge">kstack_id</code> 这个新的内核标识符相关。 需要增加一个 <code class="language-plaintext highlighter-rouge">KSTACK_ALLOCATOR</code> 的通用资源分配器对内核标识符进行分配。</p>
+  </li>
+</ol>
+
+<h4 id="133-进程和线程控制块">1.3.3 进程和线程控制块</h4>
+
+<p>对进程和线程两块资源进行分离， 线程已经成为了 CPU 资源的调度单位， 因而与代码执行相关的内容则分配至 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
+    <span class="c1">// immutable</span>
+    <span class="k">pub</span> <span class="n">process</span><span class="p">:</span> <span class="n">Weak</span><span class="o">&lt;</span><span class="n">ProcessControlBlock</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">kstack</span><span class="p">:</span> <span class="n">KernelStack</span><span class="p">,</span>
+    <span class="c1">// mutable</span>
+    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">TaskControlBlockInner</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">res</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">TaskUserRes</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">trap_cx_ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">exit_code</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>进程控制块中则保留进程内所有线程共享的资源：</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/process.rs</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">ProcessControlBlock</span> <span class="p">{</span>
+    <span class="c1">// immutable</span>
+    <span class="k">pub</span> <span class="n">pid</span><span class="p">:</span> <span class="n">PidHandle</span><span class="p">,</span>
+    <span class="c1">// mutable</span>
+    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">ProcessControlBlockInner</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">ProcessControlBlockInner</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">is_zombie</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">memory_set</span><span class="p">:</span> <span class="n">MemorySet</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Weak</span><span class="o">&lt;</span><span class="n">ProcessControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">children</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">ProcessControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">exit_code</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">fd_table</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">File</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span><span class="o">&gt;&gt;&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">signals</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">tasks</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;&gt;</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">task_res_allocator</span><span class="p">:</span> <span class="n">RecycleAllocator</span><span class="p">,</span>
+    <span class="o">...</span> <span class="c1">// 其他同步互斥相关资源</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="134-结语">1.3.4 结语</h3>
+
+<p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。</p>
 
 <h2 id="2-sync-mutex-os">2. Sync Mutex OS</h2>
 
