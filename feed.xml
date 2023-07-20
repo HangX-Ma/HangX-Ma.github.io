@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-20T13:25:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-20T14:30:41+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -467,7 +467,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h3 id="134-结语">1.3.4 结语</h3>
+<h4 id="134-结语">1.3.4 结语</h4>
 
 <p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。</p>
 
