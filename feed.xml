@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-20T18:04:38+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-20T18:44:29+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -187,7 +187,7 @@
 
 <h3 id="x3-spi1">X.3 SPI1</h3>
 
-<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
+<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 8</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 8" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
   <p>这个章节整理完 Tutorial 还有一个与 I/O 设备管理相关的第九章， 准备之后慢慢琢磨然后不断扩展内核功能， 连续一个月高强度 rCore 的学习心理上有些浮躁了。 最近想把多年未竟的 FOC 项目捡起来好好研究一下， 顺带用上 FreeRTOS 用另一个角度看 OS。</p>
 </blockquote>
 
@@ -241,7 +241,7 @@
 
 <p>但线程最大的问题就是需要 <strong>保持共享资源数据一致性</strong>， 修改数据可能会因为多个线程执行顺序的不可预知而产生 <strong>竞态条件（Race Condition）</strong>， 这是调度的不可控导致的， 而进程独享一片地址空间而不会与其他进程产生数据的地址交叉， 虽然也会被操作系统调度， 但不会遇到这样的问题。</p>
 
-<p>为了解决访问与改写共享资源带来的问题， 操作系统需要提供一些保障机制， 如 <strong>互斥锁（Mutex Lock）</strong>， <strong>信号量（Semaphore）</strong>， <strong>条件变量（Condition Variable）</strong> 等， 这也是这个章节 rCore 所需要解决的第二个问题 ———— 为线程提供上述保障。</p>
+<p>为了解决访问与改写共享资源带来的问题， 操作系统需要提供一些保障机制， 如 <strong>互斥锁（Mutex Lock）</strong>， <strong>信号量（Semaphore）</strong>， <strong>条件变量（Condition Variable）</strong> 等， 这也是这个章节 rCore 所需要解决的第二个问题 —— 为线程提供上述保障。</p>
 
 <h3 id="12-用户态的线程管理">1.2 用户态的线程管理</h3>
 

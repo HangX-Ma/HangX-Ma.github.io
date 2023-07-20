@@ -12,7 +12,7 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 7 - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>rCore OS Note - Chapter 8 - 一只豆腐</title>
 
 <meta name="description" content="第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
@@ -282,12 +282,12 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 15, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6826 words </span>
+                <span> Total 6824 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
                 <span> About 19 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s15srcore-note-ch8.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 7</h1></header></div><p class="overlay__excerpt">第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s15srcore-note-ch8.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 8</h1></header></div><p class="overlay__excerpt">第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -297,7 +297,7 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 7"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-15T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="rCore OS Note - Chapter 8"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-15T00:00:00+08:00">
     <meta itemprop="keywords" content="rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
@@ -355,7 +355,7 @@
 
 <p>但线程最大的问题就是需要 <strong>保持共享资源数据一致性</strong>， 修改数据可能会因为多个线程执行顺序的不可预知而产生 <strong>竞态条件（Race Condition）</strong>， 这是调度的不可控导致的， 而进程独享一片地址空间而不会与其他进程产生数据的地址交叉， 虽然也会被操作系统调度， 但不会遇到这样的问题。</p>
 
-<p>为了解决访问与改写共享资源带来的问题， 操作系统需要提供一些保障机制， 如 <strong>互斥锁（Mutex Lock）</strong>， <strong>信号量（Semaphore）</strong>， <strong>条件变量（Condition Variable）</strong> 等， 这也是这个章节 rCore 所需要解决的第二个问题 ———— 为线程提供上述保障。</p>
+<p>为了解决访问与改写共享资源带来的问题， 操作系统需要提供一些保障机制， 如 <strong>互斥锁（Mutex Lock）</strong>， <strong>信号量（Semaphore）</strong>， <strong>条件变量（Condition Variable）</strong> 等， 这也是这个章节 rCore 所需要解决的第二个问题 —— 为线程提供上述保障。</p>
 
 <h3 id="12-用户态的线程管理">1.2 用户态的线程管理</h3>
 
@@ -737,7 +737,7 @@ function toggle() {
 </div>
 </div>
     </div><div class="site-info mt-2">
-      <div>© 一只豆腐 2021,
+      <div>© 一只豆腐 2023,
         Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
         title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
       </div>
@@ -1441,7 +1441,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s07s15srcore-note-ch8.html';
-      var title = "rCore OS Note - Chapter 7";
+      var title = "rCore OS Note - Chapter 8";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s07s15srcore-note-ch8.html']").text(view);
       });
