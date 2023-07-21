@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 3231 words </span>
+                <span> Total 4513 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 9 mins </span>
+                <span> About 13 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -310,9 +310,15 @@
 <ul>
   <li><strong>MCU:</strong> STM32F103C8T6</li>
   <li><strong>Programmer:</strong> CMake + OpenOCD + STLink-v2</li>
-  <li><strong>Communication:</strong> Vofa+</li>
+  <li><strong>Serial Communication:</strong> Vofa+</li>
   <li><strong>PCB Design:</strong> Altium Designer 23</li>
   <li><strong>Editor:</strong> VSCode</li>
+  <li><strong>Third Party Library:</strong>
+    <ul>
+      <li>Float-point Calculation Optimization: Qfplib-M3</li>
+      <li>OLED Display: u8g2</li>
+    </ul>
+  </li>
 </ul>
 
 <p>项目地址 <a href="https://github.com/HangX-Ma/miniFOC">HangX-Ma/miniFOC</a>， 项目将持续更新， 这次挺有信心的！</p>
@@ -385,7 +391,51 @@
 [Qfplib: a family of floating-point libraries for ARM Cortex-M cores](https://www.quinapalus.com/qfplib.html)
 </div>
 
-<p>一年前就找到了这个库了， 一直没尝试用过。</p>
+<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
+
+<h2 id="3-u8g2-库的使用">3. u8g2 库的使用</h2>
+
+<p>u8g2 库的使用参考了两份代码（用的是 SSD1306 驱动芯片）， 但实际上这两篇文章都没有解决我使用 LL 库配置 SPI + DMA 进行数据传输的问题。 很遗憾我没解决这个问题， 最后使用了普通的 SPI 传输的办法， 这是因为我在几个论坛上发现很多人用了 SPI + DMA 就无法做到数据的正常传输， 必须等到 SPI + DMA 的数据传输完成后才能进行下一次传输， 而这需要通过 while 循环不断检查是否传输完毕。 既然需要 CPU 的参与， 不如直接用 SPI 还更省心。</p>
+
+<ul>
+  <li>SPI 发送数据， 需要通过 <code class="language-plaintext highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
+  <li>除此之外， u8g2 将 CS 引脚拉高之前 （Deselect）， 需要确认 SPI 的传输已经结束， 否则会造成数据错误。</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint8_t</span> <span class="nf">u8x8_byte_4wire_hw_spi</span><span class="p">(</span>
+    <span class="n">U8X8_UNUSED</span> <span class="n">u8x8_t</span> <span class="o">*</span><span class="n">u8x8</span><span class="p">,</span>
+    <span class="kt">uint8_t</span> <span class="n">msg</span><span class="p">,</span>
+    <span class="kt">uint8_t</span> <span class="n">arg_int</span><span class="p">,</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">arg_ptr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="p">...</span>
+        <span class="k">case</span> <span class="n">U8X8_MSG_BYTE_SEND</span><span class="p">:</span> <span class="c1">// Use SPI to send 'arg_int' bytes</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arg_int</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">LL_SPI_TransmitData8</span><span class="p">(</span><span class="n">SPI1</span><span class="p">,</span> <span class="o">*</span><span class="p">((</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">arg_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">SPI1</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">__NOP</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">...</span>
+        <span class="k">case</span> <span class="n">U8X8_MSG_BYTE_END_TRANSFER</span><span class="p">:</span>  <span class="c1">// Software CS is needed. (deselect)</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_BSY</span><span class="p">(</span><span class="n">SPI1</span><span class="p">)</span> <span class="o">==</span> <span class="n">SET</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">__NOP</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="n">u8x8</span><span class="o">-&gt;</span><span class="n">gpio_and_delay_cb</span><span class="p">(</span><span class="n">u8x8</span><span class="p">,</span> <span class="n">U8X8_MSG_DELAY_NANO</span><span class="p">,</span> <span class="n">u8x8</span><span class="o">-&gt;</span><span class="n">display_info</span><span class="o">-&gt;</span><span class="n">pre_chip_disable_wait_ns</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+            <span class="n">LL_GPIO_SetOutputPin</span><span class="p">(</span><span class="n">OLED_CS_SCK_MOSI_GPIO_PORT</span><span class="p">,</span> <span class="n">OLED_CS_PIN</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="https://github.com/AagsAags/stm32f103c8t6_u8g2_hw_spi">AagsAags/stm32f103c8t6_u8g2_hw_spi - Github</a><br />
+<a href="https://www.izilzty.com/?post=15">在STM32上使用U8g2图形库并配合DMA发送显示数据（LL库） - izilzty的小窝</a></p>
+</blockquote>
 
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 

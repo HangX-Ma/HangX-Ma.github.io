@@ -282,7 +282,7 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 19, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 881 words </span>
+                <span> Total 903 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -317,6 +317,8 @@
 
 <p>本质上是用 USB 虚拟串口进行数据收发， 没想到 F103 系列也支持， 但是后来看了看发现没有 DMA 功能， 这个就比较致命了。 按照现有设计， 除了进行指令的交互， MCU 还需要通过串口向上位机传输数据， 如果直接交由 CPU 进行处理会极大浪费计算资源， 一般来说需要通过 DMA 规避 CPU 对这些数据的处理。 所以， 对于 F103 系列还是老老实实用 USARTx + DMA 的组合比较合适。</p>
 
+<h2 id="2-todo">2. TODO</h2>
+
 <h2 id="x-调试记录">X. 调试记录</h2>
 
 <p>一个简单的 USART + DMA 配置， 结果配完 USART1 后发现没有数据发送出来， 也没有数据接收到。</p>
@@ -328,6 +330,7 @@
   <li>主程序可以跑通， 加入 LED 翻转指令有效， 通过 cortex-debug 插件也没有发现数据有问题。</li>
   <li>用自己之前写的可以工作的 USART1 的程序进行回环测试， 无效， 基本确定 CH340 硬件坏了。</li>
   <li>用逻辑分析仪测了一下输出脚 <em><strong>PB6(Tx)</strong></em> 有不同的输出波形， 说明 DMA 通信不成问题了， 协议部分还不清楚， 但 CH340 肯定坏了。</li>
+  <li><code class="language-plaintext highlighter-rouge">JustFloat</code> 协议测试可用。</li>
 </ul>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
