@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 4513 words </span>
+                <span> Total 5193 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 13 mins </span>
+                <span> About 15 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -464,9 +464,31 @@
   <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
 </blockquote>
 
-<h3 id="x3-spi1">X.3 SPI1</h3>
+<h3 id="x3-spi">X.3 SPI</h3>
 
 <p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
+
+<p>另外发现一个问题， SPI 的收发需要共用一个函数（纯发送不用， 我在 OLED 中测试过）， 这是因为 SPI 从机没有自己的 SCLK 时钟， 这就需要主机提供。 而双工 SPI 的接收和发送是用两套缓存空间的， 因而可以通过主机向从机发送相应的字节提供 SCLK 时钟， 才能进行同步进行数据接收。 因而， 磁编码器的 SPI 接收函数是这样的。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">uint16_t</span> <span class="nf">spi2_transmit_rw</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">outdata</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// wait until the SPI Tx buffer to be empty</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">SPI2</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="n">LL_SPI_TransmitData16</span><span class="p">(</span><span class="n">SPI2</span><span class="p">,</span> <span class="n">outdata</span><span class="p">);</span>
+    <span class="c1">// wait for 16 bits data receiving complete</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_RXNE</span><span class="p">(</span><span class="n">SPI2</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="n">LL_SPI_ReceiveData16</span><span class="p">(</span><span class="n">SPI2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>可算是懂了为什么磁编码器的数据手册里面 MOSI 是全 0 的数据了。 不过忘记买磁铁了， 调了半个晚上以为电机轴承那边是有磁性的， 结果一直读到 error 的数据， 后来问了好兄弟才知道那块地方是钢， 他推荐我实现 <strong>无感 FOC</strong>， 外贴磁铁会影响电机的磁场可能会有问题。</p>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/weixin_42832780/article/details/96424775">STM32 SPI发送与接收用一个函数实现的问题 - VX13260562029 CSDN</a></p>
+</blockquote>
+
+<h3 id="x4-dma">X.4 DMA</h3>
+
+<p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
