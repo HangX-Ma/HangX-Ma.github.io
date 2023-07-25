@@ -1,23 +1,127 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-22T22:26:49+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-25T23:52:58+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Vofa+ demo, HangX-Ma</u></font>
+</div>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
   <li><a href="https://www.vofa.plus/">Vofa plus</a></li>
   <li><a href="https://www.vofa.plus/downloads/?index=1&amp;plugin_index=2">Vofa plus - plugins</a></li>
-  <li><a href="https://www.bilibili.com/video/BV1DP411C7Xe/?spm_id_from=333.999.0.0&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">STM32使用HAL库生成USB虚拟串口连接VOFA+输出波形 - mandzy Bilibili</a></li>
+  <li><a href="https://www.bilibili.com/video/BV1DP411C7Xe/?spm_id_from=333.999.0.0&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">STM32使用HAL库生成USB虚拟串口连接VOFA+输出波形 - mandzy Bilibili</a> <a id="vofa_demo"></a></li>
   <li><a href="https://www.bilibili.com/video/BV15V411T7Gg/?spm_id_from=333.1007.top_right_bar_window_custom_collection.content.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">STM32F4使用DMA串口通信连接VOFA软件进行电机调试和波形显示 - mandzy Bilibili</a></li>
   <li><a href="https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf">ST RM0008 Reference manual</a></li>
 </ul>
 
 <h2 id="1-stm32-virtual-serial-port">1. STM32 Virtual Serial Port</h2>
 
-<p>本质上是用 USB 虚拟串口进行数据收发， 没想到 F103 系列也支持， 但是后来看了看发现没有 DMA 功能， 这个就比较致命了。 按照现有设计， 除了进行指令的交互， MCU 还需要通过串口向上位机传输数据， 如果直接交由 CPU 进行处理会极大浪费计算资源， 一般来说需要通过 DMA 规避 CPU 对这些数据的处理。 所以， 对于 F103 系列还是老老实实用 USARTx + DMA 的组合比较合适。</p>
+<p>本质上是用 USB 虚拟串口进行数据收发， 没想到 F103 系列也支持， 但是后来看了看 F103 虚拟串口没有 DMA 功能， 这个就比较致命了。 按照现有设计， 除了进行指令的交互， MCU 还需要通过串口向上位机传输数据， 如果直接交由 CPU 进行处理会极大浪费计算资源， 一般来说需要通过 DMA 规避 CPU 对这些数据的处理。 所以， 对于 F103 系列还是老老实实用 USARTx + DMA 的组合比较合适。</p>
 
-<h2 id="2-todo">2. TODO</h2>
+<h2 id="2-vofa-justfloat-protocol">2. Vofa+: JustFloat Protocol</h2>
 
-<h2 id="x-调试记录">X. 调试记录</h2>
+<p>具体的协议内容可以看官网的 <a href="https://www.vofa.plus/plugin_detail/?name=justfloat">JustFloat</a> 说明， 除了采样数据解析外， 该协议还能进行图像解析。 目前我只用到了数据采样解析部分， 搞懂这个也就一通百通了， 可以看到滚放定义的数据帧如下所示， 帧尾是一个 4 字节的特定数据 <code class="language-plaintext highlighter-rouge">0x00, 0x00, 0x80, 0x7f</code>， 这是小端的顺序， 大端需要调换一下数据的存储顺序。 也就是说， 我们在发送完希望传输的数据后， 需要紧跟在这些数据后面发送一个尾帧， 才能让 Vofa+ 识别数据帧的内容并进行可视化以及文本打印。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define CH_COUNT 通道数量
+</span><span class="k">struct</span> <span class="n">Frame</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">fdata</span><span class="p">[</span><span class="n">CH_COUNT</span><span class="p">];</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">tail</span><span class="p">[</span><span class="mi">4</span><span class="p">]{</span><span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x7f</span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>一般来说， 串口是无法接收 float 类型的数据的， 但 float 类型在 STM32 中占据 4 个字节， 因而我们可以定义这样一个 union 联合体结构解决 float 数据传输的问题。 <code class="language-plaintext highlighter-rouge">fdata</code> 和 <code class="language-plaintext highlighter-rouge">chars</code> 共用一块内存区域并且都占据 4 个字节， 这样在使用串口发送数据的时候就能将 <code class="language-plaintext highlighter-rouge">fdata</code> 拆分成 4 个 <code class="language-plaintext highlighter-rouge">chars</code> 进行发送。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * @brief Use union to decompose the float_data into 4 bytes char.
+ *        Because the USART only transfer bytes.
+ */</span>
+<span class="k">typedef</span> <span class="k">union</span> <span class="n">Format</span><span class="p">{</span>
+    <span class="kt">float</span>    <span class="n">fdata</span><span class="p">;</span>    <span class="c1">// little-endian float</span>
+    <span class="kt">uint8_t</span>  <span class="n">chars</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span> <span class="n">Format_Typedef</span><span class="p">;</span>
+
+<span class="n">Format_Typedef</span> <span class="n">send_data</span><span class="p">[</span><span class="n">VOFA_SEND_CH_COUNT</span><span class="p">];</span>
+<span class="n">Format_Typedef</span> <span class="n">recv_data</span><span class="p">[</span><span class="n">VOFA_RECV_CH_COUNT</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>这样， 根据这个协议， 我们仅需要定义两个数据就能完成 USART 的收发， 将这两个数组的地址分别配置为发送部分 DMA 的内存地址， 以及接收部分的内存地址。 当然， 在设置 DMA 的传输数据总量的时候也需要考虑到末尾 4 个字节的特定数据帧。</p>
+
+<p>具体的配置可以查看 <a href="https://github.com/HangX-Ma/miniFOC/blob/main/Software/foc/Components/Inc/vofa_usart.h">vofa_usart.h</a> 和 <a href="https://github.com/HangX-Ma/miniFOC/blob/main/Software/foc/Components/Src/vofa_usart.c">vofa_usart.c</a> 这两个文件。</p>
+<blockquote>
+  <p>特别感谢 B 站 mandzy Up 提供的代码参考！</p>
+</blockquote>
+
+<h2 id="3-vofa-components">3. Vofa+ Components</h2>
+
+<p>Vofa+ 还提供了一系列控件方便我们进行对下位机的调试， 这里以这个 <code class="language-plaintext highlighter-rouge">ExtraButtonToggle</code> 控件为例。</p>
+
+<p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-plaintext highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-plaintext highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Vofa+ components, HangX-Ma</u></font>
+</div>
+
+<p>以上图为例， 我定义了一段命令的内容为 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">%% 00 00 00</code>， 前半部分是我定义的帧头数据， 只有识别到 <code class="language-plaintext highlighter-rouge">AA</code> 和 <code class="language-plaintext highlighter-rouge">FF</code> 我才会继续解析指令， 将末尾的 <code class="language-plaintext highlighter-rouge">01</code> 作为区分不同指令的具体标识。</p>
+
+<p>而后半段则是我定义的数据帧， <code class="language-plaintext highlighter-rouge">%%</code> 标识占位符， 这样一组 <code class="language-plaintext highlighter-rouge">%%</code>占位一个字节， 我在这个按钮控件的 <code class="language-plaintext highlighter-rouge">事件与参数</code> 部分设置了激活态发送 <code class="language-plaintext highlighter-rouge">01</code>， 关闭态发送 <code class="language-plaintext highlighter-rouge">02</code>， 这样在我按下按钮后， 根据当前按钮的状态， <code class="language-plaintext highlighter-rouge">%%</code> 会被替换为 <code class="language-plaintext highlighter-rouge">01</code> 或者 <code class="language-plaintext highlighter-rouge">02</code>。 这样， 每次按下按钮后， Vofa+ 都会向 STM32 发送 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">01 00 00 00</code> 或者 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">02 00 00 00</code>。</p>
+
+<p>可以结合我在 USART 中 DMA 接收部分对数据的解析方式进行理解。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">USARTx_DMA_RX_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// If data receiving complete, clear the TC5 flag</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">LL_DMA_IsActiveFlag_TC5</span><span class="p">(</span><span class="n">DMA1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">LL_DMA_ClearFlag_TC5</span><span class="p">(</span><span class="n">DMA1</span><span class="p">);</span>
+        <span class="c1">// receive frame header: 0xAA 0xFF</span>
+        <span class="n">Format_Typedef</span> <span class="n">recv_header</span> <span class="o">=</span> <span class="n">recv_frame</span><span class="p">.</span><span class="n">data_group</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">recv_header</span><span class="p">.</span><span class="n">chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xAA</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">recv_header</span><span class="p">.</span><span class="n">chars</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xFF</span><span class="p">))</span> <span class="p">{</span>
+            <span class="kt">char</span> <span class="n">cmd</span> <span class="o">=</span> <span class="n">recv_header</span><span class="p">.</span><span class="n">chars</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+            <span class="n">Format_Typedef</span> <span class="n">recv_data</span> <span class="o">=</span> <span class="n">recv_frame</span><span class="p">.</span><span class="n">data_group</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+            <span class="k">switch</span> <span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="mh">0x01</span><span class="p">:</span>                         <span class="c1">// control motor start/stop</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">recv_data</span><span class="p">.</span><span class="n">chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// start</span>
+                    <span class="n">LED_STATE_TOGGLE</span><span class="p">();</span>
+                    <span class="n">g_bldc</span><span class="p">.</span><span class="n">start_pwm</span><span class="p">();</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">recv_data</span><span class="p">.</span><span class="n">chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// stop</span>
+                    <span class="n">LED_STATE_TOGGLE</span><span class="p">();</span>
+                    <span class="n">g_bldc</span><span class="p">.</span><span class="n">stop_pwm</span><span class="p">();</span>
+                <span class="p">}</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x02</span><span class="p">:</span> <span class="c1">// set velocity</span>
+                <span class="n">g_target_motor_vel</span> <span class="o">=</span> <span class="n">recv_data</span><span class="p">.</span><span class="n">fdata</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x03</span><span class="p">:</span> <span class="c1">// set Speed Kp</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x04</span><span class="p">:</span> <span class="c1">// set Speed Ki</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x05</span><span class="p">:</span> <span class="c1">// set Current Kp</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x06</span><span class="p">:</span> <span class="c1">// set Current Ki</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x07</span><span class="p">:</span> <span class="c1">// set Current Kp</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="mh">0x08</span><span class="p">:</span> <span class="c1">// set Current Ki</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="nl">default:</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// we need to disable dma rx channel and reset the transfer length</span>
+        <span class="n">usart_rx_dma_reload</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>这里为什么设置的发送帧为 8 个字节？ 这是因为目前使用的是 <strong>JustFloat</strong> 协议， 协议发送和接收都是依据 float 的格式与大小进行的。 而我定义了接收帧为大小为 2 的 <code class="language-plaintext highlighter-rouge">Format_Typedef</code> 数组， 正好是 2 个 float， 8 个字节大小。 若是不理解可以看看 mandzy 的相关 <a href="#vofa_demo">视频</a>。</p>
+</blockquote>
+
+<h2 id="4-调试记录">4. 调试记录</h2>
 
 <p>一个简单的 USART + DMA 配置， 结果配完 USART1 后发现没有数据发送出来， 也没有数据接收到。</p>
 
@@ -218,6 +322,52 @@
 <a href="https://www.izilzty.com/?post=15">在STM32上使用U8g2图形库并配合DMA发送显示数据（LL库） - izilzty的小窝</a></p>
 </blockquote>
 
+<h2 id="4-ina199x1-电流采样配置">4. INA199x1 电流采样配置</h2>
+
+<p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
+
+<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-plaintext highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-plaintext highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-plaintext highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
+
+<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-plaintext highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
+
+<ul>
+  <li><strong>Regular Conversion launched by software:</strong> 规则的软件触发， 调用函数触发即可</li>
+  <li><strong>Timer X Capture Compare X event:</strong> 外部引脚触发</li>
+  <li><strong>Timer X Trigger Out event:</strong> 定时器通道输出触发， 需要设置相应的定时器设置</li>
+</ul>
+
+<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-plaintext highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-plaintext highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
+
+<p>另外需要注意配置中的几个点：</p>
+
+<ul>
+  <li>DMA 配置需要在 ADC 配置之前。</li>
+  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-plaintext highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
+  <li>PWM 有 Mode 1 和 Mode 2 两种， 分别表示计数器在达到 ARR 值之有为有效电平， 以及在达到 ARR 后为有效电平。 因而对于上升沿触发的要求， 需要配置 PWM 的极性为 Mode 1 为 Low， Mode 2 为 High。 这样， Mode 1 有效电平为 Low， 而 Mode 2 有效电平为 High， 均能达到上升沿的效果。</li>
+  <li>
+    <p>ADC 校准的代码如下所示， 需要注意结合不同的型号进行差异化配置。 F103 要求在校准之前开启 ADC， 并且需要等待 ADC 的电压稳定。</p>
+
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">//* start ADC1</span>
+  <span class="n">LL_ADC_Enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+  <span class="c1">// wait until internal voltage reference stable</span>
+  <span class="n">delay_nus_72MHz</span><span class="p">(</span><span class="n">LL_ADC_DELAY_TEMPSENSOR_STAB_US</span><span class="p">);</span>
+
+  <span class="c1">// wait at least 2 ADC cycles after ADC power-on but before calibration</span>
+  <span class="n">LL_mDelay</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+  <span class="c1">// wait until ADC calibration done</span>
+  <span class="n">LL_ADC_StartCalibration</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">LL_ADC_IsCalibrationOnGoing</span><span class="p">(</span><span class="n">ADC1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<blockquote>
+  <p><a href="https://blog.51cto.com/u_520887/5290076">STM32F0使用LL库实现DMA方式AD采集</a><br />
+<a href="https://codeantenna.com/a/1MnFm9oX2G">STM32L476多通道TIM+DMA+ADC采样（LL库）</a><br />
+<a href="https://blog.51cto.com/u_15456236/4801335">STM32 定时器触发 ADC 多通道采集，DMA搬运至内存</a><br />
+<a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
+</blockquote>
+
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 
 <p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
@@ -269,7 +419,19 @@
 
 <h3 id="x4-dma">X.4 DMA</h3>
 
-<p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 8</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 8" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
+<p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>
+
+<h4 id="x41-usart-dma">X.4.1 USART DMA</h4>
+
+<p>USART 的 DMA 开启有几个 LL 库的函数需要注意：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Enable DMA Mode for reception</span>
+<span class="n">LL_USART_EnableDMAReq_RX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
+<span class="c1">// Enable DMA Mode for transmission</span>
+<span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 8</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 8" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
   <p>这个章节整理完 Tutorial 还有一个与 I/O 设备管理相关的第九章， 准备之后慢慢琢磨然后不断扩展内核功能， 连续一个月高强度 rCore 的学习心理上有些浮躁了。 最近想把多年未竟的 FOC 项目捡起来好好研究一下， 顺带用上 FreeRTOS 用另一个角度看 OS。</p>
 </blockquote>
 

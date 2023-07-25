@@ -282,11 +282,11 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 5193 words </span>
+                <span> Total 6971 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 15 mins </span>
+                <span> About 20 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -437,6 +437,52 @@
 <a href="https://www.izilzty.com/?post=15">在STM32上使用U8g2图形库并配合DMA发送显示数据（LL库） - izilzty的小窝</a></p>
 </blockquote>
 
+<h2 id="4-ina199x1-电流采样配置">4. INA199x1 电流采样配置</h2>
+
+<p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
+
+<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-plaintext highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-plaintext highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-plaintext highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
+
+<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-plaintext highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
+
+<ul>
+  <li><strong>Regular Conversion launched by software:</strong> 规则的软件触发， 调用函数触发即可</li>
+  <li><strong>Timer X Capture Compare X event:</strong> 外部引脚触发</li>
+  <li><strong>Timer X Trigger Out event:</strong> 定时器通道输出触发， 需要设置相应的定时器设置</li>
+</ul>
+
+<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-plaintext highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-plaintext highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
+
+<p>另外需要注意配置中的几个点：</p>
+
+<ul>
+  <li>DMA 配置需要在 ADC 配置之前。</li>
+  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-plaintext highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
+  <li>PWM 有 Mode 1 和 Mode 2 两种， 分别表示计数器在达到 ARR 值之有为有效电平， 以及在达到 ARR 后为有效电平。 因而对于上升沿触发的要求， 需要配置 PWM 的极性为 Mode 1 为 Low， Mode 2 为 High。 这样， Mode 1 有效电平为 Low， 而 Mode 2 有效电平为 High， 均能达到上升沿的效果。</li>
+  <li>
+    <p>ADC 校准的代码如下所示， 需要注意结合不同的型号进行差异化配置。 F103 要求在校准之前开启 ADC， 并且需要等待 ADC 的电压稳定。</p>
+
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">//* start ADC1</span>
+  <span class="n">LL_ADC_Enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+  <span class="c1">// wait until internal voltage reference stable</span>
+  <span class="n">delay_nus_72MHz</span><span class="p">(</span><span class="n">LL_ADC_DELAY_TEMPSENSOR_STAB_US</span><span class="p">);</span>
+
+  <span class="c1">// wait at least 2 ADC cycles after ADC power-on but before calibration</span>
+  <span class="n">LL_mDelay</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+  <span class="c1">// wait until ADC calibration done</span>
+  <span class="n">LL_ADC_StartCalibration</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">LL_ADC_IsCalibrationOnGoing</span><span class="p">(</span><span class="n">ADC1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<blockquote>
+  <p><a href="https://blog.51cto.com/u_520887/5290076">STM32F0使用LL库实现DMA方式AD采集</a><br />
+<a href="https://codeantenna.com/a/1MnFm9oX2G">STM32L476多通道TIM+DMA+ADC采样（LL库）</a><br />
+<a href="https://blog.51cto.com/u_15456236/4801335">STM32 定时器触发 ADC 多通道采集，DMA搬运至内存</a><br />
+<a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
+</blockquote>
+
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 
 <p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
@@ -489,6 +535,18 @@
 <h3 id="x4-dma">X.4 DMA</h3>
 
 <p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>
+
+<h4 id="x41-usart-dma">X.4.1 USART DMA</h4>
+
+<p>USART 的 DMA 开启有几个 LL 库的函数需要注意：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Enable DMA Mode for reception</span>
+<span class="n">LL_USART_EnableDMAReq_RX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
+<span class="c1">// Enable DMA Mode for transmission</span>
+<span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
