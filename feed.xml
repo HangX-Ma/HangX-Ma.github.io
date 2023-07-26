@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-25T23:52:58+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-26T09:52:28+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="400" />
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Vofa+ demo, HangX-Ma</u></font>
 </div>
@@ -61,7 +61,7 @@
 <p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-plaintext highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-plaintext highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="400" />
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Vofa+ components, HangX-Ma</u></font>
 </div>
@@ -272,9 +272,7 @@
 
 <h2 id="2-cortex-m3-浮点计算优化">2. Cortex-M3 浮点计算优化</h2>
 
-<div align="center">
-[Qfplib: a family of floating-point libraries for ARM Cortex-M cores](https://www.quinapalus.com/qfplib.html)
-</div>
+<p><strong><a href="https://www.quinapalus.com/qfplib.html">Qfplib: a family of floating-point libraries for ARM Cortex-M cores</a></strong></p>
 
 <p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
 

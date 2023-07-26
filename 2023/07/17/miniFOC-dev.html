@@ -282,7 +282,7 @@
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6971 words </span>
+                <span> Total 6929 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -387,9 +387,7 @@
 
 <h2 id="2-cortex-m3-浮点计算优化">2. Cortex-M3 浮点计算优化</h2>
 
-<div align="center">
-[Qfplib: a family of floating-point libraries for ARM Cortex-M cores](https://www.quinapalus.com/qfplib.html)
-</div>
+<p><strong><a href="https://www.quinapalus.com/qfplib.html">Qfplib: a family of floating-point libraries for ARM Cortex-M cores</a></strong></p>
 
 <p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
 
