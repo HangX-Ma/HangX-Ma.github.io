@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-26T09:52:28+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-26T16:41:39+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <div align="center">
@@ -61,7 +61,7 @@
 <p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-plaintext highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-plaintext highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="600" />
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="400" />
     <br />
     <font size="2" color="#999"><u>Vofa+ components, HangX-Ma</u></font>
 </div>
@@ -711,17 +711,123 @@
 
 <h4 id="134-结语">1.3.4 结语</h4>
 
-<p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。</p>
+<p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。 若是从 chapter7 过渡到 chapter8， 到此时的改写还不足以支撑操作系统的正常运行， 还需添加线程管理的相关机制。</p>
 
 <h2 id="2-sync-mutex-os">2. Sync Mutex OS</h2>
 
-<p>Sync Mutex OS 增加了 <strong>互斥锁（Mutex）</strong>、 <strong>信号量（Semaphore）</strong> 和 <strong>条件变量（Condvar）</strong> 这三种资源， 并提供了与这三种同步互斥资源相关的系统调用。 这样多线程应用就可以使用这三种同步互斥机制来解决各种同步互斥问题， 如生产者消费者问题、 哲学家问题、 读者写者问题等。</p>
+<p>Sync Mutex OS 增加了 <strong>互斥锁（Mutex）</strong>、 <strong>信号量（Semaphore）</strong> 和 <strong>条件变量（Condvar）</strong> 这三种资源， 并提供了与这三种同步互斥资源相关的系统调用。 这样多线程应用就可以使用这三种同步互斥机制来解决各种同步互斥问题， 如生产者消费者问题、 哲学家问题、 读者写者问题等。 在完成对操作系统的线程改写之后， 其实就遇到了引入线程带来的共享资源的访问问题， Thread Coroutine OS 与 Sync Mutex OS 耦合关系较强， 后者是前者功能性的延续。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-15-rcore-note-ch8/syncmutex-os-detail.png" alt="Sync Mutex OS details, rCore" width="600" />
     <br />
     <font size="2" color="#999"><u>Sync Mutex OS details, rCore</u></font>
-</div>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+</div>
+
+<p>共享资源 (Shared Resources) 是多个线程均能够访问的资源， 线程对于共享资源进行操作的那部分代码被称为 <strong>临界区 (Critical Section)</strong>， 多线程访问共享资源要求这种访问是互斥的。 这与 Rust 的引用是非常类似的， 可变引用只能同时间有一个， 这是因为改引用具备 <strong>写权限</strong>， 而不可变引用仅有 <strong>读权限</strong>， 可以说， <strong>写操作</strong> 才是导致共享资源需要互斥访问的根源。</p>
+
+<p>现代指令集架构提供了 <strong>原子指令(Atomic Instruction)</strong> 保护单内存位置的简单操作， 原子指令涉及到数据的 <strong>读，改，写</strong>， 只是将临界区的范围缩小为一条指令， 这意味着原子指令无法被打断， 这是由硬件层面提供相应的保障。 但对于复杂的数据结构， 简单的原子指令就无能为力了。</p>
+
+<h3 id="21-互斥锁">2.1 互斥锁</h3>
+
+<p><em>锁</em> 是附加在一种共享资源上的一种标记， 具有 <strong>上锁</strong> 和 <strong>空闲</strong> 这两种状态。 对共享资源的访问采用锁的机制后， 在进入临界区之前需要获取锁， 之后再访问临界区的共享资源， 在离开临界区时释放锁， 这三个步骤中如何获取锁是关键。 rCore 用以下指标权衡锁的实现：</p>
+
+<ol>
+  <li><strong>忙则等待：</strong> 当一个线程占有锁之后也就占有了共享资源， 其他线程必须等待该线程释放锁才能有机会获取锁， 以进入临界区。</li>
+  <li><strong>空闲则入：</strong> 资源空闲且有线程尝试进入临界区， 则操作系统能在一定时间内选择一个线程。</li>
+  <li><strong>有界等待：</strong> 要求每个线程在较大时间尺度上对锁的占有是公平的， 每个线程都有获取锁的机会而不会因为获取不到锁进入 <strong>饥饿(Starvation)</strong> 态。</li>
+</ol>
+
+<h4 id="211-软件锁的尝试">2.1.1 软件锁的尝试</h4>
+
+<p>rCore 尝试在用户态通过软件的办法实现锁， 如下代码所示尝试使用 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 这个全局变量表示锁。 可以看到没有获取到锁之前 CPU 会在 while 循环内忙等， 这种策略被称为 <strong>自旋</strong>， 在正确的实现中自旋锁会保证该过程不会被操作系统的调度打断。 在单核操作系统上， 自旋会造成极大的资源浪费， 在分配的一个时间片中， 第一次执行判断后陷入自旋， 由于没有外部量对这个判断条件中的数据进行更改， 自旋的条件始终成立， 相当于这个时间片都会被自旋所浪费。</p>
+
+<p>在该实现中， <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 实际成了一种共享资源， 操作系统可以随时打断当前线程的运行调度到另一个线程， 可以发现这样一种情况： T0 线程发现 <code class="language-plaintext highlighter-rouge">OCCUPIED = false</code> 后准备将 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 修改为 <code class="language-plaintext highlighter-rouge">true</code> (5 - 6 行之间)， 此时突然被操作系统打断调度到 T1 线程， 会导致 T1 也认为其具备进入临界区的权限进而尝试修改 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值。</p>
+
+<figure class="highlight"><pre><code class="language-rust" data-lang="rust"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre><span class="c1">// user/src/bin/adder_simple_spin.rs</span>
+<span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
+
+<span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="nd">vload!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OCCUPIED</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="n">OCCUPIED</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">OCCUPIED</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+<p>为了解决这个问题， rCore 详细介绍了适用于单核的 Peterson 多标记算法保证两个线程之间的互斥访问， 除此之外还有适用双线程的 Dekkers 算法， 以及多线程的 Eisenberg &amp; McGuire 算法。 但这些算法都具有时代的局限性， 在当前多核系统上使用需要付出极大的资源代价， 并且还很难理解。</p>
+
+<h4 id="212-硬件锁机制">2.1.2 硬件锁机制</h4>
+
+<p>事实上， 硬件层面为我们提供了锁的机制的支持， 包括 <strong>关闭中断</strong> 与 <strong>原子指令</strong>。</p>
+
+<p><strong>关闭中断</strong> 在 MCU 裸机环境下经常会用到， 操作系统的抢占式调度是由时钟中断触发， 因而关闭中断能够防止线程在临界区被操作系统调度。 但是， 下放中断权限可能导致恶意的用户资源占用（恶意永久关闭中断）； 且对于 RISC-V 多特权级架构而言， 用户态对 S-Mode 和 M-Mode 的中断修改会导致异常； 另外， 关闭中断在多核 CPU 上仅仅是关闭了当前 CPU 的中断， 并不能阻止其他 CPU 的线程进入临界区。</p>
+
+<p><strong>原子指令</strong> 在之前提到过， 它的执行无法被操作系统打断， <strong>原子指令是整个计算机系统中最根本的原子性和互斥性的来源</strong>。 比较常见的指令有 <strong>CAS（Compare-And-Swap）</strong> 以及 <strong>TAS（Test-And-Set）</strong>。 这两条是我之前一直没太理解的， 还有 RISC-V 的 <strong>（Load Reserved / Store Conditional） LR/SC</strong> 原子指令， rCore 对此解释的非常清晰。</p>
+
+<ul>
+  <li><strong>CAS（Compare-And-Swap）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">CAS rd, rs1, rs2, rs3</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 这个值会与 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值进行比较， 若 <em>source == expected</em> 则将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值替换为 <code class="language-plaintext highlighter-rouge">rs3</code> 中的 <em>new</em> 值。 <code class="language-plaintext highlighter-rouge">rs1</code> 最开始存储的 <em>source</em> 值会被存入 <code class="language-plaintext highlighter-rouge">rd</code> 目标寄存器， 这不受比较结果影响。
+    <blockquote>
+      <p>具体的使用例程可以参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#cas-tas">常用的 CAS 和 TAS 指令</a> 部分 <code class="language-plaintext highlighter-rouge">adder_atomic.rs</code> 部分。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>TAS（Test-And-Set）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">TAS rd, rs1, rs2</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 他会被直接设置为 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值， 而 <code class="language-plaintext highlighter-rouge">rd</code> 返回 <code class="language-plaintext highlighter-rouge">rs1</code> 中原来的 <em>source</em> 值。 这个设计也能实现自旋锁， 以如下伪代码为例， 如果有多个线程执行 TAS 原子指令， 仅有一个线程的输入 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值为 0， 那么 TAS 返回会为 0， 该线程就能退出循环进入后续的临界区， 而其他的线程只会看到 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 值为 1 而陷入 while 的自旋中。</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">while</span> <span class="p">(</span><span class="nf">TAS</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>LR（Load Reserved）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">LR rd, rs1</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 内存中存放的值写入 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器中。 该指令不能单独使用， 需要配合 SC 指令。</p>
+  </li>
+  <li><strong>SC（Store Conditional）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">SC rd, rs1, rs2</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值 <em>source</em> 修改为 <code class="language-plaintext highlighter-rouge">rs2</code> 中存放的 <em>new</em> 值， 若修改成功 <code class="language-plaintext highlighter-rouge">rd</code> 返回 0， 否则 <code class="language-plaintext highlighter-rouge">rd</code> 返回任意值。 修改的前提是 LR 和 SC 指令之间， 之前 LR 指令中 <code class="language-plaintext highlighter-rouge">rs1</code> 内存的值没有改变， 这通过 RISC-V 框架下的 <strong>保留集（Reservation Set）</strong> 进行判断。</li>
+</ul>
+
+<p>在 RISC-V 架构中可以通过 LR/SC 指令是实现 CAS/TAS 指令的功能。</p>
+
+<h4 id="213-让权等待">2.1.3 让权等待</h4>
+
+<p>在涉及到上述这种某种条件不满足就需要在原地 <strong>等待</strong> 的情况， 操作系统设计了多种等待方式， 包括 <strong>忙等</strong>， <strong>yield 调度</strong>， <strong>阻塞</strong>。</p>
+
+<ul>
+  <li><strong>忙等</strong>
+    <ul>
+      <li><strong>优点：</strong> 在忙等有意义的前提下， 忙等的优势是在条件成立的第一时间就能够进行响应， 对于事件的响应延迟更低， 实时性更好， 而且不涉及开销很大的上下文切换。</li>
+      <li><strong>缺点：</strong> 它的缺点则是不可避免的会浪费一部分 CPU 资源在忙等上， 且单核环境下会浪费一整个时间片。</li>
+    </ul>
+  </li>
+  <li><strong>yield 调度</strong>
+    <ul>
+      <li><strong>优点：</strong> 让出 CPU 资源， 避免忙等对 CPU 的占用。</li>
+      <li><strong>缺点：</strong> 增加了上下文切换的次数， 而上下文切换开销很大， 并且会破坏缓存资源（刷新 TLB）造成缓存命中率降低， 若 yield 非常频繁这种情况更会加剧。 另外， yeild 可能会导致当前事件的响应延时过久造成响应时间不可接收的局面。</li>
+    </ul>
+  </li>
+  <li><strong>阻塞</strong>
+    <ul>
+      <li><strong>优点：</strong> 操作系统可标记需要等待事件的线程为 <strong>阻塞态</strong>， 并将该线程从调度器队列移除， 而在等待事件到来后唤醒该线程将其加入就绪队列， 操作系统可以定义唤醒后的线程在队列中的优先级进行优先资源配置。 由于不参与调度， 因此阻塞不会浪费时间片， 以及造成上下文开销。</li>
+      <li><strong>缺点：</strong> 机制比较复杂， 并且难以避免地产生两次上下文切换（调度器移除与移入）， 在事件产生频率较高的时候不如忙等来的划算。</li>
+    </ul>
+  </li>
+</ul>
+
+<p>rCore 实现了 Sync Mutex OS 中的 <strong>阻塞 - 唤醒</strong> 机制， 具体原理参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#id18">实现阻塞与唤醒机制</a>。</p>
+
+<p>TODO…</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
 
 <dl>
   <dt>管道</dt>
