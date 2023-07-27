@@ -281,12 +281,13 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 15, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 10020 words </span>
+                <span> Total 11682 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 28 mins </span>
+                <span> About 33 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s15srcore-note-ch8.html">0</span> views</li></ul></div><div class="article__header"><header><h1>rCore OS Note - Chapter 8</h1></header></div><p class="overlay__excerpt">第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -697,7 +698,59 @@
   </li>
 </ul>
 
-<p>rCore 实现了 Sync Mutex OS 中的 <strong>阻塞 - 唤醒</strong> 机制， 具体原理参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#id18">实现阻塞与唤醒机制</a>。</p>
+<p>rCore 实现了 Sync Mutex OS 中的 <strong>阻塞 - 唤醒</strong> 机制， 具体原理参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#id18">实现阻塞与唤醒机制</a>。 但需要注意的是， rCore 的实现是在单核 CPU 上， 并且 RISC-V 架构规定从用户态陷入内核态之后所有（内核态）中断默认被自动屏蔽， 因而在内核中实现 Mutex 仅需要用单标记而无需使用原子指令。</p>
+
+<h3 id="22-信号量机制">2.2 信号量机制</h3>
+
+<p>信号量机制能够满足线程的同步要求， 即 A 线程执行到某个阶段后， B 线程通过信号量可以继续向下执行， 或者， 可以通过信号量使 N 个线程具备在临界区中访问共享资源的需求， 这些都是纯粹的 Mutex 互斥锁无法做到的。 实际上， 信号量在实现的时候还会用到 <strong>互斥锁和原子指令</strong>， 它是更高一级的同步互斥机制， 在特殊情况下， 信号量甚至与互斥锁等价。</p>
+
+<p>信号量支持两种操作：<strong>P 操作（Proberen， 表示尝试）</strong> 和 <strong>V 操作（Verhogen ，表示增加）</strong>，P 操作表示线程尝试占用一个资源， 而与之匹配的 V 操作表示线程将占用的资源归还， 这同样基于 <strong>阻塞 - 唤醒</strong> 机制实现。</p>
+
+<ul>
+  <li>当进行 P 操作的时候， 如果此时没有可用的资源， 则当前线程会被阻塞；</li>
+  <li>当进行 V 操作的时候， 如果返还之后有了可用的资源， 且此时有线程被阻塞， 那么就可以考虑唤醒它们。</li>
+</ul>
+
+<p>信号量的初始资源可用数量 N 是一个非负整数，它决定了信号量的用途。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">N &gt; 0</code>， 称其为 <strong>计数信号量 (Counting Semaphore)</strong> 或 <strong>一般信号量 (General Semaphore)</strong>， 当 <code class="language-plaintext highlighter-rouge">N = 1</code> 时， 称其为 <strong>二值信号量 (Binary Semaphore)</strong>， 其与互斥锁等价。</li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">N = 0</code>， 信号量与资源管理无关， 但可用作同步量。 如下图， 在线程 A 需要等待的时候可以对该信号量进行 P 操作， 于是线程会被阻塞。 在线程 B 执行完指定阶段之后再对该信号量进行 V 操作就能够唤醒线程 A 向下执行。 但需要注意 <strong>唤醒丢失</strong> 的问题。</p>
+
+    <div align="center">
+      <img src="/norobots/images/2023-07-15-rcore-note-ch8/semaphore-sync.png" alt="Semaphore sync, rCore" width="400" />
+      <br />
+      <font size="2" color="#999"><u>Semaphore sync, rCore</u></font>
+  </div>
+  </li>
+</ul>
+
+<p>除了作为同步原语解决同步问题， rCore 还介绍了一个基于有限缓冲协作的 <strong>生产者与消费者</strong> 问题， 其实就是利用了信号量共享资源计数， 在无资源能进行阻塞的特点， 但还需注意的是， 共享资源仍需要通过互斥锁进行保护。 详见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/3semaphore.html#id8">生产者和消费者问题</a>。 虽然信号量解决了条件同步和生产者与消费者问题， 但对程序员而言要求较高， 其开发和阅读都具备一定难度。</p>
+
+<h3 id="23-条件变量机制">2.3 条件变量机制</h3>
+
+<p>信号量与互斥锁的组合虽然能解决一些问题， 但其仍存在局限性：</p>
+
+<ul>
+  <li>信号量本质上为一个整数， 无法描述所有类型的等待事件或等待条件；</li>
+  <li>信号量需要 P 和 V 组合使用， 还容易导致死锁问题。</li>
+</ul>
+
+<p>rCore 实现了 <strong>条件变量 + 互斥锁</strong> 这样一个组合来模拟 <strong>管程</strong> 的实现， 以打破上述组合的局限性。 <strong>管程 (Monitor)</strong> 最早在 Pascal 语言中实现， 现在的 C 以及 Rust 并没有相关的实现机制， 由过程（现在的函数）、共享变量及数据结构等组成。 程序员可以自定义管程的过程和共享资源， 通过过程间接访问这些共享资源。</p>
+
+<p>管程仍是通过互斥锁满足 <strong>互斥访问</strong> 的需求， 另外还支持线程间的同步机制， 通过 <strong>阻塞-唤醒</strong> 实现条件同步。 阻塞和唤醒就是所谓的 <strong>条件变量</strong>， 而在管程的概念中将条件变量的阻塞和唤醒操作分别叫做 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 。 一个管程中可以有多个不同的条件变量， 每个条件变量代表多线程并发执行中需要等待的一种特定的条件， 并保存所有阻塞等待该条件的线程。</p>
+
+<p>这里的 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 有比较特殊的设计：</p>
+
+<ul>
+  <li><strong>wait</strong>： <code class="language-plaintext highlighter-rouge">wait</code> 操作会阻塞当前的线程， 但 <strong>不能在持有锁的情况下陷入阻塞</strong>， 在管程过程中线程是持有锁的， 因而 <code class="language-plaintext highlighter-rouge">wait</code> 需要做两件事： 释放锁， 然后阻塞线程。</li>
+  <li><strong>signal</strong>： <code class="language-plaintext highlighter-rouge">signal</code> 则是唤醒当前的线程， 处于互斥访问的需求， 线程被唤醒后需要获取锁， 然后再 <code class="language-plaintext highlighter-rouge">wait</code> 返回继续执行。</li>
+</ul>
+
+<p>由于互斥锁的存在， signal 操作也不只是简单的唤醒操作。 rCore 介绍了基于线程优先级条件的三种唤醒操作语义： Hoare， Hansen， Mesa， 详情可见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id4">管程与条件变量</a>。 在 rCore 内核中实现的是 Mesa 语义， Mesa 语义涉及到锁的竞争， 因而 wait 操作返回之时不见得线程等待的条件一定成立， 有必要重复检查确认之后再继续执行。</p>
+
+<p>另外， rCore 介绍了条件变量的两种用法 <strong>条件同步问题</strong> 以及 <strong>同步屏障问题</strong>， 尤其同步屏障问题在多线程编程中会经常遇到， 深有体会。 对此可详见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id6">条件变量的使用方法</a> 学习。</p>
 
 <p>TODO…</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->

@@ -353,7 +353,7 @@ Do not communicate by sharing memory; instead, share memory by communicating
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// unbounded 表示使用的内存是无上限的</span>
     <span class="k">let</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">)</span> <span class="o">=</span> <span class="nn">crossbeam</span><span class="p">::</span><span class="nn">channel</span><span class="p">::</span><span class="nf">unbounded</span><span class="p">();</span>
-    
+
     <span class="k">let</span> <span class="k">mut</span> <span class="n">threads</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
     <span class="k">for</span> <span class="n">_</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="nn">num_cpus</span><span class="p">::</span><span class="n">get</span> <span class="p">{</span>
         <span class="c1">// 创建一个 receiver 的拷贝， 避免下一个线程因所有权转移而无法使用 receiver</span>
