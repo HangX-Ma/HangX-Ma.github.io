@@ -1,5 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-27T10:59:51+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-29T00:02:06+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC 原理阐述</title><link href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html" rel="alternate" type="text/html" title="miniFOC 原理阐述" /><published>2023-07-28T00:00:00+08:00</published><updated>2023-07-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/28/miniFOC-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><![CDATA[<p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
+
+<h2 id="0-资料汇总">0. 资料汇总</h2>
+
+<ul>
+  <li><a href="https://space.bilibili.com/382415040/channel/collectiondetail?sid=1401820">电机FOC软硬件一条龙服务【STM32、自制IPM驱动板】 - 热心市民翔先生 Bilibili</a></li>
+  <li><a href="https://blog.csdn.net/loop222/article/details/121201638">SimpleFOC、ODrive和VESC 教程链接汇总 - loop222 CSDN</a></li>
+  <li><a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.788.recommend_more_video.2&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">【开源】自制超级无敌宇宙超迷你FOC磁场定向控制的无刷伺服电机矢量控控制器【烂核】 - 小男孩gugugu Bilibili</a></li>
+  <li><a href="https://wwjk.lanzoub.com/igCqS0jx5fwf">mini_FOC - 小男孩gugugu Bilibili</a></li>
+</ul>
+
+<h2 id="x1-零点标定">X1. 零点标定</h2>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/zero_angle.png" alt="Zero angle concept, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Zero angle concept, HangX-Ma</u></font>
+</div>
+
+<p>标定初始电角度的原因在于， 一般情况下我们会将转子磁场方向与 \(\alpha\) 正向重合的方向作为转子的零点位置（转子角度为 \(0^{\circ}\)）。 但是， 上电的时候电机还为经过电角度标定， 转子的位置对于控制器而言是未知的， 如果转子此时正好与 \(\beta\) 轴重合， 即以前述定义描述此时的转子角度已经处于 \({90}^{\circ}\)， 而控制器以为其仍处于 \(0^{\circ}\) 位置而产生了一个超前 \({90}^{\circ}\) 的 \(I_{q}\)， 那么 \(I_{q}\) 与转子此时完全重合。 只有 \(I_{q}\) 与转子存在角度差才能在切向产生力做功， 而此时重合的情况就会导致电机卡死不动。</p>
+
+<p>零点标定的原理就是进行一个开环控制， 给定一个 \(\alpha\) 轴的电流， 使得电机转子转向并固定在 \(\alpha\) 轴， 此时的电角度就是需要标定的电角度偏移量。 因而有如下条件成立：</p>
+
+\[\begin{equation*}
+  \begin{aligned}
+    U_{\alpha} &amp;= Const \\
+    U_{\beta} &amp;= 0 \\
+  \end{aligned}
+\end{equation*}\]
+
+<p>经过 Park 变换后可以得到如下结果：</p>
+
+\[\begin{equation*}
+  \begin{aligned}
+    U_{q} &amp;= 0                          \qquad U_{d} = \alpha                   \qquad electrical\_angle = 0 \\
+    U_{q} &amp;= \alpha                     \qquad U_{d} = 0                        \qquad electrical\_angle = -\pi/2 \\
+    U_{q} &amp;= \frac{\sqrt{2}}{2}\alpha   \qquad U_{d} = \frac{\sqrt{2}}{2}\alpha \qquad electrical\_angle = -\pi/2 \\
+  \end{aligned}
+\end{equation*}\]
+
+<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
+
+<h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
+
+<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
+
+<p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
+
+<blockquote>
+  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a>
+<a href="https://blog.csdn.net/loop222/article/details/120471390">SimpleFOC移植STM32（四）—— 闭环控制 - loop222 CSDN</a></p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分。]]></summary></entry><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="600" />
@@ -194,10 +245,11 @@
 
 <ul>
   <li><strong>MCU:</strong> STM32F103C8T6</li>
-  <li><strong>Programmer:</strong> CMake + OpenOCD + STLink-v2</li>
+  <li><strong>Dev Tool:</strong> CMake, OpenOCD, STLink-v2, STM32CubeMX</li>
   <li><strong>Serial Communication:</strong> Vofa+</li>
   <li><strong>PCB Design:</strong> Altium Designer 23</li>
   <li><strong>Editor:</strong> VSCode</li>
+  <li><strong>Debugger:</strong> Cortex-Debug</li>
   <li><strong>Third Party Library:</strong>
     <ul>
       <li>Float-point Calculation Optimization: Qfplib-M3</li>
@@ -269,6 +321,16 @@
   <p><a href="https://blog.csdn.net/weixin_44509533/article/details/104110454">STM32 SPI的NSS引脚配置 - 星水天河 CSDN</a><br />
 <a href="https://blog.csdn.net/m0_46272475/article/details/121152512">STM32 SPI 软件NSS和硬件NSS解读 - fanyuandrj CSND</a></p>
 </blockquote>
+
+<h2 id="13-关于磁编码器的一些建议">1.3 关于磁编码器的一些建议</h2>
+
+<ul>
+  <li>一般来说磁编码器就只需要 1 或 2 个滤波电容外加芯片就行， 设计起来很方便， 时间成本允许就自己打样， 还能针对电机安装孔进行定制化设计。</li>
+  <li>SPI 在芯片上的顺序一般都是 <code class="language-plaintext highlighter-rouge">CS</code>, <code class="language-plaintext highlighter-rouge">SCLK</code>, <code class="language-plaintext highlighter-rouge">MISO</code>, <code class="language-plaintext highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
+  <li>磁编码器似乎不是特别耐高温， 我自己把之间用热风枪吹上的芯片拆下来又装到新板子， 老会出毛病， 如果一直出现返回 error 指不定是编码器坏了。</li>
+  <li>磁铁需要买径向磁铁， <em>N 极</em> 和 <em>S 极</em> 对向水平分布。</li>
+  <li>为了安装磁铁买了 AB 胶， 非常管用， 但除此之外还买了 3mm 轴套增加安装接触面积（热胶枪装不上）。</li>
+</ul>
 
 <h2 id="2-cortex-m3-浮点计算优化">2. Cortex-M3 浮点计算优化</h2>
 
@@ -370,7 +432,7 @@
 
 <p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
 
-<h3 id="x1">X.1</h3>
+<h3 id="x1-debug">X.1 Debug</h3>
 
 <p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
 
@@ -429,7 +491,43 @@
 <span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
 </code></pre></div></div>
 
-<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 8</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 8" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
+<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
+
+<h3 id="x5-重定向-printf">X.5 重定向 printf</h3>
+
+<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-plaintext highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="kt">int</span> <span class="nf">__io_putchar</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">LL_USART_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">)</span> <span class="o">!=</span> <span class="n">SET</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="n">LL_USART_TransmitData8</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">,</span> <span class="n">ch</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">_write</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fd</span><span class="p">;</span> <span class="c1">// avoid unused warning</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">__io_putchar</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">len</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="x6-printf-浮点输出没解决">X.6 printf 浮点输出（没解决）</h3>
+
+<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_link_options</span><span class="p">(</span>LINKER:-u _printf_float<span class="p">)</span>
+</code></pre></div></div>
+
+<p>尝试了很多办法， Vofa+ 上位机程序应该对接收进行了解析所以才能输出 float 类型数据， 直接通过串口一个个发 4 bytes 的 float 还得自己去转换太麻烦了， 干脆就转成整数相关类型输出算了。</p>
+
+<blockquote>
+  <p><a href="https://community.st.com/t5/stm32-mcu-products/printf-and-float/td-p/108690">printf and float - ST Community</a><br />
+<a href="https://community.st.com/t5/stm32cubeide-mcu/how-to-use-float-in-printf/td-p/323872/page/2">how to use float in printf? - ST Community</a><br />
+<a href="https://stackoverflow.com/questions/28746062/snprintf-prints-garbage-floats-with-newlib-nano">snprintf() prints garbage floats with newlib nano - StackOverflow</a>\</p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 8</title><link href="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 8" /><published>2023-07-15T00:00:00+08:00</published><updated>2023-07-15T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/15/rcore-note-ch8</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/15/rcore-note-ch8.html"><![CDATA[<blockquote>
   <p>这个章节整理完 Tutorial 还有一个与 I/O 设备管理相关的第九章， 准备之后慢慢琢磨然后不断扩展内核功能， 连续一个月高强度 rCore 的学习心理上有些浮躁了。 最近想把多年未竟的 FOC 项目捡起来好好研究一下， 顺带用上 FreeRTOS 用另一个角度看 OS。</p>
 </blockquote>
 
@@ -2899,222 +2997,4 @@
   <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d5f55551e5e3428ca7c17026329c2d84fe9bde4f">commit#d5f5555</a>, 但该 commit 中我还对之前的 <code class="language-plaintext highlighter-rouge">sys_write</code> 的 checker 函数进行了更新。</p>
 </blockquote>
 
-<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">Start from scratch: Neovim for Rust</title><link href="https://hangx-ma.github.io/2023/06/23/neovim-config.html" rel="alternate" type="text/html" title="Start from scratch: Neovim for Rust" /><published>2023-06-23T00:00:00+08:00</published><updated>2023-06-23T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/06/23/neovim-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><![CDATA[<blockquote>
-  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
-</blockquote>
-
-<h2 id="0-安装-neovim">0. 安装 Neovim</h2>
-
-<p>使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim release build</a> 的方式， 省心省力。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
-<span class="nb">tar</span> <span class="nt">-xvf</span> nvim-linux64.tar.gz
-vim ~/.bashrc
-<span class="c"># .bashrc</span>
-<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/nvim-linux64/bin:<span class="nv">$PATH</span>
-<span class="c"># back to cli</span>
-<span class="nb">source</span> ~/.bashrc
-</code></pre></div></div>
-
-<h2 id="1-vim-选项配置">1. vim 选项配置</h2>
-
-<blockquote>
-  <p><a href="https://www.ruanyifeng.com/blog/2018/09/vimrc.html">Vim 配置入门 - 阮一峰</a><br />
-<a href="https://www.xwxwgo.com/post/2022/09/21/spell_check_in_nvim/">Neovim拼写检查</a></p>
-</blockquote>
-
-<h2 id="2-快捷键配置">2. 快捷键配置</h2>
-
-<p><a href="https://juejin.cn/book/7051157342770954277/section/7051536642238054430">Neovim 配置实战：从0到1打造自己的IDE</a></p>
-
-<h2 id="3-安装-packer-插件管理器">3. 安装 Packer 插件管理器</h2>
-
-<p>参照 Packer 的 repo 的配置内容快速安装 <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--depth</span> 1 https://github.com/wbthomason/packer.nvim<span class="se">\</span>
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-</code></pre></div></div>
-
-<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugins.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
-
-<h2 id="4-插件安装">4. 插件安装</h2>
-
-<h3 id="41-安装-onedark---dark-主题">4.1 安装 OneDark - Dark 主题</h3>
-
-<p>主要参考 <a href="https://github.com/navarasu/onedark.nvim">onedark.nvim</a>， 加入插件后自定义配置即可。</p>
-
-<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- lua/plugins/plugins.lua</span>
-<span class="n">use</span> <span class="s1">'navarasu/onedark.nvim'</span>
-</code></pre></div></div>
-
-<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- plugins/onedark.lua</span>
-<span class="nb">require</span><span class="p">(</span><span class="s1">'onedark'</span><span class="p">).</span><span class="n">setup</span> <span class="p">{</span>
-    <span class="c1">-- Main options --</span>
-    <span class="n">style</span> <span class="o">=</span> <span class="s1">'dark'</span><span class="p">,</span>
-    <span class="n">transparent</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>  <span class="c1">-- Show/hide background</span>
-<span class="p">}</span>
-<span class="nb">require</span><span class="p">(</span><span class="s1">'onedark'</span><span class="p">).</span><span class="nb">load</span><span class="p">()</span>
-</code></pre></div></div>
-
-<h3 id="42-status-line">4.2 Status Line</h3>
-
-<p>主要参考 <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a>， 拷贝 <a href="https://github.com/nvim-lualine/lualine.nvim#default-configuration">default configuration</a> 到 <code class="language-plaintext highlighter-rouge">lua/plugins/lualine.lua</code>， 其余步骤与上述一致。 后续若没有特殊情况就不重复说明相关步骤。</p>
-
-<blockquote>
-  <p>值得注意的是， 添加相关的插件后需要在 nvim 中运行 <code class="language-plaintext highlighter-rouge">PackerSync</code> 以安装相关插件， 否则 nvim 会报错。</p>
-</blockquote>
-
-<h3 id="43-navigation">4.3 Navigation</h3>
-
-<dl>
-  <dt>File Explorer: <a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.nvim</a></dt>
-  <dd>提供了便捷的文件管理树的功能， 所有的文件操作可以通过键盘实现</dd>
-  <dt>Tmux Navigator: <a href="https://github.com/christoomey/vim-tmux-navigator">vim-tmux-navigator.nvim</a></dt>
-  <dd>tmux (terminal multiplexer) 是一个终端复用器， 主要可以用于分屏和保持会话。 保持会话的意思是， 即使关闭终端窗口， 或者 SSH 由于各种原因连接中断， 在服务器端 tmux 中的会话和对应的进程仍然不会终止。 tmux 能够创建多个会话 （session）， 每个会话能够创建多个窗口 （window）， 每个窗口又可以分为多个窗格 （pane）。</dd>
-  <dt>Buffer Line: <a href="https://github.com/akinsho/bufferline.nvim">bufferline.nvim</a></dt>
-  <dd>这个插件提供了类似 vscode 的标签页的功能</dd>
-  <dt>Outline: <a href="https://github.com/simrat39/symbols-outline.nvim">symbols-outline.nvim</a></dt>
-  <dd>类似 vscode 中的 Outline， 基于 LSP 实现的函数与符号树， 方便查看代码实现的整体结构。</dd>
-</dl>
-
-<blockquote>
-  <p><a href="https://blog.51cto.com/u_11090813/5575032">从零开始配置 vim(13)——标签页插件 - jesssic</a>
-<a href="https://blog.51cto.com/u_11090813/5759499">从零开始配置vim(26)——LSP UI 美化 - jesssic</a></p>
-</blockquote>
-
-<h3 id="44-highlight">4.4 Highlight</h3>
-
-<dl>
-  <dt>Code Highlighting: <a href="https://github.com/nvim-treesitter/nvim-treesitter">nvim-treesitter.nvim</a></dt>
-  <dd>nvim-treesitter 插件提供基于 <a href="https://github.com/tree-sitter/tree-sitter">tree-sitter</a> 的多个基础功能， 它可以让你在 nvim 中高效的实现 <strong>代码高亮， 增量选择</strong> 等功能。</dd>
-  <dt>Syntax Highlighting: <a href="https://github.com/p00f/nvim-ts-rainbow">nvim-ts-rainbow</a></dt>
-  <dd>该插件依赖于 nvim-treesitter， 允许多种配置策略为不同的文件类型提供高亮支持。</dd>
-</dl>
-
-<h3 id="45-terminal">4.5 Terminal</h3>
-
-<dl>
-  <dt>Terminal: <a href="https://github.com/akinsho/toggleterm.nvim">toggleterm.nvim</a></dt>
-  <dd>虽然用 nvim 默认的指令可以在编辑文档时打开 Terminal， 但是 toggleterm.nvim 提供了更为便捷以及功能更强大的 Terminal 管理方案。</dd>
-</dl>
-
-<blockquote>
-  <p><a href="https://www.youtube.com/watch?v=5OD-7h7gzxU">Neovim - Toggleterm | Open terminal programs in Neovim - Youtube</a>
-<a href="https://blog.51cto.com/u_11090813/5647999">从零开始配置vim(19)——终端配置 - jesssic</a></p>
-</blockquote>
-
-<h3 id="46-search">4.6 Search</h3>
-
-<dl>
-  <dt>Basic Component: <a href="https://github.com/nvim-lua/popup.nvim">popup.nvim</a></dt>
-  <dd>plenary.nvim 的必要组件， 能够提供与 vim <code class="language-plaintext highlighter-rouge">popup_*</code> 兼容的 API 接口。</dd>
-  <dt>Basic Component: <a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></dt>
-  <dd>telescope.nvim 的必要组件， 能够提供异步编程， 目录扫描等基础功能。</dd>
-  <dt>Fuzzy Finder: <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></dt>
-  <dd>telescope.nvim 能在 neovim 中提供文件名模糊搜索和文本内容搜索的功能， 以及更多复杂的功能。</dd>
-</dl>
-
-<blockquote>
-  <p><a href="https://zhuanlan.zhihu.com/p/609527018">Vim/Neovim 全文检索插件 – telescope.nvim - 知乎</a></p>
-</blockquote>
-
-<h3 id="47-comment">4.7 Comment</h3>
-
-<dl>
-  <dt>Smart Comment: <a href="https://github.com/numToStr/Comment.nvim">Comment.nvim</a></dt>
-  <dd>能够方便的对代码进行注释， 这个插件的配置更灵活也更强大。</dd>
-</dl>
-
-<h3 id="48-自动补全与内容查看">4.8 自动补全与内容查看</h3>
-
-<h4 id="481-lsp-mason">4.8.1 LSP， Mason</h4>
-
-<dl>
-  <dt>Language Server Protocol: <a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a></dt>
-  <dd>Language Server Protocol (LSP) 是微软为开发工具提出的一个协议， 它将编程工具解耦成了Language Server 与 Language Client 两部分。 Client 专注于页面样式实现， Server 负责提供语言支持， 包括常见的自动补全， 跳转到定义， 查找引用， 悬停文档提示等功能。</dd>
-  <dt>Portable Package Manager: <a href="https://github.com/williamboman/mason.nvim">mason.nvim</a></dt>
-  <dd>mason.nvim 是下一代 nvim-lsp-installer， 能够方便地安装和管理 LSP servers， DAP servers， linters， 以及 formatters.</dd>
-  <dt>Packer: <a href="https://github.com/williamboman/mason-lspconfig.nvim">mason-lspconfig.nvim</a></dt>
-  <dd>mason-lspconfig.nvim 为 mason.nvim 以及 nvim-lspconfig 建立了桥梁， 方便两个插件的协同工作和配置。</dd>
-  <dt>UI: <a href="https://github.com/j-hui/fidget.nvim">fidget.nvim</a></dt>
-  <dd>nvim-lsp progress 的独立 UI插件， 将这部分信息显示在窗口右下角为程序员更专注编程提供便利。</dd>
-</dl>
-
-<blockquote>
-  <p><a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a></p>
-</blockquote>
-
-<h4 id="482-补全与自动提示">4.8.2 补全与自动提示</h4>
-
-<dl>
-  <dt>AutoPair: <a href="https://github.com/windwp/nvim-autopairs">nvim-autopairs</a></dt>
-  <dd>自动补全括号的插件， 具体作用之后用了补充。</dd>
-  <dt>Completion: <a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a></dt>
-  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code></dd>
-  <dt>Friendly Snippets: <a href="https://github.com/rafamadriz/friendly-snippets">friendly-snippets</a></dt>
-  <dd>更够为不同语言提供 Snippets 支持。</dd>
-</dl>
-
-<h3 id="49-debug">4.9 Debug</h3>
-
-<dl>
-  <dt>Debugger: <a href="https://github.com/puremourning/vimspector">vimspector</a></dt>
-  <dd>多语言的带图形界面的调试工具， 看起来挺复杂。</dd>
-  <dt>Debug Adapter Protocol: <a href="https://github.com/mfussenegger/nvim-dap">nvim-dap</a></dt>
-  <dd>Nvim-dap 是基于 Neovim 的 Debug Adapter Protocol 客户端实现的， 能够进行基本的断点、 步进等操作， 并监视应用的状态。</dd>
-</dl>
-
-<h3 id="410-rust-语言支持">4.10 Rust 语言支持</h3>
-
-<dl>
-  <dt>Code: <a href="https://rust-analyzer.github.io/">rust-analyzer</a></dt>
-  <dd>rust-analyzer 基于 LSP 实现， 它为许多代码编辑器 (包括 VS Code、 Emacs 和 Vim) 提供了补全和跳转定义等特性。</dd>
-</dl>
-
-<blockquote>
-  <p>nvim 打开后使用 <code class="language-plaintext highlighter-rouge">:Mason</code> 选择 rust-analyzer 按 i 可以便捷安装。</p>
-</blockquote>
-
-<dl>
-  <dt>Tool: <a href="https://github.com/simrat39/rust-tools.nvim">rust-tools.nvim</a></dt>
-  <dd>为 rust 编程提供便利的实用工具。</dd>
-</dl>
-
-<h3 id="411-clipboard">4.11 Clipboard</h3>
-
-<dl>
-  <dt>Clipboard: <a href="https://github.com/EtiamNullam/deferred-clipboard.nvim/tree/master">deferred-clipboard.nvim</a></dt>
-  <dd>打通操作系统与 nvim 之间的桥梁， 二者能共用剪贴板的缓存。</dd>
-</dl>
-
-<h3 id="412-git">4.12 Git</h3>
-
-<dl>
-  <dt>LazyGit: <a href="https://github.com/kdheepak/lazygit.nvim">lazygit.nvim</a></dt>
-  <dd>Git 相关组件， 实现 commit, push 等操作的可视化。</dd>
-  <dt>Git Signs: <a href="https://github.com/lewis6991/gitsigns.nvim">gitsigns.nvim</a></dt>
-  <dd>提供了和 Git 相关的功能， 例如查看 git diff， last commit， status bar 等， 类似 vscode 中的 GitLen。</dd>
-</dl>
-
-<h3 id="413-speed-up">4.13 Speed Up</h3>
-
-<dl>
-  <dt>FileType: <a href="https://github.com/nathom/filetype.nvim">filetype.nvim</a></dt>
-  <dd>filetype.nvim 是为了替代 nvim 启动时引用的 <code class="language-plaintext highlighter-rouge">filetype.vim</code> 文件， 该文件的目的是创建一系列自动命令， 根据文件名设置 filetype 变量， 但该文件的载入耗费了大量的时间， filetype.nvim 能优化这一载入过程， 对启动过程进行加速。</dd>
-  <dt>Lua Loader: <a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a></dt>
-  <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-plaintext highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
-</dl>
-
-<h3 id="414-greeter">4.14 Greeter</h3>
-
-<dl>
-  <dt>Greeter: <a href="https://github.com/startup-nvim/startup.nvim">startup.nvim</a></dt>
-  <dd>自定义 nvim 启动界面， 能够自己更换喜欢的主题！</dd>
-</dl>
-
-<h2 id="参考">参考</h2>
-
-<ul>
-  <li><a href="https://zhuanlan.zhihu.com/p/617522665">从零开始：使用Neovim搭建Rust开发IDE - 知乎</a></li>
-  <li><a href="https://zhuanlan.zhihu.com/p/467428462">我的现代化 NeoVim 配置介绍/教程</a></li>
-</ul>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim]]></summary></entry></feed>
+<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>

@@ -12,10 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>miniFOC Driver Development - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>miniFOC 原理阐述 - 一只豆腐</title>
 
-<meta name="description" content="miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。">
-<link rel="canonical" href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -280,15 +280,15 @@
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 28, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 7991 words </span>
+                <span> Total 1586 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 23 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
+                <span> About 5 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC 原理阐述</h1></header></div><p class="overlay__excerpt">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -298,300 +298,61 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="miniFOC Driver Development"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-17T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="miniFOC 原理阐述"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-28T00:00:00+08:00">
     <meta itemprop="keywords" content="FOC,STM32"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
+<div class="article__content" itemprop="articleBody"><p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
 
-<blockquote>
-  <p>目前板子设计借鉴了 <a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.880.my_history.page.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">小男孩gugugu</a> Up 的这部分内容（视频标题太长啦！）， 不想自己从头找元件然后再一个个建模搭了， 太费时间了这样就本末倒置了。</p>
-</blockquote>
+<h2 id="0-资料汇总">0. 资料汇总</h2>
 
 <ul>
-  <li><strong>MCU:</strong> STM32F103C8T6</li>
-  <li><strong>Dev Tool:</strong> CMake, OpenOCD, STLink-v2, STM32CubeMX</li>
-  <li><strong>Serial Communication:</strong> Vofa+</li>
-  <li><strong>PCB Design:</strong> Altium Designer 23</li>
-  <li><strong>Editor:</strong> VSCode</li>
-  <li><strong>Debugger:</strong> Cortex-Debug</li>
-  <li><strong>Third Party Library:</strong>
-    <ul>
-      <li>Float-point Calculation Optimization: Qfplib-M3</li>
-      <li>OLED Display: u8g2</li>
-    </ul>
-  </li>
+  <li><a href="https://space.bilibili.com/382415040/channel/collectiondetail?sid=1401820">电机FOC软硬件一条龙服务【STM32、自制IPM驱动板】 - 热心市民翔先生 Bilibili</a></li>
+  <li><a href="https://blog.csdn.net/loop222/article/details/121201638">SimpleFOC、ODrive和VESC 教程链接汇总 - loop222 CSDN</a></li>
+  <li><a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.788.recommend_more_video.2&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">【开源】自制超级无敌宇宙超迷你FOC磁场定向控制的无刷伺服电机矢量控控制器【烂核】 - 小男孩gugugu Bilibili</a></li>
+  <li><a href="https://wwjk.lanzoub.com/igCqS0jx5fwf">mini_FOC - 小男孩gugugu Bilibili</a></li>
 </ul>
 
-<p>项目地址 <a href="https://github.com/HangX-Ma/miniFOC">HangX-Ma/miniFOC</a>， 项目将持续更新， 这次挺有信心的！</p>
-
-<h2 id="1-sc60228-磁编码器">1. SC60228 磁编码器</h2>
-
-<p>SC60228 是一款非接触式高精度磁编码器芯片， 芯片中心内置了霍尔感应点矩阵， 可用以测量无刷电机的转子角度。 通过 PWM 或 SPI 的方式输出 12 bit 绝对式位置信息， 检测速率可达 20K rpm， 不难得知该款芯片能检测一周最多 4096 个位置。 相较读取 PWM 输出计算角度而言， 使用 SPI 协议读取数据的精度会更高， 代码编写也比较方便且具备通用性。</p>
-
-<blockquote>
-  <p>用这款芯片也是历史遗留问题了， 当时做了这个板子不忍心浪费， 网上有 Simple FOC 提供的 <a href="https://github.com/simplefoc/Arduino-FOC-drivers/tree/master/src/encoders/sc60228">SC60228 SimpleFOC driver</a> 可参考代码部分， 虽然看起来事情不多， 但理解数据手册进行配置和代码编写也对学习很有帮助。</p>
-</blockquote>
-
-<h2 id="11-时序图与-spi-基本配置">1.1 时序图与 SPI 基本配置</h2>
+<h2 id="x1-零点标定">X1. 零点标定</h2>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-17-miniFOC-dev/encoder-spi-time-diagram.png" alt="Encoder SPI time diagram, HangX-Ma" width="600" />
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/zero_angle.png" alt="Zero angle concept, HangX-Ma" width="600" />
     <br />
-    <font size="2" color="#999"><u>Encoder SPI time diagram, HangX-Ma</u></font>
+    <font size="2" color="#999"><u>Zero angle concept, HangX-Ma</u></font>
 </div>
 
-<p>这款芯片只需要配置 SPI 口在主机接收 <strong>(Receive Only Master)</strong> 数据即可， 不涉及双向数据传输。 我原来计划使用 DMA 传输 SPI 的数据， 但实际上 DMA 在小数据量以及高速读取的情况下并不合适， 这里的位置信息仅 16 位， 有些多此一举了。</p>
+<p>标定初始电角度的原因在于， 一般情况下我们会将转子磁场方向与 \(\alpha\) 正向重合的方向作为转子的零点位置（转子角度为 \(0^{\circ}\)）。 但是， 上电的时候电机还为经过电角度标定， 转子的位置对于控制器而言是未知的， 如果转子此时正好与 \(\beta\) 轴重合， 即以前述定义描述此时的转子角度已经处于 \({90}^{\circ}\)， 而控制器以为其仍处于 \(0^{\circ}\) 位置而产生了一个超前 \({90}^{\circ}\) 的 \(I_{q}\)， 那么 \(I_{q}\) 与转子此时完全重合。 只有 \(I_{q}\) 与转子存在角度差才能在切向产生力做功， 而此时重合的情况就会导致电机卡死不动。</p>
 
-<p>可以看到上图数据手册提供的读取绝对式角度数据的时序表， 根据 SPI 协议 SCLK 空闲时低电平， 另外根据数据手册， 在 SCLK 上升沿之后需要保持 \(t_{DO}\) 时间以使得 MISO 数据有效， 那么只能在下降沿进行数据采样。 不难确定 SPI 协议的 <strong>CPOL(Clock Polarity)</strong> 为 <strong>Low</strong>， <strong>CPHA(Clock Phase)</strong> 为 <strong>Second Edge</strong>。</p>
+<p>零点标定的原理就是进行一个开环控制， 给定一个 \(\alpha\) 轴的电流， 使得电机转子转向并固定在 \(\alpha\) 轴， 此时的电角度就是需要标定的电角度偏移量。 因而有如下条件成立：</p>
 
-<p>另外， 手册指出 <strong>\(t_{CLK}\)（SCLK 周期）</strong> 最小需要 100ns， 这里我查了一下 STM32CubeMX 配置中的 Baud Rate 的含义， 如果没理解错就相当于 SPI 中的 SCLK。 对于预设 72MHz 时钟频率的板子， 8 分频 9.0 MBits/s ≈ 111 ns， 另外 <strong>\(t_{DO}\)（SCLK 的上升沿到 MISO 数据有效之间的时间）</strong>_ 其值最大能达到 50 ns， 那么当前算是极限的速率配置了。 为了保险起见我选择设置 16 分频约 222 ns 周期， 防止数据出现丢失以及未定义的情况。</p>
+\[\begin{equation*}
+  \begin{aligned}
+    U_{\alpha} &amp;= Const \\
+    U_{\beta} &amp;= 0 \\
+  \end{aligned}
+\end{equation*}\]
 
-<blockquote>
-  <p>这里配置的是 SPI1 的， 我后面改成 SPI2 之后由于总线的时钟频率不一样， SPI2 只需要 8 分频。 改这个总线的原因还是因为 SPI2 的 DMA 通道给 USART1 给占了， 想玩玩 OLED 得用 SPI + DMA 的方式速率才能跟得上， 虽然最后可能会因为计算资源问题不上 OLED。</p>
-</blockquote>
+<p>经过 Park 变换后可以得到如下结果：</p>
 
-<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-plaintext highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-plaintext highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-plaintext highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
+\[\begin{equation*}
+  \begin{aligned}
+    U_{q} &amp;= 0                          \qquad U_{d} = \alpha                   \qquad electrical\_angle = 0 \\
+    U_{q} &amp;= \alpha                     \qquad U_{d} = 0                        \qquad electrical\_angle = -\pi/2 \\
+    U_{q} &amp;= \frac{\sqrt{2}}{2}\alpha   \qquad U_{d} = \frac{\sqrt{2}}{2}\alpha \qquad electrical\_angle = -\pi/2 \\
+  \end{aligned}
+\end{equation*}\]
 
-<div align="center">
-    <img src="/norobots/images/2023-07-17-miniFOC-dev/spi1-parameter-settings.png" alt="Encoder SPI1 parameter settings, HangX-Ma" width="400" />
-    <br />
-    <font size="2" color="#999"><u>Encoder SPI1 parameter settings, HangX-Ma</u></font>
-</div>
+<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
 
-<blockquote>
-  <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
-</blockquote>
+<h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
 
-<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
+<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
 
-<p>另外配置片选引脚的时候需要默认输出为高并且将其配置为上拉模式， 这是根据时序图所示， 芯片是在 CS 脚为低的时候工作的， 这样能保证在必要的时候选中相应的片选脚进行数据传输。</p>
-
-<blockquote>
-  <p><a href="https://www.cnblogs.com/blogernice/articles/12531133.html">详解SPI中的极性CPOL和相位CPHA - blogernice 博客园</a><br />
-<a href="https://zhuanlan.zhihu.com/p/26509678">秒懂 奇偶校验码 - 车卡门 知乎</a><br />
-<a href="https://blog.csdn.net/ftswsfb/article/details/104321901">奇偶校验原理及C实现 - ftswsfb CSND</a><br />
-<a href="https://blog.csdn.net/weixin_43593122/article/details/119253544">硬件探索——STM32F4通过SPI总线读取GMR（磁编码器） - 123-wqy CSDN</a><br />
-<a href="https://zhuanlan.zhihu.com/p/632955358">STM32——DMA数据转运 - 柯宝最帅 知乎</a><br />
-<a href="https://blog.51cto.com/u_13682052/4990083">stm32利用通用定时器实现函数运行时间精确测量 - biao2488890051 51CTO</a></p>
-</blockquote>
-
-<h2 id="12-spi-片选的说明">1.2 SPI 片选的说明</h2>
-
-<p>SPI 片选对 SPI 设备是通用的， 不管是从机还是主机， 都需要配置片选引脚。 我在 CubeMX 中看到 NSS 引脚分为硬件和软件两种， NSS 就是平常所说的片选脚， 对于主机而言片选脚需要拉高的， 这样才能保证主机 SPI 处于工作状态。 如果选择软件配置， 那么在我们选择 STM32 作为主机的时候， LL 库自动帮我们配置了 SSI 引脚作为主机的片选。 而硬件配置则会根据芯片特定的 NSS 引脚决定相应的状态。</p>
-
-<p>而 SPI 主机硬件配置时可以将 Hardware NSS Signal 配置为 <strong>Hardware NSS Output Signal</strong>， 这样 NSS 脚就能自动输出低电平使能从设备。</p>
+<p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
 
 <blockquote>
-  <p><a href="https://blog.csdn.net/weixin_44509533/article/details/104110454">STM32 SPI的NSS引脚配置 - 星水天河 CSDN</a><br />
-<a href="https://blog.csdn.net/m0_46272475/article/details/121152512">STM32 SPI 软件NSS和硬件NSS解读 - fanyuandrj CSND</a></p>
-</blockquote>
-
-<h2 id="13-关于磁编码器的一些建议">1.3 关于磁编码器的一些建议</h2>
-
-<ul>
-  <li>一般来说磁编码器就只需要 1 或 2 个滤波电容外加芯片就行， 设计起来很方便， 时间成本允许就自己打样， 还能针对电机安装孔进行定制化设计。</li>
-  <li>SPI 在芯片上的顺序一般都是 <code class="language-plaintext highlighter-rouge">CS</code>, <code class="language-plaintext highlighter-rouge">SCLK</code>, <code class="language-plaintext highlighter-rouge">MISO</code>, <code class="language-plaintext highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
-  <li>磁编码器似乎不是特别耐高温， 我自己把之间用热风枪吹上的芯片拆下来又装到新板子， 老会出毛病， 如果一直出现返回 error 指不定是编码器坏了。</li>
-  <li>磁铁需要买径向磁铁， <em>N 极</em> 和 <em>S 极</em> 对向水平分布。</li>
-  <li>为了安装磁铁买了 AB 胶， 非常管用， 但除此之外还买了 3mm 轴套增加安装接触面积（热胶枪装不上）。</li>
-</ul>
-
-<h2 id="2-cortex-m3-浮点计算优化">2. Cortex-M3 浮点计算优化</h2>
-
-<p><strong><a href="https://www.quinapalus.com/qfplib.html">Qfplib: a family of floating-point libraries for ARM Cortex-M cores</a></strong></p>
-
-<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
-
-<h2 id="3-u8g2-库的使用">3. u8g2 库的使用</h2>
-
-<p>u8g2 库的使用参考了两份代码（用的是 SSD1306 驱动芯片）， 但实际上这两篇文章都没有解决我使用 LL 库配置 SPI + DMA 进行数据传输的问题。 很遗憾我没解决这个问题， 最后使用了普通的 SPI 传输的办法， 这是因为我在几个论坛上发现很多人用了 SPI + DMA 就无法做到数据的正常传输， 必须等到 SPI + DMA 的数据传输完成后才能进行下一次传输， 而这需要通过 while 循环不断检查是否传输完毕。 既然需要 CPU 的参与， 不如直接用 SPI 还更省心。</p>
-
-<ul>
-  <li>SPI 发送数据， 需要通过 <code class="language-plaintext highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
-  <li>除此之外， u8g2 将 CS 引脚拉高之前 （Deselect）， 需要确认 SPI 的传输已经结束， 否则会造成数据错误。</li>
-</ul>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint8_t</span> <span class="nf">u8x8_byte_4wire_hw_spi</span><span class="p">(</span>
-    <span class="n">U8X8_UNUSED</span> <span class="n">u8x8_t</span> <span class="o">*</span><span class="n">u8x8</span><span class="p">,</span>
-    <span class="kt">uint8_t</span> <span class="n">msg</span><span class="p">,</span>
-    <span class="kt">uint8_t</span> <span class="n">arg_int</span><span class="p">,</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">arg_ptr</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">switch</span> <span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="p">...</span>
-        <span class="k">case</span> <span class="n">U8X8_MSG_BYTE_SEND</span><span class="p">:</span> <span class="c1">// Use SPI to send 'arg_int' bytes</span>
-            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arg_int</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">LL_SPI_TransmitData8</span><span class="p">(</span><span class="n">SPI1</span><span class="p">,</span> <span class="o">*</span><span class="p">((</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">arg_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
-                <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">SPI1</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="n">__NOP</span><span class="p">();</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-            <span class="k">break</span><span class="p">;</span>
-        <span class="p">...</span>
-        <span class="k">case</span> <span class="n">U8X8_MSG_BYTE_END_TRANSFER</span><span class="p">:</span>  <span class="c1">// Software CS is needed. (deselect)</span>
-            <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_BSY</span><span class="p">(</span><span class="n">SPI1</span><span class="p">)</span> <span class="o">==</span> <span class="n">SET</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">__NOP</span><span class="p">();</span>
-            <span class="p">}</span>
-            <span class="n">u8x8</span><span class="o">-&gt;</span><span class="n">gpio_and_delay_cb</span><span class="p">(</span><span class="n">u8x8</span><span class="p">,</span> <span class="n">U8X8_MSG_DELAY_NANO</span><span class="p">,</span> <span class="n">u8x8</span><span class="o">-&gt;</span><span class="n">display_info</span><span class="o">-&gt;</span><span class="n">pre_chip_disable_wait_ns</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-            <span class="n">LL_GPIO_SetOutputPin</span><span class="p">(</span><span class="n">OLED_CS_SCK_MOSI_GPIO_PORT</span><span class="p">,</span> <span class="n">OLED_CS_PIN</span><span class="p">);</span>
-            <span class="k">break</span><span class="p">;</span>
-        <span class="p">...</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://github.com/AagsAags/stm32f103c8t6_u8g2_hw_spi">AagsAags/stm32f103c8t6_u8g2_hw_spi - Github</a><br />
-<a href="https://www.izilzty.com/?post=15">在STM32上使用U8g2图形库并配合DMA发送显示数据（LL库） - izilzty的小窝</a></p>
-</blockquote>
-
-<h2 id="4-ina199x1-电流采样配置">4. INA199x1 电流采样配置</h2>
-
-<p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
-
-<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-plaintext highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-plaintext highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-plaintext highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
-
-<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-plaintext highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
-
-<ul>
-  <li><strong>Regular Conversion launched by software:</strong> 规则的软件触发， 调用函数触发即可</li>
-  <li><strong>Timer X Capture Compare X event:</strong> 外部引脚触发</li>
-  <li><strong>Timer X Trigger Out event:</strong> 定时器通道输出触发， 需要设置相应的定时器设置</li>
-</ul>
-
-<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-plaintext highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-plaintext highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
-
-<p>另外需要注意配置中的几个点：</p>
-
-<ul>
-  <li>DMA 配置需要在 ADC 配置之前。</li>
-  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-plaintext highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
-  <li>PWM 有 Mode 1 和 Mode 2 两种， 分别表示计数器在达到 ARR 值之有为有效电平， 以及在达到 ARR 后为有效电平。 因而对于上升沿触发的要求， 需要配置 PWM 的极性为 Mode 1 为 Low， Mode 2 为 High。 这样， Mode 1 有效电平为 Low， 而 Mode 2 有效电平为 High， 均能达到上升沿的效果。</li>
-  <li>
-    <p>ADC 校准的代码如下所示， 需要注意结合不同的型号进行差异化配置。 F103 要求在校准之前开启 ADC， 并且需要等待 ADC 的电压稳定。</p>
-
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">//* start ADC1</span>
-  <span class="n">LL_ADC_Enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
-  <span class="c1">// wait until internal voltage reference stable</span>
-  <span class="n">delay_nus_72MHz</span><span class="p">(</span><span class="n">LL_ADC_DELAY_TEMPSENSOR_STAB_US</span><span class="p">);</span>
-
-  <span class="c1">// wait at least 2 ADC cycles after ADC power-on but before calibration</span>
-  <span class="n">LL_mDelay</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
-  <span class="c1">// wait until ADC calibration done</span>
-  <span class="n">LL_ADC_StartCalibration</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
-  <span class="k">while</span> <span class="p">(</span><span class="n">LL_ADC_IsCalibrationOnGoing</span><span class="p">(</span><span class="n">ADC1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<blockquote>
-  <p><a href="https://blog.51cto.com/u_520887/5290076">STM32F0使用LL库实现DMA方式AD采集</a><br />
-<a href="https://codeantenna.com/a/1MnFm9oX2G">STM32L476多通道TIM+DMA+ADC采样（LL库）</a><br />
-<a href="https://blog.51cto.com/u_15456236/4801335">STM32 定时器触发 ADC 多通道采集，DMA搬运至内存</a><br />
-<a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
-</blockquote>
-
-<h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
-
-<p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
-
-<h3 id="x1-debug">X.1 Debug</h3>
-
-<p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
-
-<h3 id="x2-tim1-配置-pwm-输出">X.2 TIM1 配置 PWM 输出</h3>
-
-<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Core/Src/tim.c</span>
-<span class="kt">void</span> <span class="nf">MX_TIM1_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-    <span class="p">...</span>
-    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Prescaler</span> <span class="o">=</span> <span class="mi">36</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="n">TIM_InitStruct</span><span class="p">.</span><span class="n">Autoreload</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>另外， 要使能 TIM1 的输出， <code class="language-plaintext highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
-
-<blockquote>
-  <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
-</blockquote>
-
-<h3 id="x3-spi">X.3 SPI</h3>
-
-<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
-
-<p>另外发现一个问题， SPI 的收发需要共用一个函数（纯发送不用， 我在 OLED 中测试过）， 这是因为 SPI 从机没有自己的 SCLK 时钟， 这就需要主机提供。 而双工 SPI 的接收和发送是用两套缓存空间的， 因而可以通过主机向从机发送相应的字节提供 SCLK 时钟， 才能进行同步进行数据接收。 因而， 磁编码器的 SPI 接收函数是这样的。</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">uint16_t</span> <span class="nf">spi2_transmit_rw</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">outdata</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// wait until the SPI Tx buffer to be empty</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">SPI2</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
-    <span class="n">LL_SPI_TransmitData16</span><span class="p">(</span><span class="n">SPI2</span><span class="p">,</span> <span class="n">outdata</span><span class="p">);</span>
-    <span class="c1">// wait for 16 bits data receiving complete</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">LL_SPI_IsActiveFlag_RXNE</span><span class="p">(</span><span class="n">SPI2</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{}</span>
-    <span class="k">return</span> <span class="n">LL_SPI_ReceiveData16</span><span class="p">(</span><span class="n">SPI2</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>可算是懂了为什么磁编码器的数据手册里面 MOSI 是全 0 的数据了。 不过忘记买磁铁了， 调了半个晚上以为电机轴承那边是有磁性的， 结果一直读到 error 的数据， 后来问了好兄弟才知道那块地方是钢， 他推荐我实现 <strong>无感 FOC</strong>， 外贴磁铁会影响电机的磁场可能会有问题。</p>
-
-<blockquote>
-  <p><a href="https://blog.csdn.net/weixin_42832780/article/details/96424775">STM32 SPI发送与接收用一个函数实现的问题 - VX13260562029 CSDN</a></p>
-</blockquote>
-
-<h3 id="x4-dma">X.4 DMA</h3>
-
-<p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>
-
-<h4 id="x41-usart-dma">X.4.1 USART DMA</h4>
-
-<p>USART 的 DMA 开启有几个 LL 库的函数需要注意：</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Enable DMA Mode for reception</span>
-<span class="n">LL_USART_EnableDMAReq_RX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
-<span class="c1">// Enable DMA Mode for transmission</span>
-<span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
-
-<h3 id="x5-重定向-printf">X.5 重定向 printf</h3>
-
-<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-plaintext highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span><span class="kt">int</span> <span class="nf">__io_putchar</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">LL_USART_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">)</span> <span class="o">!=</span> <span class="n">SET</span><span class="p">)</span> <span class="p">{}</span>
-    <span class="n">LL_USART_TransmitData8</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">,</span> <span class="n">ch</span><span class="p">);</span>
-
-    <span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kt">int</span> <span class="nf">_write</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
-    <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fd</span><span class="p">;</span> <span class="c1">// avoid unused warning</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">__io_putchar</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">len</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="x6-printf-浮点输出没解决">X.6 printf 浮点输出（没解决）</h3>
-
-<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
-
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_link_options</span><span class="p">(</span>LINKER:-u _printf_float<span class="p">)</span>
-</code></pre></div></div>
-
-<p>尝试了很多办法， Vofa+ 上位机程序应该对接收进行了解析所以才能输出 float 类型数据， 直接通过串口一个个发 4 bytes 的 float 还得自己去转换太麻烦了， 干脆就转成整数相关类型输出算了。</p>
-
-<blockquote>
-  <p><a href="https://community.st.com/t5/stm32-mcu-products/printf-and-float/td-p/108690">printf and float - ST Community</a><br />
-<a href="https://community.st.com/t5/stm32cubeide-mcu/how-to-use-float-in-printf/td-p/323872/page/2">how to use float in printf? - ST Community</a><br />
-<a href="https://stackoverflow.com/questions/28746062/snprintf-prints-garbage-floats-with-newlib-nano">snprintf() prints garbage floats with newlib nano - StackOverflow</a>\</p>
+  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a>
+<a href="https://blog.csdn.net/loop222/article/details/120471390">SimpleFOC移植STM32（四）—— 闭环控制 - loop222 CSDN</a></p>
 </blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -652,7 +413,7 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-17T00:00:00+08:00"><!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-07-28T00:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -663,7 +424,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/15/rcore-note-ch8.html">rCore OS Note - Chapter 8</a></div><div class="next"><span>NEXT</span><a href="/2023/07/18/oopc.html">OOP C Programming</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/19/vofaplus.html">STM32F103 Vofa+ 配置与调试指南</a></div></div></div>
 
 </div>
 
@@ -706,7 +467,7 @@ function toggle() {
 				repo: 'HangX-Ma.github.io',
 				owner: 'HangX-Ma',
 				admin: ['HangX-Ma'],
-				id: '/2023/07/17/miniFOC-dev',
+				id: '/2023/07/28/miniFOC-concept',
                 labels: 'gitalk'.split(',').filter(l => l),
                 perPage: '15',
                 proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
@@ -1439,10 +1200,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      var key =   's2023s07s17sminiFOC-dev.html';
-      var title = "miniFOC Driver Development";
+      var key =   's2023s07s28sminiFOC-concept.html';
+      var title = "miniFOC 原理阐述";
       pageview.increase(key, title, function(view) {
-        $("[data-page-key='s2023s07s17sminiFOC-dev.html']").text(view);
+        $("[data-page-key='s2023s07s28sminiFOC-concept.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
