@@ -283,7 +283,7 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 7991 words </span>
+                <span> Total 8182 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -492,6 +492,22 @@
 <a href="https://blog.51cto.com/u_15456236/4801335">STM32 定时器触发 ADC 多通道采集，DMA搬运至内存</a><br />
 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
 </blockquote>
+
+<h2 id="5-速度环调试">5. 速度环调试</h2>
+
+<p>用 Kd 解决卡顿问题与 jitter 问题</p>
+
+<h2 id="6-位置环调试">6. 位置环调试</h2>
+
+<p>位置环和速度环切换出现 Motor Jump， 以及位置环存在稳态误差， 去掉积分项解决问题。</p>
+
+<blockquote>
+  <p><a href="https://www.zhihu.com/question/294695335/answer/493495590">为什么伺服驱动器位置环只有比例控制? - 全力的一度狐的回答 知乎</a></p>
+</blockquote>
+
+<h2 id="7-电流环调试">7. 电流环调试</h2>
+
+<p>电流环也需要进行相序的确认， 因而需要进行电流的相序的标定， 之前仅仅是通过手动调整电机的三根线确定了正常可以转动的线序， 并根据 align sensor 确定了相序。</p>
 
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 

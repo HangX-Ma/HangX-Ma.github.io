@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-29T00:02:06+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-07-30T23:17:55+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC 原理阐述</title><link href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html" rel="alternate" type="text/html" title="miniFOC 原理阐述" /><published>2023-07-28T00:00:00+08:00</published><updated>2023-07-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/28/miniFOC-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><![CDATA[<p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -427,6 +427,22 @@
 <a href="https://blog.51cto.com/u_15456236/4801335">STM32 定时器触发 ADC 多通道采集，DMA搬运至内存</a><br />
 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
 </blockquote>
+
+<h2 id="5-速度环调试">5. 速度环调试</h2>
+
+<p>用 Kd 解决卡顿问题与 jitter 问题</p>
+
+<h2 id="6-位置环调试">6. 位置环调试</h2>
+
+<p>位置环和速度环切换出现 Motor Jump， 以及位置环存在稳态误差， 去掉积分项解决问题。</p>
+
+<blockquote>
+  <p><a href="https://www.zhihu.com/question/294695335/answer/493495590">为什么伺服驱动器位置环只有比例控制? - 全力的一度狐的回答 知乎</a></p>
+</blockquote>
+
+<h2 id="7-电流环调试">7. 电流环调试</h2>
+
+<p>电流环也需要进行相序的确认， 因而需要进行电流的相序的标定， 之前仅仅是通过手动调整电机的三根线确定了正常可以转动的线序， 并根据 align sensor 确定了相序。</p>
 
 <h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
 
