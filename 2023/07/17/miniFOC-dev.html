@@ -283,11 +283,11 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 8182 words </span>
+                <span> Total 8283 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 23 mins </span>
+                <span> About 24 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -500,6 +500,8 @@
 <h2 id="6-位置环调试">6. 位置环调试</h2>
 
 <p>位置环和速度环切换出现 Motor Jump， 以及位置环存在稳态误差， 去掉积分项解决问题。</p>
+
+<p>Sensor Dir 旋转方向的判断需要保留， 2023-07-30 晚上拆了一下设备重新装上之后， 突然转不起来了。 第二天早上 checkout 到之前的版本， 发现引入位置反馈都转不起来， 发现是 CW 和 CCW 的问题。</p>
 
 <blockquote>
   <p><a href="https://www.zhihu.com/question/294695335/answer/493495590">为什么伺服驱动器位置环只有比例控制? - 全力的一度狐的回答 知乎</a></p>
