@@ -12,9 +12,9 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>miniFOC 原理阐述 - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>miniFOC 原理阐述与多模式应用 - 一只豆腐</title>
 
-<meta name="description" content="miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分。">
+<meta name="description" content="miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -281,14 +281,14 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 28, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Aug 01, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 1586 words </span>
+                <span> Total 2829 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 5 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC 原理阐述</h1></header></div><p class="overlay__excerpt">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分。</p></div></div>
+                <span> About 8 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC 原理阐述与多模式应用</h1></header></div><p class="overlay__excerpt">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
 
@@ -298,7 +298,7 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="miniFOC 原理阐述"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-28T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="miniFOC 原理阐述与多模式应用"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-28T00:00:00+08:00">
     <meta itemprop="keywords" content="FOC,STM32"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
@@ -353,6 +353,44 @@
 <blockquote>
   <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a>
 <a href="https://blog.csdn.net/loop222/article/details/120471390">SimpleFOC移植STM32（四）—— 闭环控制 - loop222 CSDN</a></p>
+</blockquote>
+
+<h2 id="x3-foc-多应用模式">X3. FOC 多应用模式</h2>
+
+<h3 id="x31-ratchet-棘轮模式">X3.1 Ratchet 棘轮模式</h3>
+
+<p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-plaintext highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
+
+<p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-plaintext highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-plaintext highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-plaintext highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// attractor angle variable</span>
+<span class="k">static</span> <span class="kt">float</span> <span class="n">attract_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">;</span>
+<span class="c1">// distance between attraction points</span>
+<span class="k">static</span> <span class="kt">float</span> <span class="n">attractor_distance</span> <span class="o">=</span> <span class="mi">60</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span> <span class="o">/</span> <span class="mi">180</span><span class="p">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">_PI</span><span class="p">;</span> <span class="c1">// dimp each 45 degrees</span>
+
+<span class="kt">float</span> <span class="nf">find_attractor</span><span class="p">(</span><span class="kt">float</span> <span class="n">angle</span><span class="p">){</span>
+    <span class="kt">uint32_t</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">qfp_fadd</span><span class="p">(</span><span class="n">qfp_fdiv</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">attractor_distance</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="n">f</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">qfp_fmul</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">idx</span><span class="p">,</span> <span class="n">attractor_distance</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">ratchet_mode</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">g_tor_ctrl</span><span class="p">.</span><span class="n">target_torque</span> <span class="o">=</span> <span class="n">attract_angle</span> <span class="o">-</span> <span class="n">g_foc</span><span class="p">.</span><span class="n">state_</span><span class="p">.</span><span class="n">shaft_angle</span><span class="p">;</span>
+    <span class="n">attract_angle</span> <span class="o">=</span> <span class="n">find_attractor</span><span class="p">(</span><span class="n">g_foc</span><span class="p">.</span><span class="n">state_</span><span class="p">.</span><span class="n">shaft_angle</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>下图是参阅博客园对棘轮模式原理的电压与角度关系图， 这里设定的棘轮角度为 45°， 可以看到棘轮的作用力的分界点在 <code class="language-plaintext highlighter-rouge">45°/2 = 22.5°</code> 的位置。</p>
+
+<p>这很容易理解， 这个点是两个棘轮齿的中心点， 若 <code class="language-plaintext highlighter-rouge">shaft_angle &gt; 22.5°</code> 则 <code class="language-plaintext highlighter-rouge">find_attractor</code> 会找到下一个棘轮位置， 反之则仍是当前的棘轮位置。 我们知道闭环负反馈的作用是使作用对象稳定在目标位置， 在 <code class="language-plaintext highlighter-rouge">[0;22.5°]</code> 之间， 越靠近中心点 <code class="language-plaintext highlighter-rouge">22.5°</code> 距离误差越大， 受到反向的力矩越大； 而一旦跨过中心点位置， 棘轮齿更新为下一个位置， 此时的距离误差方向就与原来的相反了， 因而受到的是正向力矩的推力， 这里会有一个明显的电压的方向的改变， 力矩方向顺应改变， 这是人感受到棘轮齿的重要原因。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/ratchet_mode.png" alt="Ratchet mode Voltage-Angle relationship, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>Ratchet mode Voltage-Angle relationship, HangX-Ma</u></font>
+</div>
+
+<blockquote>
+  <p><a href="https://www.cnblogs.com/21207-iHome/p/16898471.html">无刷电机力矩控制模拟棘轮 - XXX已失联 博客园</a></p>
 </blockquote>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -1201,7 +1239,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s07s28sminiFOC-concept.html';
-      var title = "miniFOC 原理阐述";
+      var title = "miniFOC 原理阐述与多模式应用";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s07s28sminiFOC-concept.html']").text(view);
       });

@@ -283,7 +283,7 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 19, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 3419 words </span>
+                <span> Total 3249 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -305,7 +305,7 @@
 <div class="article__content" itemprop="articleBody"><p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <div align="center">
-    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="600" />
+    <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="800" />
     <br />
     <font size="2" color="#999"><u>Vofa+ demo, HangX-Ma</u></font>
 </div>
@@ -397,18 +397,6 @@
                 <span class="k">break</span><span class="p">;</span>
             <span class="k">case</span> <span class="mh">0x02</span><span class="p">:</span> <span class="c1">// set velocity</span>
                 <span class="n">g_target_motor_vel</span> <span class="o">=</span> <span class="n">recv_data</span><span class="p">.</span><span class="n">fdata</span><span class="p">;</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x03</span><span class="p">:</span> <span class="c1">// set Speed Kp</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x04</span><span class="p">:</span> <span class="c1">// set Speed Ki</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x05</span><span class="p">:</span> <span class="c1">// set Current Kp</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x06</span><span class="p">:</span> <span class="c1">// set Current Ki</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x07</span><span class="p">:</span> <span class="c1">// set Current Kp</span>
-                <span class="k">break</span><span class="p">;</span>
-            <span class="k">case</span> <span class="mh">0x08</span><span class="p">:</span> <span class="c1">// set Current Ki</span>
                 <span class="k">break</span><span class="p">;</span>
             <span class="nl">default:</span>
                 <span class="k">break</span><span class="p">;</span>
@@ -507,7 +495,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/18/oopc.html">OOP C Programming</a></div><div class="next"><span>NEXT</span><a href="/2023/07/28/miniFOC-concept.html">miniFOC 原理阐述</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/18/oopc.html">OOP C Programming</a></div><div class="next"><span>NEXT</span><a href="/2023/07/28/miniFOC-concept.html">miniFOC 原理阐述与多模式应用</a></div></div></div>
 
 </div>
 
