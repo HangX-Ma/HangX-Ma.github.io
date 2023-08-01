@@ -287,7 +287,7 @@
                 href="/blog/archive.html?tag=C">C</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 18, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 1465 words </span>
+                <span> Total 1590 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -322,6 +322,14 @@
 <h2 id="1-使用-struct-模块化编程">1. 使用 struct 模块化编程</h2>
 
 <p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-plaintext highlighter-rouge">static</code> 对 <code class="language-plaintext highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
+
+<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-plaintext highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">painter</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">handler</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">page_t</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h2 id="2-跨文件的全局变量">2. 跨文件的全局变量</h2>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-08-01T10:52:21+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-08-01T18:04:51+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC 原理阐述与多模式应用</title><link href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html" rel="alternate" type="text/html" title="miniFOC 原理阐述与多模式应用" /><published>2023-07-28T00:00:00+08:00</published><updated>2023-07-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/28/miniFOC-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><![CDATA[<p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
@@ -237,6 +237,14 @@
 
 <p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-plaintext highlighter-rouge">static</code> 对 <code class="language-plaintext highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
 
+<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-plaintext highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">painter</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">handler</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">page_t</span><span class="p">;</span>
+</code></pre></div></div>
+
 <h2 id="2-跨文件的全局变量">2. 跨文件的全局变量</h2>
 
 <p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-plaintext highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-plaintext highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
@@ -408,7 +416,13 @@
 <a href="https://www.izilzty.com/?post=15">在STM32上使用U8g2图形库并配合DMA发送显示数据（LL库） - izilzty的小窝</a></p>
 </blockquote>
 
-<h2 id="4-ina199x1-电流采样配置">4. INA199x1 电流采样配置</h2>
+<h2 id="4-oled-菜单与动画">4. OLED 菜单与动画</h2>
+
+<p>调完 FOC 之后开始不务正业了， 不过实现一个丝滑的 OLED 菜单确实帅得优雅， 也为之后做一个集成主控芯片以及按钮的 FOC 驱动板打下基础。 我在 B 站也找了一些参考， 目前来说 <a href="https://www.bilibili.com/video/BV1wA411o7VJ/?spm_id_from=333.788.recommend_more_video.-1&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">STM32 稚晖君丝滑菜单 - uYanki Bilibili</a> 的实现是比较符合我目前的工程需求的， 不过他提供的 <a href="https://github.com/uYanki/board-stm32f103rc-berial/tree/main/7.Example/hal/gui/u8g2/02_menu">menu</a> 的库的仓库还包含了一堆其他的东西， 真的是非常庞大。</p>
+
+<p>我第一步想实现的就是简单的菜单动画， 但在查看他编写的代码的时候， 发现这些实现需要基于 erasing 这个擦除类。 于是</p>
+
+<h2 id="5-ina199x1-电流采样配置">5. INA199x1 电流采样配置</h2>
 
 <p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
 
@@ -454,15 +468,15 @@
 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a></p>
 </blockquote>
 
-<h2 id="5-速度环调试">5. 速度环调试</h2>
+<h2 id="6-速度环调试">6. 速度环调试</h2>
 
 <p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-plaintext highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-plaintext highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
 
 <p>用 PI 控制器几乎没办法解决这个问题， 凑巧的是我到 SimpleFOC 的官方文档看了看， 我发现他们的速度环实际上是用 PID 控制器实现的， 其中微分 Kd 仅为 0.001 大小。 微分的作用就是应对控制量的快速变化， 意识到这一点后我认为速度环电机的电角度的快速变化很可能让 PI 控制器没办法以较快的响应速度稳定到需要控制的角度， 因而产生了控制的滞后， 这在电机上的表现就是卡顿与抖动。 尝试加入了微小的微分量后， 电机的速度环果然稳定了下来并且表现优异。</p>
 
-<h2 id="6-位置环调试">6. 位置环调试</h2>
+<h2 id="7-位置环调试">7. 位置环调试</h2>
 
-<h3 id="61-关于位置环的比例控制">6.1 关于位置环的比例控制</h3>
+<h3 id="71-关于位置环的比例控制">7.1 关于位置环的比例控制</h3>
 
 <p>位置环需要对输出到速度环的电机转速进行限制。 另外我发现用 PI 控制器的位置环始终存在着稳态误差， 我在知乎上看到一则解答：</p>
 
@@ -489,7 +503,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h3 id="62-位置环与速度环切换的电机跳动问题">6.2 位置环与速度环切换的电机跳动问题</h3>
+<h3 id="72-位置环与速度环切换的电机跳动问题">7.2 位置环与速度环切换的电机跳动问题</h3>
 
 <p>位置环和速度环切换出现电机的跳动， 也就是切换之后电机基于当前的状态值会产生转动速度， 本质上的原因就是前一个环的状态量没有处理妥当。 如下代码所示， 我是这样解决的：</p>
 
@@ -522,7 +536,7 @@
   <p><a href="https://www.zhihu.com/question/294695335/answer/493495590">为什么伺服驱动器位置环只有比例控制? - 全力的一度狐的回答 知乎</a></p>
 </blockquote>
 
-<h2 id="7-电流环调试">7. 电流环调试</h2>
+<h2 id="8-电流环调试">8. 电流环调试</h2>
 
 <p>电流环调试感觉非常困难， 目前没有彻底解决问题。 最开始发现电流环给出的反馈波形非常奇怪， Q 和 D 两轴的波形竟然都是带截止的。 后来一路查到 ADC 转换出来的值， 发现是 A 相的电流采样芯片的放大倍数以及中心点都发生了严重偏移， 更换芯片后两路采样都重新回到了 1.65 V 的参考电压在以正弦波波形在波动。</p>
 
