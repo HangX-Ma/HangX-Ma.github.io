@@ -281,13 +281,13 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=STM32">STM32</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Aug 01, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Aug 05, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 10794 words </span>
+                <span> Total 11311 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 30 mins </span>
+                <span> About 32 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC Driver Development</h1></header></div><p class="overlay__excerpt">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -309,7 +309,7 @@
 </blockquote>
 
 <ul>
-  <li><strong>MCU:</strong> STM32F103C8T6</li>
+  <li><strong>MCU:</strong> STM32F103C8T6, 64K Flash, 20K SRAM</li>
   <li><strong>Dev Tool:</strong> CMake, OpenOCD, STLink-v2, STM32CubeMX</li>
   <li><strong>Serial Communication:</strong> Vofa+</li>
   <li><strong>PCB Design:</strong> Altium Designer 23</li>
@@ -324,6 +324,20 @@
 </ul>
 
 <p>项目地址 <a href="https://github.com/HangX-Ma/miniFOC">HangX-Ma/miniFOC</a>， 项目将持续更新， 这次挺有信心的！</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/miniFOC.svg" alt="miniFOC design, HangX-Ma" width="800" />
+    <br />
+    <font size="2" color="#999"><u>miniFOC design, HangX-Ma</u></font>
+    <br />
+    <br />
+</div>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-17-miniFOC-dev/all-components.png" alt="miniFOC driver board and other components, HangX-Ma" width="400" />
+    <br />
+    <font size="2" color="#999"><u>miniFOC driver board and other components, HangX-Ma</u></font>
+</div>
 
 <h2 id="1-sc60228-磁编码器">1. SC60228 磁编码器</h2>
 
@@ -451,7 +465,19 @@
 
 <p>调完 FOC 之后开始不务正业了， 不过实现一个丝滑的 OLED 菜单确实帅得优雅， 也为之后做一个集成主控芯片以及按钮的 FOC 驱动板打下基础。 我在 B 站也找了一些参考， 目前来说 <a href="https://www.bilibili.com/video/BV1wA411o7VJ/?spm_id_from=333.788.recommend_more_video.-1&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">STM32 稚晖君丝滑菜单 - uYanki Bilibili</a> 的实现是比较符合我目前的工程需求的， 不过他提供的 <a href="https://github.com/uYanki/board-stm32f103rc-berial/tree/main/7.Example/hal/gui/u8g2/02_menu">menu</a> 的库的仓库还包含了一堆其他的东西， 真的是非常庞大。</p>
 
-<p>我第一步想实现的就是简单的菜单动画， 但在查看他编写的代码的时候， 发现这些实现需要基于 erasing 这个擦除类。 于是</p>
+<p>我第一步想实现的就是简单的菜单动画， 但在查看他编写的代码的时候， 发现这些实现需要基于 easing 这个类。 于是， 我上网找了一圈， 发现这其实是一个补间动画相关类， <a href="https://easings.net/zh-cn">easings.net</a> 网站提供了基于各种缓动函数的动画样例， 非常直观清晰。 另外， tween.js 是有详细的文档说明的， 可以进行查阅。 为了移植方便， 我在网上找到了几个 C/C++ 版本的 tween.js 的实现， 参照这个 Up 的代码进行相关结构体的学习。</p>
+
+<p>在我自己的工程里， 为了保证在 STM32F103 这类 Cortex-M3 内核的计算效率， 我会对 easing 的主体函数用 Qfplib-m3 库进行优化。</p>
+
+<blockquote>
+  <p><a href="https://easings.net/zh-cn">easings.net</a><br />
+<a href="https://github.com/tweenjs/tween.js/blob/main/docs/user_guide_zh-CN.md">tween.js - wiki</a><br />
+<a href="https://github.com/mobius3/tweeny">tweeny</a><br />
+<a href="https://github.com/rynmth/ctween">ctween</a><br />
+<a href="https://blog.csdn.net/siyacaodeai/article/details/113766006">C++实现缓动动画效果，使用Tween算法（含详细代码） - Coding14 CSDN</a>
+<a href="https://www.jb51.net/article/135077.htm">tween.js缓动补间动画算法示例 - 李俊杰 脚本之家</a><br />
+<a href="https://blog.csdn.net/S_clifftop/article/details/89490422">Tween动画及缓动函数 - S_clifftop CSDN</a></p>
+</blockquote>
 
 <h2 id="5-ina199x1-电流采样配置">5. INA199x1 电流采样配置</h2>
 
@@ -659,7 +685,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h3 id="x6-printf-浮点输出没解决">X.6 printf 浮点输出（没解决）</h3>
+<h3 id="x6-printf-浮点输出">X.6 printf 浮点输出</h3>
 
 <p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
 
@@ -667,6 +693,8 @@
 </code></pre></div></div>
 
 <p>尝试了很多办法， Vofa+ 上位机程序应该对接收进行了解析所以才能输出 float 类型数据， 直接通过串口一个个发 4 bytes 的 float 还得自己去转换太麻烦了， 干脆就转成整数相关类型输出算了。</p>
+
+<p><em><strong>2023-08-04 UPDATE:</strong></em> 这个编译选项还是需要打开的， 我后来在 OLED 中使用 <code class="language-plaintext highlighter-rouge">sprintf</code> 做浮点数转义的时候， 如果不开启这个编译选项是无法成功将 float 类型转为字符串类型的。</p>
 
 <blockquote>
   <p><a href="https://community.st.com/t5/stm32-mcu-products/printf-and-float/td-p/108690">printf and float - ST Community</a><br />
