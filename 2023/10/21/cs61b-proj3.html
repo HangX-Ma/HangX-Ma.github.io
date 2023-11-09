@@ -12,11 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Home - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>cs61b Proj3-BYoW - 一只豆腐</title>
 
-<meta name="description" content="Code, life and embedded system...
-">
-<link rel="canonical" href="https://hangx-ma.github.io/blog/"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="UCB cs61 spring 2021 Proj3-BYoW 设计思路与记录">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -266,25 +265,16 @@
 </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
       <div class="header__title">
-        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
 " href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
-        <ul><li class="navigation__item navigation__item--active"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
-</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
-
-              <div class="col-aside d-print-none js-col-aside"></div>
-
-              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
-
-<!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="HangX-Ma"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/10/21/cs61b-proj3.html"><h2 itemprop="headline" class="item__header">cs61b Proj3-BYoW</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">UCB cs61 spring 2021 Proj3-BYoW 设计思路与记录</div><p><a href="/2023/10/21/cs61b-proj3.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:linear-gradient(135deg, rgba(34, 139, 87 , .4), rgba(90, 60, 139, .4)),url(/assets/images/bg/course/cs61b.png);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Course">Course</a>
             </li><li>
@@ -294,111 +284,316 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Java">Java</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Oct 21, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s10s21scs61b-proj3.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-10-21T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs61b,Java"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/28/miniFOC-concept.html"><h2 itemprop="headline" class="item__header">miniFOC 原理阐述与多模式应用</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。</div><p><a href="/2023/07/28/miniFOC-concept.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=FOC">FOC</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 28, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Aug 01, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-28T00:00:00+08:00">
-    <meta itemprop="keywords" content="FOC,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/19/vofaplus.html"><h2 itemprop="headline" class="item__header">STM32F103 Vofa+ 配置与调试指南</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">上位机调试工具 Vofa+ 食用指南， 结合电机调试进行说明， 感谢 Bilibili 大学。</div><p><a href="/2023/07/19/vofaplus.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=C">C</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 19, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s19svofaplus.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-19T00:00:00+08:00">
-    <meta itemprop="keywords" content="C,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/18/oopc.html"><h2 itemprop="headline" class="item__header">OOP C Programming</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">结合 OOP 思想进行 C 语言编程， 这篇文章并不从头介绍相关的知识， 而是记录个人学习的疑难点以及参考资料等资源。</div><p><a href="/2023/07/18/oopc.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=C">C</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 18, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s18soopc.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-18T00:00:00+08:00">
-    <meta itemprop="keywords" content="C"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/17/miniFOC-dev.html"><h2 itemprop="headline" class="item__header">miniFOC Driver Development</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</div><p><a href="/2023/07/17/miniFOC-dev.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=FOC">FOC</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Aug 05, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-17T00:00:00+08:00">
-    <meta itemprop="keywords" content="FOC,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/15/rcore-note-ch8.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 8</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/15/rcore-note-ch8.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Rust">Rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 15, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s15srcore-note-ch8.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-15T00:00:00+08:00">
-    <meta itemprop="keywords" content="Rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/13/rcore-note-ch7.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 7</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/13/rcore-note-ch7.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Rust">Rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 13, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s13srcore-note-ch7.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-13T00:00:00+08:00">
-    <meta itemprop="keywords" content="Rust,rCore"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/10/rcore-note-ch6.html"><h2 itemprop="headline" class="item__header">rCore OS Note - Chapter 6</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。</div><p><a href="/2023/07/10/rcore-note-ch6.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Rust">Rust</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=rCore">rCore</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 10, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s10srcore-note-ch6.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-10T00:00:00+08:00">
-    <meta itemprop="keywords" content="Rust,rCore"></div>
-      </article></div>
-</div><div class="layout--home"><div class="pagination"><p>28 post articles, 4 pages.</p>
-    <div class="pagination__menu">
-      <ul class="menu menu--nowrap"><li><div class="button button--secondary button--circle disabled">
-            <i class="fas fa-angle-left"></i>
-          </div></li><li>
-              <div class="button button--primary button--circle focus"><span>1</span></div>
-            </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2"><span>2</span></a>
-              </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page3" href="/blog/page3"><span>3</span></a>
-              </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page4" href="/blog/page4"><span>4</span></a>
-              </li><li><a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2">
-            <i class="fas fa-angle-right"></i>
-          </a></li></ul>
-    </div>
-  </div></div>
-<script>/*(function () {
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 4611 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 13 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s10s21scs61b-proj3.html">0</span> views</li></ul></div><div class="article__header"><header><h1>cs61b Proj3-BYoW</h1></header></div><p class="overlay__excerpt">UCB cs61 spring 2021 Proj3-BYoW 设计思路与记录</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
 
-})();*/
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="cs61b Proj3-BYoW"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-10-21T00:00:00+08:00">
+    <meta itemprop="keywords" content="Course,cs61b,Java"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
+
+<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-plaintext highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
+
+<p>我参考的是 <a href="https://github.com/YinY1/CS61B-sp21">YinY1</a> 的 Proj3 实现， 但我认为具体的细节是需要自己去思考的， 文件结构的设计已经给了我足够的启发。 这篇文章就详细介绍一下地图的生成， 这块难度比较高， Phase2 关于游戏交互的我就完成了基础功能没啥好说的。</p>
+
+<blockquote>
+  <p>最近有些焦虑， 感受到末尾保研和前位保研的差距了， 同届的同学已经参加过之江实验室的项目， 以及百度 Paddle 的夏令营， 现在在延续他的夏令营开源项目担任助教。 而对自己来说， 规划的一整个研一时间和半个研二时间是拿来补基础课程的， 毕竟平时还有实验室任务。 不过人家确实也很认真， 每天留到快 23:00 才回宿舍。 且不说了， 之后还有一门数据库的课程要补上。</p>
+</blockquote>
+
+<h2 id="1-文件目录">1. 文件目录</h2>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>byow
+  ├─Core
+  │  │  Engine.java
+  │  │  Main.java
+  │  │  Pair.java
+  │  │  Point.java
+  │  │  Property.java
+  │  │  RandomUtils.java
+  │  │  Utils.java
+  │  │  World.java
+  │  │
+  │  ├─Avatar
+  │  │      Avatar.java
+  │  │      Tofu.java
+  │  │
+  │  ├─HUD
+  │  │      Frame.java
+  │  │
+  │  └─Maps
+  │          Road.java
+  │          Room.java
+  │          Wall.java
+  │
+  ├─InputDemo
+  │      DemoInputSource.java
+  │      InputSource.java
+  │      KeyboardInputSource.java
+  │      RandomInputSource.java
+  │      StringInputDevice.java
+  │
+  ├─lab12
+  │      BoringWorldDemo.java
+  │      HexWorld.java
+  │      project3prep.md
+  │      RandomWorldDemo.java
+  │
+  ├─lab13
+  │      MemoryGame.java
+  │
+  ├─Networking
+  │      BYOWClient.java
+  │      BYOWServer.java
+  │
+  └─TileEngine
+          TERenderer.java
+          TETile.java
+          Tileset.java
+</code></pre></div></div>
+
+<h2 id="2-phase1-world-generation">2. Phase1: World Generation</h2>
+
+<p>Phase1 要求生成随机的地图， 地图要求由不同大小的 Rooms 以及联通这些 Room 的通道构成。 一般的实现办法就是生成多个 Rooms 的区块， 然后将这些 Rooms 通过 Path 联通起来， 而如何生成 Path 真的非常考验人。 我自己尝试过用类似 Hexagon World 中扫描的方式， 让每个 Rooms 紧贴着生成， 也尝试过生成 Rooms 后用生成迷宫的方式去生成 Path， 但这些方法都不能很好的做到和 Josh Hug 给出的样例类似。</p>
+
+<p>花了一天的时间考虑算法， 闭门造车真的不行， 有幸刷到了这样一篇知乎 <a href="https://zhuanlan.zhihu.com/p/30724817">【游必有方】一种 RogueLike 地图生成算法</a> 作者对原文 <a href="https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/">Rooms and Mazes: A Procedural Dungeon Generator</a> 进行了简化和翻译。 第一次了解到这种 2D 场景的类似的游戏被称为 <strong>RogueLike Game</strong>， 文章介绍的内容和 Proj3 所介绍的需求非常类似。</p>
+
+<p>生成地图的主要步骤：</p>
+
+<ul>
+  <li>在给定大小的地图区域内随机生成一些房间；</li>
+  <li>将除房间以外的区域用随机生成的迷宫填充；</li>
+  <li>将所有房间和迷宫通过少数节点连接起来；</li>
+  <li>删除不必要的迷宫死胡同，降低地图复杂度。</li>
+</ul>
+
+<p>对我来说链接迷宫和房间并降低地图复杂度这块是最为困惑的和不解的， 迫不及待想要了解作者的巧妙构思了。 其实这块自然而然会想到课上介绍的 Union 的概念， 尤其是一提到联通路径的时候， 就会想到 Prim 和 Kruskal 这两个最小生成树算法。 <a href="https://www.cnblogs.com/shiroe/p/15506909.html">【UE4 C++】迷宫生成——DFS、Prim、Kruskal算法实现</a> 这篇文章介绍了几种算法在生成 Maze 时的区别， 当时我自己实现了 kruskal 的迷宫， 但效果和课程所给的相去甚远。</p>
+
+<h3 id="21-创建独立的-room-areas">2.1 创建独立的 Room Areas</h3>
+
+<p>按照文章所述， 算法需要保证地图的宽高尺寸， 以及房间尺寸， 房间所在位置均为奇数， 这样能与生成的 Maze 路径对齐， 保证 Maze 所经过的路径与 Rooms 仅有一个 tile 的距离， 这样能够保证后续连接 Rooms 和 Maze Path 的时候的便利。</p>
+
+<p>至于创建随机且不重叠的 Room Areas 的思路也很粗暴， 随机生成 Room 的尺寸以及位置， 判断生成区块是否与已存在的 Room 存在重叠， 迭代一定次数即可。 对于一个有限地图而言， 没必要迭代太多次， 越往后重叠的概率越大反倒浪费资源。 这里需要注意的一个点是, Room 之间是需要留有一个 tile 的空隙的。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/room_and_maze.png" alt="Rooms and maze, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Room and maze, HangX-Ma</u></font>
+</div>
+
+<p>对于 Rooms 生成我用了 <strong>Inflation</strong> 的思想， 既然需要留有一个 Tile 的间隔， 不如在生成 Rooms 时将原点位置向左下移动一个单位， 将宽和高都扩大两个单位， 想象一下一个 5x5 的格子， 膨胀为 7x7 的格子。</p>
+
+<h3 id="22-剩余空间填充迷宫墙">2.2 剩余空间填充迷宫墙</h3>
+
+<p>原作者基于 <a href="http://www.odedwelgreen.com/karcero/">Karcero</a> 尝试生成迷宫墙以及前述的房间， 发现 <strong>Room then maze</strong> 的方式会更加高效， 其实道理也非常明晰， 先生成 Maze 并进行裁剪留下的空间用以生成 Rooms 其实极大限制了 Rooms 的生成区域， 而 maze 的填充仅占用 1 个 tile， 相比较动辄几十个 pixel 开销的 Rooms 区域而言， 其发生碰撞的概率会小很多。</p>
+
+<p>作者生成 Maze 的方式用了图形学中常用的 <strong>Flood Fill</strong> 算法（似乎之前听过， 但第一次系统学完数据结构还没用过）。 从一个合格的节点出发，生成迷宫， 直到这段迷宫不能继续生长为止。 然后换个合格节点继续生成， 直到整个地图被迷宫填充。</p>
+
+<p>这块比较困惑的地方是如何生成用以生长 Maze Path 的节点， 作者的思路很巧妙， 他规定了整个地图的尺寸是奇数的 <strong>W x H</strong> 大小， 同样也规定了生成的 Rooms 的尺寸也是奇数的， 且 Rooms 的原点位置也是奇数， 这样在我们遍历整个地图的时候， 只要将奇数位置填充为 <strong>Wall</strong> 类型， 就能够创建潜在的生成 Maze Path 的节点， 这些节点都能够和相邻的 Rooms 对齐且相聚一个 Tile 距离， 这是非常重要的一个属性。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/maze_path_tiles.png" alt="Essential maze path tiles, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Essential maze path tiles, HangX-Ma</u></font>
+</div>
+
+<p>在我们遍历完整个地图后， 就能够得到充满这些潜在可能转为 Maze Path 的 Wall Tile， 此时运用 <strong>Flood Fill</strong> 算法就能生成填充 Rooms 之间间隙的 Maze Path 了。 这里的思路也是遍历整张图找之前设定的 <strong>Wall Tile</strong>， 找到之后我们在该点的上下左右四个方向中找到沿该方向行进 2 格的 Tile（保证奇数这个属性）， 这个 Tile 的属性是 Wall， 并且落在设定的地图范围内。 连接当前点和目标点时， 我们设定这些 Tiles 的属性为 Floor， 这样在遍历完整个地图后就能得到 Maze Path。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/rooms_with_maze_path_without_connection.png" alt="Rooms with maze path but no connections, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Rooms with maze path but no connections, HangX-Ma</u></font>
+</div>
+
+<h3 id="23-连接-rooms-和-paths">2.3 连接 Rooms 和 Paths</h3>
+
+<p>此时一个重要的问题落在了面前， 如何连接 Rooms 和 Paths 使得整个地图联通。 一般来说我们都会想到用 Union 来解决这个问题， 但这里有个 trick， 我们需要将之前的各个独立的 Maze Path 视作一个单位而不单独去考虑组成 Maze Path 各个 Tiles， 所以在生成 Maze Path 的时候， 用 Kruskal Union 算法将这些组成 Paths 的 Tiles 加入联通集中， 对于 Rooms 中的 Tiles 也要进行相同的操作。 当然现在又有一个问题， 如何找到这些潜在的可成为 Passage 的 Tile？</p>
+
+<p>其实和之前的思路很类似， 也是要扫描整个图， 当扫到 Rooms 和 Paths 之前的空白区域的时候我们就开始进行筛选， 检查这个节点的上下左右四个方向的相邻节点是不是不为 Nothing 属性， 如果符合条件的相邻节点的数量大于两个， 说明这是一个潜在的 Passage Tile， 加入候选的集合中。</p>
+
+<p>之后我们就随机选取潜在的 Passage Connector， 如何该 Tile 还不在 Kruskal Union 中， 就将该 Tile 加入 Kruskal Union 中。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/rooms_with_maze_path_and_connection.png" alt="Rooms with maze path and connections, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Rooms with maze path and connections, HangX-Ma</u></font>
+</div>
+
+<h3 id="24-优化生成的地图">2.4 优化生成的地图</h3>
+
+<ul>
+  <li>
+    <p>地图过于拥挤</p>
+
+    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-plaintext highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
+  </li>
+  <li>
+    <p><strong>Dead End</strong> 过多</p>
+
+    <p>地图中出现很多死胡同是很糟心的， 这也是之前的 Maze Path 的一个重要问题， 需要一种算法去优化生成的 Maze Path 以减少死胡同的数量。 得益于之前地图的奇数尺寸的设定， 判断死胡同的方式很简单， 只需要检查这个点的邻居点是否有 3 个 Tile 的属性都是 Nothing， 这说明这个 Tile 没能够与另一个区域直接相连。</p>
+
+    <p>那么， 在遍历整张图找相应的 Dead End 的时候， 我们可以将其邻居点中不为 Nothing 的点作为下一个检查点或以此为下个检查方向， 直到死胡同消失或者达到我们设定的处理次数限制后， 我们再继续遍历地图。</p>
+  </li>
+  <li>
+    <p>生成地图的墙</p>
+
+    <p>前面将 Rooms 以及 Paths 都生成并优化了， 却发现有些灵魂缺失， 原来是关键的墙体没有生成。 再来一次暴力全图搜索， 找到不是空白的 Tile， 这次我们需要检查这些 Tile 的八邻居节点， 将这些节点中为 Nothing 属性的 Tile 设置为 Wall 属性。</p>
+  </li>
+</ul>
+
+<p>最后生成的地图如下所示：</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/optimized_world.png" alt="Optimized world, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Optimized world, HangX-Ma</u></font>
+</div>
+
+<h2 id="3-写在最后">3. 写在最后</h2>
+
+<p>原来是想边写 Blog 边做 Proj3 的， 结果人懒了硬是拖了两个星期才写写成了总结。 感觉整个设计如果深挖还会遇到很多未知的困难， 但就是这样一个初具雏形的游戏却让我在初期感到束手无措， 这种感觉做 Proj2 的时候也有。 但相较于 Proj2 的严格要求， Proj3 的发挥空间和余地都很足， 难度上也简单一些。 虽然这俩 Proj 为了提升效率我都去借鉴了别人的框架， 虽然都很有收获， 但思考的机会少了。</p>
+
+<p>总的来说， cs61b 给我的提升非常大， 在数据结构基础这块至少已经有了一个底子， 最近刷 LeetCode 的时候就明显感觉到学的内容能用得上， 并且很多设计思路都在实际使用的时候得到了思维上的强化。 cs61b 虽然学了很久， 但确实是一门不能急躁的课， 每个 slides 都要仔细阅读， discussion 以及 examprep 有精力有时间一定得自己独立去做， 这样印象会很深！</p>
+
+<blockquote>
+  <p>说一句题外话， 有些同学可能看到 cs61b 用的是 java 语言就觉得生疏， 或者日后用不着就不想学。 其实每个语言都有其各自的特性， 我有一个很明显的感受， 学完 java 的基础特性之后对面向对象的很多概念有了很深的理解， 尤其是 discussion 讲基类和子类的函数调用那块。 甚至我觉得最近很火的 Rust 有很多特性也是借鉴了 java。 当然语言这块在精不在多， 能博采众长是好事， 也需要潜心钻研不断深耕。</p>
+</blockquote>
+
+<p>就写到这儿， 日后再多复习复习课件， 温故而知新！</p>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
 </script>
 
+<script async src="https://static.addtoany.com/menu/page.js"></script>
 
-</div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-10-21T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/07/28/miniFOC-concept.html">miniFOC 原理阐述与多模式应用</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/10/21/cs61b-proj3',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
 
 <!-- end custom main bottom snippet -->
 </div>
@@ -956,6 +1151,68 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 
 })();*/
 </script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
   window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
     var $canvas = null, $this = null, _ctx = null, _text = '';
     $('.language-chart').each(function(){
@@ -1062,12 +1319,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      $('.js-pageview').each(function() {
-        var $this = $(this);
-        var key = $this.attr('data-page-key');
-        pageview.get(key, function(view) {
-          $this.attr('itemprop', 'userInteractionCount').attr('content', view).text(view);
-        });
+      var key =   's2023s10s21scs61b-proj3.html';
+      var title = "cs61b Proj3-BYoW";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s10s21scs61b-proj3.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
@@ -1127,7 +1382,43 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 		}
 		return actionMsg;
 	}
-})();</script>
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 100) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];

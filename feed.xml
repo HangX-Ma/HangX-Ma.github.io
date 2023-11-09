@@ -1,5 +1,173 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-08-05T10:40:07+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">miniFOC 原理阐述与多模式应用</title><link href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html" rel="alternate" type="text/html" title="miniFOC 原理阐述与多模式应用" /><published>2023-07-28T00:00:00+08:00</published><updated>2023-07-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/28/miniFOC-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><![CDATA[<p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-11-09T21:13:36+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs61b Proj3-BYoW</title><link href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html" rel="alternate" type="text/html" title="cs61b Proj3-BYoW" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/10/21/cs61b-proj3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><![CDATA[<p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
+
+<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-plaintext highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
+
+<p>我参考的是 <a href="https://github.com/YinY1/CS61B-sp21">YinY1</a> 的 Proj3 实现， 但我认为具体的细节是需要自己去思考的， 文件结构的设计已经给了我足够的启发。 这篇文章就详细介绍一下地图的生成， 这块难度比较高， Phase2 关于游戏交互的我就完成了基础功能没啥好说的。</p>
+
+<blockquote>
+  <p>最近有些焦虑， 感受到末尾保研和前位保研的差距了， 同届的同学已经参加过之江实验室的项目， 以及百度 Paddle 的夏令营， 现在在延续他的夏令营开源项目担任助教。 而对自己来说， 规划的一整个研一时间和半个研二时间是拿来补基础课程的， 毕竟平时还有实验室任务。 不过人家确实也很认真， 每天留到快 23:00 才回宿舍。 且不说了， 之后还有一门数据库的课程要补上。</p>
+</blockquote>
+
+<h2 id="1-文件目录">1. 文件目录</h2>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>byow
+  ├─Core
+  │  │  Engine.java
+  │  │  Main.java
+  │  │  Pair.java
+  │  │  Point.java
+  │  │  Property.java
+  │  │  RandomUtils.java
+  │  │  Utils.java
+  │  │  World.java
+  │  │
+  │  ├─Avatar
+  │  │      Avatar.java
+  │  │      Tofu.java
+  │  │
+  │  ├─HUD
+  │  │      Frame.java
+  │  │
+  │  └─Maps
+  │          Road.java
+  │          Room.java
+  │          Wall.java
+  │
+  ├─InputDemo
+  │      DemoInputSource.java
+  │      InputSource.java
+  │      KeyboardInputSource.java
+  │      RandomInputSource.java
+  │      StringInputDevice.java
+  │
+  ├─lab12
+  │      BoringWorldDemo.java
+  │      HexWorld.java
+  │      project3prep.md
+  │      RandomWorldDemo.java
+  │
+  ├─lab13
+  │      MemoryGame.java
+  │
+  ├─Networking
+  │      BYOWClient.java
+  │      BYOWServer.java
+  │
+  └─TileEngine
+          TERenderer.java
+          TETile.java
+          Tileset.java
+</code></pre></div></div>
+
+<h2 id="2-phase1-world-generation">2. Phase1: World Generation</h2>
+
+<p>Phase1 要求生成随机的地图， 地图要求由不同大小的 Rooms 以及联通这些 Room 的通道构成。 一般的实现办法就是生成多个 Rooms 的区块， 然后将这些 Rooms 通过 Path 联通起来， 而如何生成 Path 真的非常考验人。 我自己尝试过用类似 Hexagon World 中扫描的方式， 让每个 Rooms 紧贴着生成， 也尝试过生成 Rooms 后用生成迷宫的方式去生成 Path， 但这些方法都不能很好的做到和 Josh Hug 给出的样例类似。</p>
+
+<p>花了一天的时间考虑算法， 闭门造车真的不行， 有幸刷到了这样一篇知乎 <a href="https://zhuanlan.zhihu.com/p/30724817">【游必有方】一种 RogueLike 地图生成算法</a> 作者对原文 <a href="https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/">Rooms and Mazes: A Procedural Dungeon Generator</a> 进行了简化和翻译。 第一次了解到这种 2D 场景的类似的游戏被称为 <strong>RogueLike Game</strong>， 文章介绍的内容和 Proj3 所介绍的需求非常类似。</p>
+
+<p>生成地图的主要步骤：</p>
+
+<ul>
+  <li>在给定大小的地图区域内随机生成一些房间；</li>
+  <li>将除房间以外的区域用随机生成的迷宫填充；</li>
+  <li>将所有房间和迷宫通过少数节点连接起来；</li>
+  <li>删除不必要的迷宫死胡同，降低地图复杂度。</li>
+</ul>
+
+<p>对我来说链接迷宫和房间并降低地图复杂度这块是最为困惑的和不解的， 迫不及待想要了解作者的巧妙构思了。 其实这块自然而然会想到课上介绍的 Union 的概念， 尤其是一提到联通路径的时候， 就会想到 Prim 和 Kruskal 这两个最小生成树算法。 <a href="https://www.cnblogs.com/shiroe/p/15506909.html">【UE4 C++】迷宫生成——DFS、Prim、Kruskal算法实现</a> 这篇文章介绍了几种算法在生成 Maze 时的区别， 当时我自己实现了 kruskal 的迷宫， 但效果和课程所给的相去甚远。</p>
+
+<h3 id="21-创建独立的-room-areas">2.1 创建独立的 Room Areas</h3>
+
+<p>按照文章所述， 算法需要保证地图的宽高尺寸， 以及房间尺寸， 房间所在位置均为奇数， 这样能与生成的 Maze 路径对齐， 保证 Maze 所经过的路径与 Rooms 仅有一个 tile 的距离， 这样能够保证后续连接 Rooms 和 Maze Path 的时候的便利。</p>
+
+<p>至于创建随机且不重叠的 Room Areas 的思路也很粗暴， 随机生成 Room 的尺寸以及位置， 判断生成区块是否与已存在的 Room 存在重叠， 迭代一定次数即可。 对于一个有限地图而言， 没必要迭代太多次， 越往后重叠的概率越大反倒浪费资源。 这里需要注意的一个点是, Room 之间是需要留有一个 tile 的空隙的。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/room_and_maze.png" alt="Rooms and maze, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Room and maze, HangX-Ma</u></font>
+</div>
+
+<p>对于 Rooms 生成我用了 <strong>Inflation</strong> 的思想， 既然需要留有一个 Tile 的间隔， 不如在生成 Rooms 时将原点位置向左下移动一个单位， 将宽和高都扩大两个单位， 想象一下一个 5x5 的格子， 膨胀为 7x7 的格子。</p>
+
+<h3 id="22-剩余空间填充迷宫墙">2.2 剩余空间填充迷宫墙</h3>
+
+<p>原作者基于 <a href="http://www.odedwelgreen.com/karcero/">Karcero</a> 尝试生成迷宫墙以及前述的房间， 发现 <strong>Room then maze</strong> 的方式会更加高效， 其实道理也非常明晰， 先生成 Maze 并进行裁剪留下的空间用以生成 Rooms 其实极大限制了 Rooms 的生成区域， 而 maze 的填充仅占用 1 个 tile， 相比较动辄几十个 pixel 开销的 Rooms 区域而言， 其发生碰撞的概率会小很多。</p>
+
+<p>作者生成 Maze 的方式用了图形学中常用的 <strong>Flood Fill</strong> 算法（似乎之前听过， 但第一次系统学完数据结构还没用过）。 从一个合格的节点出发，生成迷宫， 直到这段迷宫不能继续生长为止。 然后换个合格节点继续生成， 直到整个地图被迷宫填充。</p>
+
+<p>这块比较困惑的地方是如何生成用以生长 Maze Path 的节点， 作者的思路很巧妙， 他规定了整个地图的尺寸是奇数的 <strong>W x H</strong> 大小， 同样也规定了生成的 Rooms 的尺寸也是奇数的， 且 Rooms 的原点位置也是奇数， 这样在我们遍历整个地图的时候， 只要将奇数位置填充为 <strong>Wall</strong> 类型， 就能够创建潜在的生成 Maze Path 的节点， 这些节点都能够和相邻的 Rooms 对齐且相聚一个 Tile 距离， 这是非常重要的一个属性。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/maze_path_tiles.png" alt="Essential maze path tiles, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Essential maze path tiles, HangX-Ma</u></font>
+</div>
+
+<p>在我们遍历完整个地图后， 就能够得到充满这些潜在可能转为 Maze Path 的 Wall Tile， 此时运用 <strong>Flood Fill</strong> 算法就能生成填充 Rooms 之间间隙的 Maze Path 了。 这里的思路也是遍历整张图找之前设定的 <strong>Wall Tile</strong>， 找到之后我们在该点的上下左右四个方向中找到沿该方向行进 2 格的 Tile（保证奇数这个属性）， 这个 Tile 的属性是 Wall， 并且落在设定的地图范围内。 连接当前点和目标点时， 我们设定这些 Tiles 的属性为 Floor， 这样在遍历完整个地图后就能得到 Maze Path。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/rooms_with_maze_path_without_connection.png" alt="Rooms with maze path but no connections, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Rooms with maze path but no connections, HangX-Ma</u></font>
+</div>
+
+<h3 id="23-连接-rooms-和-paths">2.3 连接 Rooms 和 Paths</h3>
+
+<p>此时一个重要的问题落在了面前， 如何连接 Rooms 和 Paths 使得整个地图联通。 一般来说我们都会想到用 Union 来解决这个问题， 但这里有个 trick， 我们需要将之前的各个独立的 Maze Path 视作一个单位而不单独去考虑组成 Maze Path 各个 Tiles， 所以在生成 Maze Path 的时候， 用 Kruskal Union 算法将这些组成 Paths 的 Tiles 加入联通集中， 对于 Rooms 中的 Tiles 也要进行相同的操作。 当然现在又有一个问题， 如何找到这些潜在的可成为 Passage 的 Tile？</p>
+
+<p>其实和之前的思路很类似， 也是要扫描整个图， 当扫到 Rooms 和 Paths 之前的空白区域的时候我们就开始进行筛选， 检查这个节点的上下左右四个方向的相邻节点是不是不为 Nothing 属性， 如果符合条件的相邻节点的数量大于两个， 说明这是一个潜在的 Passage Tile， 加入候选的集合中。</p>
+
+<p>之后我们就随机选取潜在的 Passage Connector， 如何该 Tile 还不在 Kruskal Union 中， 就将该 Tile 加入 Kruskal Union 中。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/rooms_with_maze_path_and_connection.png" alt="Rooms with maze path and connections, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Rooms with maze path and connections, HangX-Ma</u></font>
+</div>
+
+<h3 id="24-优化生成的地图">2.4 优化生成的地图</h3>
+
+<ul>
+  <li>
+    <p>地图过于拥挤</p>
+
+    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-plaintext highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
+  </li>
+  <li>
+    <p><strong>Dead End</strong> 过多</p>
+
+    <p>地图中出现很多死胡同是很糟心的， 这也是之前的 Maze Path 的一个重要问题， 需要一种算法去优化生成的 Maze Path 以减少死胡同的数量。 得益于之前地图的奇数尺寸的设定， 判断死胡同的方式很简单， 只需要检查这个点的邻居点是否有 3 个 Tile 的属性都是 Nothing， 这说明这个 Tile 没能够与另一个区域直接相连。</p>
+
+    <p>那么， 在遍历整张图找相应的 Dead End 的时候， 我们可以将其邻居点中不为 Nothing 的点作为下一个检查点或以此为下个检查方向， 直到死胡同消失或者达到我们设定的处理次数限制后， 我们再继续遍历地图。</p>
+  </li>
+  <li>
+    <p>生成地图的墙</p>
+
+    <p>前面将 Rooms 以及 Paths 都生成并优化了， 却发现有些灵魂缺失， 原来是关键的墙体没有生成。 再来一次暴力全图搜索， 找到不是空白的 Tile， 这次我们需要检查这些 Tile 的八邻居节点， 将这些节点中为 Nothing 属性的 Tile 设置为 Wall 属性。</p>
+  </li>
+</ul>
+
+<p>最后生成的地图如下所示：</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-10-21-cs61b-proj3/optimized_world.png" alt="Optimized world, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Optimized world, HangX-Ma</u></font>
+</div>
+
+<h2 id="3-写在最后">3. 写在最后</h2>
+
+<p>原来是想边写 Blog 边做 Proj3 的， 结果人懒了硬是拖了两个星期才写写成了总结。 感觉整个设计如果深挖还会遇到很多未知的困难， 但就是这样一个初具雏形的游戏却让我在初期感到束手无措， 这种感觉做 Proj2 的时候也有。 但相较于 Proj2 的严格要求， Proj3 的发挥空间和余地都很足， 难度上也简单一些。 虽然这俩 Proj 为了提升效率我都去借鉴了别人的框架， 虽然都很有收获， 但思考的机会少了。</p>
+
+<p>总的来说， cs61b 给我的提升非常大， 在数据结构基础这块至少已经有了一个底子， 最近刷 LeetCode 的时候就明显感觉到学的内容能用得上， 并且很多设计思路都在实际使用的时候得到了思维上的强化。 cs61b 虽然学了很久， 但确实是一门不能急躁的课， 每个 slides 都要仔细阅读， discussion 以及 examprep 有精力有时间一定得自己独立去做， 这样印象会很深！</p>
+
+<blockquote>
+  <p>说一句题外话， 有些同学可能看到 cs61b 用的是 java 语言就觉得生疏， 或者日后用不着就不想学。 其实每个语言都有其各自的特性， 我有一个很明显的感受， 学完 java 的基础特性之后对面向对象的很多概念有了很深的理解， 尤其是 discussion 讲基类和子类的函数调用那块。 甚至我觉得最近很火的 Rust 有很多特性也是借鉴了 java。 当然语言这块在精不在多， 能博采众长是好事， 也需要潜心钻研不断深耕。</p>
+</blockquote>
+
+<p>就写到这儿， 日后再多复习复习课件， 温故而知新！</p>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cs61b" /><category term="Java" /><summary type="html"><![CDATA[UCB cs61 spring 2021 Proj3-BYoW 设计思路与记录]]></summary></entry><entry><title type="html">miniFOC 原理阐述与多模式应用</title><link href="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html" rel="alternate" type="text/html" title="miniFOC 原理阐述与多模式应用" /><published>2023-07-28T00:00:00+08:00</published><updated>2023-07-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/28/miniFOC-concept</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/28/miniFOC-concept.html"><![CDATA[<p>还是遇到一些需要记录的地方， 毕竟电机控制这部分仅仅在 <em>运动控制技术</em> 这么课听过一点点（老师不咋讲， 学生不咋听）， 实践的时候和理论还是有已经的距离的。</p>
 
 <h2 id="0-资料汇总">0. 资料汇总</h2>
 
@@ -1119,7 +1287,7 @@
 
 <p>另外， rCore 介绍了条件变量的两种用法 <strong>条件同步问题</strong> 以及 <strong>同步屏障问题</strong>， 尤其同步屏障问题在多线程编程中会经常遇到， 深有体会。 对此可详见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id6">条件变量的使用方法</a> 学习。</p>
 
-<p>TODO…</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
+<p>TODO…</p>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
 
 <dl>
   <dt>管道</dt>
@@ -1496,7 +1664,7 @@
 
 <blockquote>
   <p>具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e9b19e5f19851f12bcae83531a050d60230abd08">commit#e9b19e5</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
   <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
 </blockquote>
 
@@ -1916,7 +2084,7 @@
 
 <blockquote>
   <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/1b6c70b223719a7207a786fdc49e09eccce51480">commit#1b6c70b</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-07-rcore-note-ch5/process-os-detail.png" alt="Process OS details, rCore" width="600" />
@@ -2397,7 +2565,7 @@
 
 <blockquote>
   <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5abe01a7d69f4f0486888c78acf065e4ee296989">commit#5abe01a</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
 
 <p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
 
@@ -2802,341 +2970,4 @@
 
 <blockquote>
   <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5e57b472225f7d037535038ba6c037e9566cfeb3">commit#5e57b47</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/165bda860fb29ab4c3af68e308b3f82080825031">commit#165bda8</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 3</title><link href="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 3" /><published>2023-07-01T00:00:00+08:00</published><updated>2023-07-01T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/01/rcore-note-ch3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/01/rcore-note-ch3.html"><![CDATA[<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第三章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch3">[ch3]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<blockquote>
-  <p>隔了这么就才整到第三章， 毕竟最近杂活儿有点多， 另外第二章的编程题也是安排很不合理， 把后面的内容提前扔给读者结果第三章实验部分要推倒重来太浪费时间了。 更新这章的 OS 框架的时候变动的地方有些多， 尤其是 <code class="language-plaintext highlighter-rouge">Makefile</code> 部分以及 <code class="language-plaintext highlighter-rouge">build.rs</code> 部分和 <em>rCore-Tutorial-Guide-2023S</em> 中进行了同步以及微调。</p>
-</blockquote>
-
-<h2 id="1-multi-program-os">1. Multi-program OS</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/multiprog-os-detail.png" alt="Multi-program OS Details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Multi-program OS Details, rCore</u></font>
-</div>
-
-<p>要满足 <strong>任务切换</strong> 的要求， 所以程序需要预先被加载到一个固定的内存地址， 而不是所有程序共用一个入口地址。 rCore 添加了 <code class="language-plaintext highlighter-rouge">user/build.py</code> 读取 <code class="language-plaintext highlighter-rouge">os/src/link_app.S</code> 并对每个程序的地址空间进行更改以适应前述要求。</p>
-
-<p>与 Trap 不同， Mult-program OS 中的任务切换发生在内核态 （S Mode） 且不涉及特权级切换， 通过 <code class="language-plaintext highlighter-rouge">__switch</code> 函数实现两个不同的 <code class="language-plaintext highlighter-rouge">Task Context</code> 的切换。</p>
-
-<blockquote>
-  <p><strong>为什么 <code class="language-plaintext highlighter-rouge">__switch</code> 需要通过汇编的完成主要功能？</strong><br />
-由于任务切换不涉及特权级的改变， 因而需要保存的上下文就比较少， 仅需要保存 <code class="language-plaintext highlighter-rouge">ra</code> 入口地址， <code class="language-plaintext highlighter-rouge">sp</code> 栈指针， 以及 Callee 负责寄存器 <code class="language-plaintext highlighter-rouge">s0~s11</code> 即可。 高级程序语言会在函数中自己使用一些通用的寄存器， 可能会发生意料之外的控制流， 另外 <code class="language-plaintext highlighter-rouge">__switch</code> 函数仅作为 label 存在不会被 Rust/C 编译器处理， 这些都是使用汇编完成 <code class="language-plaintext highlighter-rouge">__switch</code> 主体功能的原因。</p>
-</blockquote>
-
-<h2 id="2-cooperative-os">2. Cooperative OS</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/more-task-multiprog-os-detail.png" alt="Cooperative OS Details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Cooperative OS Details, rCore</u></font>
-</div>
-
-<p>Multi-program OS 仅仅介绍了任务切换中的 <strong>换栈</strong> 需求， 任务切换还需要指示任务的状态， 维护这一信息。 这里我仅记录初始化流程中的几个自己困惑的细节。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="k">in</span> <span class="n">tasks</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">task</span><span class="py">.task_cx</span> <span class="o">=</span> <span class="nn">TaskContext</span><span class="p">::</span><span class="nf">goto_restore</span><span class="p">(</span><span class="nf">init_app_cx</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
-    <span class="n">task</span><span class="py">.task_status</span> <span class="o">=</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Ready</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// os/src/task/context.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">goto_restore</span><span class="p">(</span><span class="n">kstack_ptr</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
-    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
-        <span class="k">fn</span> <span class="nf">__restore</span><span class="p">();</span>
-    <span class="p">}</span>
-    <span class="k">Self</span> <span class="p">{</span>
-        <span class="n">ra</span><span class="p">:</span> <span class="n">__restore</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span>
-        <span class="n">sp</span><span class="p">:</span> <span class="n">kstack_ptr</span><span class="p">,</span>
-        <span class="n">s</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">12</span><span class="p">],</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">TASK_MANAGER</code> 通过 <code class="language-plaintext highlighter-rouge">init_app_cx</code> 函数初始化了每个 task 的内核栈， 而 <code class="language-plaintext highlighter-rouge">goto_restore</code> 的设计就非常巧妙， 这里并没有进入 <code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__restore</code> 标签处， 而是将任务栈的 <code class="language-plaintext highlighter-rouge">ra</code> 初始化为 <code class="language-plaintext highlighter-rouge">__restore</code> 地址， 这样当 <code class="language-plaintext highlighter-rouge">__switch</code> 完成后 <code class="language-plaintext highlighter-rouge">ret</code> 就能直接进入<code class="language-plaintext highlighter-rouge">trap.S</code> 的 <code class="language-plaintext highlighter-rouge">__restore</code> 恢复到用户态继续执行任务。 相应的其中的 <code class="language-plaintext highlighter-rouge">sp</code> 指针被初始化为内核栈指针。</p>
-
-<blockquote>
-  <p><strong>丢失的 <code class="language-plaintext highlighter-rouge">mv sp, a0</code></strong></p>
-
-  <ul>
-    <li>
-      <p>可以顺着控制流梳理一遍， 第一次用到 <code class="language-plaintext highlighter-rouge">__switch</code> 是初始化时运行 <code class="language-plaintext highlighter-rouge">run_first_task</code> 函数。 <code class="language-plaintext highlighter-rouge">__switch</code> 将 <code class="language-plaintext highlighter-rouge">unused</code> 中的垃圾数据保存在了程序栈后切换到了第一个 task （此后就是内核栈和用户栈之间的切换了）， 通过 <code class="language-plaintext highlighter-rouge">ra</code> 指向的 <code class="language-plaintext highlighter-rouge">__restore</code> 进行上下文恢复， 对于 task 而并不需要再次更新 <code class="language-plaintext highlighter-rouge">sp</code>， 该值已经在 <code class="language-plaintext highlighter-rouge">__switch</code> 中被恢复成该任务对应的内核指针了。</p>
-    </li>
-    <li>
-      <p>另一个就是进入 trap 之后， <code class="language-plaintext highlighter-rouge">__alltrap</code> 最后进入 <code class="language-plaintext highlighter-rouge">trap_handler</code> 函数， 该函数最后会在返回参数的 <code class="language-plaintext highlighter-rouge">a0</code> 中保存之前存入的 <code class="language-plaintext highlighter-rouge">TrapContext</code>， 而在此之前有这么两句指令说明了 <code class="language-plaintext highlighter-rouge">sp</code> 就是这个 <code class="language-plaintext highlighter-rouge">TrapContext</code>。 因而无需再进行重复保存。</p>
-
-      <div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w"> </span><span class="c1"># set input argument of trap_handler(cx: &amp;mut TrapContext)</span><span class="w">
- </span><span class="n">mv</span><span class="w"> </span><span class="n">a0</span><span class="p">,</span><span class="w"> </span><span class="n">sp</span><span class="w">
- </span><span class="n">call</span><span class="w"> </span><span class="n">trap_handler</span><span class="w">
-</span></code></pre></div>      </div>
-    </li>
-  </ul>
-</blockquote>
-
-<h2 id="3-timesharing-os">3. Timesharing OS</h2>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-01-rcore-note-ch3/time-task-multiprog-os-detail.png" alt="Timesharing OS Details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Timesharing OS Details, rCore</u></font>
-</div>
-
-<h2 id="4-课后练习">4. 课后练习</h2>
-
-<p>这章的编程题还是有必要提前做一下的， 汲取了上一章的教训这次先看了 lab 部分， 发现 lab 有个要求是记录当前的正在运行的 task 的运行总时长， 这部分时间既包括内核态与用户态两部分的运行时间， 正好编程题包括了。 这部分可以选择性的完成几个基础练习， 难的部分再好好研究一下。</p>
-
-<h3 id="41-编程题">4.1 编程题</h3>
-
-<ol>
-  <li>
-    <p><em><strong>扩展内核， 能够显示操作系统切换任务的过程。</strong></em></p>
-
-    <p>只用在 <code class="language-plaintext highlighter-rouge">os/src/task/mod.rs</code> 的 <code class="language-plaintext highlighter-rouge">run_next_task</code> 以及 <code class="language-plaintext highlighter-rouge">mark_current_exited</code>， <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 加入打印就行， 另外在这里我对任务切换的流程进行了优化， 仅在当前 <code class="language-plaintext highlighter-rouge">current != next</code> 时才进行 <code class="language-plaintext highlighter-rouge">Task Context</code> 交换以及打印相关的信息， 这样能减少内核开销。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// os/src/task/mod.rs</span>
- <span class="k">fn</span> <span class="nf">run_next_task</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-     <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">next</span><span class="p">)</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_next_task</span><span class="p">()</span> <span class="p">{</span>
-         <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="k">self</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-         <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-         <span class="o">...</span>
-         <span class="c1">// ch3-pro1</span>
-         <span class="k">if</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">next</span> <span class="p">{</span>
-             <span class="nd">println!</span><span class="p">(</span><span class="s">"[kernel] task switch from {} to {}"</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">next</span><span class="p">);</span>
-             <span class="k">unsafe</span> <span class="p">{</span>
-                 <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
-             <span class="p">}</span>
-         <span class="p">}</span>
-     <span class="p">}</span>
-     <span class="o">...</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>除此之外 <code class="language-plaintext highlighter-rouge">struct TaskManagerInner</code> 中我添加了 <code class="language-plaintext highlighter-rouge">alive_task_num</code> 用以记录仍在 <code class="language-plaintext highlighter-rouge">Ready</code> 以及 <code class="language-plaintext highlighter-rouge">Running</code> 的 task 的数量， 仅在 <code class="language-plaintext highlighter-rouge">alive_task_num &gt; 1</code> 的时候才在 <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 中添加打印以保持输出面板整洁以及系统开销最小。</p>
-
-    <blockquote>
-      <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4f1dd08bae3e884a06e2a8141bf0fa4d6909310a">commit#4f1dd08</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/208d86306ee7bba5149fbd38acfb62f6d08e9d84">commit#208d863</a></p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>扩展内核， 能够统计每个应用执行后的完成时间： 用户态完成时间和内核态完成时间。</strong></em></p>
-
-    <p>lab 相关的重点， <code class="language-plaintext highlighter-rouge">sys_task_info</code> 大部分信息其实都需要 task module 的支持。 另外， 每个 task 都是独立的， 因而需要在 <code class="language-plaintext highlighter-rouge">struct TaskControlBlock</code> 中增加记录 task 运行时间的变量。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
- <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-     <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>之后比较关键的是如何记录这个时间， 这个我在之前 chapter2 实现了类似的函数， 基本思路就是利用 riscv 的 mtime 寄存器， 需要有个特定的变量存储 mtime 寄存器的值并在每次进入该 task 时计算与现在的 mtime 的插值获取时间信息的变更。</p>
-    <blockquote>
-      <p>lab 中要求时间单位为 ms， 可以使用 <code class="language-plaintext highlighter-rouge">timer.rs</code> 的 <code class="language-plaintext highlighter-rouge">get_time_ms</code> 函数。</p>
-    </blockquote>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskManagerInner</span> <span class="p">{</span>
-     <span class="cd">/// task list</span>
-     <span class="n">tasks</span><span class="p">:</span> <span class="p">[</span><span class="n">TaskControlBlock</span><span class="p">;</span> <span class="n">MAX_APP_NUM</span><span class="p">],</span>
-     <span class="cd">/// id of current `Running` task</span>
-     <span class="n">current_task</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="cd">/// the number of tasks that have not exit</span>
-     <span class="n">alive_task_num</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-     <span class="cd">/// record time point</span>
-     <span class="n">checkpoint</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <dl>
-      <dt>内核态时间</dt>
-      <dd>在 <code class="language-plaintext highlighter-rouge">run_first_task</code> 以及 <code class="language-plaintext highlighter-rouge">mark_current_exited</code>， <code class="language-plaintext highlighter-rouge">mark_current_suspend</code> 中更新信息， 另外需要在 task 退出时打印耗时。</dd>
-      <dt>用户态时间</dt>
-      <dd>用户态和内核态的分界处就是 trap， 因而在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 的起始位置和末尾位置可分别作为 user time 的开始以及 user time 的结束。</dd>
-    </dl>
-
-    <blockquote>
-      <p>具体实现可以参考课后参考答案部分 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5904c2fcb253a5bfa694ab94e0c7e3006f510238">commit#5904c2f</a>， :sob: <strong>我把 <code class="language-plaintext highlighter-rouge">user_time_start</code> 和 <code class="language-plaintext highlighter-rouge">user_time_end</code></strong> 的位置搞反了， 后续所有的版本都要更改。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>编写浮点应用程序A， 并扩展内核， 支持面向浮点应用的正常切换与抢占。</strong></em></p>
-
-    <p>这块没怎么搞懂， 看起来要加很多东西。</p>
-  </li>
-  <li>
-    <p><em><strong>编写应用程序或扩展内核， 能够统计任务切换的大致开销。</strong></em></p>
-
-    <p>这里的参考答案是有问题的， <code class="language-plaintext highlighter-rouge">__switch</code> 之后会跳转到 <code class="language-plaintext highlighter-rouge">__restore</code> 恢复到用户态，后面那句只有下一次用户态 trap 后才会执行。 虽然不对我还是测试了一下， 发现 context switch 要花费几百毫秒， 这肯定是不可能的。 可行的办法是更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 函数， 将每个 <code class="language-plaintext highlighter-rouge">__switch</code> 调用的返回地址更改为 <code class="language-plaintext highlighter-rouge">__pre_restore</code> 并在这里插入一个更新 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中的 <code class="language-plaintext highlighter-rouge">switch_time</code> 的值， 这样才能统计不同的 task 的 switch context 开销。</p>
-
-    <ul>
-      <li>
-        <p>首先需要在 <code class="language-plaintext highlighter-rouge">os/src/task/task.rs</code> 的 <code class="language-plaintext highlighter-rouge">struct TaskControlBlock</code> 中插入统计每个 task 任务切换上下文开销的变量。</p>
-
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/task/rs</span>
-  <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-  <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-      <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-      <span class="k">pub</span> <span class="n">switch_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-      <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-  <span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>更新 <code class="language-plaintext highlighter-rouge">trap.S</code> 并在尾部插入如下代码， 相应的需要更改 <code class="language-plaintext highlighter-rouge">goto_restore</code> 中 <code class="language-plaintext highlighter-rouge">ra</code> 地址为 <code class="language-plaintext highlighter-rouge">__pre_restore</code>。</p>
-
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">__pre_restore</span><span class="p">:</span>
-      <span class="n">mv</span> <span class="n">a0</span><span class="p">,</span> <span class="n">sp</span>
-      <span class="n">call</span> <span class="n">switch_cost</span>
-      <span class="n">mv</span> <span class="n">sp</span><span class="p">,</span> <span class="n">a0</span>
-      <span class="n">j</span> <span class="n">__restore</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>context switch 的开销统计的相关函数如下。</p>
-
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/task/mod.rs</span>
-  <span class="k">pub</span> <span class="k">static</span> <span class="k">mut</span> <span class="n">SWITCH_TASK_START</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
-      <span class="n">SWITCH_TASK_START</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
-      <span class="nn">switch</span><span class="p">::</span><span class="nf">__switch</span><span class="p">(</span><span class="n">current_task_cx_ptr</span><span class="p">,</span> <span class="n">next_task_cx_ptr</span><span class="p">);</span>
-      <span class="c1">// 记录除了第一次运行外的 switch cost</span>
-      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_switch_cost</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-      <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-      <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.switch_time</span> <span class="o">+=</span> <span class="n">cost</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="c1">// os/src/trap/mod.rs</span>
-  <span class="nd">#[no_mangle]</span>
-  <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">switch_cost</span> <span class="p">(</span><span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">TrapContext</span> <span class="p">{</span>
-      <span class="k">crate</span><span class="p">::</span><span class="nn">task</span><span class="p">::</span><span class="nf">update_switch_cost</span><span class="p">(</span><span class="nf">get_time_us</span><span class="p">()</span> <span class="o">-</span> <span class="n">SWITCH_TASK_START</span><span class="p">);</span>
-      <span class="n">cx</span>
-  <span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-    </ul>
-
-    <blockquote>
-      <p>具体的实现和细节可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/4e9425855a85e601fa02070c41da72b5a4f1b7c1">commit#4e9425</a>， 但当时做的时候遗漏了 <code class="language-plaintext highlighter-rouge">__switch</code> 计时函数中的 <code class="language-plaintext highlighter-rouge">crate::task::update_switch_cost(get_time_us() - SWITCH_TASK_START);</code> 导致内核只能记载程序 <strong>switch to not running</strong> 即程序开始第一次运行前的开销。 具体可以参考 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/141#issuecomment-1637146452">Mars</a> 在 rCore 相关章节的留言。</p>
-    </blockquote>
-  </li>
-  <li>
-    <p><em><strong>扩展内核，支持在内核态响应中断。</strong></em></p>
-  </li>
-  <li>
-    <p><em><strong>扩展内核，支持在内核运行的任务（简称内核任务），并支持内核任务的抢占式切换。</strong></em></p>
-  </li>
-</ol>
-
-<h3 id="42-实验练习">4.2 实验练习</h3>
-
-<h4 id="获取任务信息">获取任务信息</h4>
-
-<p>做完编程题的第二个就跑来做 lab 了， 事情比我想得要复杂一些。 这里需要声明一下 <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/index.html">rCore-Tutorial-Guide 2023</a> 实验指导书对应的 <a href="https://github.com/LearningOS/rCore-Tutorial-Test-2023S">test repo</a> 和当前的 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/index.html">rCore-Tutorial-Book-v3 3.6.0-alpha.1 文档</a> 是有差异的， 如果你和我一样是按照 tutorial 一步步搭起来的 OS 请注意以下这些细节。</p>
-
-<p>Guide 2023S 中提供的接口函数是如下形式， 在具体实现的时候由于 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 中存在一个数组结构， 需要添加 <code class="language-plaintext highlighter-rouge">#[derive(Clone, Copy)]</code>， 如果添加了 <code class="language-plaintext highlighter-rouge">#[repr(C)]</code> 修饰， 后续在 user 目录下的 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 需要保持声明的一致性， 否则 os 部分的 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 将无法正确赋值。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
-<span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span>
-
-<span class="k">struct</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-    <span class="n">status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-    <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-    <span class="n">time</span><span class="p">:</span> <span class="nb">usize</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>我最开始设想在 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 外在包裹一个 <code class="language-plaintext highlighter-rouge">TaskInfoWrapper</code>， 并将其声明为如下 case1 形式， 但问题也随之而来， 程序运行会出现 <em><strong>PageFault</strong></em> 错误。 而 case2 这样试图将 <code class="language-plaintext highlighter-rouge">TaskInfo</code> 作为可变量用 <code class="language-plaintext highlighter-rouge">UPSafeCell</code> 保护， 之后再通过 <code class="language-plaintext highlighter-rouge">lazy_static!</code> 宏声明一个 <code class="language-plaintext highlighter-rouge">[TaskInfoWrapper;MAX_APP_NUM]</code> 全局数组变量则会遇到 Copy Trait 未实现的问题。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// case1</span>
-<span class="k">struct</span> <span class="n">TaskInfoWrapper</span> <span class="p">{</span>
-    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="p">[</span><span class="n">TaskInfo</span><span class="p">;</span> <span class="n">MAX_APP_NUM</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="c1">// case2</span>
-<span class="k">struct</span> <span class="n">TaskInfoWrapper</span> <span class="p">{</span>
-    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">TaskInfo</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>因而我想现阶段我没办法找到一种合适的办法构造一个全局数组变量去存储每个 task info， 那不如利用现有的资源， 每个 task 都维护了一个 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 变量， 此前的编程题作业在这里面添加了 <code class="language-plaintext highlighter-rouge">kernel_time</code> 以及 <code class="language-plaintext highlighter-rouge">user_time</code>， 不如再增加一个 <code class="language-plaintext highlighter-rouge">syscall_times</code> 数组变量（与所给测例一致）。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">task_status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-    <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>剩下的事情就比较简单了， 给 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 提供一个可以获取当前 task 的 <code class="language-plaintext highlighter-rouge">TaskCOntrolBlock</code> 的函数， 以及一个可以在 <code class="language-plaintext highlighter-rouge">trap_handler</code> 的 syscall 之前调用的增加 <code class="language-plaintext highlighter-rouge">syscall_times</code> 值的函数就能基本满足题干的要求， 我是这么实现的。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_current_task_block</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="nf">.clone</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_task_syscall_times</span><span class="p">(</span><span class="n">syscall_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.syscall_times</span><span class="p">[</span><span class="n">syscall_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// os/src/syscall/process.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">task_block</span> <span class="o">=</span> <span class="nf">get_current_task_block</span><span class="p">();</span>
-    <span class="k">unsafe</span> <span class="p">{</span>
-        <span class="o">*</span><span class="n">ti</span> <span class="o">=</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-            <span class="n">status</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.task_status</span><span class="p">,</span>
-            <span class="n">syscall_times</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.syscall_times</span><span class="p">,</span>
-            <span class="n">time</span><span class="p">:</span> <span class="n">task_block</span><span class="py">.kernel_time</span> <span class="o">+</span> <span class="n">task_block</span><span class="py">.user_time</span><span class="p">,</span>
-        <span class="p">};</span>
-    <span class="p">}</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d5f55551e5e3428ca7c17026329c2d84fe9bde4f">commit#d5f5555</a>, 但该 commit 中我还对之前的 <code class="language-plaintext highlighter-rouge">sys_write</code> 的 checker 函数进行了更新。</p>
-</blockquote>
-
-<p class="error">需要注意 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 需要单独运行测试， 否则 <code class="language-plaintext highlighter-rouge">get_time</code> 函数获取的几个时间点的差值会受到其他程序影响而产生很大偏差。 另外测例中的 <code class="language-plaintext highlighter-rouge">println!</code> 是调用了 flush 函数的， 因而在 rCore 2023S 提供的测试环境中确实会有两次 write 系统调用， 但是按照 tutorial 搭的 OS 现阶段仅有一次 write 系统调用， 若这个测试没通过可以自行修改一下。</p>]]></content><author><name>HangX-Ma</name></author><category term="rust" /><category term="rCore" /><summary type="html"><![CDATA[第三章：多道程序与分时多任务， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
