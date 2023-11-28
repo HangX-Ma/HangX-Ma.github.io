@@ -12,10 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Async Programming in Rust: Futures, Async/Await - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Cpp-Quiz - 一只豆腐</title>
 
-<meta name="description" content="Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。">
-<link rel="canonical" href="https://hangx-ma.github.io/2023/06/16/rust-async.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="做 C++ Quiz 遇到一些有意思的语法细节记录，钻牛角尖的那种。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/11/14/cpp-details.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -274,19 +274,7 @@
         <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
-</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:url(/assets/images/bg/rust-lang/rust_metal_soft.png);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Rust">Rust</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 16, 2023</span>
-            </li><li><i class="fas fa-file-word"></i>
-                <span> Total 130 words </span>
-            </li>
-            <li>
-                <i class="fas fa-clock"></i>
-                <span> About 1 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s16srust-async.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Async Programming in Rust: Futures, Async/Await</h1></header></div><p class="overlay__excerpt">Rust 异步编程中涉及到 Futures， Async/Await 等设计， 这种 Event Driven Programming 以及 Non-Blocking 的设计与构想非常重要。</p></div></div>
-              </div>
-            </div><div class ="main"><div class="grid grid--reverse">
+</div><div class="page__content"><img class="article__header--cover" src="/assets/images/bg/c/CPP-Language.png" /><div class ="main"><div class="grid grid--reverse">
 
               <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
 </aside></div>
@@ -294,17 +282,49 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="Async Programming in Rust: Futures, Async/Await"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-16T00:00:00+08:00">
-    <meta itemprop="keywords" content="Rust"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Cpp-Quiz</h1></header></div><meta itemprop="headline" content="Cpp-Quiz"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=C%2B%2B">C++</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Nov 14, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 750 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 3 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s11s14scpp-details.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-11-14T00:00:00+08:00">
+    <meta itemprop="keywords" content="C++"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="参考">参考</h2>
+<div class="article__content" itemprop="articleBody"><p>Google 搜到了 Knatten 大佬开发的 <a href="https://github.com/knatten/cppquiz">cppquiz</a> 题库， 题库网址是 <a href="http://cppquiz.org">http://cppquiz.org</a>。 很多问题都是依据比较新的 C++17 的标准出的， 短小精悍而且有详细的解析， 很有当时做 Rust Quiz 的感觉， 但这个题库的使用体验可好多了， 能很好考察梳理自己对 C++ 语法以及执行细节的掌握程度！</p>
 
-<ul>
-  <li><a href="https://www.youtube.com/watch?v=lJ3NC-R3gSI">Rust’s Journey to Async/Await - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-2019/">[Slide]</a></li>
-  <li><a href="https://www.youtube.com/watch?v=NNwK5ZPAJCk">The Talk You’ve Been Await-ing for - QCon New York 2019</a>, <a href="https://www.infoq.com/presentations/rust-async-await/">[Slide]</a></li>
-  <li><a href="https://course.rs/advance/async/intro.html">Rust语言圣经(Rust Course) - 异步编程</a></li>
-</ul>
+<blockquote>
+  <p>解析的依据是 <a href="https://timsong-cpp.github.io/cppwp/">Working Draft: Programming Languages — C++</a></p>
+</blockquote>
+
+<h2 id="question-list">Question List</h2>
+
+<p>不贴源代码， 只记录问题解析中的重点。</p>
+
+<h3 id="question-14"><a href="https://cppquiz.org/quiz/question/14?result=OK&amp;answer=abcBCA&amp;did_answer=Answer">Question 14</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-plaintext highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-plaintext highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-plaintext highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
+
+<h3 id="question-16"><a href="https://cppquiz.org/quiz/question/16?result=OK&amp;answer=abBA&amp;did_answer=Answer">Question 16</a></h3>
+
+<p>成员函数的初始化在构造函数之前， 析构函数在任何成员函数析构之前。</p>
+
+<h3 id="question-48"><a href="https://cppquiz.org/quiz/question/48?result=OK&amp;answer=z&amp;did_answer=Answer">Question 48</a></h3>
+
+<p>TODO</p>
+
+<h3 id="question-126"><a href="https://cppquiz.org/quiz/question/126?result=OK&amp;answer=11&amp;did_answer=Answer">Question 126</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.lookup.unqual#13">basic.lookup.unqual</a> 做了相关解释， 其本意表示 class 或 struct 中的静态成员变量会优先使用定义在该 class 或 struct 中的静态成员函数， 即便外部有同名的函数存在。</p>
+
+<h3 id="question-312"><a href="https://cppquiz.org/quiz/question/312?result=CE&amp;answer=&amp;did_answer=Answer">Question 312</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-plaintext highlighter-rouge">private</code> 而 struct 都默认 <code class="language-plaintext highlighter-rouge">public</code>。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
@@ -364,7 +384,7 @@ function toggle() {
 
 }
 </script>
-<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-06-16T00:00:00+08:00"><!-- start custom article footer snippet -->
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-11-14T00:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -375,7 +395,7 @@ function toggle() {
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/06/11/rust-channel.html">Async Programming in Rust： Channel</a></div><div class="next"><span>NEXT</span><a href="/2023/06/19/rcore-note-ch1.html">rCore OS Note - Chapter 1</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/10/21/cs61b-proj3.html">cs61b Proj3-BYoW</a></div><div class="next"><span>NEXT</span><a href="/2023/11/28/cmu15445-fa23-p2.html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</a></div></div></div>
 
 </div>
 
@@ -418,7 +438,7 @@ function toggle() {
 				repo: 'HangX-Ma.github.io',
 				owner: 'HangX-Ma',
 				admin: ['HangX-Ma'],
-				id: '/2023/06/16/rust-async',
+				id: '/2023/11/14/cpp-details',
                 labels: 'gitalk'.split(',').filter(l => l),
                 perPage: '15',
                 proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
@@ -1151,10 +1171,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      var key =   's2023s06s16srust-async.html';
-      var title = "Async Programming in Rust: Futures, Async/Await";
+      var key =   's2023s11s14scpp-details.html';
+      var title = "Cpp-Quiz";
       pageview.increase(key, title, function(view) {
-        $("[data-page-key='s2023s06s16srust-async.html']").text(view);
+        $("[data-page-key='s2023s11s14scpp-details.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {

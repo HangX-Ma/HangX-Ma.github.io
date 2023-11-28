@@ -1,5 +1,407 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-11-09T21:13:36+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">cs61b Proj3-BYoW</title><link href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html" rel="alternate" type="text/html" title="cs61b Proj3-BYoW" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/10/21/cs61b-proj3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><![CDATA[<p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-11-29T00:17:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</title><link href="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html" rel="alternate" type="text/html" title="CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX" /><published>2023-11-28T00:00:00+08:00</published><updated>2023-11-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html"><![CDATA[<h2 id="1-理解-extendible-hash">1. 理解 Extendible Hash</h2>
+
+<ul>
+  <li><a href="https://www.geeksforgeeks.org/extendible-hashing-dynamic-approach-to-dbms/">Extendible Hashing (Dynamic approach to DBMS)</a></li>
+  <li><a href="http://www.cs.emory.edu/~cheung/Courses/554/Syllabus/3-index/extensible-hashing-new1.html">Emory University: Extensible Hashing</a></li>
+</ul>
+
+<p class="info">后续有条件贴上自己暗推的测例， 有需要可留言给个邮箱。</p>
+
+<h2 id="2-task1---readwrite-page-guards">2. task#1 - Read/Write Page Guards</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Page Guard</code> 的作用是实现一个基于 C++ 的 RAII(Resource Acquisition Is Initialization) 机制的 Page 管理类， 这个类能够通过析构或手动 <code class="language-plaintext highlighter-rouge">Drop</code> UnpinPage 并释放相应的 RLock 或者 WLock， 能够避免后续 Extendible Hash Index 实现时由于人为对读写锁的使用失误以及忘记 UnpinPage 导致 BufferPoolManager 的页管理出错。</p>
+
+<h3 id="21-task1-实现细节提示">2.1 task#1 实现细节提示</h3>
+
+<p>Project Specification 特地将这几个函数的实现放在一起是有其道理的， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 删除了拷贝构造和拷贝赋值， 需要实现移动构造和移动赋值以及其析构函数。 这里会需要较多的代码的复用， 尤其是 <code class="language-plaintext highlighter-rouge">Drop</code> 函数。</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">PageGuard(PageGuard &amp;&amp;that)</code>: Move constructor.</p>
+
+    <blockquote>
+      <p>对于 Basic 版本直接对 <code class="language-plaintext highlighter-rouge">page_</code>， <code class="language-plaintext highlighter-rouge">bpm_</code>， <code class="language-plaintext highlighter-rouge">is_dirty</code> 进行赋值， 出于习惯将右值 <code class="language-plaintext highlighter-rouge">that</code> 中的指针都置为 <code class="language-plaintext highlighter-rouge">nullptr</code>。 而 Upgrade 版本则可方便地通过 <code class="language-plaintext highlighter-rouge">std::move</code> 赋值 <code class="language-plaintext highlighter-rouge">guard_</code>。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">operator=(PageGuard &amp;&amp;that)</code>: Move operator.</p>
+
+    <blockquote>
+      <p>这里需要注意两点： 1. <code class="language-plaintext highlighter-rouge">that</code> 是否为自身； 2. 如果当前的 <code class="language-plaintext highlighter-rouge">guard_.page_</code> 或 <code class="language-plaintext highlighter-rouge">page_</code> 非 <code class="language-plaintext highlighter-rouge">nullptr</code>， 需要先 <code class="language-plaintext highlighter-rouge">Drop</code> 已存储在当前 PageGuard 中的 Page。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
+
+    <blockquote>
+      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">~PageGuard()</code>: Destructor.</p>
+
+    <blockquote>
+      <p>直接调用 <code class="language-plaintext highlighter-rouge">Drop</code> 就行啦！</p>
+    </blockquote>
+  </li>
+</ul>
+
+<p>至于下面这两个函数则让我面目狰狞， 给的注释说的非常隐晦， 要保证在 Upgrade 的过程中 Page 不被 Evict， 又说 BasicPageGuard 在调用这个函数后会 invalid。 具体细节参考下一小节的 <a href="#pageguardtestbpmtest">PageGuardTest.BPMTest</a> 调试。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">UpgradeRead()</code>: Upgrade to a ReadPageGuard</li>
+  <li><code class="language-plaintext highlighter-rouge">UpgradeWrite()</code>: Upgrade to a WritePageGuard</li>
+</ul>
+
+<p>而下面这四个函数也是清晰的， 对有 Read 和 Write 需求的就相应的给上读/写锁， 但这里考虑到 WritePageGuard 可能会被更改， 我个人认为需要在 Fetch 的同时将相应的 Page 设置为 <em><strong>dirty</strong></em>。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">FetchPageBasic(page_id_t page_id)</code></li>
+  <li><code class="language-plaintext highlighter-rouge">FetchPageRead(page_id_t page_id)</code></li>
+  <li><code class="language-plaintext highlighter-rouge">FetchPageWrite(page_id_t page_id)</code></li>
+  <li><code class="language-plaintext highlighter-rouge">NewPageGuarded(page_id_t *page_id)</code></li>
+</ul>
+
+<h3 id="22-task1-的调试与解析">2.2 task#1 的调试与解析</h3>
+
+<h4 id="pageguardtestbpmtest">PageGuardTest.BPMTest</h4>
+
+<p>Gradescope 中的 <strong>PageGuardTest.BPMTest</strong> 报错如下:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/autograder/source/bustub/test/storage/grading_page_guard_test.cpp:222: Failure
+Expected equality of these values:
+  2
+  page1copy-&gt;GetPinCount<span class="o">()</span>
+    Which is: 3
+</code></pre></div></div>
+
+<p>我自己模仿所给范例写了一些本地的测试都是通过的， 唯一感觉有些不确定的是 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeRead()</code> 和 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeWrite()</code> 这两个函数， 对于他们的实现细节我不是很清楚。 为了确定 Bug， 我用了 <code class="language-plaintext highlighter-rouge">LOG_DEBUG(...)</code> 打印所有与 <strong>pinCount</strong> 变更相关的信息， 再次提交 Gradescope 后得到了这样的输出：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:210:NewPageGuarded] DEBUG - new basic page guard
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:61:NewPage] DEBUG - Create new page, page_id 0, pinCount <span class="o">[</span>1]
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:79:FetchPage] DEBUG - fetch page_id 0 from buffer, pinCount from <span class="o">[</span>1] to <span class="o">[</span>2]
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 0, pinCount from <span class="o">[</span>2] to <span class="o">[</span>1]
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:186:FetchPageBasic] DEBUG - fetch basic page
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:79:FetchPage] DEBUG - fetch page_id 0 from buffer, pinCount from <span class="o">[</span>1] to <span class="o">[</span>2]
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 0, pinCount from <span class="o">[</span>2] to <span class="o">[</span>1]
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:210:NewPageGuarded] DEBUG - new basic page guard
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:61:NewPage] DEBUG - Create new page, page_id 1, pinCount <span class="o">[</span>1]
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:79:FetchPage] DEBUG - fetch page_id 1 from buffer, pinCount from <span class="o">[</span>1] to <span class="o">[</span>2]
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:192:FetchPageRead] DEBUG - fetch <span class="nb">read </span>page
+2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:79:FetchPage] DEBUG - fetch page_id 1 from buffer, pinCount from <span class="o">[</span>2] to <span class="o">[</span>3]
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:58:UpgradeRead] DEBUG - Upgrade BasicPageGuard to ReadPageGuard, page_id 1, pinCount from <span class="o">[</span>2] to <span class="o">[</span>3]
+/autograder/source/bustub/test/storage/grading_page_guard_test.cpp:222: Failure
+Expected equality of these values:
+  2
+  page1copy-&gt;GetPinCount<span class="o">()</span>
+    Which is: 3
+
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:99:~ReadPageGuard] DEBUG - ReadPageGuard deconstructor Drop
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:86:Drop] DEBUG - <span class="nb">read </span>page guard is dropped.
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 1, pinCount from <span class="o">[</span>3] to <span class="o">[</span>2]
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:50:~BasicPageGuard] DEBUG - BasicPageGuard deconstructor Drop
+2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 1, pinCount from <span class="o">[</span>2] to <span class="o">[</span>1]
+</code></pre></div></div>
+
+<p>可以看到错误就发生在 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 转为 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code> 的过程中， 按照我之前的理解， 理应 Upgrade 应当增加一次对相应的 Page 的访问， 所以最开始的代码如下：</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>但按照所给测例的输出， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 应当在 Upgrade 之后释放原有的资源， 这意味着 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 在 Upgrade 之后无法再通过 Upgrade 返回一个 <code class="language-plaintext highlighter-rouge">Read/WritePageGuard</code>， 在 Upgrade 完成后需要手动调用 <code class="language-plaintext highlighter-rouge">BasicPageGuard::Drop()</code> 释放原有的资源， 当然这个猜想在所给代码注释中得到了印证：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+  * The protected page is not evicted from the buffer pool during the upgrade,
+  * and the basic page guard should be made invalid after calling this function.
+  */</span>
+</code></pre></div></div>
+
+<p>至于为什么用 <code class="language-plaintext highlighter-rouge">FetchPageRead</code> 而不是直接返回一个全新的 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， 主要是考虑到在 Upgrade 过程中会 <strong>Drop</strong> 原有的 <strong>Basic Guard</strong>， 而 Upgrade 需要保证这个 Page 不会被缓存池的 LRU-K 算法 Evict， 那需要保证这个 Page 处于一个 Pin 的状态。 Fetch 可以增加一次 <code class="language-plaintext highlighter-rouge">pinCount</code>, 可以与 <code class="language-plaintext highlighter-rouge">Drop</code> 中调用的 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 导致 <code class="language-plaintext highlighter-rouge">pinCount</code> 的一次减少抵消。</p>
+
+<p>后续提交通过了 <strong>BMPTest</strong> 证明了我的猜想。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// reference code</span>
+<span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
+  <span class="n">ReadPageGuard</span> <span class="n">read_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
+  <span class="n">Drop</span><span class="p">();</span>
+  <span class="k">return</span> <span class="n">read_guard</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeWrite</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">WritePageGuard</span> <span class="p">{</span>
+  <span class="n">WritePageGuard</span> <span class="n">write_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageWrite</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
+  <span class="n">Drop</span><span class="p">();</span>
+  <span class="k">return</span> <span class="n">write_guard</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="3-task2---extendible-hash-table-pages">3. task#2 - Extendible Hash Table Pages</h2>
+
+<p>相较往年 23Fall 版本增加了 Header Page， 但整体思路应当是一致的， 需要注意的是我们不能更改任何 private 和 public 域中的函数和变量， 在每个头文件的顶部说明规定了这些 Page 的结构和大小。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Header page format:
+<span class="p">  ---------------------------------------------------</span>
+ | DirectoryPageIds(2048) | MaxDepth (4) | Free(2044)
+<span class="p">  ---------------------------------------------------
+</span>
+ Directory page format:
+<span class="p">  --------------------------------------------------------------------------------------</span>
+ | MaxDepth (4) | GlobalDepth (4) | LocalDepths (512) | BucketPageIds(2048) | Free(1528)
+<span class="p">  --------------------------------------------------------------------------------------
+</span>
+ Bucket page format:
+<span class="p">  ----------------------------------------------------------------------------</span>
+ | METADATA | KEY(1) + VALUE(1) | KEY(2) + VALUE(2) | ... | KEY(n) + VALUE(n)
+<span class="p">  ----------------------------------------------------------------------------
+</span>
+ Metadata format (size in byte, 8 bytes in total):
+<span class="p">  --------------------------------</span>
+ | CurrentSize (4) | MaxSize (4)
+<span class="p">  --------------------------------
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>这里我偷偷改了 <code class="language-plaintext highlighter-rouge">GetDirectoryPageId</code> 的返回类型， 不然和 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组的类型不统一。</p>
+
+  <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableHeaderPage</span><span class="o">::</span><span class="n">GetDirectoryPageId</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">page_id_t</span>
+</code></pre></div>  </div>
+</blockquote>
+
+<h3 id="31-task2-实现细节提示">3.1 task#2 实现细节提示</h3>
+
+<h4 id="hash-table-header-page">Hash Table Header Page</h4>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 需要将 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组中的 page_id 都初始化为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code>， <code class="language-plaintext highlighter-rouge">max_depth</code> 是有它的上限的。</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">HashToDirectoryIndex</code></strong>： 就比较阴险了， 对于 header 而言， 要获取 directory 的索引值， 是通过 32 位 Hash 的 MSB 实现的。 设想 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零， 32 位 Hash 右移 32 位仍是其本身。 因而需要特殊处理 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零的情况， 应返回一个 0 值。</li>
+</ul>
+
+<h4 id="hash-table-directory-page">Hash Table Directory Page</h4>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 同样需要初始化 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">bucket_page_id_</code> 这两个数组。 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">global_depth_</code> 需要初始化为 0。</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">HashToBucketIndex</code></strong>： 有个比较巧妙的办法就是直接用 hash 值对 <code class="language-plaintext highlighter-rouge">Size()</code> 取模， 这和使用 <code class="language-plaintext highlighter-rouge">GetGlobalDepthMask</code> 是一样的。</li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">GetSplitImageIndex</code></strong>： 主要得理解 Extendible Hash Index 的 Split 的思路， directory 部分扩大事实上就是左移了一个 global depth， 这导致 directory 数量变为原来的两倍。 例如 <code class="language-plaintext highlighter-rouge">00</code> 会分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code> 但二者都指向同一个 bucket。 所以我们只需要得到当前 bucket 并对其 global_depth 位取反， 就能得到镜像的 bucket 的索引值。</p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">uint32_t</span> <span class="p">{</span>
+  <span class="c1">// Ensure the bucket local depth has increased!</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">bucket_idx</span> <span class="o">^</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">IncrGlobalDepth</code></strong>： 结合上个函数的解析， 如果理解了 Extendible Hash Index 的实现思路， 增加 global_depth 要做的就是拷贝一份原有的 buckets， 如 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code>， 把 <code class="language-plaintext highlighter-rouge">00</code> 的内容拷贝一份到 <code class="language-plaintext highlighter-rouge">100</code> 中即可。</p>
+
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">global_depth_</span> <span class="o">&lt;</span> <span class="n">HTABLE_DIRECTORY_MAX_DEPTH</span><span class="p">);</span>
+  <span class="kt">uint32_t</span> <span class="n">prev_expansion_num</span> <span class="o">=</span> <span class="n">Size</span><span class="p">();</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">prev_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">curr_idx</span> <span class="o">=</span> <span class="n">prev_expansion_num</span><span class="p">;</span> <span class="n">prev_idx</span> <span class="o">&lt;</span> <span class="n">prev_expansion_num</span><span class="p">;</span>
+      <span class="n">prev_idx</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curr_idx</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">local_depths_</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_depths_</span><span class="p">[</span><span class="n">prev_idx</span><span class="p">];</span>
+    <span class="n">bucket_page_ids_</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">bucket_page_ids_</span><span class="p">[</span><span class="n">prev_idx</span><span class="p">];</span>
+  <span class="p">}</span>
+  <span class="n">global_depth_</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong><code class="language-plaintext highlighter-rouge">CanShrink</code></strong>： 检查所有的 bucket 的 local_depth， 如果都比 global depth 要小， 就可以缩小 global_depth。 这个函数在后续 Merge 的时候需要用到。</li>
+</ul>
+
+<p>其他的该加加该减减就行， 不用想太多， 就是纯粹的增减！</p>
+
+<h4 id="hash-table-bucket-page">Hash Table Bucket Page</h4>
+
+<p>讲道理开始一点思路没有， 我看到有人在 <a href="https://zhuanlan.zhihu.com/p/664444839">知乎 - zihao 彼方 CMU15-445(2023FALL)-Project#2: Extendible Hash Index</a> 发了篇文章， 里面提到需要对 bucket 中的 <code class="language-plaintext highlighter-rouge">array_</code> 数组全部初始化为一个特殊值 ， <strong>坑爹啊！！！</strong> 这导致我后续花了将近 6 个小时找 <strong>GrowShrinkTest</strong> 的错误。</p>
+
+<p>实际上 bucket 的实现非常简洁， 我后来在看 <code class="language-plaintext highlighter-rouge">PrintBucket</code> 的实现的时候得到了启发， BUSTUB 直接访问的前 <code class="language-plaintext highlighter-rouge">size_</code> 个元素。 说明每次 <code class="language-plaintext highlighter-rouge">Insert</code> 的时候利用 <code class="language-plaintext highlighter-rouge">size_</code> 可以对数组进行尾部插入， 这是因为 <code class="language-plaintext highlighter-rouge">size_</code> 始终指向下一个插入的位置。而每次 <code class="language-plaintext highlighter-rouge">Remove</code> 的时候只用 <code class="language-plaintext highlighter-rouge">size_</code> 指向当前数组的尾部数据 (人话就是 <code class="language-plaintext highlighter-rouge">size_ -= 1</code>)， 让这个尾部数据填充到 <code class="language-plaintext highlighter-rouge">RemoveAt</code> 的那个 bucket_idx 位置即可。</p>
+
+<p>我们无需对数组进行初始化等操作， <code class="language-plaintext highlighter-rouge">size_</code> 表示当前的数据大小可以很好的控制访问权限。</p>
+
+<h3 id="32-task2-的调试与解析">3.2 task#2 的调试与解析</h3>
+
+<h4 id="growshrinktest">GrowShrinkTest</h4>
+
+<p>对 Bucket Page 理解不到位， 重构后能够通过该测例。</p>
+
+<h2 id="4-task3---extendible-hashing-implementation">4. task#3 - Extendible Hashing Implementation</h2>
+
+<p>感觉没必要细说， 但需要写一下踩过的坑以及记录一些实现相关的细节。</p>
+
+<blockquote>
+  <p>大家真没辙了参考这位大佬 21 年实现的版本， <a href="https://github.com/epis2048/cmu_15445_2021/tree/ghess/p2-refinement">cmu15-445/2021</a>， 核心与框架都是一致的。</p>
+</blockquote>
+
+<h3 id="41-task3-实现细节提示">4.1 task#3 实现细节提示</h3>
+
+<p>这里实现的时候需要考虑 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， <code class="language-plaintext highlighter-rouge">WritePageGuard</code> 的使用场景。 一般来说， 只有需要通过 <code class="language-plaintext highlighter-rouge">NewPageGuarded</code> 获取新 Page 才会用到 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， 之后都会通过 Upgrade 函数将这个获取到的 Page 加上读写锁。 使用 PageGuard 原则就是看是否后续操作会产生对数据的更改， 如果不会更改就尽量使用 Read， 并在适当的时候通过 <code class="language-plaintext highlighter-rouge">Drop</code> 函数提前释放相关的读写锁， 以提高并行效率。</p>
+
+<h4 id="migrateentries">MigrateEntries</h4>
+
+<p>我相信很多人看到这个函数是懵的， 这个函数究竟什么作用根本没有提示。 这个函数和 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code> 函数都是用在 <strong>Split Bucket</strong> 中的。 试想有一个 bucket_idx 为 <code class="language-plaintext highlighter-rouge">00</code> 的 bucket 存储了两个 KV 数据， 在我们增加 global_depth 和 local_depth 之后， 我们需要将 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 中的数据填充到新的 <code class="language-plaintext highlighter-rouge">000</code>(原 <code class="language-plaintext highlighter-rouge">00</code>) 和 <code class="language-plaintext highlighter-rouge">100</code> 这两个 bucket， 此时就要用到 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 函数。</p>
+
+<p>首先将原有数据拷贝出来， 这里需要注意的是， 如果使用 <code class="language-plaintext highlighter-rouge">ExtendibleHTableBucketPage&lt;K, V, KC&gt;::EntryAt</code> 函数会有问题， 我们无法对一个 const 引用进行拷贝构造。 解决办法就是单独用 <code class="language-plaintext highlighter-rouge">KeyAt</code> 和 <code class="language-plaintext highlighter-rouge">ValueAt</code>配合 <code class="language-plaintext highlighter-rouge">std::make_pair</code> 构造一个新的 KV。</p>
+
+<blockquote>
+  <p>可以自己尝试用 LOG_DEBUG 看看结果， 不出意外的话 <code class="language-plaintext highlighter-rouge">copied</code> 的 KV 应都是 0 值。</p>
+</blockquote>
+
+<p>之后根据新的 local_depth 将拷贝的数据按照新的 bucket_idx 插入 old_bucket 或 new_bucket。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">MigrateEntries</span><span class="p">(</span><span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">old_bucket</span><span class="p">,</span>
+                                                       <span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">new_bucket</span><span class="p">,</span>
+                                                       <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
+  <span class="cm">/* Get valid items in old bucket */</span>
+  <span class="kt">uint32_t</span> <span class="n">old_bucket_size</span> <span class="o">=</span> <span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">Size</span><span class="p">();</span>
+  <span class="k">auto</span> <span class="n">copied</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">old_bucket_size</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">old_bucket_size</span><span class="p">;</span> <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">copied</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span><span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">KeyAt</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">ValueAt</span><span class="p">(</span><span class="n">idx</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="cm">/* reset old bucket */</span>
+  <span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">bucket_max_size_</span><span class="p">);</span>
+  <span class="n">BUSTUB_ASSERT</span><span class="p">(</span><span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">Size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"old bucket should be reset"</span><span class="p">);</span>
+
+  <span class="cm">/* Do rehashing */</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">old_bucket_size</span><span class="p">;</span> <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="n">copied</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+    <span class="kt">uint32_t</span> <span class="n">target_bucket_idx</span> <span class="o">=</span> <span class="n">Hash</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">local_depth_mask</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">target_bucket_idx</span> <span class="o">==</span> <span class="n">new_bucket_idx</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">new_bucket</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">cmp_</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">old_bucket</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">cmp_</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="updatedirectorymapping">UpdateDirectoryMapping</h4>
+
+<p>这又是做什么？ 可以想象的是， 有时候我们有很多 bucket_idx 指向的是同一个 page_id， 如果不清楚请参考 <a href="#1-理解-extendible-hash">理解-extendible-hash</a> 我们在 Split Bucket 完成后， 需要让原来指向 split_bucket_idx 的那些 buckets 重新分配指向， 要么是 split_bucket_idx， 要么是 image_bucket_idx， 并且都需要设定新的 local_depth。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">UpdateDirectoryMapping</span><span class="p">(</span><span class="n">ExtendibleHTableDirectoryPage</span> <span class="o">*</span><span class="n">directory</span><span class="p">,</span>
+                                                               <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="n">page_id_t</span> <span class="n">new_bucket_page_id</span><span class="p">,</span>
+                                                               <span class="kt">uint32_t</span> <span class="n">new_local_depth</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">uint32_t</span> <span class="n">msb_diff</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">new_local_depth</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">new_bucket_idx</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">msb_diff</span><span class="p">;</span> <span class="n">i</span> <span class="o">-=</span> <span class="n">msb_diff</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">directory</span><span class="o">-&gt;</span><span class="n">SetBucketPageId</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_bucket_page_id</span><span class="p">);</span>
+    <span class="n">directory</span><span class="o">-&gt;</span><span class="n">SetLocalDepth</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_local_depth</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">new_bucket_idx</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">directory</span><span class="o">-&gt;</span><span class="n">Size</span><span class="p">();</span> <span class="n">i</span> <span class="o">+=</span> <span class="n">msb_diff</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">directory</span><span class="o">-&gt;</span><span class="n">SetBucketPageId</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_bucket_page_id</span><span class="p">);</span>
+    <span class="n">directory</span><span class="o">-&gt;</span><span class="n">SetLocalDepth</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_local_depth</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="42-task2-的调试与解析">4.2 task#2 的调试与解析</h3>
+
+<h4 id="getvalue-和-remove">GetValue 和 Remove</h4>
+
+<p>这两个函数的接口都是 <code class="language-plaintext highlighter-rouge">key</code>， 说明有时候可能这个 <code class="language-plaintext highlighter-rouge">key</code> 是不存在于 BufferPool 的， 我们需要在获取 directory index 的时候就可以判断， 如果 directory_idx 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 可以提早返回结果， 因为这个 <code class="language-plaintext highlighter-rouge">key</code> 并不存在。</p>
+
+<p>另外注意 Fall 2023 版本是 unique-key， 不存在一个 key 对应多个值的情况。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">GetValue</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">result</span><span class="p">,</span> <span class="n">Transaction</span> <span class="o">*</span><span class="n">transaction</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">Remove</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="n">Transaction</span> <span class="o">*</span><span class="n">transaction</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="insert">Insert</h4>
+
+<p><code class="language-plaintext highlighter-rouge">Insert</code> 中在 directory 的 page_id 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 时调用 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code>， 在 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code> 中调用 <code class="language-plaintext highlighter-rouge">InsertToNewBucket</code>， 这是这两个函数的使用方式。</p>
+
+<ul>
+  <li>如果发现 directory 索引超过了 header 的最大限制， 需要直接返回 false。</li>
+  <li>判断当前需要插入的 bucket 的情况， 如果没有满则可以直接调用 bucket 的 Insert 函数， 如果满了则调用 <code class="language-plaintext highlighter-rouge">SplitInsert</code> 函数。</li>
+</ul>
+
+<h4 id="splitinsert">SplitInsert</h4>
+
+<p>这个函数不进行任何插入操作， 插入操作仅在 <code class="language-plaintext highlighter-rouge">Insert</code> 中进行， 因而在该函数完成对 global_depth 和 local_depth 的扩容后， 需要再次调用 <code class="language-plaintext highlighter-rouge">Insert</code> 完成数据插入。</p>
+
+<p><strong>需要注意以下几点</strong>：</p>
+
+<ol>
+  <li>当前的 bucket_idx 获取的 local_depth 已经与传入的 <code class="language-plaintext highlighter-rouge">directory_max_depth_</code> 相等了， 说明 directory 已经扩容到最大， bucket 也扩容到最多， 无法继续扩容， 直接返回 <code class="language-plaintext highlighter-rouge">false</code>。</li>
+  <li>如果上述条件不满足， 说明还可以继续扩容， 如果 local_depth 已经和 global_depth 相等了， 先增加 global_depth。</li>
+  <li>增加 local_depth。</li>
+  <li>调用 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 以及 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code>（有两次） 完成扩容。</li>
+  <li>重新尝试 <code class="language-plaintext highlighter-rouge">Insert</code>。</li>
+</ol>
+
+<h4 id="merge">Merge</h4>
+
+<p>需要注意的是 Recursive Merge， 因为很可能一次 Merge 后还能够接着下一次 Merge 直到最小单位。 由于 Merge 的时候会将当前的 bucket 指向 image bucket 以达到 Merge 的目的， 所以如果要递归进行 Merge， 就要以 image_bucket_idx 和 new_local_depth 生成新的 bucket_idx 进行下次 Merge 的调用。</p>
+
+<p><strong>另外注意 Merge 的几个先后条件</strong>：</p>
+
+<ol>
+  <li>local_depth 为 0， 说明已经到达 Merge 的极限了， 直接返回。</li>
+  <li>当前的 bucket_idx 得到的 local_depth 和镜像的 image_bucket_idx 得到的 image_local_depth 不一致， 深度不一致则不能 Merge， 也需要直接返回。</li>
+  <li>我们需要在 Merge 的过程中对 bucket_idx 再进行一次 <code class="language-plaintext highlighter-rouge">IsEmpty</code> 的判断， 如果非空直接返回。 这是因为在 <code class="language-plaintext highlighter-rouge">Remove</code> 函数中我们判断 bucket 为空后， 释放 latch 的瞬间这个 latch 被 Insert 拿走了， 这个 bucket 可能又被塞入了新的值， 后续 Merge 函数获取到锁的时候就可能看到的是这个新值了。</li>
+  <li>删除 bucket_idx 对应的 Page 后要将之前所有指向这个 bucket_idx 存储的 Page 的那些 buckets 重新直线新的 image_bucket 对应的 Page 以及设置新的 local_depth。</li>
+  <li>需要循环调用 <code class="language-plaintext highlighter-rouge">CanShrink</code> 缩小 global_depth。</li>
+</ol>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">...</span>
+  <span class="cm">/* recursive merge */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">directory_write_page</span><span class="o">-&gt;</span><span class="n">GetGlobalDepth</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">uint32_t</span> <span class="n">next_bucket_idx</span> <span class="o">=</span> <span class="n">image_bucket_idx</span> <span class="o">&amp;</span> <span class="n">new_local_depth</span><span class="p">;</span>
+    <span class="kt">uint32_t</span> <span class="n">next_image_bucket_idx</span> <span class="o">=</span> <span class="n">directory_write_page</span><span class="o">-&gt;</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="n">next_bucket_idx</span><span class="p">);</span>
+
+
+    <span class="n">Merge</span><span class="p">(</span><span class="n">directory_idx</span><span class="p">,</span> <span class="n">next_bucket_idx</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+    <span class="n">Merge</span><span class="p">(</span><span class="n">directory_idx</span><span class="p">,</span> <span class="n">next_image_bucket_idx</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="5-task4--concurrency-control">5. task#4  Concurrency Control</h2>
+
+<p>实现的时候给 <code class="language-plaintext highlighter-rouge">Insert</code>， <code class="language-plaintext highlighter-rouge">Remove</code> 以及自定义的一些会更改 directory 或 bucket 的函数都加上了一把 latch， 在 return 或进入另一个函数前释放 latch， 能完美通过测试。</p>
+
+<h2 id="6-写在最后">6. 写在最后</h2>
+
+<p>不枉这一个星期的努力， P2 顺利收官了！</p>
+
+<p>虽然最后成功通过了 P2 的所有测试， 但整个 Project 并没有完全独立完成， 设计上也有参考前述的 2021 年的 Extendible Hash Index 的实现。 除了所给函数没注释导致对其功能的理解上的缺失， 还有阅读 Specification 和代码注释不仔细， 对 Extendible Hash Index 的原理以及概念不熟悉不透彻。 对于 Debug 目前能用的就是 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code> 以及配置 VSCode 的 CodeLLDB 实现图形化调试， 一旦遇到多线程的情况， 大多只能依赖 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code>， 可想而知 P4 将是个令人望而生畏的任务。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-11-28-cmu15445-fa23-p2/p2-leaderboard-rank.png" alt="Project2 LeaderBoard Rank, HangX-Ma" width="600" />
+    <br />
+    <font size="2" color="#999"><u>Project2 LeaderBoard Rank, HangX-Ma</u></font>
+</div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="cmu15-445" /><summary type="html"><![CDATA[学习 CMU15-445 Fall 2023， 该章与 Extendible Hash Index 相关， 介绍 Extendible Hash 的原理与实施细节]]></summary></entry><entry><title type="html">Cpp-Quiz</title><link href="https://hangx-ma.github.io/2023/11/14/cpp-details.html" rel="alternate" type="text/html" title="Cpp-Quiz" /><published>2023-11-14T00:00:00+08:00</published><updated>2023-11-14T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/14/cpp-details</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/14/cpp-details.html"><![CDATA[<p>Google 搜到了 Knatten 大佬开发的 <a href="https://github.com/knatten/cppquiz">cppquiz</a> 题库， 题库网址是 <a href="http://cppquiz.org">http://cppquiz.org</a>。 很多问题都是依据比较新的 C++17 的标准出的， 短小精悍而且有详细的解析， 很有当时做 Rust Quiz 的感觉， 但这个题库的使用体验可好多了， 能很好考察梳理自己对 C++ 语法以及执行细节的掌握程度！</p>
+
+<blockquote>
+  <p>解析的依据是 <a href="https://timsong-cpp.github.io/cppwp/">Working Draft: Programming Languages — C++</a></p>
+</blockquote>
+
+<h2 id="question-list">Question List</h2>
+
+<p>不贴源代码， 只记录问题解析中的重点。</p>
+
+<h3 id="question-14"><a href="https://cppquiz.org/quiz/question/14?result=OK&amp;answer=abcBCA&amp;did_answer=Answer">Question 14</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-plaintext highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-plaintext highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-plaintext highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
+
+<h3 id="question-16"><a href="https://cppquiz.org/quiz/question/16?result=OK&amp;answer=abBA&amp;did_answer=Answer">Question 16</a></h3>
+
+<p>成员函数的初始化在构造函数之前， 析构函数在任何成员函数析构之前。</p>
+
+<h3 id="question-48"><a href="https://cppquiz.org/quiz/question/48?result=OK&amp;answer=z&amp;did_answer=Answer">Question 48</a></h3>
+
+<p>TODO</p>
+
+<h3 id="question-126"><a href="https://cppquiz.org/quiz/question/126?result=OK&amp;answer=11&amp;did_answer=Answer">Question 126</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.lookup.unqual#13">basic.lookup.unqual</a> 做了相关解释， 其本意表示 class 或 struct 中的静态成员变量会优先使用定义在该 class 或 struct 中的静态成员函数， 即便外部有同名的函数存在。</p>
+
+<h3 id="question-312"><a href="https://cppquiz.org/quiz/question/312?result=CE&amp;answer=&amp;did_answer=Answer">Question 312</a></h3>
+
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-plaintext highlighter-rouge">private</code> 而 struct 都默认 <code class="language-plaintext highlighter-rouge">public</code>。</p>]]></content><author><name>HangX-Ma</name></author><category term="C++" /><summary type="html"><![CDATA[做 C++ Quiz 遇到一些有意思的语法细节记录，钻牛角尖的那种。]]></summary></entry><entry><title type="html">cs61b Proj3-BYoW</title><link href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html" rel="alternate" type="text/html" title="cs61b Proj3-BYoW" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/10/21/cs61b-proj3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><![CDATA[<p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
 
 <p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-plaintext highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
 
@@ -2084,890 +2486,4 @@
 
 <blockquote>
   <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/1b6c70b223719a7207a786fdc49e09eccce51480">commit#1b6c70b</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 5</title><link href="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 5" /><published>2023-07-07T00:00:00+08:00</published><updated>2023-07-07T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/07/rcore-note-ch5</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/07/rcore-note-ch5.html"><![CDATA[<p>Process OS 强化了以往用以调度应用的 task 的概念， 在这一层抽象的基础上发展出 process， 弱化了 CPU 与任务之间的耦合关系， 所以单从操作系统结构的角度分析其实并没有太大的变化。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-07-rcore-note-ch5/process-os-detail.png" alt="Process OS details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Process OS Details, rCore</u></font>
-</div>
-
-<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第五章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch5">[ch5]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="1-进程概念">1. 进程概念</h2>
-
-<p><strong>进程</strong> 就是操作系统选取某个可执行文件并对其进行一次动态执行的过程， 对于可执行文件中给出的需求能相应对 <strong>硬件/虚拟资源</strong> 进行 <strong>动态绑定和解绑</strong>。 进程的引入让开发者能够控制程序的运行， 操作系统能够面向用户进行交互。 rCore 增添了操作系统中最为关键的几个系统调用： <code class="language-plaintext highlighter-rouge">sys_fork</code>， <code class="language-plaintext highlighter-rouge">sys_waitpid</code>， <code class="language-plaintext highlighter-rouge">sys_exec</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_read</code>。 同样的， 通过引入 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 提供动态内存分配支持， 结合这些系统调用， 在用户态 rCore 提供了一个用户初始程序 <strong>initproc</strong>， 这让 rCore 具备了与应用层的交互能力， 但其背后则需依托 rCore 的进程管理。</p>
-
-<h2 id="2-进程管理的组成结构">2. 进程管理的组成结构</h2>
-
-<p>rCore 为增添了 <code class="language-plaintext highlighter-rouge">struct PidHandle</code> 作为每个进程的标识， 其实现与上一章的 Physical Frame 非常类似。 另外 rCore 改造了 <code class="language-plaintext highlighter-rouge">build.rs</code> 和 <code class="language-plaintext highlighter-rouge">loader.rs</code> 以使 rCore 能够支持应用名而非 task id 加载应用。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/pid.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="nf">PidHandle</span><span class="p">(</span><span class="k">pub</span> <span class="nb">usize</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="21-应用的内核栈">2.1 应用的内核栈</h3>
-
-<p>由于引入了进程标识 PID， 之前用 task id 进行应用区分的方式需要用 PID 替代， 所有应用的内核栈的创建就与以往有所不同。 rCore 从 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中分离了 <code class="language-plaintext highlighter-rouge">KernelStack</code> 用以初始化与管理每个应用的内核栈。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/pid.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">KernelStack</span> <span class="p">{</span>
-    <span class="n">pid</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="22-进程控制块">2.2 进程控制块</h3>
-
-<p>在内核中，每个进程的执行状态、资源控制等元数据均保存在一个被称为 <strong>进程控制块 (PCB, Process Control Block)</strong> 的结构中，它是内核对进程进行管理的单位。 对于 rCore 而言， PCB 其实是对原来的 TCB 的扩展， 并区分 immutable 与 mutable 两类数据 （ Inner 块使用 <code class="language-plaintext highlighter-rouge">UPSafeCell&lt;T&gt;</code> 管理可变数据）。 第五章新增的是 <code class="language-plaintext highlighter-rouge">parent</code>， <code class="language-plaintext highlighter-rouge">children</code>， 以及 <code class="language-plaintext highlighter-rouge">exit_code</code> 这几个可变量， 使用 <code class="language-plaintext highlighter-rouge">Weak</code> 智能指针能确保不影响父进程的引用计数， 而 <code class="language-plaintext highlighter-rouge">Arc</code> 则提供了对子进程的引用计数， 这两者的配合可以保证父子进程的双向关系以及控制子进程的资源回收了。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="c1">// immutable</span>
-    <span class="k">pub</span> <span class="n">pid</span><span class="p">:</span> <span class="n">PidHandle</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">kernel_stack</span><span class="p">:</span> <span class="n">KernelStack</span><span class="p">,</span>
-    <span class="c1">// mutable</span>
-    <span class="n">inner</span><span class="p">:</span> <span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">TaskControlBlockInner</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="k">pub</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Weak</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">children</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">exit_code</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>另外我认为解决了上一章痛点问题的是关于任务控制模块的访问方式， rCore 的第五章提供了 <code class="language-plaintext highlighter-rouge">inner_exclusive_access</code> 方法， 此前我也尝试过类似的返回引用的方式避免直接拷贝一整个 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 以避免巨大的开销， 但当时没有考虑到可以在外层包裹一层 <code class="language-plaintext highlighter-rouge">UPSafeCell&lt;T&gt;</code>。 另外相应的， 增加了外增 Wrapper 以及 PID 后， 原来的 <strong>任务控制块创建</strong> 也要转变为 <strong>进程控制块创建</strong>， 其实主要差异就是 Kernel Stack 的创建以及新增的变量的初始化。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="k">impl</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">inner_exclusive_access</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">RefMut</span><span class="o">&lt;</span><span class="nv">'_</span><span class="p">,</span> <span class="n">TaskControlBlockInner</span><span class="o">&gt;</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">()</span>
-    <span class="p">}</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>除此之外就是在 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中实现几个关键的系统调用了。</p>
-
-<blockquote>
-  <p>需要一提的是， 由于增添了 <code class="language-plaintext highlighter-rouge">wrapper</code>， <code class="language-plaintext highlighter-rouge">os/src/task/mod.rs</code> 中的代码对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 中数据访问发生了变化， 这一块需要大改。</p>
-</blockquote>
-
-<h3 id="23-进程管理器">2.3 进程管理器</h3>
-
-<p><strong>任务管理器</strong> 或称 <strong>进程管理器</strong> <code class="language-plaintext highlighter-rouge">TaskManager</code> 将 CPU 的监控职能拆分到处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 中， 其自身仅负责管理所有进程， 这种分离有助于后续实现多核环境的拓展。 这里比较关键的设计是将 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 用 <code class="language-plaintext highlighter-rouge">Arc</code> 智能指针管理， 并将其存储在堆上， 不仅减少开销也方便维护。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/manager.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskManager</span> <span class="p">{</span>
-    <span class="n">ready_queue</span><span class="p">:</span> <span class="n">VecDeque</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="24-cpu-管理器">2.4 CPU 管理器</h3>
-
-<p>处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 负责维护 CPU 相关的状态。 其中 <code class="language-plaintext highlighter-rouge">current</code> 表示当前处理器上执行的进程任务， 而 <code class="language-plaintext highlighter-rouge">idle_task_cx</code> 则是 idle 控制流的任务上下文。 这个 idle 控制流运行在 CPU 启动栈上， 它会从 <code class="language-plaintext highlighter-rouge">TaskManager</code> 中选择一个进程任务放在当前的 CPU 核上运行。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/processor.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Processor</span> <span class="p">{</span>
-    <span class="n">current</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-    <span class="n">idle_task_cx</span><span class="p">:</span> <span class="n">TaskContext</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>idle 控制流的设计目的在于分离进程调度与 Trap， 换入/换出进程仅需要调用 <code class="language-plaintext highlighter-rouge">schedule</code> 函数， 通过 <code class="language-plaintext highlighter-rouge">__switch</code> 保存自身进程的上下文， 之后程序流会换回 <code class="language-plaintext highlighter-rouge">idle_task_cx_ptr</code> 中的内容重新回到 <code class="language-plaintext highlighter-rouge">run_tasks</code> 的 loop 循环中查找下一个待运行的进程。 这点设计和 xv6 如出一辙， 在 rCore 中则是会持续运行 <code class="language-plaintext highlighter-rouge">run_tasks</code> 用以进程的调度。 引用我自己在 rCore 留言板上的 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/47#issuecomment-1625393985">回答</a> 能帮助理解它的作用：</p>
-
-<blockquote>
-  <p>idle 控制流的设计和 xv6 的很像， rCore 让 <code class="language-plaintext highlighter-rouge">run_tasks</code> 始终保持运行， 可以把这个函数想象成一个游戏机，它的作用就是不断挑选可运行的游戏卡（进程）， 然后放到 CPU 这个卡槽中。 一定时间后这个 CPU 卡槽要给别的游戏卡（进程）用了就把这个当前的卡弹出来（这里就用了 <code class="language-plaintext highlighter-rouge">schedule</code> 函数弹出）， 然后游戏机又开始选下一张能用的游戏卡（进程）了。</p>
-
-  <p>游戏卡（进程）只知道自己被插上要运行， 以及到某个点自己要弹出来， 它不知道游戏机的存在， 这样就做到了任务调度的透明。</p>
-</blockquote>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/processor.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_tasks</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">loop</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSOR</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">fetch_task</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">let</span> <span class="n">idle_task_cx_ptr</span> <span class="o">=</span> <span class="n">processor</span><span class="nf">.get_idle_task_cx_ptr</span><span class="p">();</span>
-            <span class="c1">// access coming task TCB exclusively</span>
-            <span class="k">let</span> <span class="k">mut</span> <span class="n">task_inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
-            <span class="k">let</span> <span class="n">next_task_cx_ptr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">task_inner</span><span class="py">.task_cx</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskContext</span><span class="p">;</span>
-            <span class="n">task_inner</span><span class="py">.task_status</span> <span class="o">=</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Running</span><span class="p">;</span>
-            <span class="c1">// stop exclusively accessing coming task TCB manually</span>
-            <span class="nf">drop</span><span class="p">(</span><span class="n">task_inner</span><span class="p">);</span>
-            <span class="n">processor</span><span class="py">.current</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
-            <span class="c1">// stop exclusively accessing processor manually</span>
-            <span class="nf">drop</span><span class="p">(</span><span class="n">processor</span><span class="p">);</span>
-            <span class="k">unsafe</span> <span class="p">{</span>
-                <span class="nf">__switch</span><span class="p">(</span>
-                    <span class="n">idle_task_cx_ptr</span><span class="p">,</span>
-                    <span class="n">next_task_cx_ptr</span><span class="p">,</span>
-                <span class="p">);</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">schedule</span><span class="p">(</span><span class="n">switched_task_cx_ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskContext</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSOR</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">idle_task_cx_ptr</span> <span class="o">=</span> <span class="n">processor</span><span class="nf">.get_idle_task_cx_ptr</span><span class="p">();</span>
-    <span class="nf">drop</span><span class="p">(</span><span class="n">processor</span><span class="p">);</span>
-    <span class="k">unsafe</span> <span class="p">{</span>
-        <span class="nf">__switch</span><span class="p">(</span>
-            <span class="n">switched_task_cx_ptr</span><span class="p">,</span>
-            <span class="n">idle_task_cx_ptr</span><span class="p">,</span>
-        <span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="3-进程管理的实现机制">3. 进程管理的实现机制</h2>
-
-<h3 id="31-初始进程创建">3.1 初始进程创建</h3>
-
-<p>可以先看一下 rCore 在第五章的 <code class="language-plaintext highlighter-rouge">main.rs</code> 做的事情， 可以看到在内存管理模块初始化完成后， 会调用 <code class="language-plaintext highlighter-rouge">task</code> 子模块提供的 <code class="language-plaintext highlighter-rouge">add_initproc</code> 将初始进程 <code class="language-plaintext highlighter-rouge">ch5b_initproc</code> 加入进程任务管理器。 因而在 task 子模块中需要初始化进程控制块 <code class="language-plaintext highlighter-rouge">INITPROC</code>。 另外， <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 相较之前有所变更。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/main.rs</span>
-<span class="nd">#[no_mangle]</span> <span class="c1">// avoid compiler confusion</span>
-<span class="k">fn</span> <span class="nf">rust_main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nf">clear_bss</span><span class="p">();</span>
-    <span class="nf">kernel_log_info</span><span class="p">();</span>
-
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"[kernel] Hello, world!"</span><span class="p">);</span>
-    <span class="nn">mm</span><span class="p">::</span><span class="nf">init</span><span class="p">();</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"[kernel] back to world!"</span><span class="p">);</span>
-    <span class="c1">// mm tests</span>
-    <span class="nn">mm</span><span class="p">::</span><span class="nf">heap_test</span><span class="p">();</span>
-    <span class="nn">mm</span><span class="p">::</span><span class="nf">frame_allocator_test</span><span class="p">();</span>
-    <span class="nn">mm</span><span class="p">::</span><span class="nf">remap_test</span><span class="p">();</span>
-
-    <span class="nn">task</span><span class="p">::</span><span class="nf">add_initproc</span><span class="p">();</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"after initproc!"</span><span class="p">);</span>
-
-    <span class="nn">trap</span><span class="p">::</span><span class="nf">init</span><span class="p">();</span>
-    <span class="nn">trap</span><span class="p">::</span><span class="nf">enable_timer_interrupt</span><span class="p">();</span>
-    <span class="nn">timer</span><span class="p">::</span><span class="nf">set_next_trigger</span><span class="p">();</span>
-    <span class="nn">loader</span><span class="p">::</span><span class="nf">list_apps</span><span class="p">();</span>
-    <span class="nn">task</span><span class="p">::</span><span class="nf">run_tasks</span><span class="p">();</span>
-    <span class="nd">panic!</span><span class="p">(</span><span class="s">"Unreachable in rust_main!"</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="32-进程调度机制">3.2 进程调度机制</h3>
-
-<p>进程调度一方面是 CPU 分给当前进程的时间片用尽触发 <code class="language-plaintext highlighter-rouge">SupervisorTimer</code> 中断需要调度， 另一方面是进程主动让出 CPU 的占用权， 都需要用到 <code class="language-plaintext highlighter-rouge">suspend_current_and_run_next</code> 这个函数。 在引入进程的抽象之后， 调度不需要进程本身更新关于 <code class="language-plaintext highlighter-rouge">__switch</code> 函数相关的内容， 只需要获取当前进程的控制块 TCB 并将其加入 task 队列中后使用 <code class="language-plaintext highlighter-rouge">schedule</code> 即可。 这也是前述引入 idle 控制流的好处之一， 对进程调度的解耦让整个代码流都干净了很多。</p>
-
-<h3 id="33-进程的生成机制">3.3 进程的生成机制</h3>
-
-<p>这块相较而言就会显得复杂一些， 在内核中唯一的初始化进程是 <code class="language-plaintext highlighter-rouge">initproc</code>， 后续的进程都需要通过 <code class="language-plaintext highlighter-rouge">fork/exec</code> 这两个系统调用提供的进程生成机制实现。</p>
-
-<ul>
-  <li>
-    <p><strong>fork</strong></p>
-
-    <p><code class="language-plaintext highlighter-rouge">fork</code> 需要对除了返回值外的父进程所有信息的完全复制， 这甚至要求地址空间的映射方式， 映射页的权限， 映射范围， 以及数据都需要与父进程一致， 不同的是最终映射到的具体的物理地址页 PPN。 在 rCore 中管理这部分信息的是 <code class="language-plaintext highlighter-rouge">memory_set.rs</code>， 为了复制这些信息新增了 <code class="language-plaintext highlighter-rouge">from_another</code> 函数拷贝一个 <strong>逻辑段</strong> 的上述数据。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
-  <span class="k">impl</span> <span class="n">MapArea</span> <span class="p">{</span>
-      <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_another</span><span class="p">(</span><span class="n">another</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">MapArea</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-      <span class="o">...</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>这之后真正对整个地址空间进行完全复制的是， <code class="language-plaintext highlighter-rouge">MemorySet</code> 中新增的 <code class="language-plaintext highlighter-rouge">from_existed_user</code> 函数。 该函数将生成一个新的 tranmpoline 并遍历当前用户态虚拟地址空间中所有的逻辑段并拷贝这些数据到目标地址空间。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
-  <span class="k">impl</span> <span class="n">MemorySet</span> <span class="p">{</span>
-      <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_existed_user</span><span class="p">(</span><span class="n">user_space</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">MemorySet</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">MemorySet</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-      <span class="o">...</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>可以看到 <code class="language-plaintext highlighter-rouge">TaskControlBlock::fork</code> 的代码和 <code class="language-plaintext highlighter-rouge">new</code> 基本一致， 只是它的数据来源于它的父进程， 子进程的地址空间通过 <code class="language-plaintext highlighter-rouge">MemorySet::from_existed_user</code> 建立。 另外， <code class="language-plaintext highlighter-rouge">sys_fork</code> 的实现中需要更改 <code class="language-plaintext highlighter-rouge">TrapContext</code> 中的 <code class="language-plaintext highlighter-rouge">a0</code> 寄存器， <code class="language-plaintext highlighter-rouge">trap_handler</code> 部分需要配合做出微调， 以保证能够通过返回值区分子进程和父进程。</p>
-  </li>
-  <li>
-    <p><strong>exec</strong></p>
-
-    <p><code class="language-plaintext highlighter-rouge">exec</code> 系统调用是载入一个新的 ELF 的代码和数据替换当前进程的应用地址空间中的内容并执行。 它要做的事情其实和 <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 也很像， 但我们不需要重新生成进程的 PID 以及分配新的 KernelStack， 这些信息原有的进程已经提供了， 仅需要将我们所需要的 <code class="language-plaintext highlighter-rouge">memory_set</code>， <code class="language-plaintext highlighter-rouge">user_sp</code>， <code class="language-plaintext highlighter-rouge">entry_point</code> 这些信息进行更新即可， 之后我们仅需要完善 <code class="language-plaintext highlighter-rouge">sys_exec</code> 系统调用的实现。</p>
-
-    <p>最为关键的还是 <code class="language-plaintext highlighter-rouge">translated_str</code> 这个函数， <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要对输入的 <code class="language-plaintext highlighter-rouge">path</code> 参数进行解析， 这个 <code class="language-plaintext highlighter-rouge">path</code> 的内容来自应用的虚拟地址空间。 因而 <code class="language-plaintext highlighter-rouge">translated_str</code> 就需要在该应用空间中通过查找 Page Table 的方式逐个拷贝字符串信息到当前 kernel 中的 <code class="language-plaintext highlighter-rouge">string</code> 变量中。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/page_table.rs</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">translated_str</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
-      <span class="k">let</span> <span class="n">page_table</span> <span class="o">=</span> <span class="nn">PageTable</span><span class="p">::</span><span class="nf">from_token</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-      <span class="k">let</span> <span class="k">mut</span> <span class="n">string</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-      <span class="k">let</span> <span class="k">mut</span> <span class="n">va</span> <span class="o">=</span> <span class="n">ptr</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">;</span>
-      <span class="k">loop</span> <span class="p">{</span>
-          <span class="k">let</span> <span class="n">ch</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">page_table</span>
-              <span class="nf">.translate_va</span><span class="p">(</span><span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">va</span><span class="p">))</span>
-              <span class="nf">.unwrap</span><span class="p">()</span>
-              <span class="nf">.get_mut</span><span class="p">());</span>
-          <span class="k">if</span> <span class="n">ch</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-              <span class="k">break</span><span class="p">;</span>
-          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-              <span class="n">string</span><span class="nf">.push</span><span class="p">(</span><span class="n">ch</span> <span class="k">as</span> <span class="nb">char</span><span class="p">);</span>
-              <span class="n">va</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-          <span class="p">}</span>
-      <span class="p">}</span>
-      <span class="n">string</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-
-    <p>在 kernel 中获取到了这个应用信息后就能通过 <code class="language-plaintext highlighter-rouge">loader.rs</code> 提供的 <code class="language-plaintext highlighter-rouge">get_app_data_by_name</code> 在指定的内存地址空间加载应用了。</p>
-  </li>
-  <li>
-    <p><strong>read</strong></p>
-
-    <p>最后的 <code class="language-plaintext highlighter-rouge">sys_read</code> 实现还没有涉及到文件系统， 因而需要调用 SBI 提供的接口以获取用户的键盘输入。</p>
-  </li>
-</ul>
-
-<h3 id="34-进程资源回收机制">3.4 进程资源回收机制</h3>
-
-<p>资源回收涉及到进程的退出， 在此之前 task 中实现此功能的是 <code class="language-plaintext highlighter-rouge">exit_current_and_run_next</code>  函数， 但相比之前的章节， ch5 需要该函数传入一个退出码， 这个退出码会写入到当前进程的进程控制块 TCB 中。 这里比较关键的一步操作是将当前进程的所有子进程的父进程更改为 <code class="language-plaintext highlighter-rouge">INITPROC</code>， 这样当前进程被回收后其子进程仍能被管理而不至于进入一种无法定义的状态。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">exit_current_and_run_next</span><span class="p">(</span><span class="n">exit_code</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="c1">// ++++++ access initproc TCB exclusively</span>
-    <span class="p">{</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">initproc_inner</span> <span class="o">=</span> <span class="n">INITPROC</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
-        <span class="k">for</span> <span class="n">child</span> <span class="k">in</span> <span class="n">inner</span><span class="py">.children</span><span class="nf">.iter</span><span class="p">()</span> <span class="p">{</span>
-            <span class="n">child</span><span class="nf">.inner_exclusive_access</span><span class="p">()</span><span class="py">.parent</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">downgrade</span><span class="p">(</span><span class="o">&amp;</span><span class="n">INITPROC</span><span class="p">));</span>
-            <span class="n">initproc_inner</span><span class="py">.children</span><span class="nf">.push</span><span class="p">(</span><span class="n">child</span><span class="nf">.clone</span><span class="p">());</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="c1">// ++++++ stop exclusively accessing parent PCB</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>父进程的资源回收操作详见 <code class="language-plaintext highlighter-rouge">sys_waitpid</code> 系统调用。</p>
-
-<h2 id="4-修复-syscall">4. 修复 syscall</h2>
-
-<h3 id="41-sys_task_info">4.1 sys_task_info</h3>
-
-<p>该系统调用主要是这几个 <code class="language-plaintext highlighter-rouge">get_*</code> 函数需要对应新的 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 的获取方式， 关键需要注意要用 <code class="language-plaintext highlighter-rouge">current_task</code> 获取当前的进程的 TCB 以免获取进程信息时所有权转移。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="k">let</span> <span class="k">ref</span> <span class="n">task_info</span> <span class="o">=</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-        <span class="n">status</span><span class="p">:</span> <span class="nf">get_current_task_status</span><span class="p">(),</span>
-        <span class="n">syscall_times</span><span class="p">:</span> <span class="nf">get_current_task_syscall_times</span><span class="p">(),</span>
-        <span class="n">time</span><span class="p">:</span> <span class="nf">get_current_task_time_cost</span><span class="p">(),</span>
-    <span class="p">};</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>另外， 记录内核态和用户态的进程开销需要用到一个 <code class="language-plaintext highlighter-rouge">checkpoint</code> 记录时刻点， 这个变量也要放入 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code>， 通过 <code class="language-plaintext highlighter-rouge">update_checkpoint</code> 函数更新时刻点并获取时间变化量。 不过在 <code class="language-plaintext highlighter-rouge">TaskControlBlock::fork</code> 函数中的初始化和 <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 有所不同， 前者需要将 <code class="language-plaintext highlighter-rouge">checkpoint</code> 的值通过 <code class="language-plaintext highlighter-rouge">get_time_ms</code> 更新为进程创建的时刻点， 否则新的子进程的计时仍会以 OS 运行的第一个程序为起始时刻点， 这样我们无法通过 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 时间相关的测试。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">user_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">kernel_time</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">checkpoint</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="c1">// record time point</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="cd">/// update checkpoint and return the diff time</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_checkpoint</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">prev_point</span> <span class="o">=</span> <span class="k">self</span><span class="py">.checkpoint</span><span class="p">;</span>
-        <span class="k">self</span><span class="py">.checkpoint</span> <span class="o">=</span> <span class="nf">get_time_ms</span><span class="p">();</span>
-        <span class="k">return</span> <span class="k">self</span><span class="py">.checkpoint</span> <span class="o">-</span> <span class="n">prev_point</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>对 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 修改就是将其放入了子进程， 不做这个更改应该也不影响最终的结果。 另外 <code class="language-plaintext highlighter-rouge">user_time_start</code> 和 <code class="language-plaintext highlighter-rouge">user_time_end</code> 这一对记录用户态时间开销的函数接口和位置都没有变， <code class="language-plaintext highlighter-rouge">update_task_syscall_times</code> 亦是如此。 更新内核时间开销同样只用在 <code class="language-plaintext highlighter-rouge">exit_current_and_run_next</code> 以及 <code class="language-plaintext highlighter-rouge">suspend_current_and_run_next</code> 这两个临界态函数中调用 <code class="language-plaintext highlighter-rouge">update_checkpoint</code> 更新即可。</p>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e887b13ad109771da03f97c25b2723425cd9b37f">commit#e887b13</a></p>
-</blockquote>
-
-<h3 id="42-sys_mmap-与-sys_munmap">4.2 sys_mmap 与 sys_munmap</h3>
-
-<p>这个比较简单， 只用根据 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 变更后对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 的获取方式修改 <code class="language-plaintext highlighter-rouge">get_current_task_page_table</code>， <code class="language-plaintext highlighter-rouge">create_new_map_area</code>， <code class="language-plaintext highlighter-rouge">unmap_consecutive_area</code> 即可。</p>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d8e4b55f2243fe3c5808d23b41a8eccaf28edfe7">commit#d8e4b55</a></p>
-</blockquote>
-
-<h2 id="5-课后练习">5. 课后练习</h2>
-
-<h3 id="51-编程练习">5.1 编程练习</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
-</ul>
-
-<h3 id="52-实验练习">5.2 实验练习</h3>
-
-<h4 id="实现-spawn-系统调用">实现 spawn 系统调用</h4>
-
-<p>这部分实验要求使用 <code class="language-plaintext highlighter-rouge">fork</code> 和 <code class="language-plaintext highlighter-rouge">exec</code>， 但是可以借鉴这二者的写法， <code class="language-plaintext highlighter-rouge">path</code> 部分获取就是模仿 <code class="language-plaintext highlighter-rouge">exec</code> 写的。 实现该系统调用的主要想法是给新的应用数据 <code class="language-plaintext highlighter-rouge">elf_data</code> 建立一个新的进程模块， 这意味着我们需要以 <code class="language-plaintext highlighter-rouge">exec</code> 的角度去改编 <code class="language-plaintext highlighter-rouge">fork</code>。 一直到 <code class="language-plaintext highlighter-rouge">TrapContext</code> 这部分， 前面的内容和 <code class="language-plaintext highlighter-rouge">fork</code> 基本一致， 但是我们需要运行一个新的应用， 因而不能像 <code class="language-plaintext highlighter-rouge">fork</code> 那样沿用与其父进程一致的配置， 而需要创建一个全新的 <code class="language-plaintext highlighter-rouge">TrapContext</code> 以容纳 <code class="language-plaintext highlighter-rouge">entry_point</code>， <code class="language-plaintext highlighter-rouge">user_sp</code>， <code class="language-plaintext highlighter-rouge">kernel_stack_top</code> 这几个依托当前应用数据生成的信息。 最后也是最关键的， 我们需要返回子进程的 pid， 并且将这个子进程的进程控制模块加入到 task 队列中， 以使得操作系统能够分配资源执行该应用。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// HINT: fork + exec =/= spawn</span>
-<span class="cd">/// ALERT: Don't fork parent process address space</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_spawn</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">task</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">parent_inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">token</span> <span class="o">=</span> <span class="n">parent_inner</span><span class="py">.memory_set</span><span class="nf">.token</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">path</span> <span class="o">=</span> <span class="nf">translated_str</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
-    <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">elf_data</span><span class="p">)</span> <span class="o">=</span> <span class="nf">get_app_data_by_name</span><span class="p">(</span><span class="n">path</span><span class="nf">.as_str</span><span class="p">())</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="p">(</span><span class="n">memory_set</span><span class="p">,</span> <span class="n">user_sp</span><span class="p">,</span> <span class="n">entry_point</span><span class="p">)</span> <span class="o">=</span> <span class="nn">MemorySet</span><span class="p">::</span><span class="nf">from_elf</span><span class="p">(</span><span class="n">elf_data</span><span class="p">);</span>
-        <span class="k">let</span> <span class="n">trap_cx_ppn</span> <span class="o">=</span> <span class="n">memory_set</span>
-            <span class="nf">.translate</span><span class="p">(</span><span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">TRAP_CONTEXT_BASE</span><span class="p">)</span><span class="nf">.into</span><span class="p">())</span>
-            <span class="nf">.unwrap</span><span class="p">()</span>
-            <span class="nf">.ppn</span><span class="p">();</span>
-        <span class="c1">// alloc a pid and a kernel stack in kernel space</span>
-        <span class="k">let</span> <span class="n">pid_handle</span> <span class="o">=</span> <span class="nf">pid_alloc</span><span class="p">();</span>
-        <span class="k">let</span> <span class="n">kernel_stack</span> <span class="o">=</span> <span class="nn">KernelStack</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pid_handle</span><span class="p">);</span>
-        <span class="k">let</span> <span class="n">kernel_stack_top</span> <span class="o">=</span> <span class="n">kernel_stack</span><span class="nf">.get_top</span><span class="p">();</span>
-        <span class="k">let</span> <span class="n">task_control_block</span> <span class="o">=</span> <span class="nn">Arc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">TaskControlBlock</span> <span class="p">{</span>
-            <span class="n">pid</span><span class="p">:</span> <span class="n">pid_handle</span><span class="p">,</span>
-            <span class="n">kernel_stack</span><span class="p">,</span>
-            <span class="n">inner</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span>
-                <span class="nn">UPSafeCell</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-                    <span class="n">task_status</span><span class="p">:</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Ready</span><span class="p">,</span>
-                    <span class="n">task_cx</span><span class="p">:</span> <span class="nn">TaskContext</span><span class="p">::</span><span class="nf">goto_trap_return</span><span class="p">(</span><span class="n">kernel_stack_top</span><span class="p">),</span>
-                    <span class="n">syscall_times</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="n">MAX_SYSCALL_NUM</span><span class="p">],</span>
-                    <span class="n">user_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                    <span class="n">kernel_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                    <span class="n">checkpoint</span><span class="p">:</span> <span class="nf">get_time_ms</span><span class="p">(),</span> <span class="c1">// give the new process a new start point</span>
-                    <span class="n">memory_set</span><span class="p">,</span>
-                    <span class="n">trap_cx_ppn</span><span class="p">,</span>
-                    <span class="n">base_size</span><span class="p">:</span> <span class="n">parent_inner</span><span class="py">.base_size</span><span class="p">,</span>
-                    <span class="n">heap_bottom</span><span class="p">:</span> <span class="n">parent_inner</span><span class="py">.heap_bottom</span><span class="p">,</span>
-                    <span class="n">program_brk</span><span class="p">:</span> <span class="n">parent_inner</span><span class="py">.program_brk</span><span class="p">,</span>
-                    <span class="n">parent</span><span class="p">:</span> <span class="nf">Some</span><span class="p">(</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">downgrade</span><span class="p">(</span><span class="o">&amp;</span><span class="n">task</span><span class="p">)),</span>
-                    <span class="n">children</span><span class="p">:</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">(),</span>
-                    <span class="n">exit_code</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                <span class="p">})</span>
-            <span class="p">},</span>
-        <span class="p">});</span>
-        <span class="c1">// add child</span>
-        <span class="n">parent_inner</span><span class="py">.children</span><span class="nf">.push</span><span class="p">(</span><span class="n">task_control_block</span><span class="nf">.clone</span><span class="p">());</span>
-        <span class="c1">// prepare TrapContext in user space</span>
-        <span class="k">let</span> <span class="n">trap_cx</span> <span class="o">=</span> <span class="n">task_control_block</span><span class="nf">.inner_exclusive_access</span><span class="p">()</span><span class="nf">.get_trap_cx</span><span class="p">();</span>
-        <span class="o">*</span><span class="n">trap_cx</span> <span class="o">=</span> <span class="nn">TrapContext</span><span class="p">::</span><span class="nf">app_init_context</span><span class="p">(</span>
-            <span class="n">entry_point</span><span class="p">,</span>
-            <span class="n">user_sp</span><span class="p">,</span>
-            <span class="n">KERNEL_SPACE</span><span class="nf">.exclusive_access</span><span class="p">()</span><span class="nf">.token</span><span class="p">(),</span>
-            <span class="n">kernel_stack_top</span><span class="p">,</span>
-            <span class="n">trap_handler</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span>
-        <span class="p">);</span>
-        <span class="k">let</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">task_control_block</span><span class="py">.pid</span><span class="na">.0</span> <span class="k">as</span> <span class="nb">isize</span><span class="p">;</span>
-        <span class="nf">add_task</span><span class="p">(</span><span class="n">task_control_block</span><span class="p">);</span>
-        <span class="n">pid</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="o">-</span><span class="mi">1</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/74015ec9fd1e41526fe855d4d9744f59657d9d85">commit#74015ec</a></p>
-</blockquote>
-
-<h4 id="stride-调度算法">stride 调度算法</h4>
-
-<p>stride 调度需要存储两个变量， 一个是 <code class="language-plaintext highlighter-rouge">stride</code>， 表示当前的进程已经运行的 “长度”， 这个长度是以 <code class="language-plaintext highlighter-rouge">pass</code> 为单位进行更新的。 那么第二个变量就是 <code class="language-plaintext highlighter-rouge">priority</code>， 表示调度的优先级， 于是有公式成立：</p>
-
-\[pass = BIG\_STRIDE/priority\]
-
-<p>其中 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 被定义为一个预定义的极大常数， 则该调度方案为每个进程分配的时间将与其优先级成正比。 实验中对这些变量还有以下的规约：</p>
-
-<ul>
-  <li>stride 调度要求进程优先级 \(\ge{2}\) ，所以设定进程优先级 \(\le{1}\) 会导致错误。</li>
-  <li>进程初始 stride 设置为 0。</li>
-  <li>进程初始优先级设置为 16。</li>
-</ul>
-
-<p>由于 priority \(\ge\) 2， 因而 pass \(\le\) BIG_STRIDE/2， 在不考虑溢出的情况下，  <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code>， 始终成立， 这一点用反证法可以证明。 但现实中必然需要考虑溢出， 那么这里可以利用符号整数的特性， 避免在溢出后某些本应延后调度的进程因为 <code class="language-plaintext highlighter-rouge">stride</code> 值溢出后从小值开始的缘故被优先调度。 所以， 可以将 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 设置为 <code class="language-plaintext highlighter-rouge">u64</code> 类型最大值， 结合 <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code> 亦会有 <code class="language-plaintext highlighter-rouge">STRIDE_MIN – STRIDE_STRIDE &gt;= -BigStride / 2</code>， 这个与 <code class="language-plaintext highlighter-rouge">i64</code> 的表示方式非常相似， 因而可以这样设计 stride 的比较方式：</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">cmp</span><span class="p">::</span><span class="n">Ordering</span><span class="p">;</span>
-
-<span class="k">struct</span> <span class="nf">Stride</span><span class="p">(</span><span class="nb">u64</span><span class="p">);</span>
-
-<span class="k">impl</span> <span class="nb">PartialOrd</span> <span class="k">for</span> <span class="n">Stride</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">partial_cmp</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Ordering</span><span class="o">&gt;</span> <span class="p">{</span>
-        <span class="nf">Some</span><span class="p">((</span><span class="k">self</span><span class="na">.0</span> <span class="k">as</span> <span class="nb">i64</span><span class="p">)</span><span class="nf">.cmp</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">other</span><span class="na">.0</span> <span class="k">as</span> <span class="nb">i64</span><span class="p">)))</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="nb">PartialEq</span> <span class="k">for</span> <span class="n">Stride</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">eq</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">bool</span> <span class="p">{</span>
-        <span class="k">false</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>我自己尝试了去实现 BinaryHeap 进行调度， 但是程序会卡死在 initproc 中， 作为一个 Rust 新手以及确实很久没接触算法了， 不知道什么地方除了问题， 于是就用了最简单的思路， 在每次 <code class="language-plaintext highlighter-rouge">fetch</code> 下一个 task 之前对这个队列中的 task 做检查， 找到最小的 stride。 这里每次将初始最小值设定为 <code class="language-plaintext highlighter-rouge">0x7FFF_FFFF</code> 是为了解决前述的溢出问题， 本质上利用有符号整数的思想就是把大于 <code class="language-plaintext highlighter-rouge">MAX/2</code> 等价为负数。 这样 TIPs 中说明的 <em>使用 8 bits 存储 stride, BIG_STRIDE = 255, 则: <code class="language-plaintext highlighter-rouge">(125 &lt; 255) == false</code>, <code class="language-plaintext highlighter-rouge">(129 &lt; 255) == true</code></em> 就好理解了。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/manager.rs</span>
-<span class="cd">/// A simple FIFO scheduler.</span>
-<span class="k">impl</span> <span class="n">TaskManager</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="cd">/// Take a process out of the ready queue</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">fetch</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">min_index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">min_stride</span> <span class="o">=</span> <span class="mi">0x7FFF_FFFF</span><span class="p">;</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="k">in</span> <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-            <span class="k">if</span> <span class="n">inner</span><span class="nf">.get_status</span><span class="p">()</span> <span class="o">==</span> <span class="nn">TaskStatus</span><span class="p">::</span><span class="n">Ready</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="n">inner</span><span class="py">.stride</span> <span class="o">&lt;</span> <span class="n">min_stride</span> <span class="p">{</span>
-                    <span class="n">min_stride</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.stride</span><span class="p">;</span>
-                    <span class="n">min_index</span> <span class="o">=</span> <span class="n">idx</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-
-        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.get</span><span class="p">(</span><span class="n">min_index</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-            <span class="n">inner</span><span class="py">.stride</span> <span class="o">+=</span> <span class="n">BIG_STRIDE</span> <span class="o">/</span> <span class="n">inner</span><span class="py">.priority</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">self</span><span class="py">.ready_queue</span><span class="nf">.remove</span><span class="p">(</span><span class="n">min_index</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5abe01a7d69f4f0486888c78acf065e4ee296989">commit#5abe01a</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第五章：进程， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 4</title><link href="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 4" /><published>2023-07-04T00:00:00+08:00</published><updated>2023-07-04T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/04/rcore-note-ch4</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/04/rcore-note-ch4.html"><![CDATA[<p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
-
-<p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-os-detail.png" alt="Address Space OS details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Address Space OS Details, rCore</u></font>
-</div>
-
-<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第四章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch4">[ch4]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="1-sv39-多级页表的机制">1. Sv39 多级页表的机制</h2>
-
-<div align="center">
-    <a id="translation-details"></a>
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/address-translation.png" alt="RISC-V address translation details, MIT xv6" width="600" />
-    <br />
-    <font size="2" color="#999"><u>RISC-V address translation details, MIT xv6</u></font>
-</div>
-
-<p>rCore 和 xv6 都使用了 Sv39 模式， 这意味着 64-bit 的 <strong>VA (Virtual Address)</strong> 仅有低端的 39 bits 是被使用的。 而这 39 位又被划分为两部分， 被称为 <strong>VPN (Virtual Page Number)</strong> 的高 27 位用于索引 <strong>PTE (Page Table Entry)</strong>， PTE 是存放在每个应用的 Page Table 中， 由 44 位的 <strong>PPN (Physical Page Number)</strong>  与 10 位标志位组成， 这 PTE 实际构成了虚拟地址与物理地址的索引关系。 另外低 12 位是表示页内的偏移量， 这是因为我们使用 <strong>分页内存管理</strong>， 最小的内存单位是 <em>页</em>， 这低 12 位最终会与 PPN 组合成为实际的 56 位物理地址。</p>
-
-<blockquote>
-  <p>需要明确的是 \(One Page: 2^{12} = 4096\)， 因而虚拟地址的低 12 位才被称作是页内的偏移量， 因为 12 位正好构成了一个页的大小。</p>
-</blockquote>
-
-<p>上图描述了三级页表的查询方式， Sv48 可以使用四级页表， 具体的设计依具体情况而定。 多级页表的构建是为了节省内存开销， 我们只需要按需增添 PTE。 我们可以通过三级页表进行逐级索引， 依据上图由 <em>L2</em> 的 512 个一级页表可以索引， <em>L1</em> 的 \(512\times{512}\) 个二级页表， 这样的开销会比直接映射的页表小得多。 例如我们当前仅需要建立一个地址映射， 那么只需要各使用 <em>L2</em>， <em>L1</em>， <em>L0</em> 三级页表中的一个 PTE， 我们节省了 511 个 <em>L1</em> PTE， \(511\times{512}\) 个 <em>L0</em> PTE。</p>
-
-<p>如果每个地址映射都需要经历三级查表效率肯定会低， 因而 MMU 会提供 <strong>TLB (Translation Look-Aside Buffer)</strong> 缓存来加快映射查询， 但需要注意的是， 映射关系发生改变后缓存就失效了， 我们需要通过 <code class="language-plaintext highlighter-rouge">sfence.vma</code> 指令刷新 TLB。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/page-table.png" alt="Translation process, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Translation process, rCore</u></font>
-</div>
-
-<p>在 rCore 中， 虚拟地址 <strong>(VA, Virtual Address)</strong> 中的最小单位被称为 <em>Page</em>， 其对应的物理地址 <strong>(PA, Physical Address)</strong> 中的最小单位被称为 <em>Frame</em>， 这二者的关系可以从上图可以窥见一斑， 二者大小一样都是 4096 Bytes。</p>
-
-<h2 id="2-sv39-分页管理设计">2. Sv39 分页管理设计</h2>
-
-<h3 id="21-frame-allocator---物理页帧管理">2.1 frame allocator - 物理页帧管理</h3>
-
-<p>rCore 中内核直接管理了虚拟内存和物理内存。 <em>Frame</em> 所在的空间位于 <code class="language-plaintext highlighter-rouge">ekernel</code> 与 <code class="language-plaintext highlighter-rouge">MEMORY_END</code> 之间。 rCore 使用 <code class="language-plaintext highlighter-rouge">struct StackFrameAllocator</code> 实现 <strong>FRAME_ALLOCATOR</strong>， 并开放给其他内核模块两个用以分配和回收物理地址 <em>frame</em> 的接口： <code class="language-plaintext highlighter-rouge">frame_alloc</code> 以及 <code class="language-plaintext highlighter-rouge">frame_dealloc</code>。 值得注意的是 <code class="language-plaintext highlighter-rouge">frame_alloc</code> 返回的类型是封装 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 的 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 类型， 该类型实现了 <code class="language-plaintext highlighter-rouge">Drop</code> Trait， 这是一种 RAII 的思想， 当 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的声明周期结束， 其包裹的 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 能通过编译器自动回收到 <code class="language-plaintext highlighter-rouge">FRAME_ALLOCATOR</code>。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/frame_allocator.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">FrameTracker</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="nb">Drop</span> <span class="k">for</span> <span class="n">FrameTracker</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">frame_dealloc</span><span class="p">(</span><span class="k">self</span><span class="py">.ppn</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><b>内核访问物理页帧</b></p>
-
-<p>为了让内核能访问实际的物理地址， rCore 设计了三种粒度的访问方式： 基于 PTE， 基于 Bytes， 基于变量类型。 至此， 物理地址空间的分配以及访问的框架已经建成， 后续需要做的就是构建虚拟地址与物理地址映射的 <strong>页表(Page Table)</strong>。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
-
-<span class="k">impl</span> <span class="n">PhysPageNum</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_pte_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="n">PageTableEntry</span><span class="p">];</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_bytes_array</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">];</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="n">get_mut</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="k">mut</span> <span class="n">T</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="22-page-table---映射表构建">2.2 Page Table - 映射表构建</h3>
-
-<p>构建页表的基本单元就是 <strong>PTE(Page Table Entry)</strong>， 这里有个关键概念需要澄清， 页表的存储位置。 其实从 xv6 的那张 <a href="#translation-details"><em>RISC-V address translation details, MIT xv6</em></a> 也可以看出， 通过索引从 <em>Lx</em> 定位到的 PPN 会指向下一级 Page Table， 这意味着 Page Table 实际上也是存储在具体的物理页帧上的， 并且每个 PTE 对应唯一的一个 PPN。 因而 rCore 对 Page Table 的数据结构的设计就包括了定位 Page Table 的 <code class="language-plaintext highlighter-rouge">root_ppn</code> 以及 Page Table 中包含的各个 PTE 项 <code class="language-plaintext highlighter-rouge">frames</code>。</p>
-
-<blockquote>
-  <p>估计是为了让 <code class="language-plaintext highlighter-rouge">root_ppn</code> 和 <code class="language-plaintext highlighter-rouge">frames</code> 的指向和含义统一才把 PTE 命名为 frame， 个人感觉直接用 PTE 会清晰很多。 这里 rCore 又提及 RAII 的思想， <code class="language-plaintext highlighter-rouge">frames</code> 内部变量通过 <code class="language-plaintext highlighter-rouge">Vec</code> 数据结构绑定 <code class="language-plaintext highlighter-rouge">FrameTracker</code>， 可以保证声明周期结束后对 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的内存自动回收。</p>
-</blockquote>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">PageTable</span> <span class="p">{</span>
-    <span class="n">root_ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span>
-    <span class="n">frames</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>这样就不难理解 <code class="language-plaintext highlighter-rouge">struct PageTable</code> 初始化的流程了， 每个 Page Table 都需要向 frame allocator 先申请一个物理页帧将其 PPN 作为 <code class="language-plaintext highlighter-rouge">root_ppn</code> 唯一标识。</p>
-
-<h3 id="23-建立-va-与-pa-的映射关系">2.3 建立 VA 与 PA 的映射关系</h3>
-
-<p>Page Table 必然是动态变化的， 程序运行的时候会通过 <code class="language-plaintext highlighter-rouge">Page Fault</code> Trap 来实现对内存页的按需分配。 当我们知道虚拟地址空间的某个 VA 的时候， 需要通过前述的 Page Table 找到或建立一个关于物理页帧映射。 Xv6 中是通过 <code class="language-plaintext highlighter-rouge">walk</code> 函数实现的， rCore 提供了两个基础函数 <code class="language-plaintext highlighter-rouge">find_pte_create</code> 以及 <code class="language-plaintext highlighter-rouge">find_pte</code>， 区别就在于是否在某一级页表的 PTE 未创建时创建一个新的 PTE。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
-
-<span class="k">impl</span> <span class="n">VirtPageNum</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">indexes</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">[</span><span class="nb">usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">]</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">vpn</span> <span class="o">=</span> <span class="k">self</span><span class="na">.0</span><span class="p">;</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0usize</span><span class="p">;</span> <span class="mi">3</span><span class="p">];</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="mi">3</span><span class="p">)</span><span class="nf">.rev</span><span class="p">()</span> <span class="p">{</span>
-            <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vpn</span> <span class="o">&amp;</span> <span class="mi">511</span><span class="p">;</span>
-            <span class="n">vpn</span> <span class="o">&gt;&gt;=</span> <span class="mi">9</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="n">idx</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// os/src/mm/page_table.rs</span>
-
-<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">find_pte_create</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
-    <span class="k">fn</span> <span class="nf">find_pte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">PageTableEntry</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>rCore 通过 <code class="language-plaintext highlighter-rouge">indexes</code> 解析 VPN (Virtual Page Number)， 找到三级页表每一级中的 leaf PTE 的索引号。 这里会用到 PTE 中的 Flags 部分的信息。 标志位 <code class="language-plaintext highlighter-rouge">V</code> 表示当前的 PTE 为合法有效的， 在建立新的 PTE 的时候需要更新该标志位， 否则会引起 Page Fault。 基于这几个函数， rCore 封装了两个更便利的函数方便 Page Table 的维护， 用 <code class="language-plaintext highlighter-rouge">map/unmap</code> 为当前的 Page Table 增加或删除 PTE。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
-
-<span class="k">impl</span> <span class="n">PageTable</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">ppn</span><span class="p">:</span> <span class="n">PhysPageNum</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="n">PTEFlags</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte_create</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
-        <span class="nd">assert!</span><span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is mapped before mapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
-        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ppn</span><span class="p">,</span> <span class="n">flags</span> <span class="p">|</span> <span class="nn">PTEFlags</span><span class="p">::</span><span class="n">V</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">unmap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">pte</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.find_pte</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
-        <span class="nd">assert!</span><span class="p">(</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">(),</span> <span class="s">"vpn {:?} is invalid before unmapping"</span><span class="p">,</span> <span class="n">vpn</span><span class="p">);</span>
-        <span class="o">*</span><span class="n">pte</span> <span class="o">=</span> <span class="nn">PageTableEntry</span><span class="p">::</span><span class="nf">empty</span><span class="p">();</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><strong>手动页表查询</strong>： Page Table 还实现了两个特殊的函数模仿 MMU 获取 Page Table。 <code class="language-plaintext highlighter-rouge">from_token</code> 直接读取 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器中的 PPN 段获取一个 Page Table， 之后就能直接通过 <code class="language-plaintext highlighter-rouge">translate</code> 函数得到 VPN 对应的第三级的 PTE。</p>
-</blockquote>
-
-<h2 id="3-地址空间与抽象">3. 地址空间与抽象</h2>
-
-<p>rCore 抽象了两种概念来管理整个虚拟内存及其映射的物理内存。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/addr-space-abstract.png" alt="Address space abstraction, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Address space abstraction, HangX-Ma</u></font>
-</div>
-
-<ul>
-  <li>
-    <p><strong>逻辑段： 一段连续地址的虚拟内存</strong></p>
-
-    <p>rCore 使用 <code class="language-plaintext highlighter-rouge">sruct MapArea</code> 表示逻辑段。</p>
-
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">vpn_range</code> 表明该逻辑段的在虚拟地址的范围以及长度；</li>
-      <li><code class="language-plaintext highlighter-rouge">map_type</code> 则表示了虚拟地址和物理地址的映射办法， 直接映射 （<code class="language-plaintext highlighter-rouge">MapType::Identical</code>） 又或是通过 <strong>FRAME_ALLOCATOR</strong> 随机分配物理帧 （<code class="language-plaintext highlighter-rouge">MapType::Framed</code>） （外设地址都是直接映射的， 这样区分有助于后续的应用拓展）；</li>
-      <li>既然区分了映射方式， 存储映射关系的数据结构也会不同， <code class="language-plaintext highlighter-rouge">data_frames</code> 用于存储 leaf PTE 的 PPN 与其对应的 VPN 之间的关系， 仅用在 <code class="language-plaintext highlighter-rouge">Framed</code> 映射办法。</li>
-      <li>
-        <p>最后的 <code class="language-plaintext highlighter-rouge">map_perm</code> 其实就和 Linux 系统的 RWXU 的含义基本接近了。</p>
-
-        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/memory_set.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">MapArea</span> <span class="p">{</span>
-    <span class="n">vpn_range</span><span class="p">:</span> <span class="n">VPNRange</span><span class="p">,</span>
-    <span class="n">data_frames</span><span class="p">:</span> <span class="n">BTreeMap</span><span class="o">&lt;</span><span class="n">VirtPageNum</span><span class="p">,</span> <span class="n">FrameTracker</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">map_type</span><span class="p">:</span> <span class="n">MapType</span><span class="p">,</span>
-    <span class="n">map_perm</span><span class="p">:</span> <span class="n">MapPermission</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>地址空间：一系列有关联的逻辑段</strong></p>
-
-    <p>rCore 通过 <code class="language-plaintext highlighter-rouge">struct MemorySet</code> 封装这些逻辑段， 这是因为虽然逻辑段本身是连续的一段虚拟地址， 但多个逻辑段之间可能并不是连续的。 注意这里的 <code class="language-plaintext highlighter-rouge">page_table</code> 是一个 <em>Root Page Table</em>， 包含了该所有的 PTE 的物理页帧， 而 <code class="language-plaintext highlighter-rouge">areas</code> 则包含了数据所在的物理页帧， 这样的的设计构成了一个地址空间所需的所有的物理页帧。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
-
-  <span class="k">pub</span> <span class="k">struct</span> <span class="n">MemorySet</span> <span class="p">{</span>
-      <span class="n">page_table</span><span class="p">:</span> <span class="n">PageTable</span><span class="p">,</span>
-      <span class="n">areas</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">MapArea</span><span class="o">&gt;</span><span class="p">,</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<h3 id="31-内核地址空间">3.1 内核地址空间</h3>
-
-<p>Sv39 规定 64 位虚拟地址的 [63:39] 这 25 位必须和第 38 位相同， 否则 MMU 会直接认定它是一个不合法的虚拟地址。 因而虚拟地址空间可以被划分为低地址的 \(2^{39}\) bytes (512 GB)， 以及当第 38 位为 1 时的 512 GB， 分别称为 <em>High Half</em> 以及 <em>Low Half</em>。 rCore 设计的内核空间如下图所示。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-high.png" alt="Kernel address space high half, rCore" width="400" />
-    <br />
-    <font size="2" color="#999"><u>Kernel address space high half, rCore</u></font>
-</div>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/kernel-as-low.png" alt="Kernel address space low half, rCore" width="300" />
-    <br />
-    <font size="2" color="#999"><u>Kernel address space low half, rCore</u></font>
-</div>
-
-<h3 id="32-应用地址空间">3.2 应用地址空间</h3>
-
-<p>rCore 设计的内核空间如下图所示， 具体含义和解释见 rCore Tutorial 相关章节的内容。 需要注意的是， 几个具有不同访问权限的逻辑段之间需要通过页面对齐进行限制与区分。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-04-rcore-note-ch4/app-as-full.png" alt="Application address space, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Application address space, rCore</u></font>
-</div>
-
-<h2 id="4-基于地址空间的分时多任务">4. 基于地址空间的分时多任务</h2>
-
-<h3 id="41-trampoline">4.1 Trampoline</h3>
-
-<p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-plaintext highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
-
-<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>
-
-<h3 id="42-改进-syscall">4.2 改进 syscall</h3>
-
-<p>rCore 的手册更改了 <code class="language-plaintext highlighter-rouge">sys_write</code> 系统调用， 通过 <code class="language-plaintext highlighter-rouge">translated_byte_buffer</code> 在内核空间中开辟了一个可以访问应用数据的区域（实际上是将应用数据从用户态虚拟地址空间拷贝到了内核态虚拟地址空间以供内核访问）。 相应的， 前述章节需要访问应用态数据的系统调用均需要通过这种间接的方式进行数据的访问与更改。 这也就是 <code class="language-plaintext highlighter-rouge">sys_get_time</code> 以及 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 在第四章失效的原因。</p>
-
-<h2 id="5-课后练习">5. 课后练习</h2>
-
-<h3 id="51-编程练习">5.1 编程练习</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
-</ul>
-
-<h3 id="52-实验练习">5.2 实验练习</h3>
-
-<h4 id="重写-sys_get_time-和-sys_task_info">重写 <em>sys_get_time</em> 和 <em>sys_task_info</em></h4>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_get_time</span><span class="p">(</span><span class="n">ts</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TimeVal</span><span class="p">,</span> <span class="n">_tz</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">us</span> <span class="o">=</span> <span class="nf">get_time_us</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">dst_vec</span> <span class="o">=</span> <span class="nf">translated_byte_buffer</span><span class="p">(</span>
-        <span class="nf">current_user_token</span><span class="p">(),</span>
-        <span class="n">ts</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TimeVal</span><span class="o">&gt;</span><span class="p">()</span>
-    <span class="p">);</span>
-    <span class="k">let</span> <span class="k">ref</span> <span class="n">time_val</span> <span class="o">=</span> <span class="n">TimeVal</span> <span class="p">{</span>
-            <span class="n">sec</span><span class="p">:</span> <span class="n">us</span> <span class="o">/</span> <span class="mi">1_000_000</span><span class="p">,</span>
-            <span class="n">usec</span><span class="p">:</span> <span class="n">us</span> <span class="o">%</span> <span class="mi">1_000_000</span><span class="p">,</span>
-    <span class="p">};</span>
-    <span class="k">let</span> <span class="n">src_ptr</span> <span class="o">=</span> <span class="n">time_val</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">TimeVal</span><span class="p">;</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span> <span class="k">in</span> <span class="n">dst_vec</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">unit_len</span> <span class="o">=</span> <span class="n">dst</span><span class="nf">.len</span><span class="p">();</span>
-        <span class="k">unsafe</span> <span class="p">{</span>
-            <span class="n">dst</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span>
-                <span class="n">src_ptr</span><span class="nf">.wrapping_byte_add</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="n">unit_len</span><span class="p">)</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span>
-                <span class="n">unit_len</span><span class="p">)</span>
-            <span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">dst_vec</span> <span class="o">=</span> <span class="nf">translated_byte_buffer</span><span class="p">(</span>
-        <span class="nf">current_user_token</span><span class="p">(),</span>
-        <span class="n">ti</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">TaskInfo</span><span class="o">&gt;</span><span class="p">()</span>
-    <span class="p">);</span>
-    <span class="k">let</span> <span class="k">ref</span> <span class="n">task_info</span> <span class="o">=</span> <span class="n">TaskInfo</span> <span class="p">{</span>
-        <span class="n">status</span><span class="p">:</span> <span class="nf">get_current_task_status</span><span class="p">(),</span>
-        <span class="n">syscall_times</span><span class="p">:</span> <span class="nf">get_current_task_syscall_times</span><span class="p">(),</span>
-        <span class="n">time</span><span class="p">:</span> <span class="nf">get_current_task_time_cost</span><span class="p">(),</span>
-    <span class="p">};</span>
-    <span class="c1">// println!("[kernel]: time {} syscall_time {}", task_info.time, task_info.syscall_times[super::SYSCALL_GET_TIME]);</span>
-    <span class="k">let</span> <span class="n">src_ptr</span> <span class="o">=</span> <span class="n">task_info</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">TaskInfo</span><span class="p">;</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span> <span class="k">in</span> <span class="n">dst_vec</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.enumerate</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="n">unit_len</span> <span class="o">=</span> <span class="n">dst</span><span class="nf">.len</span><span class="p">();</span>
-        <span class="k">unsafe</span> <span class="p">{</span>
-            <span class="n">dst</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span>
-                <span class="n">src_ptr</span><span class="nf">.wrapping_byte_add</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="n">unit_len</span><span class="p">)</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span>
-                <span class="n">unit_len</span><span class="p">)</span>
-            <span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/b1ac23ab6103d75398e859fe68df01789950cf0e">commit#b1ac23a</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/db314555940997712b4afba2c19ce41c5c8c26ed">commit#db31455</a></p>
-</blockquote>
-
-<h4 id="mmap-和-munmap-匿名映射"><em>mmap</em> 和 <em>munmap</em> 匿名映射</h4>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
-
-<span class="cd">/// port: page permission [2:0] X|W|R</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_mmap</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="n">start</span> <span class="o">%</span> <span class="n">PAGE_SIZE</span> <span class="o">!=</span> <span class="mi">0</span> <span class="cm">/* start need to be page aligned */</span> <span class="p">||</span> 
-        <span class="n">port</span> <span class="o">&amp;</span> <span class="o">!</span><span class="mi">0x7</span> <span class="o">!=</span> <span class="mi">0</span> <span class="cm">/* other bits of port needs to be zero */</span> <span class="p">||</span>
-        <span class="n">port</span> <span class="o">&amp;</span> <span class="mi">0x7</span> <span class="o">==</span><span class="mi">0</span> <span class="cm">/* No permission set, meaningless */</span> <span class="p">||</span>
-        <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">MAXVA</span> <span class="cm">/* mapping range should be an legal address */</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="c1">// check the range [start, start + len)</span>
-    <span class="k">let</span> <span class="n">start_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="nf">.floor</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">end_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">len</span><span class="p">)</span><span class="nf">.ceil</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">vpns</span> <span class="o">=</span> <span class="nn">VPNRange</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">start_vpn</span><span class="p">,</span> <span class="n">end_vpn</span><span class="p">);</span>
-    <span class="k">for</span> <span class="n">vpn</span> <span class="k">in</span> <span class="n">vpns</span> <span class="p">{</span>
-       <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">pte</span><span class="p">)</span> <span class="o">=</span> <span class="nf">get_current_task_page_table</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span> <span class="p">{</span>
-            <span class="c1">// we find a pte that has been mapped</span>
-            <span class="k">if</span> <span class="n">pte</span><span class="nf">.is_valid</span><span class="p">()</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-            <span class="p">}</span>
-       <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="c1">// all ptes in range has pass the test</span>
-    <span class="nf">create_new_map_area</span><span class="p">(</span>
-        <span class="n">start_vpn</span><span class="nf">.into</span><span class="p">(),</span>
-        <span class="n">end_vpn</span><span class="nf">.into</span><span class="p">(),</span>
-        <span class="nn">MapPermission</span><span class="p">::</span><span class="nf">from_bits_truncate</span><span class="p">((</span><span class="n">port</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">|</span> <span class="nn">MapPermission</span><span class="p">::</span><span class="n">U</span>
-    <span class="p">);</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-
-
-<span class="cd">/// munmap the mapped virtual addresses</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_munmap</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">MAXVA</span> <span class="p">||</span> <span class="n">start</span> <span class="o">%</span> <span class="n">PAGE_SIZE</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">// avoid undefined situation</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">mlen</span> <span class="o">=</span> <span class="n">len</span><span class="p">;</span>
-    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">MAXVA</span> <span class="o">-</span> <span class="n">len</span> <span class="p">{</span>
-        <span class="n">mlen</span> <span class="o">=</span> <span class="n">MAXVA</span> <span class="o">-</span> <span class="n">start</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="nf">unmap_consecutive_area</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">mlen</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
-
-<span class="c1">//* ch4-lab2, mmap, munmap</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_current_task_page_table</span><span class="p">(</span><span class="n">vpn</span><span class="p">:</span> <span class="n">VirtPageNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">PageTableEntry</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.translate</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">create_new_map_area</span><span class="p">(</span><span class="n">start_va</span><span class="p">:</span> <span class="n">VirtAddr</span><span class="p">,</span> <span class="n">end_va</span><span class="p">:</span> <span class="n">VirtAddr</span><span class="p">,</span> <span class="n">perm</span><span class="p">:</span> <span class="n">MapPermission</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.insert_framed_area</span><span class="p">(</span><span class="n">start_va</span><span class="p">,</span> <span class="n">end_va</span><span class="p">,</span> <span class="n">perm</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">unmap_consecutive_area</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">TASK_MANAGER</span><span class="py">.inner</span><span class="nf">.exclusive_access</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.current_task</span><span class="p">;</span>
-    <span class="k">let</span> <span class="n">start_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="nf">.floor</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">end_vpn</span> <span class="o">=</span> <span class="nn">VirtAddr</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">len</span><span class="p">)</span><span class="nf">.ceil</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">vpns</span> <span class="o">=</span> <span class="nn">VPNRange</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">start_vpn</span><span class="p">,</span> <span class="n">end_vpn</span><span class="p">);</span>
-    <span class="k">for</span> <span class="n">vpn</span> <span class="k">in</span> <span class="n">vpns</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">pte</span><span class="p">)</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.translate</span><span class="p">(</span><span class="n">vpn</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="o">!</span><span class="n">pte</span><span class="nf">.is_valid</span><span class="p">()</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="n">inner</span><span class="py">.tasks</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="py">.memory_set</span><span class="nf">.get_page_table</span><span class="p">()</span><span class="nf">.unmap</span><span class="p">(</span><span class="n">vpn</span><span class="p">);</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="c1">// Also unmapped if no PTE found</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="mi">0</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/5e57b472225f7d037535038ba6c037e9566cfeb3">commit#5e57b47</a> 以及 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/165bda860fb29ab4c3af68e308b3f82080825031">commit#165bda8</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第四章：地址空间， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
