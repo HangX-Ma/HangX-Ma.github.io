@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -346,7 +350,7 @@
 <ol>
   <li><strong>send datagram：</strong> 该方法被 TCPConnection 或者 router 所调用， 这个接口就是将待发送的 Internet(IP) datagrams 转义为以太网帧并最终发送出去。
     <ul>
-      <li>如果以太网目的地址是已知的就直接发送， 创建以太网帧 （<code class="language-plaintext highlighter-rouge">type = EthernetHeader::TYPE IPv4</code>）， 将 payload 设置为串行的数据报文， 并设置源地址和目标地址。</li>
+      <li>如果以太网目的地址是已知的就直接发送， 创建以太网帧 （<code class="language-html highlighter-rouge">type = EthernetHeader::TYPE IPv4</code>）， 将 payload 设置为串行的数据报文， 并设置源地址和目标地址。</li>
       <li>如果以太网目的地址未知， 广播下一跳的以太网地址的 ARP 请求， 并将 IP 报文放入队列中待 ARP 回复收到后能将其发送出去。
         <blockquote>
           <p>需要间隔 5 秒再发送相同的 ARP 请求， 并且只有在收到目的以太网地址后再将数据报放入队列中。 若没有收到目的以太网地址， 我们需要将 dgrams 以及其对应的 Address 都暂存在列表中， 以供之后收到 ARP reply 后再进行发送， 否则这部分数据就会丢失了。</p>
@@ -357,12 +361,12 @@
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">void</span> <span class="nf">send_datagram</span><span class="p">(</span><span class="k">const</span> <span class="n">InternetDatagram</span> <span class="o">&amp;</span><span class="n">dgram</span><span class="p">,</span> <span class="k">const</span> <span class="n">Address</span> <span class="o">&amp;</span><span class="n">next_hop</span><span class="p">);</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>recv frame：</strong> 该方法接收来自网络的以太网帧， 但需要忽略任何目的地址非网络接口部分的帧 （广播地址或者存储在 <code class="language-plaintext highlighter-rouge">_ethernet_address</code> 中的接口自身的以太网地址）。
+  <li><strong>recv frame：</strong> 该方法接收来自网络的以太网帧， 但需要忽略任何目的地址非网络接口部分的帧 （广播地址或者存储在 <code class="language-html highlighter-rouge">_ethernet_address</code> 中的接口自身的以太网地址）。
     <ul>
       <li>若为 IPv4 帧就将其以 <em><strong>InternetDatagramF</strong></em> 进行解析， 若成功的就将结果的 <em><strong>InternetDatagramF</strong></em> 返回给调用者。</li>
       <li>若为 ARP 帧就将其以 <em><strong>ARPMessage</strong></em>  进行解析， 若成功则缓存发送方 IP 地址与以太网帧的映射 30 秒。 若这个 ARP 请求是询问我们的 IP 地址， 就回复正确的 ARP 答复。
         <blockquote>
-          <p>根据 FAQs 中的答疑， 我们需要自行创建一个用以存储映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>。</p>
+          <p>根据 FAQs 中的答疑， 我们需要自行创建一个用以存储映射的 <code class="language-html highlighter-rouge">arp_table_</code>。</p>
         </blockquote>
       </li>
     </ul>
@@ -390,7 +394,7 @@
 
 <h4 id="ethernet-frames">Ethernet Frames</h4>
 
-<p><em><strong>EthernetFrame</strong></em> 是我们需要传输给 TAP 设备的数据， 根据已有信息， 我们只需要将组装好的 <em><strong>EthernetFrame</strong></em> 用 <code class="language-plaintext highlighter-rouge">queue</code> 数据结构封装即可。</p>
+<p><em><strong>EthernetFrame</strong></em> 是我们需要传输给 TAP 设备的数据， 根据已有信息， 我们只需要将组装好的 <em><strong>EthernetFrame</strong></em> 用 <code class="language-html highlighter-rouge">queue</code> 数据结构封装即可。</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// outbound Ethernet frames which will be sent by the Network Interface</span>
 <span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">EthernetFrame</span><span class="o">&gt;</span> <span class="n">outbound_frames_</span> <span class="p">{};</span>
@@ -398,16 +402,16 @@
 
 <h4 id="arp-table">ARP Table</h4>
 
-<p>从以上接口的描述可以看出， 我们需要建立一个存储 ARP 映射的 <code class="language-plaintext highlighter-rouge">arp_table_</code>， IP-To-Ethernet。 根据 <a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">wiki</a> 关于 ARP 原理章节的阐述， 这个表中的 ARP 数据需要有一个变量存储 <em><strong>EthernetFrame</strong></em> 表示映射目标， 以及 <em><strong>ttl (time-to-live)</strong></em> 表示该条 ARP 信息的生命周期 （默认是 30s）。 另外，在 FAQs 中有这么一句：</p>
+<p>从以上接口的描述可以看出， 我们需要建立一个存储 ARP 映射的 <code class="language-html highlighter-rouge">arp_table_</code>， IP-To-Ethernet。 根据 <a href="https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE">wiki</a> 关于 ARP 原理章节的阐述， 这个表中的 ARP 数据需要有一个变量存储 <em><strong>EthernetFrame</strong></em> 表示映射目标， 以及 <em><strong>ttl (time-to-live)</strong></em> 表示该条 ARP 信息的生命周期 （默认是 30s）。 另外，在 FAQs 中有这么一句：</p>
 
 <p class="info"><strong>Q:</strong> <em>How do I convert an IP address that comes in the form of an Address object, into a raw 32-bit integer that I can write into the ARP message?</em>
 <br />
-<strong>A:</strong> Use the <code class="language-plaintext highlighter-rouge">Address::ipv4 numeric()</code> method.</p>
+<strong>A:</strong> Use the <code class="language-html highlighter-rouge">Address::ipv4 numeric()</code> method.</p>
 
-<p>这说明 ARP 的映射应当是 <code class="language-plaintext highlighter-rouge">uint32_t</code> 类型到 <code class="language-plaintext highlighter-rouge">arp_t</code> 类型， 我们可以用一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储映射信息。 除此之外我们还注意到， 同一个 ARP 的 ARP 请求的间隔需要 5s， 那么除了映射信息外， 我们还需要一个 <code class="language-plaintext highlighter-rouge">list</code> 结构用以存储绑定 <em><strong>InternetDatagram</strong></em> 和 <em><strong>Address</strong></em> 的等待列表 <code class="language-plaintext highlighter-rouge">arp_datagrams_waiting_list_</code>。 另外， 为了记录 ARP 请求的声明周期， 我们还需要一个 <code class="language-plaintext highlighter-rouge">unordered_map</code> 数据结构存储 <em><strong>numeric IP</strong></em> 与该条 ARP 请求的声明周期的映射 <code class="language-plaintext highlighter-rouge">arp_requests_lifetime_</code>。</p>
+<p>这说明 ARP 的映射应当是 <code class="language-html highlighter-rouge">uint32_t</code> 类型到 <code class="language-html highlighter-rouge">arp_t</code> 类型， 我们可以用一个 <code class="language-html highlighter-rouge">unordered_map</code> 数据结构存储映射信息。 除此之外我们还注意到， 同一个 ARP 的 ARP 请求的间隔需要 5s， 那么除了映射信息外， 我们还需要一个 <code class="language-html highlighter-rouge">list</code> 结构用以存储绑定 <em><strong>InternetDatagram</strong></em> 和 <em><strong>Address</strong></em> 的等待列表 <code class="language-html highlighter-rouge">arp_datagrams_waiting_list_</code>。 另外， 为了记录 ARP 请求的声明周期， 我们还需要一个 <code class="language-html highlighter-rouge">unordered_map</code> 数据结构存储 <em><strong>numeric IP</strong></em> 与该条 ARP 请求的声明周期的映射 <code class="language-html highlighter-rouge">arp_requests_lifetime_</code>。</p>
 
 <blockquote>
-  <p>这里使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构是头文件中已经包含了相关的库文件， 另外这部分信息具有时效的不确定性， 我们并不清楚 ARP 请求究竟哪一个会在下一刻返回， 所以在这部分信息我们需要逐个遍历， 将已经获取目标以太网地址的数据包组装后放入发送队列中， 并从 <code class="language-plaintext highlighter-rouge">list</code> 中移除。 故而使用 <code class="language-plaintext highlighter-rouge">list</code> 数据结构能够利用链表插入/移除数据的快速性的优势， 而不用考虑查询带来的负面影响。</p>
+  <p>这里使用 <code class="language-html highlighter-rouge">list</code> 数据结构是头文件中已经包含了相关的库文件， 另外这部分信息具有时效的不确定性， 我们并不清楚 ARP 请求究竟哪一个会在下一刻返回， 所以在这部分信息我们需要逐个遍历， 将已经获取目标以太网地址的数据包组装后放入发送队列中， 并从 <code class="language-html highlighter-rouge">list</code> 中移除。 故而使用 <code class="language-html highlighter-rouge">list</code> 数据结构能够利用链表插入/移除数据的快速性的优势， 而不用考虑查询带来的负面影响。</p>
 </blockquote>
 
 <p>这样关于 ARP Table 的数据结构就可以按如下格式创建。 需要注意的是 TTL 的时间单位是 ‘毫秒’， 而我们设定的边界值都是以 ‘秒’ 为单位。</p>
@@ -426,7 +430,7 @@
 
 <h4 id="内存泄漏">内存泄漏</h4>
 
-<p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-plaintext highlighter-rouge">erase</code> 函数之后又用了 <code class="language-plaintext highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-plaintext highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-plaintext highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
+<p>在遍历 ARP Table 的时候我用了迭代器， 但是调用了 <code class="language-html highlighter-rouge">erase</code> 函数之后又用了 <code class="language-html highlighter-rouge">iter++</code> 去获取下一个 ARP 项， 这产生了矛盾， 当前的迭代器的内存空间已经被释放了。 因而使用 <code class="language-html highlighter-rouge">erase</code> 函数需要注意使用 <code class="language-html highlighter-rouge">iter = xxx.erase(iter);</code> 来更新迭代器的内容。</p>
 
 <h2 id="3-测试结果">3. 测试结果</h2>
 
@@ -601,7 +605,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -322,7 +326,7 @@
   <li>确定下一跳的 IP 地址</li>
 </ul>
 
-<p>在 Lab5 中需要实现一个新的 <code class="language-plaintext highlighter-rouge">Router</code> 类， 该类能够 <em>跟踪路由表信息</em> 并且 <em>将接收到的每个 datagram 通过正确的输出端 <strong>NetworkInterface</strong> 正确转发到下一跳 （hop）</em>。 在项目指导书中明确解释了 <em><strong>route</strong></em> 的相关含义， 后续需要通过 IP 的最长前缀匹配来实现路由的功能， 这也是实验中最为棘手的部分。</p>
+<p>在 Lab5 中需要实现一个新的 <code class="language-html highlighter-rouge">Router</code> 类， 该类能够 <em>跟踪路由表信息</em> 并且 <em>将接收到的每个 datagram 通过正确的输出端 <strong>NetworkInterface</strong> 正确转发到下一跳 （hop）</em>。 在项目指导书中明确解释了 <em><strong>route</strong></em> 的相关含义， 后续需要通过 IP 的最长前缀匹配来实现路由的功能， 这也是实验中最为棘手的部分。</p>
 
 <h2 id="2-ip-router-实现">2. IP Router 实现</h2>
 
@@ -334,7 +338,7 @@
                  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">next_hop</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">interface_num</span><span class="p">);</span>
 </code></pre></div>    </div>
 
-    <p>根据 <code class="language-plaintext highlighter-rouge">add_route</code> 所给的参数以及 <a href="https://en.wikipedia.org/wiki/Routing_table">wiki</a> 中对 routing table 内容的描述， 我们需要自己创建如下的数据结构。</p>
+    <p>根据 <code class="language-html highlighter-rouge">add_route</code> 所给的参数以及 <a href="https://en.wikipedia.org/wiki/Routing_table">wiki</a> 中对 routing table 内容的描述， 我们需要自己创建如下的数据结构。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// Routing table data structure</span>
  <span class="k">using</span> <span class="n">route_t</span> <span class="o">=</span> <span class="k">struct</span> <span class="p">{</span>
@@ -358,7 +362,7 @@
       <li>在匹配的路由方案中路由器选择 <em>prefix_length</em> 值最大的那个， 选中的就是满足 “最长前缀匹配” 的路由。</li>
       <li>如果没有匹配的路由信息， 则丢弃该项 datagram。</li>
       <li>每一跳的路由器都需要减少 datagrams 的 ttl。 如果 ttl 已经归零或者在本次减除后触及零的下界， 路由器同样需要丢弃该项 datagram。</li>
-      <li>最终， 路由器需要将修改过的 datagram 通过合适的网络接口 （<code class="language-plaintext highlighter-rouge">interface(interface num).send datagram()</code>） 发送到下一跳。</li>
+      <li>最终， 路由器需要将修改过的 datagram 通过合适的网络接口 （<code class="language-html highlighter-rouge">interface(interface num).send datagram()</code>） 发送到下一跳。</li>
     </ul>
 
     <p>整个过程中， 路由器仅需要和 datagram 以及链接层的网络接口抽象进行交互， 完全不需要考虑 TCP， ARP 以及以太网帧， 较好实现了分层隔离， 降低了路由器的处理负担。</p>
@@ -378,9 +382,9 @@
 
 <h2 id="4-坑点记录">4. 坑点记录</h2>
 
-<p>测试的时候有这样一条记录（就是第一个测试都没过啦）， 当时觉得很奇怪怎么会有 <code class="language-plaintext highlighter-rouge">bad IPv4 datagram</code> 的打印， 查看后是 <code class="language-plaintext highlighter-rouge">InternetDatagram</code> 的 <code class="language-plaintext highlighter-rouge">parse</code> 返回了错误。 于是我给 <code class="language-plaintext highlighter-rouge">set_error</code> 的部分都加上了打印才发现是 <strong>checksum</strong> 未匹配。 我还以为是 <em><strong>NetworkInterface</strong></em> 部分的接收部分没有写好， 调试了半天就想着要不要用 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 在 <code class="language-plaintext highlighter-rouge">recv_frame</code> 中重新把 checksum 计算一下， 这时候突然发现这个函数的接口都是 <code class="language-plaintext highlighter-rouge">const</code> 类型， 并且结合 <em><strong>NetworkInterface</strong></em> 在 <em>link layer</em> 与 <em>application</em> 之间的情况， 以及错误是出现在以太网帧传输到 router 再转发出去的， 唯一有嫌疑的应当还是刚刚写的 <em><strong>Router</strong></em> 类。</p>
+<p>测试的时候有这样一条记录（就是第一个测试都没过啦）， 当时觉得很奇怪怎么会有 <code class="language-html highlighter-rouge">bad IPv4 datagram</code> 的打印， 查看后是 <code class="language-html highlighter-rouge">InternetDatagram</code> 的 <code class="language-html highlighter-rouge">parse</code> 返回了错误。 于是我给 <code class="language-html highlighter-rouge">set_error</code> 的部分都加上了打印才发现是 <strong>checksum</strong> 未匹配。 我还以为是 <em><strong>NetworkInterface</strong></em> 部分的接收部分没有写好， 调试了半天就想着要不要用 <code class="language-html highlighter-rouge">compute_checksum</code> 在 <code class="language-html highlighter-rouge">recv_frame</code> 中重新把 checksum 计算一下， 这时候突然发现这个函数的接口都是 <code class="language-html highlighter-rouge">const</code> 类型， 并且结合 <em><strong>NetworkInterface</strong></em> 在 <em>link layer</em> 与 <em>application</em> 之间的情况， 以及错误是出现在以太网帧传输到 router 再转发出去的， 唯一有嫌疑的应当还是刚刚写的 <em><strong>Router</strong></em> 类。</p>
 
-<p>在读 <code class="language-plaintext highlighter-rouge">router.cc</code> 代码考虑把 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 加在哪里的时候我突然看到 ttl 的值被我更改了。 这不就是问题根源嘛， 我们更新了 <em><strong>InternetDatagram</strong></em> 的内容， 那么 checksum 也需要重新计算。</p>
+<p>在读 <code class="language-html highlighter-rouge">router.cc</code> 代码考虑把 <code class="language-html highlighter-rouge">compute_checksum</code> 加在哪里的时候我突然看到 ttl 的值被我更改了。 这不就是问题根源嘛， 我们更新了 <em><strong>InternetDatagram</strong></em> 的内容， 那么 checksum 也需要重新计算。</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Testing traffic between two ordinary hosts <span class="o">(</span>applesauce to cherrypie<span class="o">)</span>...
 
@@ -601,7 +605,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

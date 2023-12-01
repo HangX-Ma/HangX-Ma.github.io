@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -299,12 +303,12 @@
     <meta itemprop="keywords" content="Course,cs144"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
+<div class="article__content" itemprop="articleBody"><p><a href="https://github.com/HangX-Ma/cs144-sp23/blob/main/lab0.md">Lab Checkpoint 0: networking warmup</a> 直接写了 Markdown 记录 <strong>Networking by hand</strong> 的部分， 另外完成了 <code class="language-html highlighter-rouge">ByteStream</code> 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。
 <!--more--></p>
 <blockquote>
   <p><a href="https://kiprey.github.io/2021/11/cs144-lab1/">Kiprey</a> 2021 年的 Lab1 的记录给予了我帮助和启发。</p>
 
-  <p>该实验通过打印信息进行调试会更有效， 可以自己在 <code class="language-plaintext highlighter-rouge">test</code> 文件中增加自己的测试样例。</p>
+  <p>该实验通过打印信息进行调试会更有效， 可以自己在 <code class="language-html highlighter-rouge">test</code> 文件中增加自己的测试样例。</p>
 </blockquote>
 
 <ul>
@@ -321,13 +325,13 @@
     <font size="2" color="#999"><u>CS144 Labs'structure</u></font>
 </div>
 
-<p>Lab1 的实验需要完成 <code class="language-plaintext highlighter-rouge">ByteStream</code> 外部的 <code class="language-plaintext highlighter-rouge">StreamReassembler</code> 部分。 Transmission Control Protocol (TCP) 的传输实现是一种可靠的顺序字节流， 尽管底层网络是以 <em>“best effort”</em> 的形式在进行报文的传输。 这意味着在报文传输的过程中， 数据包中的信息很可能会丢失、 重排、 替换、 或者重复。 这需要 TCP 为数据包提供可靠的底层逻辑。</p>
+<p>Lab1 的实验需要完成 <code class="language-html highlighter-rouge">ByteStream</code> 外部的 <code class="language-html highlighter-rouge">StreamReassembler</code> 部分。 Transmission Control Protocol (TCP) 的传输实现是一种可靠的顺序字节流， 尽管底层网络是以 <em>“best effort”</em> 的形式在进行报文的传输。 这意味着在报文传输的过程中， 数据包中的信息很可能会丢失、 重排、 替换、 或者重复。 这需要 TCP 为数据包提供可靠的底层逻辑。</p>
 
-<p>TCP 的发送端会将字节流分割成短的 <code class="language-plaintext highlighter-rouge">segments</code>， 因此这些数据能够契合报文的容量需求。 但正如前述所说， 底层网络可能会使得这些 <code class="language-plaintext highlighter-rouge">segments</code> 变得不那么可靠， 因而 <code class="language-plaintext highlighter-rouge">StreamReassembler</code> 部分需要实现的， 就是在发送端确保发送的数据是连续的字节流。</p>
+<p>TCP 的发送端会将字节流分割成短的 <code class="language-html highlighter-rouge">segments</code>， 因此这些数据能够契合报文的容量需求。 但正如前述所说， 底层网络可能会使得这些 <code class="language-html highlighter-rouge">segments</code> 变得不那么可靠， 因而 <code class="language-html highlighter-rouge">StreamReassembler</code> 部分需要实现的， 就是在发送端确保发送的数据是连续的字节流。</p>
 
 <h2 id="2-要求">2. 要求</h2>
 
-<p><code class="language-plaintext highlighter-rouge">StreamReassembler</code> 需要遵循一定的规则。 starter code 中提供了两个公有函数对接口进行了一定的限制。</p>
+<p><code class="language-html highlighter-rouge">StreamReassembler</code> 需要遵循一定的规则。 starter code 中提供了两个公有函数对接口进行了一定的限制。</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Insert a new substring to be reassembled into a ByteStream.</span>
 <span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span> <span class="kt">uint64_t</span> <span class="n">first_index</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">data</span><span class="p">,</span> 
@@ -336,13 +340,13 @@
 <span class="kt">uint64_t</span> <span class="n">bytes_pending</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>另外， 根据实验说明， 原则上 <code class="language-plaintext highlighter-rouge">Reassembler</code> 需要处理以下几种情况：</p>
+<p>另外， 根据实验说明， 原则上 <code class="language-html highlighter-rouge">Reassembler</code> 需要处理以下几种情况：</p>
 
 <ul>
-  <li>获取的字节流正好是 <code class="language-plaintext highlighter-rouge">ByteStream</code> 所需的下一组字节， 需要将这些字节直接用 <code class="language-plaintext highlighter-rouge">Writer</code> 写入到 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中。</li>
-  <li><code class="language-plaintext highlighter-rouge">ByteStream</code> 很有可能也会存满， 此时若有一部分字节完成 <code class="language-plaintext highlighter-rouge">Reassembler</code> 处理需要传递给 <code class="language-plaintext highlighter-rouge">ByteStream</code>， 则该部分也需要缓存， 实际上就是该部分也需要占用 <code class="language-plaintext highlighter-rouge">Reassembler</code> 内部的缓存空间， 这个内部的缓存空间就是 <em>unassembled</em> 的部分。</li>
-  <li>当收到的字节流能够符合当前的空余空间但在在其更早的字节却不存在的时候 （也就是数据传输产生了空洞， 不连续） 需要将当前收到的字节流在 <code class="language-plaintext highlighter-rouge">Reassembler</code> 中进行缓存。</li>
-  <li><code class="language-plaintext highlighter-rouge">Reassembler</code> 会丢弃那些超出当前空余空间的字节。 并且， 传入 <code class="language-plaintext highlighter-rouge">Reassembler</code> 中的子列 （substring） 可能会存在重复以及重叠， 或者有一部分已经被存入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中， 这些情况都需要考虑并进行处理。</li>
+  <li>获取的字节流正好是 <code class="language-html highlighter-rouge">ByteStream</code> 所需的下一组字节， 需要将这些字节直接用 <code class="language-html highlighter-rouge">Writer</code> 写入到 <code class="language-html highlighter-rouge">ByteStream</code> 的缓存中。</li>
+  <li><code class="language-html highlighter-rouge">ByteStream</code> 很有可能也会存满， 此时若有一部分字节完成 <code class="language-html highlighter-rouge">Reassembler</code> 处理需要传递给 <code class="language-html highlighter-rouge">ByteStream</code>， 则该部分也需要缓存， 实际上就是该部分也需要占用 <code class="language-html highlighter-rouge">Reassembler</code> 内部的缓存空间， 这个内部的缓存空间就是 <em>unassembled</em> 的部分。</li>
+  <li>当收到的字节流能够符合当前的空余空间但在在其更早的字节却不存在的时候 （也就是数据传输产生了空洞， 不连续） 需要将当前收到的字节流在 <code class="language-html highlighter-rouge">Reassembler</code> 中进行缓存。</li>
+  <li><code class="language-html highlighter-rouge">Reassembler</code> 会丢弃那些超出当前空余空间的字节。 并且， 传入 <code class="language-html highlighter-rouge">Reassembler</code> 中的子列 （substring） 可能会存在重复以及重叠， 或者有一部分已经被存入 <code class="language-html highlighter-rouge">ByteStream</code> 的缓存中， 这些情况都需要考虑并进行处理。</li>
 </ul>
 
 <p>关于存储空间指导书给了下图的提示。</p>
@@ -353,22 +357,22 @@
     <font size="2" color="#999"><u>Memory usage limitation of Reassembler and ByteStream</u></font>
 </div>
 
-<p><code class="language-plaintext highlighter-rouge">Reassembler</code> 与 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的内存上限是之前 Lab0 中规定的 <code class="language-plaintext highlighter-rouge">capacity</code> 的大小。 对于 <code class="language-plaintext highlighter-rouge">Reassembler</code> 而言， <code class="language-plaintext highlighter-rouge">capacity = first_unacceptable_index - first_unpopped_index</code>。 <code class="language-plaintext highlighter-rouge">ByteStream</code> 相对于 <code class="language-plaintext highlighter-rouge">Reassembler</code> 更为底层， 位于网络收发的端口， 负责实际的收发工作。 所以对于途中的几个 <em>first</em> 开头的索引其具备如下含义：</p>
+<p><code class="language-html highlighter-rouge">Reassembler</code> 与 <code class="language-html highlighter-rouge">ByteStream</code> 的内存上限是之前 Lab0 中规定的 <code class="language-html highlighter-rouge">capacity</code> 的大小。 对于 <code class="language-html highlighter-rouge">Reassembler</code> 而言， <code class="language-html highlighter-rouge">capacity = first_unacceptable_index - first_unpopped_index</code>。 <code class="language-html highlighter-rouge">ByteStream</code> 相对于 <code class="language-html highlighter-rouge">Reassembler</code> 更为底层， 位于网络收发的端口， 负责实际的收发工作。 所以对于途中的几个 <em>first</em> 开头的索引其具备如下含义：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">first_unpopped_index</code>： 已经排序整理且验证正确的部分的起始索引， 这部分（绿色区块）存储在 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中等待发送。</li>
-  <li><code class="language-plaintext highlighter-rouge">first_unassembled_index</code>： 尚未排序的整理验证的部分， 可称其为子列 （substrings）的起始索引， 这部分（红色区块）存储在 <code class="language-plaintext highlighter-rouge">Reassembler</code> 的内部缓存区域。</li>
-  <li><code class="language-plaintext highlighter-rouge">first_unacceptable_index</code>： 需要被丢弃的部分的起始索引。</li>
+  <li><code class="language-html highlighter-rouge">first_unpopped_index</code>： 已经排序整理且验证正确的部分的起始索引， 这部分（绿色区块）存储在 <code class="language-html highlighter-rouge">ByteStream</code> 的缓存中等待发送。</li>
+  <li><code class="language-html highlighter-rouge">first_unassembled_index</code>： 尚未排序的整理验证的部分， 可称其为子列 （substrings）的起始索引， 这部分（红色区块）存储在 <code class="language-html highlighter-rouge">Reassembler</code> 的内部缓存区域。</li>
+  <li><code class="language-html highlighter-rouge">first_unacceptable_index</code>： 需要被丢弃的部分的起始索引。</li>
 </ul>
 
 <h2 id="3-实现思路">3. 实现思路</h2>
 
-<p>依据 <code class="language-plaintext highlighter-rouge">Memory usage limitation of Reassembler and ByteStream</code> 图中所示的几个 <em>index</em>， 其中最为关键的两个应当是 <code class="language-plaintext highlighter-rouge">first_unpopped_index</code> 和 <code class="language-plaintext highlighter-rouge">first_unacceptable_index</code>。 框架程序提供的两个方法函数是不够用的， 我们需要定义几个私有变量以便存储关键信息：</p>
+<p>依据 <code class="language-html highlighter-rouge">Memory usage limitation of Reassembler and ByteStream</code> 图中所示的几个 <em>index</em>， 其中最为关键的两个应当是 <code class="language-html highlighter-rouge">first_unpopped_index</code> 和 <code class="language-html highlighter-rouge">first_unacceptable_index</code>。 框架程序提供的两个方法函数是不够用的， 我们需要定义几个私有变量以便存储关键信息：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">unassembled_index_</code>： 表示 <code class="language-plaintext highlighter-rouge">first_unassembled_index</code>。</li>
-  <li><code class="language-plaintext highlighter-rouge">unassembled_substrings_</code>： 表示 <em>unassembled</em> 部分的缓存集， 为 <em>map</em> 类型， 可以将存储的 <em>first_index</em> 与其对应的 <em>data</em> 进行映射， 并提高查找速度。</li>
-  <li><code class="language-plaintext highlighter-rouge">is_closed_</code>： 表示接受端已收到最后一节 <em>substring</em>， 并且 <code class="language-plaintext highlighter-rouge">pending_buffer_</code> 也已清空， 此时应当终止此次数据的接收。</li>
+  <li><code class="language-html highlighter-rouge">unassembled_index_</code>： 表示 <code class="language-html highlighter-rouge">first_unassembled_index</code>。</li>
+  <li><code class="language-html highlighter-rouge">unassembled_substrings_</code>： 表示 <em>unassembled</em> 部分的缓存集， 为 <em>map</em> 类型， 可以将存储的 <em>first_index</em> 与其对应的 <em>data</em> 进行映射， 并提高查找速度。</li>
+  <li><code class="language-html highlighter-rouge">is_closed_</code>： 表示接受端已收到最后一节 <em>substring</em>， 并且 <code class="language-html highlighter-rouge">pending_buffer_</code> 也已清空， 此时应当终止此次数据的接收。</li>
 </ul>
 
 <p>另外也对框架代码所给的两个函数的变量与功能进行说明：</p>
@@ -381,13 +385,13 @@
          <span class="kt">bool</span> <span class="n">is_last_substring</span><span class="p">,</span> <span class="n">Writer</span><span class="o">&amp;</span> <span class="n">output</span> <span class="p">);</span>
 </code></pre></div>    </div>
 
-    <p>传输 <em>substring</em> 至 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的主体方法， 包含大部分逻辑实现。</p>
+    <p>传输 <em>substring</em> 至 <code class="language-html highlighter-rouge">ByteStream</code> 的主体方法， 包含大部分逻辑实现。</p>
 
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">first_index</code>： <em>substring</em> 数据的第一个 index， 需要和上述 <code class="language-plaintext highlighter-rouge">unassembled_index_</code> 进行区分。</li>
-      <li><code class="language-plaintext highlighter-rouge">data</code>： 需要进行传输的 <em>substring</em> 数据。</li>
-      <li><code class="language-plaintext highlighter-rouge">is_last_substring</code>： 最后一条 <em>substring</em> 的标志变量。</li>
-      <li><code class="language-plaintext highlighter-rouge">output</code>： <code class="language-plaintext highlighter-rouge">ByteStream</code> 中实现的 <code class="language-plaintext highlighter-rouge">Writer</code> 类， 将数据写入（push）传输缓存， 这部分信息会被远端的 <code class="language-plaintext highlighter-rouge">Reader</code> 类导出(pop)接收。</li>
+      <li><code class="language-html highlighter-rouge">first_index</code>： <em>substring</em> 数据的第一个 index， 需要和上述 <code class="language-html highlighter-rouge">unassembled_index_</code> 进行区分。</li>
+      <li><code class="language-html highlighter-rouge">data</code>： 需要进行传输的 <em>substring</em> 数据。</li>
+      <li><code class="language-html highlighter-rouge">is_last_substring</code>： 最后一条 <em>substring</em> 的标志变量。</li>
+      <li><code class="language-html highlighter-rouge">output</code>： <code class="language-html highlighter-rouge">ByteStream</code> 中实现的 <code class="language-html highlighter-rouge">Writer</code> 类， 将数据写入（push）传输缓存， 这部分信息会被远端的 <code class="language-html highlighter-rouge">Reader</code> 类导出(pop)接收。</li>
     </ul>
   </li>
   <li>
@@ -396,7 +400,7 @@
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">uint64_t</span> <span class="n">bytes_pending</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
 
-    <p>剩余仍存留在 <code class="language-plaintext highlighter-rouge">unassembler</code> 缓存部分的数据大小， 该部分和 <code class="language-plaintext highlighter-rouge">[first_unassembled_index, first_unacceptable_index]</code> 区间的 <code class="language-plaintext highlighter-rouge">available_capability</code> 毫无关系， 需要区分。 <code class="language-plaintext highlighter-rouge">available_capability</code> 表示当前能够接收的 <code class="language-plaintext highlighter-rouge">substring</code> 最大的大小。</p>
+    <p>剩余仍存留在 <code class="language-html highlighter-rouge">unassembler</code> 缓存部分的数据大小， 该部分和 <code class="language-html highlighter-rouge">[first_unassembled_index, first_unacceptable_index]</code> 区间的 <code class="language-html highlighter-rouge">available_capability</code> 毫无关系， 需要区分。 <code class="language-html highlighter-rouge">available_capability</code> 表示当前能够接收的 <code class="language-html highlighter-rouge">substring</code> 最大的大小。</p>
   </li>
 </ol>
 
@@ -405,10 +409,10 @@
 <h4 id="符号说明">符号说明</h4>
 
 <ul>
-  <li>重叠部分： 以 <code class="language-plaintext highlighter-rouge">=</code> 表示子列和存于 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中或已传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 中的数据重叠的 <em>index</em>。</li>
-  <li>当前数据： 以 <code class="language-plaintext highlighter-rouge">&gt;</code> 表示当前数据。</li>
-  <li>front数据： 以 <code class="language-plaintext highlighter-rouge">F</code> 表示与当前数据最邻近的保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要小。</li>
-  <li>rear数据： 以 <code class="language-plaintext highlighter-rouge">R</code> 表示与当前数据最邻近的保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要大。</li>
+  <li>重叠部分： 以 <code class="language-html highlighter-rouge">=</code> 表示子列和存于 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中或已传入 <code class="language-html highlighter-rouge">ByteStream</code> 中的数据重叠的 <em>index</em>。</li>
+  <li>当前数据： 以 <code class="language-html highlighter-rouge">&gt;</code> 表示当前数据。</li>
+  <li>front数据： 以 <code class="language-html highlighter-rouge">F</code> 表示与当前数据最邻近的保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要小。</li>
+  <li>rear数据： 以 <code class="language-html highlighter-rouge">R</code> 表示与当前数据最邻近的保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中的那段数据， 这段数据的 <em>first_index</em> 比当前传入数据的 <em>first_index</em> 要大。</li>
 </ul>
 
 <h4 id="特殊情况">特殊情况</h4>
@@ -416,22 +420,22 @@
 <p>对于特殊情况可以跳过后续繁琐的处理逻辑， 加快处理速度。 对于传入的 <em>substring</em> 而言， 有如下几种特殊情况可以跳过处理直接返回：</p>
 
 <ul>
-  <li><strong>数据重复</strong>， 这意味着 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; unassembled_index_</code>， 传入的 <em>substring</em> 已经是 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的一部分， 无需重复传输数据。</li>
-  <li><strong>缓存不足</strong>， <code class="language-plaintext highlighter-rouge">first_index_ &gt;= unassembled_substrings_ + available_capability</code>， 相当于 <code class="language-plaintext highlighter-rouge">first_index</code> 处于 <code class="language-plaintext highlighter-rouge">first_unacceptable_index</code> 之后的区间， 意味着该 <em>substring</em> 需要被丢弃。 或者 <em><code class="language-plaintext highlighter-rouge">available_capability == 0</code></em>， 此时已经没有空间用于处理。</li>
+  <li><strong>数据重复</strong>， 这意味着 <code class="language-html highlighter-rouge">first_index + data.size() - 1 <span class="nt">&lt;</span> <span class="nt">unassembled_index_</span></code>， 传入的 <em>substring</em> 已经是 <code class="language-html highlighter-rouge">ByteStream</code> 的一部分， 无需重复传输数据。</li>
+  <li><strong>缓存不足</strong>， <code class="language-html highlighter-rouge">first_index_ &gt;= unassembled_substrings_ + available_capability</code>， 相当于 <code class="language-html highlighter-rouge">first_index</code> 处于 <code class="language-html highlighter-rouge">first_unacceptable_index</code> 之后的区间， 意味着该 <em>substring</em> 需要被丢弃。 或者 <em><code class="language-html highlighter-rouge">available_capability == 0</code></em>， 此时已经没有空间用于处理。</li>
   <li><strong>空子列</strong>， <em>substring</em> 传入的 data 的大小为零。</li>
 </ul>
 
 <h3 id="31-unassembled_index_--first_index">3.1 unassembled_index_ &gt;= first_index</h3>
 
-<p>这意味着此时传入的 substring 的一部分是已经传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 中的， 或者全都已经传入了 <code class="language-plaintext highlighter-rouge">ByteStream</code>。 还有可能有一部分和已经在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中缓存的数据重叠， 那么重叠的部分就需要被丢弃。</p>
+<p>这意味着此时传入的 substring 的一部分是已经传入 <code class="language-html highlighter-rouge">ByteStream</code> 中的， 或者全都已经传入了 <code class="language-html highlighter-rouge">ByteStream</code>。 还有可能有一部分和已经在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中缓存的数据重叠， 那么重叠的部分就需要被丢弃。</p>
 
 <ul>
   <li>
     <p>部分重叠</p>
 
-    <p>这种情况和有 <code class="language-plaintext highlighter-rouge">rear</code> 部分的处理会差不多， 所以在代码实现上做了整合， 实时细节在 <a href="#32-unassembled_index_--first_index">3.2</a> 节讨论， 唯一有区别的就是在此时需要截断 <code class="language-plaintext highlighter-rouge">[first_index, unassembled_index_]</code> 之间的数据。</p>
+    <p>这种情况和有 <code class="language-html highlighter-rouge">rear</code> 部分的处理会差不多， 所以在代码实现上做了整合， 实时细节在 <a href="#32-unassembled_index_--first_index">3.2</a> 节讨论， 唯一有区别的就是在此时需要截断 <code class="language-html highlighter-rouge">[first_index, unassembled_index_]</code> 之间的数据。</p>
 
-    <p>进行截断后的数据是从 <code class="language-plaintext highlighter-rouge">unassembled_index</code> 起始的， 需要检查截断后的 <em>data</em> 的长度， 若截断后的 <em>data</em> 的长度超过了 <em>available_capability</em> 那么需要取 <code class="language-plaintext highlighter-rouge">min(data.size() - overlapped_length, available_capability())</code>。</p>
+    <p>进行截断后的数据是从 <code class="language-html highlighter-rouge">unassembled_index</code> 起始的， 需要检查截断后的 <em>data</em> 的长度， 若截断后的 <em>data</em> 的长度超过了 <em>available_capability</em> 那么需要取 <code class="language-html highlighter-rouge">min(data.size() - overlapped_length, available_capability())</code>。</p>
 
     <pre><code class="language-txt">      first_index  unassembled_index_
           v                v      REPEATED_IN_MAP
@@ -469,17 +473,17 @@
 
 <h3 id="32-unassembled_index_--first_index">3.2 unassembled_index_ &lt; first_index</h3>
 
-<p>在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中的数据有些是连续的， 有些则不是连续的， 我们在保存数据的时候是以当前要保存的 <em>data</em> 与该 <em>data</em> 的 <em>first_index</em> 值进行映射的。 那么， 最复杂的情况是， 当前的这段数据正好恰在两段已缓存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 之间。 这种情况也是需要进行数据截断的， 当前数据可能会超出最大索引值的范围， 这种情况发生在 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &gt; unassembled_index_ + cap - 1</code> 的时候。</p>
+<p>在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中的数据有些是连续的， 有些则不是连续的， 我们在保存数据的时候是以当前要保存的 <em>data</em> 与该 <em>data</em> 的 <em>first_index</em> 值进行映射的。 那么， 最复杂的情况是， 当前的这段数据正好恰在两段已缓存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 之间。 这种情况也是需要进行数据截断的， 当前数据可能会超出最大索引值的范围， 这种情况发生在 <code class="language-html highlighter-rouge">first_index + data.size() - 1 &gt; unassembled_index_ + cap - 1</code> 的时候。</p>
 
 <ol>
   <li>
-    <p>讨论传入数据的 <em>first_index</em> 比保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中最邻近的数据的 <em>fisrt_index</em> 小的那部分数据。 可将 <em>index</em> 值较大段的数据称为_rear_index_， 当前数据的 <em>index</em> 仍称作 <em>first_index</em>。 可通过 <code class="language-plaintext highlighter-rouge">map::lower_bound(first_index)</code> 获取大于等于 <code class="language-plaintext highlighter-rouge">first_index</code> 的迭代器。</p>
+    <p>讨论传入数据的 <em>first_index</em> 比保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中最邻近的数据的 <em>fisrt_index</em> 小的那部分数据。 可将 <em>index</em> 值较大段的数据称为_rear_index_， 当前数据的 <em>index</em> 仍称作 <em>first_index</em>。 可通过 <code class="language-html highlighter-rouge">map::lower_bound(first_index)</code> 获取大于等于 <code class="language-html highlighter-rouge">first_index</code> 的迭代器。</p>
 
     <ul>
       <li>
         <p>没有重叠</p>
 
-        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理， 判断 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; rear_index</code> 即可。</p>
+        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理， 判断 <code class="language-html highlighter-rouge">first_index + data.size() - 1 <span class="nt">&lt;</span> <span class="nt">rear_index</span></code> 即可。</p>
 
         <pre><code class="language-txt">                      first_index  rear_index
                           v            v
@@ -491,7 +495,7 @@
 </code></pre>
       </li>
       <li>
-        <p>部分重叠， 与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 需要截断当前的 <em>substring</em> 重复的部分即可， 若截断 <code class="language-plaintext highlighter-rouge">rear</code> 部分重复的数据， 则还需要重新更新 <code class="language-plaintext highlighter-rouge">unassemble_substrings_</code>， 效率不高。 需要满足 <code class="language-plaintext highlighter-rouge">first_index + data.size() - 1 &lt; rear_index + rear_data.size() - 1</code> 的条件， 否则就会变成全部重叠的情况。 此时的重叠部分长度就是 <code class="language-plaintext highlighter-rouge">first_index + data.size() - rear_index</code>。</p>
+        <p>部分重叠， 与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 需要截断当前的 <em>substring</em> 重复的部分即可， 若截断 <code class="language-html highlighter-rouge">rear</code> 部分重复的数据， 则还需要重新更新 <code class="language-html highlighter-rouge">unassemble_substrings_</code>， 效率不高。 需要满足 <code class="language-html highlighter-rouge">first_index + data.size() - 1 <span class="nt">&lt;</span> <span class="nt">rear_index</span> <span class="err">+</span> <span class="na">rear_data.size</span><span class="err">()</span> <span class="na">-</span> <span class="err">1</span></code> 的条件， 否则就会变成全部重叠的情况。 此时的重叠部分长度就是 <code class="language-html highlighter-rouge">first_index + data.size() - rear_index</code>。</p>
 
         <pre><code class="language-txt">              first_index  rear_index
                   v           v
@@ -504,9 +508,9 @@
       </li>
       <li>
         <p>全部重叠
-  以 <code class="language-plaintext highlighter-rouge">rear</code> 存在全部重叠为例， 这种情况就直接将 <code class="language-plaintext highlighter-rouge">rear</code> 从 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中移除即可。</p>
+  以 <code class="language-html highlighter-rouge">rear</code> 存在全部重叠为例， 这种情况就直接将 <code class="language-html highlighter-rouge">rear</code> 从 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中移除即可。</p>
 
-        <p>需要注意处理完一个最邻近的 <em>substring</em> 后， 可能新的最邻近的 <em>substring</em> 也需要进行处理， 这一般发生在 <em>substring</em> 产生全部重叠的时候， 这能确保当前保存的 <em>substring</em> 的正确性。 更新迭代器时需要更新为 <code class="language-plaintext highlighter-rouge">map::lower_bound(rear_index + rear_data.size() - 1)</code>， 才能跨过当前的 <code class="language-plaintext highlighter-rouge">rear</code> 找到 <code class="language-plaintext highlighter-rouge">next_rear</code> 继续进行处理， <code class="language-plaintext highlighter-rouge">next_rear</code> 也可能还在当前的 <em>data</em> 的覆盖范围。</p>
+        <p>需要注意处理完一个最邻近的 <em>substring</em> 后， 可能新的最邻近的 <em>substring</em> 也需要进行处理， 这一般发生在 <em>substring</em> 产生全部重叠的时候， 这能确保当前保存的 <em>substring</em> 的正确性。 更新迭代器时需要更新为 <code class="language-html highlighter-rouge">map::lower_bound(rear_index + rear_data.size() - 1)</code>， 才能跨过当前的 <code class="language-html highlighter-rouge">rear</code> 找到 <code class="language-html highlighter-rouge">next_rear</code> 继续进行处理， <code class="language-html highlighter-rouge">next_rear</code> 也可能还在当前的 <em>data</em> 的覆盖范围。</p>
       </li>
     </ul>
 
@@ -520,13 +524,13 @@
 </code></pre>
   </li>
   <li>
-    <p>讨论当前传入数据与保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中 <em>first_index</em> 比当前数据的 <em>first_index</em> 小的最邻近那部分数据的关系。 可将 <em>index</em> 较小段的数据称为 <em>front_index</em>， 当前数据的 <em>index</em> 仍称作 <code class="language-plaintext highlighter-rouge">first_index</code>。 与 <code class="language-plaintext highlighter-rouge">rear</code> 不同的是， 最多只有一个 <code class="language-plaintext highlighter-rouge">front</code> 数据存在。 若 <code class="language-plaintext highlighter-rouge">map::lower_bound(first_index)</code> 得到的迭代器不是 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 的头部， 说明存在 <code class="language-plaintext highlighter-rouge">front</code>， 只需要将该位置所在的迭代器向前更新一步即可。 相较从头向后扫描查找与 <code class="language-plaintext highlighter-rouge">front</code> 重叠， 这种办法仅需一次操作即可完成。</p>
+    <p>讨论当前传入数据与保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中 <em>first_index</em> 比当前数据的 <em>first_index</em> 小的最邻近那部分数据的关系。 可将 <em>index</em> 较小段的数据称为 <em>front_index</em>， 当前数据的 <em>index</em> 仍称作 <code class="language-html highlighter-rouge">first_index</code>。 与 <code class="language-html highlighter-rouge">rear</code> 不同的是， 最多只有一个 <code class="language-html highlighter-rouge">front</code> 数据存在。 若 <code class="language-html highlighter-rouge">map::lower_bound(first_index)</code> 得到的迭代器不是 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 的头部， 说明存在 <code class="language-html highlighter-rouge">front</code>， 只需要将该位置所在的迭代器向前更新一步即可。 相较从头向后扫描查找与 <code class="language-html highlighter-rouge">front</code> 重叠， 这种办法仅需一次操作即可完成。</p>
 
     <ul>
       <li>
         <p>没有重叠</p>
 
-        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-plaintext highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理。</p>
+        <p>则当前的 <em>substring</em> 可以直接保存在 <code class="language-html highlighter-rouge">unassembled_substrings_</code> 中， 无需做额外的处理。</p>
 
         <pre><code class="language-txt">  unassembled_index_  front_index   first_index
           v              v            v
@@ -540,7 +544,7 @@
       <li>
         <p>部分重叠</p>
 
-        <p>与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 只需要截断当前的 <em>substring</em> 重复的部分即可， 也可以截断 <code class="language-plaintext highlighter-rouge">front</code> 重复的部分。</p>
+        <p>与 <a href="#31-unassembled_index_--first_index">3.1</a> 节中的情况类似， 只需要截断当前的 <em>substring</em> 重复的部分即可， 也可以截断 <code class="language-html highlighter-rouge">front</code> 重复的部分。</p>
 
         <pre><code class="language-txt">  unassembled_index_  front_index  first_index  
           v              v            v
@@ -555,7 +559,7 @@
       <li>
         <p>全部重叠</p>
 
-        <p>此时的处理会和 <code class="language-plaintext highlighter-rouge">rear</code> 部分有所区别， 调用 <code class="language-plaintext highlighter-rouge">erase</code> 处理 <em>data</em> 时是从前向后， 而 <code class="language-plaintext highlighter-rouge">rear</code> 是从后向前。</p>
+        <p>此时的处理会和 <code class="language-html highlighter-rouge">rear</code> 部分有所区别， 调用 <code class="language-html highlighter-rouge">erase</code> 处理 <em>data</em> 时是从前向后， 而 <code class="language-html highlighter-rouge">rear</code> 是从后向前。</p>
 
         <pre><code class="language-txt">              front_index  first_index
                   v           v
@@ -572,12 +576,12 @@
 
 <h3 id="33-补充">3.3 补充</h3>
 
-<p>最后将数据加入 <code class="language-plaintext highlighter-rouge">map</code> 缓存的时候需要特别判断 <code class="language-plaintext highlighter-rouge">data.size() &gt; 0</code>， 因为在之前的处理中很可能 <em>data</em> 已经没有实际数据存在了， 这样就不需要将这部分数据放到 <code class="language-plaintext highlighter-rouge">map</code> 结构中。 除此之外， 在调用 <code class="language-plaintext highlighter-rouge">output.push</code> 的时候需要判断前后的 <code class="language-plaintext highlighter-rouge">output.bytes_pushed</code> 的情况， 很可能有一部分数据并没有被传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的缓存中， 需要我们手动将这部分数据再保存在 <code class="language-plaintext highlighter-rouge">map</code> 中， 但不要忘了调用 <code class="language-plaintext highlighter-rouge">erase</code> 将之前的 push 不完整的那段数据从 <code class="language-plaintext highlighter-rouge">map</code> 中删除。 在遍历 <code class="language-plaintext highlighter-rouge">map</code> 查找可以传入 <code class="language-plaintext highlighter-rouge">ByteStream</code> 的数据的时候， 一旦发现 <em>unassembled_index</em> 和获取的 <code class="language-plaintext highlighter-rouge">sub_index</code> 不一致了， 就可以直接跳出循环， 这意味着数据已经不连续了， 没有必要继续数据传递的进程了。</p>
+<p>最后将数据加入 <code class="language-html highlighter-rouge">map</code> 缓存的时候需要特别判断 <code class="language-html highlighter-rouge">data.size() &gt; 0</code>， 因为在之前的处理中很可能 <em>data</em> 已经没有实际数据存在了， 这样就不需要将这部分数据放到 <code class="language-html highlighter-rouge">map</code> 结构中。 除此之外， 在调用 <code class="language-html highlighter-rouge">output.push</code> 的时候需要判断前后的 <code class="language-html highlighter-rouge">output.bytes_pushed</code> 的情况， 很可能有一部分数据并没有被传入 <code class="language-html highlighter-rouge">ByteStream</code> 的缓存中， 需要我们手动将这部分数据再保存在 <code class="language-html highlighter-rouge">map</code> 中， 但不要忘了调用 <code class="language-html highlighter-rouge">erase</code> 将之前的 push 不完整的那段数据从 <code class="language-html highlighter-rouge">map</code> 中删除。 在遍历 <code class="language-html highlighter-rouge">map</code> 查找可以传入 <code class="language-html highlighter-rouge">ByteStream</code> 的数据的时候， 一旦发现 <em>unassembled_index</em> 和获取的 <code class="language-html highlighter-rouge">sub_index</code> 不一致了， 就可以直接跳出循环， 这意味着数据已经不连续了， 没有必要继续数据传递的进程了。</p>
 
 <blockquote>
-  <p><code class="language-plaintext highlighter-rouge">reassembler_win.cc</code> 测试不通过， 可能是迭代器更新不对， 以及 <code class="language-plaintext highlighter-rouge">lower_bound</code> 可能用了 <code class="language-plaintext highlighter-rouge">upper_bound</code> 没找到对应的位置。</p>
+  <p><code class="language-html highlighter-rouge">reassembler_win.cc</code> 测试不通过， 可能是迭代器更新不对， 以及 <code class="language-html highlighter-rouge">lower_bound</code> 可能用了 <code class="language-html highlighter-rouge">upper_bound</code> 没找到对应的位置。</p>
 
-  <p><code class="language-plaintext highlighter-rouge">reassembler_speed_test.cc</code> 测试发现读取和写入数据不一致， 可能就是没有考虑 push 时仅有一部分数据被传入了 <code class="language-plaintext highlighter-rouge">ByteStream</code> 而导致数据丢失。</p>
+  <p><code class="language-html highlighter-rouge">reassembler_speed_test.cc</code> 测试发现读取和写入数据不一致， 可能就是没有考虑 push 时仅有一部分数据被传入了 <code class="language-html highlighter-rouge">ByteStream</code> 而导致数据丢失。</p>
 </blockquote>
 
 <h2 id="4-测试结果">4. 测试结果</h2>
@@ -785,7 +789,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

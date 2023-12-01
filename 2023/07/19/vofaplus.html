@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -326,7 +330,7 @@
 
 <h2 id="2-vofa-justfloat-protocol">2. Vofa+: JustFloat Protocol</h2>
 
-<p>具体的协议内容可以看官网的 <a href="https://www.vofa.plus/plugin_detail/?name=justfloat">JustFloat</a> 说明， 除了采样数据解析外， 该协议还能进行图像解析。 目前我只用到了数据采样解析部分， 搞懂这个也就一通百通了， 可以看到滚放定义的数据帧如下所示， 帧尾是一个 4 字节的特定数据 <code class="language-plaintext highlighter-rouge">0x00, 0x00, 0x80, 0x7f</code>， 这是小端的顺序， 大端需要调换一下数据的存储顺序。 也就是说， 我们在发送完希望传输的数据后， 需要紧跟在这些数据后面发送一个尾帧， 才能让 Vofa+ 识别数据帧的内容并进行可视化以及文本打印。</p>
+<p>具体的协议内容可以看官网的 <a href="https://www.vofa.plus/plugin_detail/?name=justfloat">JustFloat</a> 说明， 除了采样数据解析外， 该协议还能进行图像解析。 目前我只用到了数据采样解析部分， 搞懂这个也就一通百通了， 可以看到滚放定义的数据帧如下所示， 帧尾是一个 4 字节的特定数据 <code class="language-html highlighter-rouge">0x00, 0x00, 0x80, 0x7f</code>， 这是小端的顺序， 大端需要调换一下数据的存储顺序。 也就是说， 我们在发送完希望传输的数据后， 需要紧跟在这些数据后面发送一个尾帧， 才能让 Vofa+ 识别数据帧的内容并进行可视化以及文本打印。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define CH_COUNT 通道数量
 </span><span class="k">struct</span> <span class="n">Frame</span> <span class="p">{</span>
@@ -335,7 +339,7 @@
 <span class="p">};</span>
 </code></pre></div></div>
 
-<p>一般来说， 串口是无法接收 float 类型的数据的， 但 float 类型在 STM32 中占据 4 个字节， 因而我们可以定义这样一个 union 联合体结构解决 float 数据传输的问题。 <code class="language-plaintext highlighter-rouge">fdata</code> 和 <code class="language-plaintext highlighter-rouge">chars</code> 共用一块内存区域并且都占据 4 个字节， 这样在使用串口发送数据的时候就能将 <code class="language-plaintext highlighter-rouge">fdata</code> 拆分成 4 个 <code class="language-plaintext highlighter-rouge">chars</code> 进行发送。</p>
+<p>一般来说， 串口是无法接收 float 类型的数据的， 但 float 类型在 STM32 中占据 4 个字节， 因而我们可以定义这样一个 union 联合体结构解决 float 数据传输的问题。 <code class="language-html highlighter-rouge">fdata</code> 和 <code class="language-html highlighter-rouge">chars</code> 共用一块内存区域并且都占据 4 个字节， 这样在使用串口发送数据的时候就能将 <code class="language-html highlighter-rouge">fdata</code> 拆分成 4 个 <code class="language-html highlighter-rouge">chars</code> 进行发送。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * @brief Use union to decompose the float_data into 4 bytes char.
@@ -359,9 +363,9 @@
 
 <h2 id="3-vofa-components">3. Vofa+ Components</h2>
 
-<p>Vofa+ 还提供了一系列控件方便我们进行对下位机的调试， 这里以这个 <code class="language-plaintext highlighter-rouge">ExtraButtonToggle</code> 控件为例。</p>
+<p>Vofa+ 还提供了一系列控件方便我们进行对下位机的调试， 这里以这个 <code class="language-html highlighter-rouge">ExtraButtonToggle</code> 控件为例。</p>
 
-<p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-plaintext highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-plaintext highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
+<p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-html highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-html highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="400" />
@@ -369,9 +373,9 @@
     <font size="2" color="#999"><u>Vofa+ components, HangX-Ma</u></font>
 </div>
 
-<p>以上图为例， 我定义了一段命令的内容为 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">%% 00 00 00</code>， 前半部分是我定义的帧头数据， 只有识别到 <code class="language-plaintext highlighter-rouge">AA</code> 和 <code class="language-plaintext highlighter-rouge">FF</code> 我才会继续解析指令， 将末尾的 <code class="language-plaintext highlighter-rouge">01</code> 作为区分不同指令的具体标识。</p>
+<p>以上图为例， 我定义了一段命令的内容为 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">%% 00 00 00</code>， 前半部分是我定义的帧头数据， 只有识别到 <code class="language-html highlighter-rouge">AA</code> 和 <code class="language-html highlighter-rouge">FF</code> 我才会继续解析指令， 将末尾的 <code class="language-html highlighter-rouge">01</code> 作为区分不同指令的具体标识。</p>
 
-<p>而后半段则是我定义的数据帧， <code class="language-plaintext highlighter-rouge">%%</code> 标识占位符， 这样一组 <code class="language-plaintext highlighter-rouge">%%</code>占位一个字节， 我在这个按钮控件的 <code class="language-plaintext highlighter-rouge">事件与参数</code> 部分设置了激活态发送 <code class="language-plaintext highlighter-rouge">01</code>， 关闭态发送 <code class="language-plaintext highlighter-rouge">02</code>， 这样在我按下按钮后， 根据当前按钮的状态， <code class="language-plaintext highlighter-rouge">%%</code> 会被替换为 <code class="language-plaintext highlighter-rouge">01</code> 或者 <code class="language-plaintext highlighter-rouge">02</code>。 这样， 每次按下按钮后， Vofa+ 都会向 STM32 发送 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">01 00 00 00</code> 或者 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">02 00 00 00</code>。</p>
+<p>而后半段则是我定义的数据帧， <code class="language-html highlighter-rouge">%%</code> 标识占位符， 这样一组 <code class="language-html highlighter-rouge">%%</code>占位一个字节， 我在这个按钮控件的 <code class="language-html highlighter-rouge">事件与参数</code> 部分设置了激活态发送 <code class="language-html highlighter-rouge">01</code>， 关闭态发送 <code class="language-html highlighter-rouge">02</code>， 这样在我按下按钮后， 根据当前按钮的状态， <code class="language-html highlighter-rouge">%%</code> 会被替换为 <code class="language-html highlighter-rouge">01</code> 或者 <code class="language-html highlighter-rouge">02</code>。 这样， 每次按下按钮后， Vofa+ 都会向 STM32 发送 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">01 00 00 00</code> 或者 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">02 00 00 00</code>。</p>
 
 <p>可以结合我在 USART 中 DMA 接收部分对数据的解析方式进行理解。</p>
 
@@ -409,7 +413,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>这里为什么设置的发送帧为 8 个字节？ 这是因为目前使用的是 <strong>JustFloat</strong> 协议， 协议发送和接收都是依据 float 的格式与大小进行的。 而我定义了接收帧为大小为 2 的 <code class="language-plaintext highlighter-rouge">Format_Typedef</code> 数组， 正好是 2 个 float， 8 个字节大小。 若是不理解可以看看 mandzy 的相关 <a href="#vofa_demo">视频</a>。</p>
+  <p>这里为什么设置的发送帧为 8 个字节？ 这是因为目前使用的是 <strong>JustFloat</strong> 协议， 协议发送和接收都是依据 float 的格式与大小进行的。 而我定义了接收帧为大小为 2 的 <code class="language-html highlighter-rouge">Format_Typedef</code> 数组， 正好是 2 个 float， 8 个字节大小。 若是不理解可以看看 mandzy 的相关 <a href="#vofa_demo">视频</a>。</p>
 </blockquote>
 
 <h2 id="4-调试记录">4. 调试记录</h2>
@@ -418,12 +422,12 @@
 
 <ul>
   <li>将 USART1 更换为 USART2 以及 USART3 都是一样的情况。</li>
-  <li>检查了 DMA 的配置， 发现 <code class="language-plaintext highlighter-rouge">recv_frame</code> 和 <code class="language-plaintext highlighter-rouge">send_frame</code> 的地址忘记写目标地址上了， 但是还是不行。</li>
+  <li>检查了 DMA 的配置， 发现 <code class="language-html highlighter-rouge">recv_frame</code> 和 <code class="language-html highlighter-rouge">send_frame</code> 的地址忘记写目标地址上了， 但是还是不行。</li>
   <li>单独测试收的过程， 在指令中加入一个翻转 LED 的命令， 无效， cortex-debug 也接收不到中断。</li>
   <li>主程序可以跑通， 加入 LED 翻转指令有效， 通过 cortex-debug 插件也没有发现数据有问题。</li>
   <li>用自己之前写的可以工作的 USART1 的程序进行回环测试， 无效， 基本确定 CH340 硬件坏了。</li>
   <li>用逻辑分析仪测了一下输出脚 <em><strong>PB6(Tx)</strong></em> 有不同的输出波形， 说明 DMA 通信不成问题了， 协议部分还不清楚， 但 CH340 肯定坏了。</li>
-  <li><code class="language-plaintext highlighter-rouge">JustFloat</code> 协议测试可用。</li>
+  <li><code class="language-html highlighter-rouge">JustFloat</code> 协议测试可用。</li>
 </ul>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -584,7 +588,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -307,7 +311,7 @@
 
 <p>后来又想了想什么地方造成了数据外泄， 毕竟 markdown 数据也是保存在自己的私有仓库中， 估计 content 部分的内容被精准地洗劫了， 而且图片是上传在博客园的服务器上的， 被爬走还能正常显示， 这和在 Git Pages 中用相对地址引用还有区别。</p>
 
-<p>感觉自己的 Git Pages 把源码都泄露在外头无异于数据裸奔， 另外 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 每次都需要自己去手动更新， 明明 jekyll-sitemap 插件能够将这件事情自动化处理， 于是产生了分离源码仓库和展示仓库的想法。</p>
+<p>感觉自己的 Git Pages 把源码都泄露在外头无异于数据裸奔， 另外 <code class="language-html highlighter-rouge">sitemap.xml</code> 每次都需要自己去手动更新， 明明 jekyll-sitemap 插件能够将这件事情自动化处理， 于是产生了分离源码仓库和展示仓库的想法。</p>
 
 <h2 id="2-私有化与自动化部署">2. 私有化与自动化部署</h2>
 
@@ -325,7 +329,7 @@ flowchart LR
     p2 --&gt;|Compile/Push| p3
 </div>
 
-<p>需要在自己的源码仓库中创建 <code class="language-plaintext highlighter-rouge">.github/workflows/jekyll.yml</code> 文件， 当然文件名可以自定义。 这样 Git Action 就可以识别这个配置文件的内容， 这个仓库就能执行配置文件定义的各个步骤。 在其中复制粘贴如下代码， 将其中带有提示性的大写的字符都替换为自己的配置。 但需要注意的是， 我们需要通过 <code class="language-plaintext highlighter-rouge">ssh-keygen -t rsa</code> 生成用于该仓库推送的一对密钥， 将私有密钥填写在私有仓库的 <code class="language-plaintext highlighter-rouge">Settings-&gt;Actions secrets and variables</code> 的 <code class="language-plaintext highlighter-rouge">Secrets</code> 中， 并将这个 <em>secret</em> 命名为 <code class="language-plaintext highlighter-rouge">DEPLOY_KEY</code>。 之后需要将公有密钥添加到 Github 账号的 <code class="language-plaintext highlighter-rouge">Settings-&gt;SSH and GPG keys</code> 中。</p>
+<p>需要在自己的源码仓库中创建 <code class="language-html highlighter-rouge">.github/workflows/jekyll.yml</code> 文件， 当然文件名可以自定义。 这样 Git Action 就可以识别这个配置文件的内容， 这个仓库就能执行配置文件定义的各个步骤。 在其中复制粘贴如下代码， 将其中带有提示性的大写的字符都替换为自己的配置。 但需要注意的是， 我们需要通过 <code class="language-html highlighter-rouge">ssh-keygen -t rsa</code> 生成用于该仓库推送的一对密钥， 将私有密钥填写在私有仓库的 <code class="language-html highlighter-rouge">Settings-&gt;Actions secrets and variables</code> 的 <code class="language-html highlighter-rouge">Secrets</code> 中， 并将这个 <em>secret</em> 命名为 <code class="language-html highlighter-rouge">DEPLOY_KEY</code>。 之后需要将公有密钥添加到 Github 账号的 <code class="language-html highlighter-rouge">Settings-&gt;SSH and GPG keys</code> 中。</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># This workflow uses actions that are not certified by GitHub.</span>
 <span class="c1"># They are provided by a third-party and are governed by</span>
@@ -426,7 +430,7 @@ flowchart LR
 
 <h2 id="3-爬虫与目录结构保护">3. 爬虫与目录结构保护</h2>
 
-<p>更改网站的 <code class="language-plaintext highlighter-rouge">robots.txt</code> 为如下形式</p>
+<p>更改网站的 <code class="language-html highlighter-rouge">robots.txt</code> 为如下形式</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
 <span class="na">layout</span><span class="pi">:</span> <span class="kc">null</span>
@@ -441,14 +445,14 @@ flowchart LR
 
 </code></pre></div></div>
 
-<p>出于安全考虑，站点的某些目录结构，譬如 <code class="language-plaintext highlighter-rouge">/norobots/</code>， 不希望被外部访问， 所以需要使用重定向来保护目录， 可以使用 GitHub 推荐的 Jekyll 重定向插件 <a href="https://github.com/jekyll/jekyll-redirect-from">Jekyll Redirect From</a>。</p>
+<p>出于安全考虑，站点的某些目录结构，譬如 <code class="language-html highlighter-rouge">/norobots/</code>， 不希望被外部访问， 所以需要使用重定向来保护目录， 可以使用 GitHub 推荐的 Jekyll 重定向插件 <a href="https://github.com/jekyll/jekyll-redirect-from">Jekyll Redirect From</a>。</p>
 
-<p>GitHub Pages 默认支持该插件，在项目的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 里添加引用：</p>
+<p>GitHub Pages 默认支持该插件，在项目的 <code class="language-html highlighter-rouge">Gemfile</code> 里添加引用：</p>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem "jekyll-redirect-from"
 </code></pre></div></div>
 
-<p>接着运行 <code class="language-plaintext highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
+<p>接着运行 <code class="language-html highlighter-rouge">bundle install</code> 命令安装插件，安装完成后，在站点 404 页面的 YAML 头部添加跳转规则：</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
 <span class="na">redirect_from</span><span class="pi">:</span>
@@ -456,7 +460,7 @@ flowchart LR
 <span class="nn">---</span>
 </code></pre></div></div>
 
-<p>具体的目录可以更具自己站点的实际情况定义， 按照上述定义， <code class="language-plaintext highlighter-rouge">访问 {SITE_URL}/norobots/</code> 会直接返回 404 页面， 从而保护了敏感目录。</p>
+<p>具体的目录可以更具自己站点的实际情况定义， 按照上述定义， <code class="language-html highlighter-rouge">访问 {SITE_URL}/norobots/</code> 会直接返回 404 页面， 从而保护了敏感目录。</p>
 
 <blockquote>
   <p><a href="https://cotes.page/posts/the-seo-to-jekyll/">Jekyll 的 SEO 优化</a></p>
@@ -620,7 +624,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

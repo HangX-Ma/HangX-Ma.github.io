@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
@@ -325,7 +329,7 @@
   <li>对于个人而言， 需要使用同一套代码在不同的终端中启用 server 以及 client。</li>
   <li>为了使用 relay， 我们需要选择任意的一个 1024 到 64000 之间的偶数以区分不同的 group。 我们可以选择 “4088”。</li>
   <li>
-    <p>server 端在 build 文件夹下输入 <code class="language-plaintext highlighter-rouge">./apps/endtoend server cs144.keithw.org 4088</code>， 若顺利的话 server 端会打印如下信息：</p>
+    <p>server 端在 build 文件夹下输入 <code class="language-html highlighter-rouge">./apps/endtoend server cs144.keithw.org 4088</code>， 若顺利的话 server 端会打印如下信息：</p>
 
     <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cs144@cs144-ubuntu22:~/minnow/build<span class="nv">$ </span>./apps/endtoend server cs144.keithw.org 4088
  DEBUG: Network interface has Ethernet address 02:00:00:91:a1:8f and IP address 172.16.0.1
@@ -358,7 +362,7 @@
 </code></pre></div>    </div>
   </li>
   <li>
-    <p>若以上信息都能正确打印， 则意味着 TCP 握手成功， 若有问题则需要在之前的命令后加上 <code class="language-plaintext highlighter-rouge">debug</code> 进入 debug 模式进行调试。</p>
+    <p>若以上信息都能正确打印， 则意味着 TCP 握手成功， 若有问题则需要在之前的命令后加上 <code class="language-html highlighter-rouge">debug</code> 进入 debug 模式进行调试。</p>
 
     <ul>
       <li>我们可以在 server 或者 client 任意一端输入数据， 就能在相应的另一端看到数据。
@@ -415,37 +419,29 @@
 
 <ul>
   <li>
-    <p>将 1M 大小的随机数写入文件 <code class="language-plaintext highlighter-rouge">/tmp/big.txt</code>。</p>
+    <p>将 1M 大小的随机数写入文件 <code class="language-html highlighter-rouge">/tmp/big.txt</code>。</p>
 
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">dd </span><span class="k">if</span><span class="o">=</span>/dev/urandom <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span>1 <span class="nv">of</span><span class="o">=</span>/tmp/big.txt
-</code></pre></div>      </div>
-    </div>
+    <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">dd </span><span class="k">if</span><span class="o">=</span>/dev/urandom <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span>1 <span class="nv">of</span><span class="o">=</span>/tmp/big.txt
+</code></pre></div>    </div>
   </li>
   <li>
     <p>让 server 端在接受连接后立刻发送文件。</p>
 
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./apps/endtoend server cs144.keithw.org 4088 &lt; /tmp/big.txt
-</code></pre></div>      </div>
-    </div>
+    <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./apps/endtoend server cs144.keithw.org 4088 &lt; /tmp/big.txt
+</code></pre></div>    </div>
   </li>
   <li>
     <p>让 client 端关闭输出数据流并下载文件。</p>
 
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  &lt;/dev/null ./apps/endtoend client cs144.keithw.org 4089 <span class="o">&gt;</span> /tmp/big-received.txt
-</code></pre></div>      </div>
-    </div>
+    <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  &lt;/dev/null ./apps/endtoend client cs144.keithw.org 4089 <span class="o">&gt;</span> /tmp/big-received.txt
+</code></pre></div>    </div>
   </li>
   <li>
     <p>比较两个文件确保二者一致</p>
 
-    <div class="snippet">
-      <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sha256sum</span> /tmp/big.txt
+    <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sha256sum</span> /tmp/big.txt
   <span class="nb">sha256sum</span> /tmp/big-received.txt
-</code></pre></div>      </div>
-    </div>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -644,7 +640,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

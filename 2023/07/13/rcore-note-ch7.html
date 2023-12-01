@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -347,29 +351,29 @@
 
 <h2 id="1-文件抽象">1. 文件抽象</h2>
 
-<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-plaintext highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
+<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-html highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
 
-<p>一般来说， 文件的会涉及到， <code class="language-plaintext highlighter-rouge">open</code>， <code class="language-plaintext highlighter-rouge">close</code>， <code class="language-plaintext highlighter-rouge">read</code>， <code class="language-plaintext highlighter-rouge">write</code> 这些基本操作。</p>
+<p>一般来说， 文件的会涉及到， <code class="language-html highlighter-rouge">open</code>， <code class="language-html highlighter-rouge">close</code>， <code class="language-html highlighter-rouge">read</code>， <code class="language-html highlighter-rouge">write</code> 这些基本操作。</p>
 
 <p>另外， 进程被创建的时候内核会默认打开三个缺省的文件， 这个设计对于后续的 I/O 重定向而言非常重要。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">fd: 0</code> 标准输入</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 1</code> 标准输出</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 2</code> 标准错误输出</li>
+  <li><code class="language-html highlighter-rouge">fd: 0</code> 标准输入</li>
+  <li><code class="language-html highlighter-rouge">fd: 1</code> 标准输出</li>
+  <li><code class="language-html highlighter-rouge">fd: 2</code> 标准错误输出</li>
 </ul>
 
-<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-plaintext highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
+<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-html highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
 
 <h2 id="2-管道">2. 管道</h2>
 
-<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-plaintext highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-plaintext highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
+<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-html highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-html highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
 
 <p>rCore 对管道的设计分为端口设计与缓存设计。</p>
 
 <ul>
-  <li><strong>端口设计</strong> <code class="language-plaintext highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-plaintext highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
-  <li><strong>缓存设计</strong> <code class="language-plaintext highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-plaintext highlighter-rouge">struct Pipe</code> 用 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;PipeRingBuffer&gt;&gt;</code> 维护对 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-plaintext highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
+  <li><strong>端口设计</strong> <code class="language-html highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-html highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
+  <li><strong>缓存设计</strong> <code class="language-html highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-html highlighter-rouge">struct Pipe</code> 用 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">PipeRingBuffer</span><span class="nt">&gt;</span>&gt;</code> 维护对 <code class="language-html highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-html highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-html highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
 </ul>
 
 <blockquote>
@@ -402,7 +406,7 @@
 
 <h2 id="3-标准-io-重定向">3. 标准 I/O 重定向</h2>
 
-<p>重定向的想法在于对 <code class="language-plaintext highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-plaintext highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-plaintext highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-plaintext highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-plaintext highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
+<p>重定向的想法在于对 <code class="language-html highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-html highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-html highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-html highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-html highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/fs.rs</span>
 
@@ -426,7 +430,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>为了能让用户端使用重定向， rCore 对 <code class="language-plaintext highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-plaintext highlighter-rouge">args_vec: Vec&lt;String&gt;</code> 中作为参数传入 <code class="language-plaintext highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-plaintext highlighter-rouge">aa</code> 和 <code class="language-plaintext highlighter-rouge">bb</code>。</p>
+<p>为了能让用户端使用重定向， rCore 对 <code class="language-html highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-html highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-html highlighter-rouge">args_vec: Vec<span class="nt">&lt;String&gt;</span></code> 中作为参数传入 <code class="language-html highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-html highlighter-rouge">aa</code> 和 <code class="language-html highlighter-rouge">bb</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -477,13 +481,13 @@
     <font size="2" color="#999"><u>Push stack process 2, HangX-Ma</u></font>
 </div>
 
-<p>压栈完成后 rCore 将 <code class="language-plaintext highlighter-rouge">TrapContext</code>中的 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-plaintext highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-plaintext highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-plaintext highlighter-rouge">&amp;[&amp;str]</code> 的形式。</p>
+<p>压栈完成后 rCore 将 <code class="language-html highlighter-rouge">TrapContext</code>中的 <code class="language-html highlighter-rouge">a0</code> 和 <code class="language-html highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-html highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-html highlighter-rouge">a0</code> 和 <code class="language-html highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-html highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>[<span class="err">&amp;</span>str]</code> 的形式。</p>
 
 <h2 id="4-信号">4. 信号</h2>
 
 <p>信号机制补足了单向事件通知的机制， 这是一种类似于硬件中断的软件级异步通知机制， 使得进程在接收到特定事件的时候能够暂停当前的工作并及时响应事件， 并在响应事件之后可以恢复当前工作继续执行。 如果进程没有接收到任何事件， 它可以执行自己的任务。 这里的暂停与恢复的工作， 都由操作系统来完成， 应用程序只需设置好响应某事件的事件处理例程就够了。</p>
 
-<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-plaintext highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
+<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-html highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
 
 <ul>
   <li>
@@ -514,7 +518,7 @@
 
 <h3 id="41-信号相关的数据结构">4.1 信号相关的数据结构</h3>
 
-<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
+<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-html highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">bitflags!</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalFlags</span><span class="p">:</span> <span class="nb">i32</span> <span class="p">{</span>
@@ -527,7 +531,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外为了处理收到的信号， rCore 定义了 <code class="language-plaintext highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-plaintext highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-plaintext highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
+<p>另外为了处理收到的信号， rCore 定义了 <code class="language-html highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-html highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-html highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// Action for a signal</span>
 <span class="nd">#[repr(C,</span> <span class="nd">align(</span><span class="mi">16</span><span class="nd">))]</span>
@@ -543,14 +547,14 @@
 <p>如前所述， 信号产生有异步信号和同步信号， rCore 将其分作三类， 前两类是异步信号， 最后一类是同步信号。</p>
 
 <ol>
-  <li>进程通过 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
+  <li>进程通过 <code class="language-html highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
   <li>内核检测到某些事件给某个进程发送信号， 但这个事件与接收信号的进程的执行无关。</li>
-  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-plaintext highlighter-rouge">SIGILL</code> 非法指令。</li>
+  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-html highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-html highlighter-rouge">SIGILL</code> 非法指令。</li>
 </ol>
 
 <h4 id="kill-系统调用">kill 系统调用</h4>
 
-<p>实现 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-plaintext highlighter-rouge">manager.rs</code> 中增添 <code class="language-plaintext highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-plaintext highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-plaintext highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-plaintext highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
+<p>实现 <code class="language-html highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-html highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-html highlighter-rouge">manager.rs</code> 中增添 <code class="language-html highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-html highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-html highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-html highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -579,23 +583,23 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>需要注意的是， 如果 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
+<p>需要注意的是， 如果 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
 
 <h4 id="内核信号生成">内核信号生成</h4>
 
-<p>就是将之前说的 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 以及 <code class="language-plaintext highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
+<p>就是将之前说的 <code class="language-html highlighter-rouge">SIGSEGV</code> 以及 <code class="language-html highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
 
 <h3 id="43-信号的处理">4.3 信号的处理</h3>
 
 <p>与信号处理相关的系统调用则有三个：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
+  <li><code class="language-html highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
+  <li><code class="language-html highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
+  <li><code class="language-html highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
 </ul>
 
-<p>需要在 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中增加 <code class="language-plaintext highlighter-rouge">signal_mask</code> 以及 <code class="language-plaintext highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-plaintext highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-plaintext highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-plaintext highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
+<p>需要在 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中增加 <code class="language-html highlighter-rouge">signal_mask</code> 以及 <code class="language-html highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-html highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-html highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-html highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-html highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
@@ -614,7 +618,7 @@
 
 <ul>
   <li>
-    <p>进程可以通过 <code class="language-plaintext highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-plaintext highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-plaintext highlighter-rouge">old_action</code> 中， 而将 <code class="language-plaintext highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
+    <p>进程可以通过 <code class="language-html highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-html highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-html highlighter-rouge">old_action</code> 中， 而将 <code class="language-html highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigaction</span><span class="p">(</span>
       <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
@@ -637,10 +641,10 @@
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
+    <p><code class="language-html highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-plaintext highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-plaintext highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-plaintext highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
+    <p><code class="language-html highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-html highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-html highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-html highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-html highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/syscall/process.rs</span>
 
@@ -660,7 +664,7 @@
   </li>
 </ul>
 
-<p>关于 <code class="language-plaintext highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
+<p>关于 <code class="language-html highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
 
 <h2 id="5-课后练习">5. 课后练习</h2>
 
@@ -838,7 +842,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

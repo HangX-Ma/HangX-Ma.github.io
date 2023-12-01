@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-11-29T00:17:40+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-01T17:11:52+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</title><link href="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html" rel="alternate" type="text/html" title="CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX" /><published>2023-11-28T00:00:00+08:00</published><updated>2023-11-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html"><![CDATA[<h2 id="1-理解-extendible-hash">1. 理解 Extendible Hash</h2>
 
 <ul>
@@ -10,39 +10,39 @@
 
 <h2 id="2-task1---readwrite-page-guards">2. task#1 - Read/Write Page Guards</h2>
 
-<p><code class="language-plaintext highlighter-rouge">Page Guard</code> 的作用是实现一个基于 C++ 的 RAII(Resource Acquisition Is Initialization) 机制的 Page 管理类， 这个类能够通过析构或手动 <code class="language-plaintext highlighter-rouge">Drop</code> UnpinPage 并释放相应的 RLock 或者 WLock， 能够避免后续 Extendible Hash Index 实现时由于人为对读写锁的使用失误以及忘记 UnpinPage 导致 BufferPoolManager 的页管理出错。</p>
+<p><code class="language-html highlighter-rouge">Page Guard</code> 的作用是实现一个基于 C++ 的 RAII(Resource Acquisition Is Initialization) 机制的 Page 管理类， 这个类能够通过析构或手动 <code class="language-html highlighter-rouge">Drop</code> UnpinPage 并释放相应的 RLock 或者 WLock， 能够避免后续 Extendible Hash Index 实现时由于人为对读写锁的使用失误以及忘记 UnpinPage 导致 BufferPoolManager 的页管理出错。</p>
 
 <h3 id="21-task1-实现细节提示">2.1 task#1 实现细节提示</h3>
 
-<p>Project Specification 特地将这几个函数的实现放在一起是有其道理的， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 删除了拷贝构造和拷贝赋值， 需要实现移动构造和移动赋值以及其析构函数。 这里会需要较多的代码的复用， 尤其是 <code class="language-plaintext highlighter-rouge">Drop</code> 函数。</p>
+<p>Project Specification 特地将这几个函数的实现放在一起是有其道理的， <code class="language-html highlighter-rouge">BasicPageGuard</code> 删除了拷贝构造和拷贝赋值， 需要实现移动构造和移动赋值以及其析构函数。 这里会需要较多的代码的复用， 尤其是 <code class="language-html highlighter-rouge">Drop</code> 函数。</p>
 
 <ul>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">PageGuard(PageGuard &amp;&amp;that)</code>: Move constructor.</p>
+    <p><code class="language-html highlighter-rouge">PageGuard(PageGuard <span class="err">&amp;&amp;</span>that)</code>: Move constructor.</p>
 
     <blockquote>
-      <p>对于 Basic 版本直接对 <code class="language-plaintext highlighter-rouge">page_</code>， <code class="language-plaintext highlighter-rouge">bpm_</code>， <code class="language-plaintext highlighter-rouge">is_dirty</code> 进行赋值， 出于习惯将右值 <code class="language-plaintext highlighter-rouge">that</code> 中的指针都置为 <code class="language-plaintext highlighter-rouge">nullptr</code>。 而 Upgrade 版本则可方便地通过 <code class="language-plaintext highlighter-rouge">std::move</code> 赋值 <code class="language-plaintext highlighter-rouge">guard_</code>。</p>
+      <p>对于 Basic 版本直接对 <code class="language-html highlighter-rouge">page_</code>， <code class="language-html highlighter-rouge">bpm_</code>， <code class="language-html highlighter-rouge">is_dirty</code> 进行赋值， 出于习惯将右值 <code class="language-html highlighter-rouge">that</code> 中的指针都置为 <code class="language-html highlighter-rouge">nullptr</code>。 而 Upgrade 版本则可方便地通过 <code class="language-html highlighter-rouge">std::move</code> 赋值 <code class="language-html highlighter-rouge">guard_</code>。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">operator=(PageGuard &amp;&amp;that)</code>: Move operator.</p>
+    <p><code class="language-html highlighter-rouge">operator=(PageGuard <span class="err">&amp;&amp;</span>that)</code>: Move operator.</p>
 
     <blockquote>
-      <p>这里需要注意两点： 1. <code class="language-plaintext highlighter-rouge">that</code> 是否为自身； 2. 如果当前的 <code class="language-plaintext highlighter-rouge">guard_.page_</code> 或 <code class="language-plaintext highlighter-rouge">page_</code> 非 <code class="language-plaintext highlighter-rouge">nullptr</code>， 需要先 <code class="language-plaintext highlighter-rouge">Drop</code> 已存储在当前 PageGuard 中的 Page。</p>
+      <p>这里需要注意两点： 1. <code class="language-html highlighter-rouge">that</code> 是否为自身； 2. 如果当前的 <code class="language-html highlighter-rouge">guard_.page_</code> 或 <code class="language-html highlighter-rouge">page_</code> 非 <code class="language-html highlighter-rouge">nullptr</code>， 需要先 <code class="language-html highlighter-rouge">Drop</code> 已存储在当前 PageGuard 中的 Page。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
+    <p><code class="language-html highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
 
     <blockquote>
-      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
+      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-html highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-html highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-html highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-html highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">~PageGuard()</code>: Destructor.</p>
+    <p><code class="language-html highlighter-rouge">~PageGuard()</code>: Destructor.</p>
 
     <blockquote>
-      <p>直接调用 <code class="language-plaintext highlighter-rouge">Drop</code> 就行啦！</p>
+      <p>直接调用 <code class="language-html highlighter-rouge">Drop</code> 就行啦！</p>
     </blockquote>
   </li>
 </ul>
@@ -50,17 +50,17 @@
 <p>至于下面这两个函数则让我面目狰狞， 给的注释说的非常隐晦， 要保证在 Upgrade 的过程中 Page 不被 Evict， 又说 BasicPageGuard 在调用这个函数后会 invalid。 具体细节参考下一小节的 <a href="#pageguardtestbpmtest">PageGuardTest.BPMTest</a> 调试。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">UpgradeRead()</code>: Upgrade to a ReadPageGuard</li>
-  <li><code class="language-plaintext highlighter-rouge">UpgradeWrite()</code>: Upgrade to a WritePageGuard</li>
+  <li><code class="language-html highlighter-rouge">UpgradeRead()</code>: Upgrade to a ReadPageGuard</li>
+  <li><code class="language-html highlighter-rouge">UpgradeWrite()</code>: Upgrade to a WritePageGuard</li>
 </ul>
 
 <p>而下面这四个函数也是清晰的， 对有 Read 和 Write 需求的就相应的给上读/写锁， 但这里考虑到 WritePageGuard 可能会被更改， 我个人认为需要在 Fetch 的同时将相应的 Page 设置为 <em><strong>dirty</strong></em>。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageBasic(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageRead(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageWrite(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">NewPageGuarded(page_id_t *page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageBasic(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageRead(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageWrite(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">NewPageGuarded(page_id_t *page_id)</code></li>
 </ul>
 
 <h3 id="22-task1-的调试与解析">2.2 task#1 的调试与解析</h3>
@@ -76,7 +76,7 @@ Expected equality of these values:
     Which is: 3
 </code></pre></div></div>
 
-<p>我自己模仿所给范例写了一些本地的测试都是通过的， 唯一感觉有些不确定的是 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeRead()</code> 和 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeWrite()</code> 这两个函数， 对于他们的实现细节我不是很清楚。 为了确定 Bug， 我用了 <code class="language-plaintext highlighter-rouge">LOG_DEBUG(...)</code> 打印所有与 <strong>pinCount</strong> 变更相关的信息， 再次提交 Gradescope 后得到了这样的输出：</p>
+<p>我自己模仿所给范例写了一些本地的测试都是通过的， 唯一感觉有些不确定的是 <code class="language-html highlighter-rouge">BasicPageGuard::UpgradeRead()</code> 和 <code class="language-html highlighter-rouge">BasicPageGuard::UpgradeWrite()</code> 这两个函数， 对于他们的实现细节我不是很清楚。 为了确定 Bug， 我用了 <code class="language-html highlighter-rouge">LOG_DEBUG(...)</code> 打印所有与 <strong>pinCount</strong> 变更相关的信息， 再次提交 Gradescope 后得到了这样的输出：</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:210:NewPageGuarded] DEBUG - new basic page guard
 2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:61:NewPage] DEBUG - Create new page, page_id 0, pinCount <span class="o">[</span>1]
@@ -104,14 +104,14 @@ Expected equality of these values:
 2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 1, pinCount from <span class="o">[</span>2] to <span class="o">[</span>1]
 </code></pre></div></div>
 
-<p>可以看到错误就发生在 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 转为 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code> 的过程中， 按照我之前的理解， 理应 Upgrade 应当增加一次对相应的 Page 的访问， 所以最开始的代码如下：</p>
+<p>可以看到错误就发生在 <code class="language-html highlighter-rouge">BasicPageGuard</code> 转为 <code class="language-html highlighter-rouge">ReadPageGuard</code> 的过程中， 按照我之前的理解， 理应 Upgrade 应当增加一次对相应的 Page 的访问， 所以最开始的代码如下：</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
   <span class="k">return</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>但按照所给测例的输出， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 应当在 Upgrade 之后释放原有的资源， 这意味着 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 在 Upgrade 之后无法再通过 Upgrade 返回一个 <code class="language-plaintext highlighter-rouge">Read/WritePageGuard</code>， 在 Upgrade 完成后需要手动调用 <code class="language-plaintext highlighter-rouge">BasicPageGuard::Drop()</code> 释放原有的资源， 当然这个猜想在所给代码注释中得到了印证：</p>
+<p>但按照所给测例的输出， <code class="language-html highlighter-rouge">BasicPageGuard</code> 应当在 Upgrade 之后释放原有的资源， 这意味着 <code class="language-html highlighter-rouge">BasicPageGuard</code> 在 Upgrade 之后无法再通过 Upgrade 返回一个 <code class="language-html highlighter-rouge">Read/WritePageGuard</code>， 在 Upgrade 完成后需要手动调用 <code class="language-html highlighter-rouge">BasicPageGuard::Drop()</code> 释放原有的资源， 当然这个猜想在所给代码注释中得到了印证：</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
   * The protected page is not evicted from the buffer pool during the upgrade,
@@ -119,11 +119,11 @@ Expected equality of these values:
   */</span>
 </code></pre></div></div>
 
-<p>至于为什么用 <code class="language-plaintext highlighter-rouge">FetchPageRead</code> 而不是直接返回一个全新的 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， 主要是考虑到在 Upgrade 过程中会 <strong>Drop</strong> 原有的 <strong>Basic Guard</strong>， 而 Upgrade 需要保证这个 Page 不会被缓存池的 LRU-K 算法 Evict， 那需要保证这个 Page 处于一个 Pin 的状态。 Fetch 可以增加一次 <code class="language-plaintext highlighter-rouge">pinCount</code>, 可以与 <code class="language-plaintext highlighter-rouge">Drop</code> 中调用的 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 导致 <code class="language-plaintext highlighter-rouge">pinCount</code> 的一次减少抵消。</p>
+<p>至于为什么用 <code class="language-html highlighter-rouge">FetchPageRead</code> 而不是直接返回一个全新的 <code class="language-html highlighter-rouge">ReadPageGuard</code>， 主要是考虑到在 Upgrade 过程中会 <strong>Drop</strong> 原有的 <strong>Basic Guard</strong>， 而 Upgrade 需要保证这个 Page 不会被缓存池的 LRU-K 算法 Evict， 那需要保证这个 Page 处于一个 Pin 的状态。 Fetch 可以增加一次 <code class="language-html highlighter-rouge">pinCount</code>, 可以与 <code class="language-html highlighter-rouge">Drop</code> 中调用的 <code class="language-html highlighter-rouge">UnpinPage</code> 导致 <code class="language-html highlighter-rouge">pinCount</code> 的一次减少抵消。</p>
 
 <p>后续提交通过了 <strong>BMPTest</strong> 证明了我的猜想。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// reference code</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// reference code</span>
 <span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
   <span class="n">ReadPageGuard</span> <span class="n">read_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
   <span class="n">Drop</span><span class="p">();</span>
@@ -163,30 +163,30 @@ Expected equality of these values:
 </span></code></pre></div></div>
 
 <blockquote>
-  <p>这里我偷偷改了 <code class="language-plaintext highlighter-rouge">GetDirectoryPageId</code> 的返回类型， 不然和 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组的类型不统一。</p>
-
-  <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableHeaderPage</span><span class="o">::</span><span class="n">GetDirectoryPageId</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">page_id_t</span>
-</code></pre></div>  </div>
+  <p>这里我偷偷改了 <code class="language-html highlighter-rouge">GetDirectoryPageId</code> 的返回类型， 不然和 <code class="language-html highlighter-rouge">directory_page_ids_</code> 数组的类型不统一。</p>
 </blockquote>
+
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableHeaderPage</span><span class="o">::</span><span class="n">GetDirectoryPageId</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">page_id_t</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h3 id="31-task2-实现细节提示">3.1 task#2 实现细节提示</h3>
 
 <h4 id="hash-table-header-page">Hash Table Header Page</h4>
 
 <ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 需要将 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组中的 page_id 都初始化为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code>， <code class="language-plaintext highlighter-rouge">max_depth</code> 是有它的上限的。</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">HashToDirectoryIndex</code></strong>： 就比较阴险了， 对于 header 而言， 要获取 directory 的索引值， 是通过 32 位 Hash 的 MSB 实现的。 设想 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零， 32 位 Hash 右移 32 位仍是其本身。 因而需要特殊处理 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零的情况， 应返回一个 0 值。</li>
+  <li><strong><code class="language-html highlighter-rouge">Init</code></strong>： 需要将 <code class="language-html highlighter-rouge">directory_page_ids_</code> 数组中的 page_id 都初始化为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code>， <code class="language-html highlighter-rouge">max_depth</code> 是有它的上限的。</li>
+  <li><strong><code class="language-html highlighter-rouge">HashToDirectoryIndex</code></strong>： 就比较阴险了， 对于 header 而言， 要获取 directory 的索引值， 是通过 32 位 Hash 的 MSB 实现的。 设想 <code class="language-html highlighter-rouge">max_depth</code> 为零， 32 位 Hash 右移 32 位仍是其本身。 因而需要特殊处理 <code class="language-html highlighter-rouge">max_depth</code> 为零的情况， 应返回一个 0 值。</li>
 </ul>
 
 <h4 id="hash-table-directory-page">Hash Table Directory Page</h4>
 
 <ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 同样需要初始化 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">bucket_page_id_</code> 这两个数组。 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">global_depth_</code> 需要初始化为 0。</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">HashToBucketIndex</code></strong>： 有个比较巧妙的办法就是直接用 hash 值对 <code class="language-plaintext highlighter-rouge">Size()</code> 取模， 这和使用 <code class="language-plaintext highlighter-rouge">GetGlobalDepthMask</code> 是一样的。</li>
+  <li><strong><code class="language-html highlighter-rouge">Init</code></strong>： 同样需要初始化 <code class="language-html highlighter-rouge">local_depth_</code> 以及 <code class="language-html highlighter-rouge">bucket_page_id_</code> 这两个数组。 <code class="language-html highlighter-rouge">local_depth_</code> 以及 <code class="language-html highlighter-rouge">global_depth_</code> 需要初始化为 0。</li>
+  <li><strong><code class="language-html highlighter-rouge">HashToBucketIndex</code></strong>： 有个比较巧妙的办法就是直接用 hash 值对 <code class="language-html highlighter-rouge">Size()</code> 取模， 这和使用 <code class="language-html highlighter-rouge">GetGlobalDepthMask</code> 是一样的。</li>
   <li>
-    <p><strong><code class="language-plaintext highlighter-rouge">GetSplitImageIndex</code></strong>： 主要得理解 Extendible Hash Index 的 Split 的思路， directory 部分扩大事实上就是左移了一个 global depth， 这导致 directory 数量变为原来的两倍。 例如 <code class="language-plaintext highlighter-rouge">00</code> 会分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code> 但二者都指向同一个 bucket。 所以我们只需要得到当前 bucket 并对其 global_depth 位取反， 就能得到镜像的 bucket 的索引值。</p>
+    <p><strong><code class="language-html highlighter-rouge">GetSplitImageIndex</code></strong>： 主要得理解 Extendible Hash Index 的 Split 的思路， directory 部分扩大事实上就是左移了一个 global depth， 这导致 directory 数量变为原来的两倍。 例如 <code class="language-html highlighter-rouge">00</code> 会分裂为 <code class="language-html highlighter-rouge">000</code> 和 <code class="language-html highlighter-rouge">100</code> 但二者都指向同一个 bucket。 所以我们只需要得到当前 bucket 并对其 global_depth 位取反， 就能得到镜像的 bucket 的索引值。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">uint32_t</span> <span class="p">{</span>
+    <div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">uint32_t</span> <span class="p">{</span>
   <span class="c1">// Ensure the bucket local depth has increased!</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
   <span class="k">return</span> <span class="n">bucket_idx</span> <span class="o">^</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
@@ -194,9 +194,9 @@ Expected equality of these values:
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><strong><code class="language-plaintext highlighter-rouge">IncrGlobalDepth</code></strong>： 结合上个函数的解析， 如果理解了 Extendible Hash Index 的实现思路， 增加 global_depth 要做的就是拷贝一份原有的 buckets， 如 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code>， 把 <code class="language-plaintext highlighter-rouge">00</code> 的内容拷贝一份到 <code class="language-plaintext highlighter-rouge">100</code> 中即可。</p>
+    <p><strong><code class="language-html highlighter-rouge">IncrGlobalDepth</code></strong>： 结合上个函数的解析， 如果理解了 Extendible Hash Index 的实现思路， 增加 global_depth 要做的就是拷贝一份原有的 buckets， 如 bucket_idx <code class="language-html highlighter-rouge">00</code> 分裂为 <code class="language-html highlighter-rouge">000</code> 和 <code class="language-html highlighter-rouge">100</code>， 把 <code class="language-html highlighter-rouge">00</code> 的内容拷贝一份到 <code class="language-html highlighter-rouge">100</code> 中即可。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
+    <div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">global_depth_</span> <span class="o">&lt;</span> <span class="n">HTABLE_DIRECTORY_MAX_DEPTH</span><span class="p">);</span>
   <span class="kt">uint32_t</span> <span class="n">prev_expansion_num</span> <span class="o">=</span> <span class="n">Size</span><span class="p">();</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">prev_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">curr_idx</span> <span class="o">=</span> <span class="n">prev_expansion_num</span><span class="p">;</span> <span class="n">prev_idx</span> <span class="o">&lt;</span> <span class="n">prev_expansion_num</span><span class="p">;</span>
@@ -208,18 +208,18 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong><code class="language-plaintext highlighter-rouge">CanShrink</code></strong>： 检查所有的 bucket 的 local_depth， 如果都比 global depth 要小， 就可以缩小 global_depth。 这个函数在后续 Merge 的时候需要用到。</li>
+  <li><strong><code class="language-html highlighter-rouge">CanShrink</code></strong>： 检查所有的 bucket 的 local_depth， 如果都比 global depth 要小， 就可以缩小 global_depth。 这个函数在后续 Merge 的时候需要用到。</li>
 </ul>
 
 <p>其他的该加加该减减就行， 不用想太多， 就是纯粹的增减！</p>
 
 <h4 id="hash-table-bucket-page">Hash Table Bucket Page</h4>
 
-<p>讲道理开始一点思路没有， 我看到有人在 <a href="https://zhuanlan.zhihu.com/p/664444839">知乎 - zihao 彼方 CMU15-445(2023FALL)-Project#2: Extendible Hash Index</a> 发了篇文章， 里面提到需要对 bucket 中的 <code class="language-plaintext highlighter-rouge">array_</code> 数组全部初始化为一个特殊值 ， <strong>坑爹啊！！！</strong> 这导致我后续花了将近 6 个小时找 <strong>GrowShrinkTest</strong> 的错误。</p>
+<p>讲道理开始一点思路没有， 我看到有人在 <a href="https://zhuanlan.zhihu.com/p/664444839">知乎 - zihao 彼方 CMU15-445(2023FALL)-Project#2: Extendible Hash Index</a> 发了篇文章， 里面提到需要对 bucket 中的 <code class="language-html highlighter-rouge">array_</code> 数组全部初始化为一个特殊值 ， <strong>坑爹啊！！！</strong> 这导致我后续花了将近 6 个小时找 <strong>GrowShrinkTest</strong> 的错误。</p>
 
-<p>实际上 bucket 的实现非常简洁， 我后来在看 <code class="language-plaintext highlighter-rouge">PrintBucket</code> 的实现的时候得到了启发， BUSTUB 直接访问的前 <code class="language-plaintext highlighter-rouge">size_</code> 个元素。 说明每次 <code class="language-plaintext highlighter-rouge">Insert</code> 的时候利用 <code class="language-plaintext highlighter-rouge">size_</code> 可以对数组进行尾部插入， 这是因为 <code class="language-plaintext highlighter-rouge">size_</code> 始终指向下一个插入的位置。而每次 <code class="language-plaintext highlighter-rouge">Remove</code> 的时候只用 <code class="language-plaintext highlighter-rouge">size_</code> 指向当前数组的尾部数据 (人话就是 <code class="language-plaintext highlighter-rouge">size_ -= 1</code>)， 让这个尾部数据填充到 <code class="language-plaintext highlighter-rouge">RemoveAt</code> 的那个 bucket_idx 位置即可。</p>
+<p>实际上 bucket 的实现非常简洁， 我后来在看 <code class="language-html highlighter-rouge">PrintBucket</code> 的实现的时候得到了启发， BUSTUB 直接访问的前 <code class="language-html highlighter-rouge">size_</code> 个元素。 说明每次 <code class="language-html highlighter-rouge">Insert</code> 的时候利用 <code class="language-html highlighter-rouge">size_</code> 可以对数组进行尾部插入， 这是因为 <code class="language-html highlighter-rouge">size_</code> 始终指向下一个插入的位置。而每次 <code class="language-html highlighter-rouge">Remove</code> 的时候只用 <code class="language-html highlighter-rouge">size_</code> 指向当前数组的尾部数据 (人话就是 <code class="language-html highlighter-rouge">size_ -= 1</code>)， 让这个尾部数据填充到 <code class="language-html highlighter-rouge">RemoveAt</code> 的那个 bucket_idx 位置即可。</p>
 
-<p>我们无需对数组进行初始化等操作， <code class="language-plaintext highlighter-rouge">size_</code> 表示当前的数据大小可以很好的控制访问权限。</p>
+<p>我们无需对数组进行初始化等操作， <code class="language-html highlighter-rouge">size_</code> 表示当前的数据大小可以很好的控制访问权限。</p>
 
 <h3 id="32-task2-的调试与解析">3.2 task#2 的调试与解析</h3>
 
@@ -237,21 +237,46 @@ Expected equality of these values:
 
 <h3 id="41-task3-实现细节提示">4.1 task#3 实现细节提示</h3>
 
-<p>这里实现的时候需要考虑 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， <code class="language-plaintext highlighter-rouge">WritePageGuard</code> 的使用场景。 一般来说， 只有需要通过 <code class="language-plaintext highlighter-rouge">NewPageGuarded</code> 获取新 Page 才会用到 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， 之后都会通过 Upgrade 函数将这个获取到的 Page 加上读写锁。 使用 PageGuard 原则就是看是否后续操作会产生对数据的更改， 如果不会更改就尽量使用 Read， 并在适当的时候通过 <code class="language-plaintext highlighter-rouge">Drop</code> 函数提前释放相关的读写锁， 以提高并行效率。</p>
+<p>这里实现的时候需要考虑 <code class="language-html highlighter-rouge">BasicPageGuard</code>， <code class="language-html highlighter-rouge">ReadPageGuard</code>， <code class="language-html highlighter-rouge">WritePageGuard</code> 的使用场景。 一般来说， 只有需要通过 <code class="language-html highlighter-rouge">NewPageGuarded</code> 获取新 Page 才会用到 <code class="language-html highlighter-rouge">BasicPageGuard</code>， 之后都会通过 Upgrade 函数将这个获取到的 Page 加上读写锁。 使用 PageGuard 原则就是看是否后续操作会产生对数据的更改， 如果不会更改就尽量使用 Read， 并在适当的时候通过 <code class="language-html highlighter-rouge">Drop</code> 函数提前释放相关的读写锁， 以提高并行效率。</p>
 
 <h4 id="migrateentries">MigrateEntries</h4>
 
-<p>我相信很多人看到这个函数是懵的， 这个函数究竟什么作用根本没有提示。 这个函数和 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code> 函数都是用在 <strong>Split Bucket</strong> 中的。 试想有一个 bucket_idx 为 <code class="language-plaintext highlighter-rouge">00</code> 的 bucket 存储了两个 KV 数据， 在我们增加 global_depth 和 local_depth 之后， 我们需要将 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 中的数据填充到新的 <code class="language-plaintext highlighter-rouge">000</code>(原 <code class="language-plaintext highlighter-rouge">00</code>) 和 <code class="language-plaintext highlighter-rouge">100</code> 这两个 bucket， 此时就要用到 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 函数。</p>
+<p>我相信很多人看到这个函数是懵的， 这个函数究竟什么作用根本没有提示。 这个函数和 <code class="language-html highlighter-rouge">UpdateDirectoryMapping</code> 函数都是用在 <strong>Split Bucket</strong> 中的。 试想有一个 bucket_idx 为 <code class="language-html highlighter-rouge">00</code> 的 bucket 存储了两个 KV 数据， 在我们增加 global_depth 和 local_depth 之后， 我们需要将 bucket_idx <code class="language-html highlighter-rouge">00</code> 中的数据填充到新的 <code class="language-html highlighter-rouge">000</code>(原 <code class="language-html highlighter-rouge">00</code>) 和 <code class="language-html highlighter-rouge">100</code> 这两个 bucket， 此时就要用到 <code class="language-html highlighter-rouge">MigrateEntries</code> 函数。</p>
 
-<p>首先将原有数据拷贝出来， 这里需要注意的是， 如果使用 <code class="language-plaintext highlighter-rouge">ExtendibleHTableBucketPage&lt;K, V, KC&gt;::EntryAt</code> 函数会有问题， 我们无法对一个 const 引用进行拷贝构造。 解决办法就是单独用 <code class="language-plaintext highlighter-rouge">KeyAt</code> 和 <code class="language-plaintext highlighter-rouge">ValueAt</code>配合 <code class="language-plaintext highlighter-rouge">std::make_pair</code> 构造一个新的 KV。</p>
+<p>首先将原有数据拷贝出来， 这里需要注意的是， 如果使用 <code class="language-html highlighter-rouge">ExtendibleHTableBucketPage<span class="nt">&lt;K</span><span class="err">,</span> <span class="na">V</span><span class="err">,</span> <span class="na">KC</span><span class="nt">&gt;</span>::EntryAt</code> 函数会有问题， 我们无法对一个 const 引用进行拷贝构造。 解决办法就是单独用 <code class="language-html highlighter-rouge">KeyAt</code> 和 <code class="language-html highlighter-rouge">ValueAt</code>配合 <code class="language-html highlighter-rouge">std::make_pair</code> 构造一个新的 KV。</p>
 
 <blockquote>
-  <p>可以自己尝试用 LOG_DEBUG 看看结果， 不出意外的话 <code class="language-plaintext highlighter-rouge">copied</code> 的 KV 应都是 0 值。</p>
+  <p>可以自己尝试用 LOG_DEBUG 看看结果， 不出意外的话 <code class="language-html highlighter-rouge">copied</code> 的 KV 应都是 0 值。</p>
 </blockquote>
 
 <p>之后根据新的 local_depth 将拷贝的数据按照新的 bucket_idx 插入 old_bucket 或 new_bucket。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre></td><td class="code"><pre><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
 <span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">MigrateEntries</span><span class="p">(</span><span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">old_bucket</span><span class="p">,</span>
                                                        <span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">new_bucket</span><span class="p">,</span>
                                                        <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
@@ -276,13 +301,13 @@ Expected equality of these values:
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</pre></td></tr></tbody></table></code></pre></figure>
 
 <h4 id="updatedirectorymapping">UpdateDirectoryMapping</h4>
 
 <p>这又是做什么？ 可以想象的是， 有时候我们有很多 bucket_idx 指向的是同一个 page_id， 如果不清楚请参考 <a href="#1-理解-extendible-hash">理解-extendible-hash</a> 我们在 Split Bucket 完成后， 需要让原来指向 split_bucket_idx 的那些 buckets 重新分配指向， 要么是 split_bucket_idx， 要么是 image_bucket_idx， 并且都需要设定新的 local_depth。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
 <span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">UpdateDirectoryMapping</span><span class="p">(</span><span class="n">ExtendibleHTableDirectoryPage</span> <span class="o">*</span><span class="n">directory</span><span class="p">,</span>
                                                                <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="n">page_id_t</span> <span class="n">new_bucket_page_id</span><span class="p">,</span>
                                                                <span class="kt">uint32_t</span> <span class="n">new_local_depth</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
@@ -302,7 +327,7 @@ Expected equality of these values:
 
 <h4 id="getvalue-和-remove">GetValue 和 Remove</h4>
 
-<p>这两个函数的接口都是 <code class="language-plaintext highlighter-rouge">key</code>， 说明有时候可能这个 <code class="language-plaintext highlighter-rouge">key</code> 是不存在于 BufferPool 的， 我们需要在获取 directory index 的时候就可以判断， 如果 directory_idx 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 可以提早返回结果， 因为这个 <code class="language-plaintext highlighter-rouge">key</code> 并不存在。</p>
+<p>这两个函数的接口都是 <code class="language-html highlighter-rouge">key</code>， 说明有时候可能这个 <code class="language-html highlighter-rouge">key</code> 是不存在于 BufferPool 的， 我们需要在获取 directory index 的时候就可以判断， 如果 directory_idx 为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code> 可以提早返回结果， 因为这个 <code class="language-html highlighter-rouge">key</code> 并不存在。</p>
 
 <p>另外注意 Fall 2023 版本是 unique-key， 不存在一个 key 对应多个值的情况。</p>
 
@@ -312,25 +337,25 @@ Expected equality of these values:
 
 <h4 id="insert">Insert</h4>
 
-<p><code class="language-plaintext highlighter-rouge">Insert</code> 中在 directory 的 page_id 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 时调用 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code>， 在 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code> 中调用 <code class="language-plaintext highlighter-rouge">InsertToNewBucket</code>， 这是这两个函数的使用方式。</p>
+<p><code class="language-html highlighter-rouge">Insert</code> 中在 directory 的 page_id 为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code> 时调用 <code class="language-html highlighter-rouge">InsertToNewDirectory</code>， 在 <code class="language-html highlighter-rouge">InsertToNewDirectory</code> 中调用 <code class="language-html highlighter-rouge">InsertToNewBucket</code>， 这是这两个函数的使用方式。</p>
 
 <ul>
   <li>如果发现 directory 索引超过了 header 的最大限制， 需要直接返回 false。</li>
-  <li>判断当前需要插入的 bucket 的情况， 如果没有满则可以直接调用 bucket 的 Insert 函数， 如果满了则调用 <code class="language-plaintext highlighter-rouge">SplitInsert</code> 函数。</li>
+  <li>判断当前需要插入的 bucket 的情况， 如果没有满则可以直接调用 bucket 的 Insert 函数， 如果满了则调用 <code class="language-html highlighter-rouge">SplitInsert</code> 函数。</li>
 </ul>
 
 <h4 id="splitinsert">SplitInsert</h4>
 
-<p>这个函数不进行任何插入操作， 插入操作仅在 <code class="language-plaintext highlighter-rouge">Insert</code> 中进行， 因而在该函数完成对 global_depth 和 local_depth 的扩容后， 需要再次调用 <code class="language-plaintext highlighter-rouge">Insert</code> 完成数据插入。</p>
+<p>这个函数不进行任何插入操作， 插入操作仅在 <code class="language-html highlighter-rouge">Insert</code> 中进行， 因而在该函数完成对 global_depth 和 local_depth 的扩容后， 需要再次调用 <code class="language-html highlighter-rouge">Insert</code> 完成数据插入。</p>
 
 <p><strong>需要注意以下几点</strong>：</p>
 
 <ol>
-  <li>当前的 bucket_idx 获取的 local_depth 已经与传入的 <code class="language-plaintext highlighter-rouge">directory_max_depth_</code> 相等了， 说明 directory 已经扩容到最大， bucket 也扩容到最多， 无法继续扩容， 直接返回 <code class="language-plaintext highlighter-rouge">false</code>。</li>
+  <li>当前的 bucket_idx 获取的 local_depth 已经与传入的 <code class="language-html highlighter-rouge">directory_max_depth_</code> 相等了， 说明 directory 已经扩容到最大， bucket 也扩容到最多， 无法继续扩容， 直接返回 <code class="language-html highlighter-rouge">false</code>。</li>
   <li>如果上述条件不满足， 说明还可以继续扩容， 如果 local_depth 已经和 global_depth 相等了， 先增加 global_depth。</li>
   <li>增加 local_depth。</li>
-  <li>调用 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 以及 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code>（有两次） 完成扩容。</li>
-  <li>重新尝试 <code class="language-plaintext highlighter-rouge">Insert</code>。</li>
+  <li>调用 <code class="language-html highlighter-rouge">MigrateEntries</code> 以及 <code class="language-html highlighter-rouge">UpdateDirectoryMapping</code>（有两次） 完成扩容。</li>
+  <li>重新尝试 <code class="language-html highlighter-rouge">Insert</code>。</li>
 </ol>
 
 <h4 id="merge">Merge</h4>
@@ -342,12 +367,12 @@ Expected equality of these values:
 <ol>
   <li>local_depth 为 0， 说明已经到达 Merge 的极限了， 直接返回。</li>
   <li>当前的 bucket_idx 得到的 local_depth 和镜像的 image_bucket_idx 得到的 image_local_depth 不一致， 深度不一致则不能 Merge， 也需要直接返回。</li>
-  <li>我们需要在 Merge 的过程中对 bucket_idx 再进行一次 <code class="language-plaintext highlighter-rouge">IsEmpty</code> 的判断， 如果非空直接返回。 这是因为在 <code class="language-plaintext highlighter-rouge">Remove</code> 函数中我们判断 bucket 为空后， 释放 latch 的瞬间这个 latch 被 Insert 拿走了， 这个 bucket 可能又被塞入了新的值， 后续 Merge 函数获取到锁的时候就可能看到的是这个新值了。</li>
+  <li>我们需要在 Merge 的过程中对 bucket_idx 再进行一次 <code class="language-html highlighter-rouge">IsEmpty</code> 的判断， 如果非空直接返回。 这是因为在 <code class="language-html highlighter-rouge">Remove</code> 函数中我们判断 bucket 为空后， 释放 latch 的瞬间这个 latch 被 Insert 拿走了， 这个 bucket 可能又被塞入了新的值， 后续 Merge 函数获取到锁的时候就可能看到的是这个新值了。</li>
   <li>删除 bucket_idx 对应的 Page 后要将之前所有指向这个 bucket_idx 存储的 Page 的那些 buckets 重新直线新的 image_bucket 对应的 Page 以及设置新的 local_depth。</li>
-  <li>需要循环调用 <code class="language-plaintext highlighter-rouge">CanShrink</code> 缩小 global_depth。</li>
+  <li>需要循环调用 <code class="language-html highlighter-rouge">CanShrink</code> 缩小 global_depth。</li>
 </ol>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">...</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">...</span>
   <span class="cm">/* recursive merge */</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">directory_write_page</span><span class="o">-&gt;</span><span class="n">GetGlobalDepth</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
     <span class="kt">uint32_t</span> <span class="n">next_bucket_idx</span> <span class="o">=</span> <span class="n">image_bucket_idx</span> <span class="o">&amp;</span> <span class="n">new_local_depth</span><span class="p">;</span>
@@ -361,13 +386,13 @@ Expected equality of these values:
 
 <h2 id="5-task4--concurrency-control">5. task#4  Concurrency Control</h2>
 
-<p>实现的时候给 <code class="language-plaintext highlighter-rouge">Insert</code>， <code class="language-plaintext highlighter-rouge">Remove</code> 以及自定义的一些会更改 directory 或 bucket 的函数都加上了一把 latch， 在 return 或进入另一个函数前释放 latch， 能完美通过测试。</p>
+<p>实现的时候给 <code class="language-html highlighter-rouge">Insert</code>， <code class="language-html highlighter-rouge">Remove</code> 以及自定义的一些会更改 directory 或 bucket 的函数都加上了一把 latch， 在 return 或进入另一个函数前释放 latch， 能完美通过测试。</p>
 
 <h2 id="6-写在最后">6. 写在最后</h2>
 
 <p>不枉这一个星期的努力， P2 顺利收官了！</p>
 
-<p>虽然最后成功通过了 P2 的所有测试， 但整个 Project 并没有完全独立完成， 设计上也有参考前述的 2021 年的 Extendible Hash Index 的实现。 除了所给函数没注释导致对其功能的理解上的缺失， 还有阅读 Specification 和代码注释不仔细， 对 Extendible Hash Index 的原理以及概念不熟悉不透彻。 对于 Debug 目前能用的就是 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code> 以及配置 VSCode 的 CodeLLDB 实现图形化调试， 一旦遇到多线程的情况， 大多只能依赖 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code>， 可想而知 P4 将是个令人望而生畏的任务。</p>
+<p>虽然最后成功通过了 P2 的所有测试， 但整个 Project 并没有完全独立完成， 设计上也有参考前述的 2021 年的 Extendible Hash Index 的实现。 除了所给函数没注释导致对其功能的理解上的缺失， 还有阅读 Specification 和代码注释不仔细， 对 Extendible Hash Index 的原理以及概念不熟悉不透彻。 对于 Debug 目前能用的就是 <code class="language-html highlighter-rouge">LOG_DEBUG</code> 以及配置 VSCode 的 CodeLLDB 实现图形化调试， 一旦遇到多线程的情况， 大多只能依赖 <code class="language-html highlighter-rouge">LOG_DEBUG</code>， 可想而知 P4 将是个令人望而生畏的任务。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-11-28-cmu15445-fa23-p2/p2-leaderboard-rank.png" alt="Project2 LeaderBoard Rank, HangX-Ma" width="600" />
@@ -385,7 +410,7 @@ Expected equality of these values:
 
 <h3 id="question-14"><a href="https://cppquiz.org/quiz/question/14?result=OK&amp;answer=abcBCA&amp;did_answer=Answer">Question 14</a></h3>
 
-<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-plaintext highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-plaintext highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-plaintext highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-html highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-html highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-html highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
 
 <h3 id="question-16"><a href="https://cppquiz.org/quiz/question/16?result=OK&amp;answer=abBA&amp;did_answer=Answer">Question 16</a></h3>
 
@@ -401,9 +426,9 @@ Expected equality of these values:
 
 <h3 id="question-312"><a href="https://cppquiz.org/quiz/question/312?result=CE&amp;answer=&amp;did_answer=Answer">Question 312</a></h3>
 
-<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-plaintext highlighter-rouge">private</code> 而 struct 都默认 <code class="language-plaintext highlighter-rouge">public</code>。</p>]]></content><author><name>HangX-Ma</name></author><category term="C++" /><summary type="html"><![CDATA[做 C++ Quiz 遇到一些有意思的语法细节记录，钻牛角尖的那种。]]></summary></entry><entry><title type="html">cs61b Proj3-BYoW</title><link href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html" rel="alternate" type="text/html" title="cs61b Proj3-BYoW" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/10/21/cs61b-proj3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><![CDATA[<p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-html highlighter-rouge">private</code> 而 struct 都默认 <code class="language-html highlighter-rouge">public</code>。</p>]]></content><author><name>HangX-Ma</name></author><category term="C++" /><summary type="html"><![CDATA[做 C++ Quiz 遇到一些有意思的语法细节记录，钻牛角尖的那种。]]></summary></entry><entry><title type="html">cs61b Proj3-BYoW</title><link href="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html" rel="alternate" type="text/html" title="cs61b Proj3-BYoW" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/10/21/cs61b-proj3</id><content type="html" xml:base="https://hangx-ma.github.io/2023/10/21/cs61b-proj3.html"><![CDATA[<p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
 
-<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-plaintext highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
+<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-html highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
 
 <p>我参考的是 <a href="https://github.com/YinY1/CS61B-sp21">YinY1</a> 的 Proj3 实现， 但我认为具体的细节是需要自己去思考的， 文件结构的设计已经给了我足够的启发。 这篇文章就详细介绍一下地图的生成， 这块难度比较高， Phase2 关于游戏交互的我就完成了基础功能没啥好说的。</p>
 
@@ -535,7 +560,7 @@ Expected equality of these values:
   <li>
     <p>地图过于拥挤</p>
 
-    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-plaintext highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
+    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-html highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
   </li>
   <li>
     <p><strong>Dead End</strong> 过多</p>
@@ -609,11 +634,11 @@ Expected equality of these values:
   \end{aligned}
 \end{equation*}\]
 
-<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
+<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-html highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
 
 <h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
 
-<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
+<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-html highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
 
 <p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
 
@@ -626,9 +651,9 @@ Expected equality of these values:
 
 <h3 id="x31-ratchet-棘轮模式">X3.1 Ratchet 棘轮模式</h3>
 
-<p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-plaintext highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
+<p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-html highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
 
-<p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-plaintext highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-plaintext highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-plaintext highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
+<p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-html highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-html highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-html highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// attractor angle variable</span>
 <span class="k">static</span> <span class="kt">float</span> <span class="n">attract_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">;</span>
@@ -646,9 +671,9 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>下图是参阅博客园对棘轮模式原理的电压与角度关系图， 这里设定的棘轮角度为 45°， 可以看到棘轮的作用力的分界点在 <code class="language-plaintext highlighter-rouge">45°/2 = 22.5°</code> 的位置。</p>
+<p>下图是参阅博客园对棘轮模式原理的电压与角度关系图， 这里设定的棘轮角度为 45°， 可以看到棘轮的作用力的分界点在 <code class="language-html highlighter-rouge">45°/2 = 22.5°</code> 的位置。</p>
 
-<p>这很容易理解， 这个点是两个棘轮齿的中心点， 若 <code class="language-plaintext highlighter-rouge">shaft_angle &gt; 22.5°</code> 则 <code class="language-plaintext highlighter-rouge">find_attractor</code> 会找到下一个棘轮位置， 反之则仍是当前的棘轮位置。 我们知道闭环负反馈的作用是使作用对象稳定在目标位置， 在 <code class="language-plaintext highlighter-rouge">[0;22.5°]</code> 之间， 越靠近中心点 <code class="language-plaintext highlighter-rouge">22.5°</code> 距离误差越大， 受到反向的力矩越大； 而一旦跨过中心点位置， 棘轮齿更新为下一个位置， 此时的距离误差方向就与原来的相反了， 因而受到的是正向力矩的推力， 这里会有一个明显的电压的方向的改变， 力矩方向顺应改变， 这是人感受到棘轮齿的重要原因。</p>
+<p>这很容易理解， 这个点是两个棘轮齿的中心点， 若 <code class="language-html highlighter-rouge">shaft_angle &gt; 22.5°</code> 则 <code class="language-html highlighter-rouge">find_attractor</code> 会找到下一个棘轮位置， 反之则仍是当前的棘轮位置。 我们知道闭环负反馈的作用是使作用对象稳定在目标位置， 在 <code class="language-html highlighter-rouge">[0;22.5°]</code> 之间， 越靠近中心点 <code class="language-html highlighter-rouge">22.5°</code> 距离误差越大， 受到反向的力矩越大； 而一旦跨过中心点位置， 棘轮齿更新为下一个位置， 此时的距离误差方向就与原来的相反了， 因而受到的是正向力矩的推力， 这里会有一个明显的电压的方向的改变， 力矩方向顺应改变， 这是人感受到棘轮齿的重要原因。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-28-miniFOC-concept/ratchet_mode.png" alt="Ratchet mode Voltage-Angle relationship, HangX-Ma" width="400" />
@@ -682,7 +707,7 @@ Expected equality of these values:
 
 <h2 id="2-vofa-justfloat-protocol">2. Vofa+: JustFloat Protocol</h2>
 
-<p>具体的协议内容可以看官网的 <a href="https://www.vofa.plus/plugin_detail/?name=justfloat">JustFloat</a> 说明， 除了采样数据解析外， 该协议还能进行图像解析。 目前我只用到了数据采样解析部分， 搞懂这个也就一通百通了， 可以看到滚放定义的数据帧如下所示， 帧尾是一个 4 字节的特定数据 <code class="language-plaintext highlighter-rouge">0x00, 0x00, 0x80, 0x7f</code>， 这是小端的顺序， 大端需要调换一下数据的存储顺序。 也就是说， 我们在发送完希望传输的数据后， 需要紧跟在这些数据后面发送一个尾帧， 才能让 Vofa+ 识别数据帧的内容并进行可视化以及文本打印。</p>
+<p>具体的协议内容可以看官网的 <a href="https://www.vofa.plus/plugin_detail/?name=justfloat">JustFloat</a> 说明， 除了采样数据解析外， 该协议还能进行图像解析。 目前我只用到了数据采样解析部分， 搞懂这个也就一通百通了， 可以看到滚放定义的数据帧如下所示， 帧尾是一个 4 字节的特定数据 <code class="language-html highlighter-rouge">0x00, 0x00, 0x80, 0x7f</code>， 这是小端的顺序， 大端需要调换一下数据的存储顺序。 也就是说， 我们在发送完希望传输的数据后， 需要紧跟在这些数据后面发送一个尾帧， 才能让 Vofa+ 识别数据帧的内容并进行可视化以及文本打印。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define CH_COUNT 通道数量
 </span><span class="k">struct</span> <span class="n">Frame</span> <span class="p">{</span>
@@ -691,7 +716,7 @@ Expected equality of these values:
 <span class="p">};</span>
 </code></pre></div></div>
 
-<p>一般来说， 串口是无法接收 float 类型的数据的， 但 float 类型在 STM32 中占据 4 个字节， 因而我们可以定义这样一个 union 联合体结构解决 float 数据传输的问题。 <code class="language-plaintext highlighter-rouge">fdata</code> 和 <code class="language-plaintext highlighter-rouge">chars</code> 共用一块内存区域并且都占据 4 个字节， 这样在使用串口发送数据的时候就能将 <code class="language-plaintext highlighter-rouge">fdata</code> 拆分成 4 个 <code class="language-plaintext highlighter-rouge">chars</code> 进行发送。</p>
+<p>一般来说， 串口是无法接收 float 类型的数据的， 但 float 类型在 STM32 中占据 4 个字节， 因而我们可以定义这样一个 union 联合体结构解决 float 数据传输的问题。 <code class="language-html highlighter-rouge">fdata</code> 和 <code class="language-html highlighter-rouge">chars</code> 共用一块内存区域并且都占据 4 个字节， 这样在使用串口发送数据的时候就能将 <code class="language-html highlighter-rouge">fdata</code> 拆分成 4 个 <code class="language-html highlighter-rouge">chars</code> 进行发送。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * @brief Use union to decompose the float_data into 4 bytes char.
@@ -715,9 +740,9 @@ Expected equality of these values:
 
 <h2 id="3-vofa-components">3. Vofa+ Components</h2>
 
-<p>Vofa+ 还提供了一系列控件方便我们进行对下位机的调试， 这里以这个 <code class="language-plaintext highlighter-rouge">ExtraButtonToggle</code> 控件为例。</p>
+<p>Vofa+ 还提供了一系列控件方便我们进行对下位机的调试， 这里以这个 <code class="language-html highlighter-rouge">ExtraButtonToggle</code> 控件为例。</p>
 
-<p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-plaintext highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-plaintext highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
+<p>将这个控件拖出到新的 Tab 中， 右击可以看到一个 <code class="language-html highlighter-rouge">事件与参数</code> 的选项， 这是表示按钮在 <strong>激活</strong> 以及 <strong>关闭</strong> 的时候会发送的指令。 如果我们的下位机协议非常简单， 配置这个控件的这个选项的参数就能实现功能， 但我们经常会需要对指令包装一个帧头以区分不同功能的指令， 并在解析帧头后继续接收数据， Vofa+ 提供了一个 <code class="language-html highlighter-rouge">命令</code> 区块方便我们发送 <strong>帧头+数据</strong> 这种组合。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_components.png" alt="Vofa+ components, HangX-Ma" width="400" />
@@ -725,9 +750,9 @@ Expected equality of these values:
     <font size="2" color="#999"><u>Vofa+ components, HangX-Ma</u></font>
 </div>
 
-<p>以上图为例， 我定义了一段命令的内容为 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">%% 00 00 00</code>， 前半部分是我定义的帧头数据， 只有识别到 <code class="language-plaintext highlighter-rouge">AA</code> 和 <code class="language-plaintext highlighter-rouge">FF</code> 我才会继续解析指令， 将末尾的 <code class="language-plaintext highlighter-rouge">01</code> 作为区分不同指令的具体标识。</p>
+<p>以上图为例， 我定义了一段命令的内容为 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">%% 00 00 00</code>， 前半部分是我定义的帧头数据， 只有识别到 <code class="language-html highlighter-rouge">AA</code> 和 <code class="language-html highlighter-rouge">FF</code> 我才会继续解析指令， 将末尾的 <code class="language-html highlighter-rouge">01</code> 作为区分不同指令的具体标识。</p>
 
-<p>而后半段则是我定义的数据帧， <code class="language-plaintext highlighter-rouge">%%</code> 标识占位符， 这样一组 <code class="language-plaintext highlighter-rouge">%%</code>占位一个字节， 我在这个按钮控件的 <code class="language-plaintext highlighter-rouge">事件与参数</code> 部分设置了激活态发送 <code class="language-plaintext highlighter-rouge">01</code>， 关闭态发送 <code class="language-plaintext highlighter-rouge">02</code>， 这样在我按下按钮后， 根据当前按钮的状态， <code class="language-plaintext highlighter-rouge">%%</code> 会被替换为 <code class="language-plaintext highlighter-rouge">01</code> 或者 <code class="language-plaintext highlighter-rouge">02</code>。 这样， 每次按下按钮后， Vofa+ 都会向 STM32 发送 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">01 00 00 00</code> 或者 <code class="language-plaintext highlighter-rouge">AA FF 00 01</code> <code class="language-plaintext highlighter-rouge">02 00 00 00</code>。</p>
+<p>而后半段则是我定义的数据帧， <code class="language-html highlighter-rouge">%%</code> 标识占位符， 这样一组 <code class="language-html highlighter-rouge">%%</code>占位一个字节， 我在这个按钮控件的 <code class="language-html highlighter-rouge">事件与参数</code> 部分设置了激活态发送 <code class="language-html highlighter-rouge">01</code>， 关闭态发送 <code class="language-html highlighter-rouge">02</code>， 这样在我按下按钮后， 根据当前按钮的状态， <code class="language-html highlighter-rouge">%%</code> 会被替换为 <code class="language-html highlighter-rouge">01</code> 或者 <code class="language-html highlighter-rouge">02</code>。 这样， 每次按下按钮后， Vofa+ 都会向 STM32 发送 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">01 00 00 00</code> 或者 <code class="language-html highlighter-rouge">AA FF 00 01</code> <code class="language-html highlighter-rouge">02 00 00 00</code>。</p>
 
 <p>可以结合我在 USART 中 DMA 接收部分对数据的解析方式进行理解。</p>
 
@@ -765,7 +790,7 @@ Expected equality of these values:
 </code></pre></div></div>
 
 <blockquote>
-  <p>这里为什么设置的发送帧为 8 个字节？ 这是因为目前使用的是 <strong>JustFloat</strong> 协议， 协议发送和接收都是依据 float 的格式与大小进行的。 而我定义了接收帧为大小为 2 的 <code class="language-plaintext highlighter-rouge">Format_Typedef</code> 数组， 正好是 2 个 float， 8 个字节大小。 若是不理解可以看看 mandzy 的相关 <a href="#vofa_demo">视频</a>。</p>
+  <p>这里为什么设置的发送帧为 8 个字节？ 这是因为目前使用的是 <strong>JustFloat</strong> 协议， 协议发送和接收都是依据 float 的格式与大小进行的。 而我定义了接收帧为大小为 2 的 <code class="language-html highlighter-rouge">Format_Typedef</code> 数组， 正好是 2 个 float， 8 个字节大小。 若是不理解可以看看 mandzy 的相关 <a href="#vofa_demo">视频</a>。</p>
 </blockquote>
 
 <h2 id="4-调试记录">4. 调试记录</h2>
@@ -774,17 +799,17 @@ Expected equality of these values:
 
 <ul>
   <li>将 USART1 更换为 USART2 以及 USART3 都是一样的情况。</li>
-  <li>检查了 DMA 的配置， 发现 <code class="language-plaintext highlighter-rouge">recv_frame</code> 和 <code class="language-plaintext highlighter-rouge">send_frame</code> 的地址忘记写目标地址上了， 但是还是不行。</li>
+  <li>检查了 DMA 的配置， 发现 <code class="language-html highlighter-rouge">recv_frame</code> 和 <code class="language-html highlighter-rouge">send_frame</code> 的地址忘记写目标地址上了， 但是还是不行。</li>
   <li>单独测试收的过程， 在指令中加入一个翻转 LED 的命令， 无效， cortex-debug 也接收不到中断。</li>
   <li>主程序可以跑通， 加入 LED 翻转指令有效， 通过 cortex-debug 插件也没有发现数据有问题。</li>
   <li>用自己之前写的可以工作的 USART1 的程序进行回环测试， 无效， 基本确定 CH340 硬件坏了。</li>
   <li>用逻辑分析仪测了一下输出脚 <em><strong>PB6(Tx)</strong></em> 有不同的输出波形， 说明 DMA 通信不成问题了， 协议部分还不清楚， 但 CH340 肯定坏了。</li>
-  <li><code class="language-plaintext highlighter-rouge">JustFloat</code> 协议测试可用。</li>
+  <li><code class="language-html highlighter-rouge">JustFloat</code> 协议测试可用。</li>
 </ul>]]></content><author><name>HangX-Ma</name></author><category term="C" /><category term="STM32" /><summary type="html"><![CDATA[上位机调试工具 Vofa+ 食用指南， 结合电机调试进行说明， 感谢 Bilibili 大学。]]></summary></entry><entry><title type="html">OOP C Programming</title><link href="https://hangx-ma.github.io/2023/07/18/oopc.html" rel="alternate" type="text/html" title="OOP C Programming" /><published>2023-07-18T00:00:00+08:00</published><updated>2023-07-18T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/18/oopc</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/18/oopc.html"><![CDATA[<p>研究这部分内容的动机主要还是编写 STM32 的 C 代码的时候， 期望有一个固有的类能够管理其方法， 这样能够比较清晰的管理这些同属于一类的代码结构。 其实这里就涉及到了 <strong>面向对象</strong> 的编程思想， 将数据抽象为 <strong>类</strong> 和 <strong>方法</strong>， 类能表征数据的属性， 而方法则是数据属性及状态改变的一种行为。</p>
 
 <p>之前在接触 Linux 驱动的时候其实就浅浅地接触到了 C 面向对象的思想， 例如 MTD 层抽象接口提供给 Block， 我们直接从顶层通过代码索引的方式是没办法找到具体的 Block 调用方法的。 我们只能看到 MTD 抽象出来的接口， 这一定程度上提供了数据的私有化的能力。</p>
 
-<p>网上的相关文章众说纷纭， 但目前看来就是 <em><strong>C 现代编程</strong></em> 这本书讲的最清晰最明白， LW_OOPC 则是 高焕堂 以及其团队 MISOO 设计的方便 C 面向对象的宏定义模块， 能方便相关的开发。 其实这些文章读过来， 主要还是需要开发者用好 <code class="language-plaintext highlighter-rouge">struct</code>， <code class="language-plaintext highlighter-rouge">Macro</code>， <code class="language-plaintext highlighter-rouge">pointer</code>  这三类资源。 <code class="language-plaintext highlighter-rouge">struct</code> 可谓是重中之重， 可以看到在 C++ 中的 struct 和 class 仅在数据接口的私有性上存在差异， 而在 Rust 中则直接删除了 class 的定义， 转向了 struct + trait 的编程模式。</p>
+<p>网上的相关文章众说纷纭， 但目前看来就是 <em><strong>C 现代编程</strong></em> 这本书讲的最清晰最明白， LW_OOPC 则是 高焕堂 以及其团队 MISOO 设计的方便 C 面向对象的宏定义模块， 能方便相关的开发。 其实这些文章读过来， 主要还是需要开发者用好 <code class="language-html highlighter-rouge">struct</code>， <code class="language-html highlighter-rouge">Macro</code>， <code class="language-html highlighter-rouge">pointer</code>  这三类资源。 <code class="language-html highlighter-rouge">struct</code> 可谓是重中之重， 可以看到在 C++ 中的 struct 和 class 仅在数据接口的私有性上存在差异， 而在 Rust 中则直接删除了 class 的定义， 转向了 struct + trait 的编程模式。</p>
 
 <p>这篇文章不定期更新 OOP C 的一些想法， 其实读 <em><strong>C 现代编程</strong></em> 还是有很多疑惑的， 但是没用到就没太深刻的印象， 有问题再好好研究记录！</p>
 
@@ -805,9 +830,9 @@ Expected equality of these values:
 
 <h2 id="1-使用-struct-模块化编程">1. 使用 struct 模块化编程</h2>
 
-<p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-plaintext highlighter-rouge">static</code> 对 <code class="language-plaintext highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
+<p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-html highlighter-rouge">static</code> 对 <code class="language-html highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
 
-<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-plaintext highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
+<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-html highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">painter</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
@@ -817,7 +842,7 @@ Expected equality of these values:
 
 <h2 id="2-跨文件的全局变量">2. 跨文件的全局变量</h2>
 
-<p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-plaintext highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-plaintext highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
+<p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-html highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-html highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-html highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-html highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
 
 <dl>
   <dt>声明</dt>
@@ -826,7 +851,7 @@ Expected equality of these values:
   <dd>指明变量、函数存储在哪里，当定义发生时，系统为变量或函数分配内存单元。</dd>
 </dl>
 
-<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-plaintext highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-plaintext highlighter-rouge">g_encoder</code>， 在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 中则通过 <code class="language-plaintext highlighter-rouge">extern</code> 声明 <code class="language-plaintext highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-plaintext highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-plaintext highlighter-rouge">config.h</code> 以及 <code class="language-plaintext highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-plaintext highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。 但我需要在 <code class="language-plaintext highlighter-rouge">config.h</code> 用注释说明这些全局变量的位置以及功能， 方便后续进行查阅检索。</p>
+<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-html highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-html highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-html highlighter-rouge">g_encoder</code>， 在 <code class="language-html highlighter-rouge">encoder.h</code> 中则通过 <code class="language-html highlighter-rouge">extern</code> 声明 <code class="language-html highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-html highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-html highlighter-rouge">config.h</code> 以及 <code class="language-html highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-html highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。 但我需要在 <code class="language-html highlighter-rouge">config.h</code> 用注释说明这些全局变量的位置以及功能， 方便后续进行查阅检索。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// encoder.c</span>
 <span class="n">Encoder</span> <span class="n">g_encoder</span><span class="p">;</span>
@@ -904,7 +929,7 @@ Expected equality of these values:
   <p>这里配置的是 SPI1 的， 我后面改成 SPI2 之后由于总线的时钟频率不一样， SPI2 只需要 8 分频。 改这个总线的原因还是因为 SPI2 的 DMA 通道给 USART1 给占了， 想玩玩 OLED 得用 SPI + DMA 的方式速率才能跟得上， 虽然最后可能会因为计算资源问题不上 OLED。</p>
 </blockquote>
 
-<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-plaintext highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-plaintext highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-plaintext highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
+<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-html highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-html highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-html highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-17-miniFOC-dev/spi1-parameter-settings.png" alt="Encoder SPI1 parameter settings, HangX-Ma" width="400" />
@@ -916,7 +941,7 @@ Expected equality of these values:
   <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
 </blockquote>
 
-<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-html highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-html highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-html highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
 
 <p>另外配置片选引脚的时候需要默认输出为高并且将其配置为上拉模式， 这是根据时序图所示， 芯片是在 CS 脚为低的时候工作的， 这样能保证在必要的时候选中相应的片选脚进行数据传输。</p>
 
@@ -944,7 +969,7 @@ Expected equality of these values:
 
 <ul>
   <li>一般来说磁编码器就只需要 1 或 2 个滤波电容外加芯片就行， 设计起来很方便， 时间成本允许就自己打样， 还能针对电机安装孔进行定制化设计。</li>
-  <li>SPI 在芯片上的顺序一般都是 <code class="language-plaintext highlighter-rouge">CS</code>, <code class="language-plaintext highlighter-rouge">SCLK</code>, <code class="language-plaintext highlighter-rouge">MISO</code>, <code class="language-plaintext highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
+  <li>SPI 在芯片上的顺序一般都是 <code class="language-html highlighter-rouge">CS</code>, <code class="language-html highlighter-rouge">SCLK</code>, <code class="language-html highlighter-rouge">MISO</code>, <code class="language-html highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
   <li>磁编码器似乎不是特别耐高温， 我自己把之间用热风枪吹上的芯片拆下来又装到新板子， 老会出毛病， 如果一直出现返回 error 指不定是编码器坏了。</li>
   <li>磁铁需要买径向磁铁， <em>N 极</em> 和 <em>S 极</em> 对向水平分布。</li>
   <li>为了安装磁铁买了 AB 胶， 非常管用， 但除此之外还买了 3mm 轴套增加安装接触面积（热胶枪装不上）。</li>
@@ -954,14 +979,14 @@ Expected equality of these values:
 
 <p><strong><a href="https://www.quinapalus.com/qfplib.html">Qfplib: a family of floating-point libraries for ARM Cortex-M cores</a></strong></p>
 
-<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
+<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-html highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-html highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-html highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
 
 <h2 id="3-u8g2-库的使用">3. u8g2 库的使用</h2>
 
 <p>u8g2 库的使用参考了两份代码（用的是 SSD1306 驱动芯片）， 但实际上这两篇文章都没有解决我使用 LL 库配置 SPI + DMA 进行数据传输的问题。 很遗憾我没解决这个问题， 最后使用了普通的 SPI 传输的办法， 这是因为我在几个论坛上发现很多人用了 SPI + DMA 就无法做到数据的正常传输， 必须等到 SPI + DMA 的数据传输完成后才能进行下一次传输， 而这需要通过 while 循环不断检查是否传输完毕。 既然需要 CPU 的参与， 不如直接用 SPI 还更省心。</p>
 
 <ul>
-  <li>SPI 发送数据， 需要通过 <code class="language-plaintext highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
+  <li>SPI 发送数据， 需要通过 <code class="language-html highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
   <li>除此之外， u8g2 将 CS 引脚拉高之前 （Deselect）， 需要确认 SPI 的传输已经结束， 否则会造成数据错误。</li>
 </ul>
 
@@ -1022,9 +1047,9 @@ Expected equality of these values:
 
 <p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
 
-<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-plaintext highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-plaintext highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-plaintext highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
+<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-html highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-html highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-html highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
 
-<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-plaintext highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
+<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-html highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
 
 <ul>
   <li><strong>Regular Conversion launched by software:</strong> 规则的软件触发， 调用函数触发即可</li>
@@ -1032,13 +1057,13 @@ Expected equality of these values:
   <li><strong>Timer X Trigger Out event:</strong> 定时器通道输出触发， 需要设置相应的定时器设置</li>
 </ul>
 
-<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-plaintext highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-plaintext highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
+<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-html highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-html highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
 
 <p>另外需要注意配置中的几个点：</p>
 
 <ul>
   <li>DMA 配置需要在 ADC 配置之前。</li>
-  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-plaintext highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
+  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-html highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
   <li>PWM 有 Mode 1 和 Mode 2 两种， 分别表示计数器在达到 ARR 值之有为有效电平， 以及在达到 ARR 后为有效电平。 因而对于上升沿触发的要求， 需要配置 PWM 的极性为 Mode 1 为 Low， Mode 2 为 High。 这样， Mode 1 有效电平为 Low， 而 Mode 2 有效电平为 High， 均能达到上升沿的效果。</li>
   <li>
     <p>ADC 校准的代码如下所示， 需要注意结合不同的型号进行差异化配置。 F103 要求在校准之前开启 ADC， 并且需要等待 ADC 的电压稳定。</p>
@@ -1066,7 +1091,7 @@ Expected equality of these values:
 
 <h2 id="6-速度环调试">6. 速度环调试</h2>
 
-<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-plaintext highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-plaintext highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
+<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-html highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-html highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
 
 <p>用 PI 控制器几乎没办法解决这个问题， 凑巧的是我到 SimpleFOC 的官方文档看了看， 我发现他们的速度环实际上是用 PID 控制器实现的， 其中微分 Kd 仅为 0.001 大小。 微分的作用就是应对控制量的快速变化， 意识到这一点后我认为速度环电机的电角度的快速变化很可能让 PI 控制器没办法以较快的响应速度稳定到需要控制的角度， 因而产生了控制的滞后， 这在电机上的表现就是卡顿与抖动。 尝试加入了微小的微分量后， 电机的速度环果然稳定了下来并且表现优异。</p>
 
@@ -1104,10 +1129,10 @@ Expected equality of these values:
 <p>位置环和速度环切换出现电机的跳动， 也就是切换之后电机基于当前的状态值会产生转动速度， 本质上的原因就是前一个环的状态量没有处理妥当。 如下代码所示， 我是这样解决的：</p>
 
 <ul>
-  <li>位置传感器仿照电机初始化时的流程， 让当前的从位置传感芯片的 SPI 获取到的 <code class="language-plaintext highlighter-rouge">raw_angle_data</code> 赋值给 <code class="language-plaintext highlighter-rouge">raw_angle_data_prev</code>， 那么在调用 <code class="language-plaintext highlighter-rouge">get_angle</code> 的时候， 返回值会重新归零。</li>
-  <li>获取转轴速度的时候是基于当前的角度以及与上次获取的角度差的， 因而重新更新 <code class="language-plaintext highlighter-rouge">angle_prev</code> 为当前的角度， 那么后续获取 <code class="language-plaintext highlighter-rouge">get_velocity</code> 的时候返回值就为零了， 那么电机的状态中的速度也就归零了。</li>
-  <li>另外我们需要更新当前的机械角度值为 <code class="language-plaintext highlighter-rouge">get_shaft_angle</code>， 这是叠加上 Sensor Dir 的机械角度值， 本质上是调用了 <code class="language-plaintext highlighter-rouge">get_angle</code>， 此时的值也归零。</li>
-  <li>最后设定位置环的目标位置 <code class="language-plaintext highlighter-rouge">target_angle</code> 为当前的机械角度， 这样就不产生位置误差， 位置环能保持静止。 另外直接设定速度环的 <code class="language-plaintext highlighter-rouge">target_speed</code> 为 0， 这样速度环也没有速度量的输出。</li>
+  <li>位置传感器仿照电机初始化时的流程， 让当前的从位置传感芯片的 SPI 获取到的 <code class="language-html highlighter-rouge">raw_angle_data</code> 赋值给 <code class="language-html highlighter-rouge">raw_angle_data_prev</code>， 那么在调用 <code class="language-html highlighter-rouge">get_angle</code> 的时候， 返回值会重新归零。</li>
+  <li>获取转轴速度的时候是基于当前的角度以及与上次获取的角度差的， 因而重新更新 <code class="language-html highlighter-rouge">angle_prev</code> 为当前的角度， 那么后续获取 <code class="language-html highlighter-rouge">get_velocity</code> 的时候返回值就为零了， 那么电机的状态中的速度也就归零了。</li>
+  <li>另外我们需要更新当前的机械角度值为 <code class="language-html highlighter-rouge">get_shaft_angle</code>， 这是叠加上 Sensor Dir 的机械角度值， 本质上是调用了 <code class="language-html highlighter-rouge">get_angle</code>， 此时的值也归零。</li>
+  <li>最后设定位置环的目标位置 <code class="language-html highlighter-rouge">target_angle</code> 为当前的机械角度， 这样就不产生位置误差， 位置环能保持静止。 另外直接设定速度环的 <code class="language-html highlighter-rouge">target_speed</code> 为 0， 这样速度环也没有速度量的输出。</li>
 </ul>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">encoder_reset</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
@@ -1144,11 +1169,11 @@ Expected equality of these values:
 
 <h3 id="x1-debug">X.1 Debug</h3>
 
-<p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
+<p>CubeMX 中的 <code class="language-html highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
 
 <h3 id="x2-tim1-配置-pwm-输出">X.2 TIM1 配置 PWM 输出</h3>
 
-<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
+<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-html highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-html highlighter-rouge">Prescaler</code> 以及 <code class="language-html highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-html highlighter-rouge">36 - 1</code> 配置成 <code class="language-html highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Core/Src/tim.c</span>
 <span class="kt">void</span> <span class="nf">MX_TIM1_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
@@ -1159,7 +1184,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外， 要使能 TIM1 的输出， <code class="language-plaintext highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
+<p>另外， 要使能 TIM1 的输出， <code class="language-html highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-html highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-html highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
@@ -1167,7 +1192,7 @@ Expected equality of these values:
 
 <h3 id="x3-spi">X.3 SPI</h3>
 
-<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
+<p>需要增加 <code class="language-html highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
 
 <p>另外发现一个问题， SPI 的收发需要共用一个函数（纯发送不用， 我在 OLED 中测试过）， 这是因为 SPI 从机没有自己的 SCLK 时钟， 这就需要主机提供。 而双工 SPI 的接收和发送是用两套缓存空间的， 因而可以通过主机向从机发送相应的字节提供 SCLK 时钟， 才能进行同步进行数据接收。 因而， 磁编码器的 SPI 接收函数是这样的。</p>
 
@@ -1201,11 +1226,11 @@ Expected equality of these values:
 <span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
 </code></pre></div></div>
 
-<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
+<p>除此之外， 对于配置了 <code class="language-html highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-html highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-html highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
 
 <h3 id="x5-重定向-printf">X.5 重定向 printf</h3>
 
-<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-plaintext highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
+<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-html highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
 </span><span class="kt">int</span> <span class="nf">__io_putchar</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">)</span> <span class="p">{</span>
@@ -1226,14 +1251,14 @@ Expected equality of these values:
 
 <h3 id="x6-printf-浮点输出">X.6 printf 浮点输出</h3>
 
-<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
+<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-html highlighter-rouge">-O0</code>。</p>
 
 <div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_link_options</span><span class="p">(</span>LINKER:-u _printf_float<span class="p">)</span>
 </code></pre></div></div>
 
 <p>尝试了很多办法， Vofa+ 上位机程序应该对接收进行了解析所以才能输出 float 类型数据， 直接通过串口一个个发 4 bytes 的 float 还得自己去转换太麻烦了， 干脆就转成整数相关类型输出算了。</p>
 
-<p><em><strong>2023-08-04 UPDATE:</strong></em> 这个编译选项还是需要打开的， 我后来在 OLED 中使用 <code class="language-plaintext highlighter-rouge">sprintf</code> 做浮点数转义的时候， 如果不开启这个编译选项是无法成功将 float 类型转为字符串类型的。</p>
+<p><em><strong>2023-08-04 UPDATE:</strong></em> 这个编译选项还是需要打开的， 我后来在 OLED 中使用 <code class="language-html highlighter-rouge">sprintf</code> 做浮点数转义的时候， 如果不开启这个编译选项是无法成功将 float 类型转为字符串类型的。</p>
 
 <blockquote>
   <p><a href="https://community.st.com/t5/stm32-mcu-products/printf-and-float/td-p/108690">printf and float - ST Community</a><br />
@@ -1264,7 +1289,7 @@ Expected equality of these values:
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第八章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch8]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore 第八章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch8]</a> <code class="language-html highlighter-rouge">TODO</code></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -1338,27 +1363,27 @@ Expected equality of these values:
 <ul>
   <li><strong>线程初始化</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::new</code>： 创建当前处于 <code class="language-plaintext highlighter-rouge">Running</code> 的一个主线程， 并将剩余的线程资源初始化为 <code class="language-plaintext highlighter-rouge">Available</code> 以向量的形式存储在 <code class="language-plaintext highlighter-rouge">Runtime</code> 结构体中方便后续的资源线程创建和管理。</li>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::init</code>： 传递 Runtime 对象的地址至全局变量 <em>RUNTIME</em>， 方便其他函数获取相应的资源线程。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::new</code>： 创建当前处于 <code class="language-html highlighter-rouge">Running</code> 的一个主线程， 并将剩余的线程资源初始化为 <code class="language-html highlighter-rouge">Available</code> 以向量的形式存储在 <code class="language-html highlighter-rouge">Runtime</code> 结构体中方便后续的资源线程创建和管理。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::init</code>： 传递 Runtime 对象的地址至全局变量 <em>RUNTIME</em>， 方便其他函数获取相应的资源线程。</li>
     </ul>
   </li>
   <li><strong>线程创建</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::spawn</code>： 在存储线程资源的向量中查找一个状态为 <code class="language-plaintext highlighter-rouge">Available</code> 的空闲线程， 为调度准备 <em>old return address</em> 以及 <em>new return address</em> 并分配新的空间并设置栈顶的位置， 在返回前将该线程状态设置为 <code class="language-plaintext highlighter-rouge">Ready</code>。
+      <li><code class="language-html highlighter-rouge">Runtime::spawn</code>： 在存储线程资源的向量中查找一个状态为 <code class="language-html highlighter-rouge">Available</code> 的空闲线程， 为调度准备 <em>old return address</em> 以及 <em>new return address</em> 并分配新的空间并设置栈顶的位置， 在返回前将该线程状态设置为 <code class="language-html highlighter-rouge">Ready</code>。
         <blockquote>
-          <p>实际上这里的 <em>old return address</em> 被设置为了 <code class="language-plaintext highlighter-rouge">guard</code> 函数的地址， 该函数内部调用了 <code class="language-plaintext highlighter-rouge">t_return</code> 将当线程的状态重新设置为 <code class="language-plaintext highlighter-rouge">Available</code> 后会调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行线程的切换。 这种设计的作用在讲述 <strong>线程切换</strong> 后再详细说明。</p>
+          <p>实际上这里的 <em>old return address</em> 被设置为了 <code class="language-html highlighter-rouge">guard</code> 函数的地址， 该函数内部调用了 <code class="language-html highlighter-rouge">t_return</code> 将当线程的状态重新设置为 <code class="language-html highlighter-rouge">Available</code> 后会调用 <code class="language-html highlighter-rouge">t_yield</code> 进行线程的切换。 这种设计的作用在讲述 <strong>线程切换</strong> 后再详细说明。</p>
         </blockquote>
       </li>
     </ul>
   </li>
   <li>
     <p><strong>线程切换</strong>
-  线程切换应当是调度中最重要的一个模块， 主要功能由 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以及 <code class="language-plaintext highlighter-rouge">switch</code> 这两个函数提供。 之前提及的 <code class="language-plaintext highlighter-rouge">Runtime::t_return</code>， <code class="language-plaintext highlighter-rouge">Runtime::guard</code> 以及 <code class="language-plaintext highlighter-rouge">Runtime::yield_task</code> 都封装了 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以完成相应的调度的功能。</p>
+  线程切换应当是调度中最重要的一个模块， 主要功能由 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 以及 <code class="language-html highlighter-rouge">switch</code> 这两个函数提供。 之前提及的 <code class="language-html highlighter-rouge">Runtime::t_return</code>， <code class="language-html highlighter-rouge">Runtime::guard</code> 以及 <code class="language-html highlighter-rouge">Runtime::yield_task</code> 都封装了 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 以完成相应的调度的功能。</p>
 
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::t_yield</code>： 从当前位置开始查找一个状态为 <code class="language-plaintext highlighter-rouge">Ready</code> 的线程， 没找到会返回 false。 如果当前的线程不是 <code class="language-plaintext highlighter-rouge">Available</code>（说明在 <code class="language-plaintext highlighter-rouge">Running</code>） 就将当前的线程重新放到 <code class="language-plaintext highlighter-rouge">Ready</code> 数组中， 另外就是将找到的 <code class="language-plaintext highlighter-rouge">Ready</code> 线程切换为 <code class="language-plaintext highlighter-rouge">Running</code>。 最后调用 <code class="language-plaintext highlighter-rouge">switch</code> 交换新旧线程的上下文。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::t_yield</code>： 从当前位置开始查找一个状态为 <code class="language-html highlighter-rouge">Ready</code> 的线程， 没找到会返回 false。 如果当前的线程不是 <code class="language-html highlighter-rouge">Available</code>（说明在 <code class="language-html highlighter-rouge">Running</code>） 就将当前的线程重新放到 <code class="language-html highlighter-rouge">Ready</code> 数组中， 另外就是将找到的 <code class="language-html highlighter-rouge">Ready</code> 线程切换为 <code class="language-html highlighter-rouge">Running</code>。 最后调用 <code class="language-html highlighter-rouge">switch</code> 交换新旧线程的上下文。</li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">switch</code>： 完成对 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 未进行切换的 <em>当前指令指针(PC)、 通用寄存器集合和栈</em> 的切换， 关键的任务切换在于如何对 PC 指针进行切换。 <code class="language-plaintext highlighter-rouge">x1(ra)</code> 寄存器保存着当前 <code class="language-plaintext highlighter-rouge">switch</code> 函数的返回地址， rCore 设计从 offset 为 0x00 到 0x68 的寄存器都按序存储， 其中也包括了 <code class="language-plaintext highlighter-rouge">ra</code>。 而在 offset 0x70 的位置又存储了一次 <code class="language-plaintext highlighter-rouge">ra</code>， 其作用也很明显， 后续 <code class="language-plaintext highlighter-rouge">ld t0, 0x70(a1)</code> 这句指令载入了新的 Context 中的 <code class="language-plaintext highlighter-rouge">ra</code>， 通过 <code class="language-plaintext highlighter-rouge">jr t0</code> 就能在 switch 之后直接跳转到新的指令运行的位置。</p>
+        <p><code class="language-html highlighter-rouge">switch</code>： 完成对 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 未进行切换的 <em>当前指令指针(PC)、 通用寄存器集合和栈</em> 的切换， 关键的任务切换在于如何对 PC 指针进行切换。 <code class="language-html highlighter-rouge">x1(ra)</code> 寄存器保存着当前 <code class="language-html highlighter-rouge">switch</code> 函数的返回地址， rCore 设计从 offset 为 0x00 到 0x68 的寄存器都按序存储， 其中也包括了 <code class="language-html highlighter-rouge">ra</code>。 而在 offset 0x70 的位置又存储了一次 <code class="language-html highlighter-rouge">ra</code>， 其作用也很明显， 后续 <code class="language-html highlighter-rouge">ld t0, 0x70(a1)</code> 这句指令载入了新的 Context 中的 <code class="language-html highlighter-rouge">ra</code>， 通过 <code class="language-html highlighter-rouge">jr t0</code> 就能在 switch 之后直接跳转到新的指令运行的位置。</p>
 
         <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[naked]</span>
 <span class="nd">#[no_mangle]</span>
@@ -1385,14 +1410,14 @@ Expected equality of these values:
   </li>
   <li><strong>线程执行</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::run</code>： 用一个 while 循环调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行调度， 所有线程执行完后会退出。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::run</code>： 用一个 while 循环调用 <code class="language-html highlighter-rouge">t_yield</code> 进行调度， 所有线程执行完后会退出。</li>
     </ul>
   </li>
 </ul>
 
-<p>从整体的 rCore 线程设计可以看出， 线程的调度几乎就是按序执行， 所以 <code class="language-plaintext highlighter-rouge">Runtime::spawn</code> 会放入一个 <code class="language-plaintext highlighter-rouge">guard</code> 函数地址作为 <em>old return address</em> 以释放线程资源， 因为当下一次线程位置又切换到这个线程的时候， 实际上该线程已处理完了。 这个设计只能等当前运行的线程主动让出处理器使用权后， 线程管理运行时才能切换检查。</p>
+<p>从整体的 rCore 线程设计可以看出， 线程的调度几乎就是按序执行， 所以 <code class="language-html highlighter-rouge">Runtime::spawn</code> 会放入一个 <code class="language-html highlighter-rouge">guard</code> 函数地址作为 <em>old return address</em> 以释放线程资源， 因为当下一次线程位置又切换到这个线程的时候， 实际上该线程已处理完了。 这个设计只能等当前运行的线程主动让出处理器使用权后， 线程管理运行时才能切换检查。</p>
 
-<p>具体实现细节不表了， rCore 在 <code class="language-plaintext highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
+<p>具体实现细节不表了， rCore 在 <code class="language-html highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
 
 <h3 id="13-内核态的线程管理">1.3 内核态的线程管理</h3>
 
@@ -1417,17 +1442,17 @@ Expected equality of these values:
 
 <ul>
   <li>
-    <p><strong>线程创建</strong> 的系统调用 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 通过 <strong>TID(Thread Identifier)</strong> 区分不同线程， 与进程的 PID 设计很类似， 内核会为每个线程分配专属资源： 用户栈、 Trap 上下文还有内核栈， 前两个在进程地址空间中， 内核栈在内核地址空间中。</p>
+    <p><strong>线程创建</strong> 的系统调用 <code class="language-html highlighter-rouge">sys_thread_create</code> 通过 <strong>TID(Thread Identifier)</strong> 区分不同线程， 与进程的 PID 设计很类似， 内核会为每个线程分配专属资源： 用户栈、 Trap 上下文还有内核栈， 前两个在进程地址空间中， 内核栈在内核地址空间中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_thread_create</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span><span class="p">;</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>线程管理</strong> 通过 TID， <code class="language-plaintext highlighter-rouge">gettid</code> 系统调用能获取当前线程的 TID。</li>
-  <li><strong>线程退出</strong> 通过 <code class="language-plaintext highlighter-rouge">exit</code> 系统调用完成， 约定线程从绑定的函数返回的时候都需要调用 <code class="language-plaintext highlighter-rouge">exit</code> 通知操作系统进行资源回收， 更细粒度的线程取代了进程的作为操作系统的调度单元。</li>
-  <li><strong>线程资源回收</strong> 通过 <code class="language-plaintext highlighter-rouge">waittid</code> 回收收线程占用的用户态和内核态资源。 这个工作一般是进程/主线程完成， 但若是 <strong>主线程</strong> 调用了 <code class="language-plaintext highlighter-rouge">exit</code> <strong>其子线程</strong> 都会全部退出， 被 <strong>父进程</strong> 回收资源。</li>
+  <li><strong>线程管理</strong> 通过 TID， <code class="language-html highlighter-rouge">gettid</code> 系统调用能获取当前线程的 TID。</li>
+  <li><strong>线程退出</strong> 通过 <code class="language-html highlighter-rouge">exit</code> 系统调用完成， 约定线程从绑定的函数返回的时候都需要调用 <code class="language-html highlighter-rouge">exit</code> 通知操作系统进行资源回收， 更细粒度的线程取代了进程的作为操作系统的调度单元。</li>
+  <li><strong>线程资源回收</strong> 通过 <code class="language-html highlighter-rouge">waittid</code> 回收收线程占用的用户态和内核态资源。 这个工作一般是进程/主线程完成， 但若是 <strong>主线程</strong> 调用了 <code class="language-html highlighter-rouge">exit</code> <strong>其子线程</strong> 都会全部退出， 被 <strong>父进程</strong> 回收资源。</li>
 </ul>
 
-<p>rCore 之前描述的线程模型提到不能混用进程和线程的系统调用， 原因在于其设计对线程和进程进行了分离。 若是调用了 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 生成子线程就只考虑多个线程在一个进程内的交互， 如果涉及到父子进程的交互， 就等价为进程模型。</p>
+<p>rCore 之前描述的线程模型提到不能混用进程和线程的系统调用， 原因在于其设计对线程和进程进行了分离。 若是调用了 <code class="language-html highlighter-rouge">sys_thread_create</code> 生成子线程就只考虑多个线程在一个进程内的交互， 如果涉及到父子进程的交互， 就等价为进程模型。</p>
 
 <h4 id="132-软硬件资源管理">1.3.2 软硬件资源管理</h4>
 
@@ -1435,7 +1460,7 @@ Expected equality of these values:
 
 <ol>
   <li>
-    <p>把原来分配 PID 的数据结构用更通用的 <code class="language-plaintext highlighter-rouge">RecycleAllocator</code> 描述， 能为 PID 以及 TID 分配提供描述结构。 PID 的分配还是延续之前章节， 使用 <code class="language-plaintext highlighter-rouge">PID_ALLOCATOR</code> 这个全局变量。 而线程归属于进程容器， 所以在每个进程控制块的内部可变结构 <code class="language-plaintext highlighter-rouge">ProcessControlBlockInner</code> 中占据一个变量位置， 由进程控制块 <code class="language-plaintext highlighter-rouge">ProcessControlBlock</code> 进行管理。</p>
+    <p>把原来分配 PID 的数据结构用更通用的 <code class="language-html highlighter-rouge">RecycleAllocator</code> 描述， 能为 PID 以及 TID 分配提供描述结构。 PID 的分配还是延续之前章节， 使用 <code class="language-html highlighter-rouge">PID_ALLOCATOR</code> 这个全局变量。 而线程归属于进程容器， 所以在每个进程控制块的内部可变结构 <code class="language-html highlighter-rouge">ProcessControlBlockInner</code> 中占据一个变量位置， 由进程控制块 <code class="language-html highlighter-rouge">ProcessControlBlock</code> 进行管理。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// os/src/task/process.rs</span>
 
@@ -1461,19 +1486,19 @@ Expected equality of these values:
      <font size="2" color="#999"><u>Process address space with threads, rCore</u></font>
  </div>
 
-    <p>这个就和第三章的结构非常类似了， 为此 rCore 提供了 <code class="language-plaintext highlighter-rouge">trap_cx_bottom_from_tid</code> 以及 <code class="language-plaintext highlighter-rouge">ustack_bottom_from_tid</code> 这两个函数索引每个线程的用户栈以及 Trap 上下文的具体位置。</p>
+    <p>这个就和第三章的结构非常类似了， 为此 rCore 提供了 <code class="language-html highlighter-rouge">trap_cx_bottom_from_tid</code> 以及 <code class="language-html highlighter-rouge">ustack_bottom_from_tid</code> 这两个函数索引每个线程的用户栈以及 Trap 上下文的具体位置。</p>
   </li>
   <li>
-    <p>线程资源整合 <code class="language-plaintext highlighter-rouge">TaskUserRes</code>， 将线程的 TID 、用户栈和 Trap 上下文与线程打包， 由于声明周期一致， 能够进行统一的资源分配和回收。</p>
+    <p>线程资源整合 <code class="language-html highlighter-rouge">TaskUserRes</code>， 将线程的 TID 、用户栈和 Trap 上下文与线程打包， 由于声明周期一致， 能够进行统一的资源分配和回收。</p>
   </li>
   <li>
-    <p>内核栈不再与 PID 或 TID 挂钩， 而与 <code class="language-plaintext highlighter-rouge">kstack_id</code> 这个新的内核标识符相关。 需要增加一个 <code class="language-plaintext highlighter-rouge">KSTACK_ALLOCATOR</code> 的通用资源分配器对内核标识符进行分配。</p>
+    <p>内核栈不再与 PID 或 TID 挂钩， 而与 <code class="language-html highlighter-rouge">kstack_id</code> 这个新的内核标识符相关。 需要增加一个 <code class="language-html highlighter-rouge">KSTACK_ALLOCATOR</code> 的通用资源分配器对内核标识符进行分配。</p>
   </li>
 </ol>
 
 <h4 id="133-进程和线程控制块">1.3.3 进程和线程控制块</h4>
 
-<p>对进程和线程两块资源进行分离， 线程已经成为了 CPU 资源的调度单位， 因而与代码执行相关的内容则分配至 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中。</p>
+<p>对进程和线程两块资源进行分离， 线程已经成为了 CPU 资源的调度单位， 因而与代码执行相关的内容则分配至 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -1521,7 +1546,7 @@ Expected equality of these values:
 
 <h4 id="134-结语">1.3.4 结语</h4>
 
-<p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。 若是从 chapter7 过渡到 chapter8， 到此时的改写还不足以支撑操作系统的正常运行， 还需添加线程管理的相关机制。</p>
+<p>任务管理器 <code class="language-html highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-html highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。 若是从 chapter7 过渡到 chapter8， 到此时的改写还不足以支撑操作系统的正常运行， 还需添加线程管理的相关机制。</p>
 
 <h2 id="2-sync-mutex-os">2. Sync Mutex OS</h2>
 
@@ -1549,22 +1574,11 @@ Expected equality of these values:
 
 <h4 id="211-软件锁的尝试">2.1.1 软件锁的尝试</h4>
 
-<p>rCore 尝试在用户态通过软件的办法实现锁， 如下代码所示尝试使用 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 这个全局变量表示锁。 可以看到没有获取到锁之前 CPU 会在 while 循环内忙等， 这种策略被称为 <strong>自旋</strong>， 在正确的实现中自旋锁会保证该过程不会被操作系统的调度打断。 在单核操作系统上， 自旋会造成极大的资源浪费， 在分配的一个时间片中， 第一次执行判断后陷入自旋， 由于没有外部量对这个判断条件中的数据进行更改， 自旋的条件始终成立， 相当于这个时间片都会被自旋所浪费。</p>
+<p>rCore 尝试在用户态通过软件的办法实现锁， 如下代码所示尝试使用 <code class="language-html highlighter-rouge">OCCUPIED</code> 这个全局变量表示锁。 可以看到没有获取到锁之前 CPU 会在 while 循环内忙等， 这种策略被称为 <strong>自旋</strong>， 在正确的实现中自旋锁会保证该过程不会被操作系统的调度打断。 在单核操作系统上， 自旋会造成极大的资源浪费， 在分配的一个时间片中， 第一次执行判断后陷入自旋， 由于没有外部量对这个判断条件中的数据进行更改， 自旋的条件始终成立， 相当于这个时间片都会被自旋所浪费。</p>
 
-<p>在该实现中， <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 实际成了一种共享资源， 操作系统可以随时打断当前线程的运行调度到另一个线程， 可以发现这样一种情况： T0 线程发现 <code class="language-plaintext highlighter-rouge">OCCUPIED = false</code> 后准备将 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 修改为 <code class="language-plaintext highlighter-rouge">true</code> (5 - 6 行之间)， 此时突然被操作系统打断调度到 T1 线程， 会导致 T1 也认为其具备进入临界区的权限进而尝试修改 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值。</p>
+<p>在该实现中， <code class="language-html highlighter-rouge">OCCUPIED</code> 实际成了一种共享资源， 操作系统可以随时打断当前线程的运行调度到另一个线程， 可以发现这样一种情况： T0 线程发现 <code class="language-html highlighter-rouge">OCCUPIED = false</code> 后准备将 <code class="language-html highlighter-rouge">OCCUPIED</code> 修改为 <code class="language-html highlighter-rouge">true</code> (5 - 6 行之间)， 此时突然被操作系统打断调度到 T1 线程， 会导致 T1 也认为其具备进入临界区的权限进而尝试修改 <code class="language-html highlighter-rouge">OCCUPIED</code> 的值。</p>
 
-<figure class="highlight"><pre><code class="language-rust" data-lang="rust"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td><td class="code"><pre><span class="c1">// user/src/bin/adder_simple_spin.rs</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// user/src/bin/adder_simple_spin.rs</span>
 <span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
 
 <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
@@ -1575,7 +1589,7 @@ Expected equality of these values:
 <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
     <span class="n">OCCUPIED</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure>
+</code></pre></div></div>
 
 <p>为了解决这个问题， rCore 详细介绍了适用于单核的 Peterson 多标记算法保证两个线程之间的互斥访问， 除此之外还有适用双线程的 Dekkers 算法， 以及多线程的 Eisenberg &amp; McGuire 算法。 但这些算法都具有时代的局限性， 在当前多核系统上使用需要付出极大的资源代价， 并且还很难理解。</p>
 
@@ -1588,13 +1602,13 @@ Expected equality of these values:
 <p><strong>原子指令</strong> 在之前提到过， 它的执行无法被操作系统打断， <strong>原子指令是整个计算机系统中最根本的原子性和互斥性的来源</strong>。 比较常见的指令有 <strong>CAS（Compare-And-Swap）</strong> 以及 <strong>TAS（Test-And-Set）</strong>。 这两条是我之前一直没太理解的， 还有 RISC-V 的 <strong>（Load Reserved / Store Conditional） LR/SC</strong> 原子指令， rCore 对此解释的非常清晰。</p>
 
 <ul>
-  <li><strong>CAS（Compare-And-Swap）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">CAS rd, rs1, rs2, rs3</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 这个值会与 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值进行比较， 若 <em>source == expected</em> 则将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值替换为 <code class="language-plaintext highlighter-rouge">rs3</code> 中的 <em>new</em> 值。 <code class="language-plaintext highlighter-rouge">rs1</code> 最开始存储的 <em>source</em> 值会被存入 <code class="language-plaintext highlighter-rouge">rd</code> 目标寄存器， 这不受比较结果影响。
+  <li><strong>CAS（Compare-And-Swap）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">CAS rd, rs1, rs2, rs3</code>， <code class="language-html highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 这个值会与 <code class="language-html highlighter-rouge">rs2</code> 中的 <em>expected</em> 值进行比较， 若 <em>source == expected</em> 则将 <code class="language-html highlighter-rouge">rs1</code> 的值替换为 <code class="language-html highlighter-rouge">rs3</code> 中的 <em>new</em> 值。 <code class="language-html highlighter-rouge">rs1</code> 最开始存储的 <em>source</em> 值会被存入 <code class="language-html highlighter-rouge">rd</code> 目标寄存器， 这不受比较结果影响。
     <blockquote>
-      <p>具体的使用例程可以参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#cas-tas">常用的 CAS 和 TAS 指令</a> 部分 <code class="language-plaintext highlighter-rouge">adder_atomic.rs</code> 部分。</p>
+      <p>具体的使用例程可以参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#cas-tas">常用的 CAS 和 TAS 指令</a> 部分 <code class="language-html highlighter-rouge">adder_atomic.rs</code> 部分。</p>
     </blockquote>
   </li>
   <li>
-    <p><strong>TAS（Test-And-Set）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">TAS rd, rs1, rs2</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 他会被直接设置为 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值， 而 <code class="language-plaintext highlighter-rouge">rd</code> 返回 <code class="language-plaintext highlighter-rouge">rs1</code> 中原来的 <em>source</em> 值。 这个设计也能实现自旋锁， 以如下伪代码为例， 如果有多个线程执行 TAS 原子指令， 仅有一个线程的输入 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值为 0， 那么 TAS 返回会为 0， 该线程就能退出循环进入后续的临界区， 而其他的线程只会看到 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 值为 1 而陷入 while 的自旋中。</p>
+    <p><strong>TAS（Test-And-Set）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">TAS rd, rs1, rs2</code>， <code class="language-html highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 他会被直接设置为 <code class="language-html highlighter-rouge">rs2</code> 中的 <em>expected</em> 值， 而 <code class="language-html highlighter-rouge">rd</code> 返回 <code class="language-html highlighter-rouge">rs1</code> 中原来的 <em>source</em> 值。 这个设计也能实现自旋锁， 以如下伪代码为例， 如果有多个线程执行 TAS 原子指令， 仅有一个线程的输入 <code class="language-html highlighter-rouge">OCCUPIED</code> 的值为 0， 那么 TAS 返回会为 0， 该线程就能退出循环进入后续的临界区， 而其他的线程只会看到 <code class="language-html highlighter-rouge">OCCUPIED</code> 值为 1 而陷入 while 的自旋中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
@@ -1603,9 +1617,9 @@ Expected equality of these values:
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><strong>LR（Load Reserved）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">LR rd, rs1</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 内存中存放的值写入 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器中。 该指令不能单独使用， 需要配合 SC 指令。</p>
+    <p><strong>LR（Load Reserved）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">LR rd, rs1</code>， 将 <code class="language-html highlighter-rouge">rs1</code> 内存中存放的值写入 <code class="language-html highlighter-rouge">rd</code> 寄存器中。 该指令不能单独使用， 需要配合 SC 指令。</p>
   </li>
-  <li><strong>SC（Store Conditional）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">SC rd, rs1, rs2</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值 <em>source</em> 修改为 <code class="language-plaintext highlighter-rouge">rs2</code> 中存放的 <em>new</em> 值， 若修改成功 <code class="language-plaintext highlighter-rouge">rd</code> 返回 0， 否则 <code class="language-plaintext highlighter-rouge">rd</code> 返回任意值。 修改的前提是 LR 和 SC 指令之间， 之前 LR 指令中 <code class="language-plaintext highlighter-rouge">rs1</code> 内存的值没有改变， 这通过 RISC-V 框架下的 <strong>保留集（Reservation Set）</strong> 进行判断。</li>
+  <li><strong>SC（Store Conditional）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">SC rd, rs1, rs2</code>， 将 <code class="language-html highlighter-rouge">rs1</code> 的值 <em>source</em> 修改为 <code class="language-html highlighter-rouge">rs2</code> 中存放的 <em>new</em> 值， 若修改成功 <code class="language-html highlighter-rouge">rd</code> 返回 0， 否则 <code class="language-html highlighter-rouge">rd</code> 返回任意值。 修改的前提是 LR 和 SC 指令之间， 之前 LR 指令中 <code class="language-html highlighter-rouge">rs1</code> 内存的值没有改变， 这通过 RISC-V 框架下的 <strong>保留集（Reservation Set）</strong> 进行判断。</li>
 </ul>
 
 <p>在 RISC-V 架构中可以通过 LR/SC 指令是实现 CAS/TAS 指令的功能。</p>
@@ -1651,9 +1665,9 @@ Expected equality of these values:
 <p>信号量的初始资源可用数量 N 是一个非负整数，它决定了信号量的用途。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">N &gt; 0</code>， 称其为 <strong>计数信号量 (Counting Semaphore)</strong> 或 <strong>一般信号量 (General Semaphore)</strong>， 当 <code class="language-plaintext highlighter-rouge">N = 1</code> 时， 称其为 <strong>二值信号量 (Binary Semaphore)</strong>， 其与互斥锁等价。</li>
+  <li><code class="language-html highlighter-rouge">N &gt; 0</code>， 称其为 <strong>计数信号量 (Counting Semaphore)</strong> 或 <strong>一般信号量 (General Semaphore)</strong>， 当 <code class="language-html highlighter-rouge">N = 1</code> 时， 称其为 <strong>二值信号量 (Binary Semaphore)</strong>， 其与互斥锁等价。</li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">N = 0</code>， 信号量与资源管理无关， 但可用作同步量。 如下图， 在线程 A 需要等待的时候可以对该信号量进行 P 操作， 于是线程会被阻塞。 在线程 B 执行完指定阶段之后再对该信号量进行 V 操作就能够唤醒线程 A 向下执行。 但需要注意 <strong>唤醒丢失</strong> 的问题。</p>
+    <p><code class="language-html highlighter-rouge">N = 0</code>， 信号量与资源管理无关， 但可用作同步量。 如下图， 在线程 A 需要等待的时候可以对该信号量进行 P 操作， 于是线程会被阻塞。 在线程 B 执行完指定阶段之后再对该信号量进行 V 操作就能够唤醒线程 A 向下执行。 但需要注意 <strong>唤醒丢失</strong> 的问题。</p>
 
     <div align="center">
       <img src="/norobots/images/2023-07-15-rcore-note-ch8/semaphore-sync.png" alt="Semaphore sync, rCore" width="400" />
@@ -1676,13 +1690,13 @@ Expected equality of these values:
 
 <p>rCore 实现了 <strong>条件变量 + 互斥锁</strong> 这样一个组合来模拟 <strong>管程</strong> 的实现， 以打破上述组合的局限性。 <strong>管程 (Monitor)</strong> 最早在 Pascal 语言中实现， 现在的 C 以及 Rust 并没有相关的实现机制， 由过程（现在的函数）、共享变量及数据结构等组成。 程序员可以自定义管程的过程和共享资源， 通过过程间接访问这些共享资源。</p>
 
-<p>管程仍是通过互斥锁满足 <strong>互斥访问</strong> 的需求， 另外还支持线程间的同步机制， 通过 <strong>阻塞-唤醒</strong> 实现条件同步。 阻塞和唤醒就是所谓的 <strong>条件变量</strong>， 而在管程的概念中将条件变量的阻塞和唤醒操作分别叫做 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 。 一个管程中可以有多个不同的条件变量， 每个条件变量代表多线程并发执行中需要等待的一种特定的条件， 并保存所有阻塞等待该条件的线程。</p>
+<p>管程仍是通过互斥锁满足 <strong>互斥访问</strong> 的需求， 另外还支持线程间的同步机制， 通过 <strong>阻塞-唤醒</strong> 实现条件同步。 阻塞和唤醒就是所谓的 <strong>条件变量</strong>， 而在管程的概念中将条件变量的阻塞和唤醒操作分别叫做 <code class="language-html highlighter-rouge">wait</code> 和 <code class="language-html highlighter-rouge">signal</code> 。 一个管程中可以有多个不同的条件变量， 每个条件变量代表多线程并发执行中需要等待的一种特定的条件， 并保存所有阻塞等待该条件的线程。</p>
 
-<p>这里的 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 有比较特殊的设计：</p>
+<p>这里的 <code class="language-html highlighter-rouge">wait</code> 和 <code class="language-html highlighter-rouge">signal</code> 有比较特殊的设计：</p>
 
 <ul>
-  <li><strong>wait</strong>： <code class="language-plaintext highlighter-rouge">wait</code> 操作会阻塞当前的线程， 但 <strong>不能在持有锁的情况下陷入阻塞</strong>， 在管程过程中线程是持有锁的， 因而 <code class="language-plaintext highlighter-rouge">wait</code> 需要做两件事： 释放锁， 然后阻塞线程。</li>
-  <li><strong>signal</strong>： <code class="language-plaintext highlighter-rouge">signal</code> 则是唤醒当前的线程， 处于互斥访问的需求， 线程被唤醒后需要获取锁， 然后再 <code class="language-plaintext highlighter-rouge">wait</code> 返回继续执行。</li>
+  <li><strong>wait</strong>： <code class="language-html highlighter-rouge">wait</code> 操作会阻塞当前的线程， 但 <strong>不能在持有锁的情况下陷入阻塞</strong>， 在管程过程中线程是持有锁的， 因而 <code class="language-html highlighter-rouge">wait</code> 需要做两件事： 释放锁， 然后阻塞线程。</li>
+  <li><strong>signal</strong>： <code class="language-html highlighter-rouge">signal</code> 则是唤醒当前的线程， 处于互斥访问的需求， 线程被唤醒后需要获取锁， 然后再 <code class="language-html highlighter-rouge">wait</code> 返回继续执行。</li>
 </ul>
 
 <p>由于互斥锁的存在， signal 操作也不只是简单的唤醒操作。 rCore 介绍了基于线程优先级条件的三种唤醒操作语义： Hoare， Hansen， Mesa， 详情可见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id4">管程与条件变量</a>。 在 rCore 内核中实现的是 Mesa 语义， Mesa 语义涉及到锁的竞争， 因而 wait 操作返回之时不见得线程等待的条件一定成立， 有必要重复检查确认之后再继续执行。</p>
@@ -1735,29 +1749,29 @@ Expected equality of these values:
 
 <h2 id="1-文件抽象">1. 文件抽象</h2>
 
-<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-plaintext highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
+<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-html highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
 
-<p>一般来说， 文件的会涉及到， <code class="language-plaintext highlighter-rouge">open</code>， <code class="language-plaintext highlighter-rouge">close</code>， <code class="language-plaintext highlighter-rouge">read</code>， <code class="language-plaintext highlighter-rouge">write</code> 这些基本操作。</p>
+<p>一般来说， 文件的会涉及到， <code class="language-html highlighter-rouge">open</code>， <code class="language-html highlighter-rouge">close</code>， <code class="language-html highlighter-rouge">read</code>， <code class="language-html highlighter-rouge">write</code> 这些基本操作。</p>
 
 <p>另外， 进程被创建的时候内核会默认打开三个缺省的文件， 这个设计对于后续的 I/O 重定向而言非常重要。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">fd: 0</code> 标准输入</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 1</code> 标准输出</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 2</code> 标准错误输出</li>
+  <li><code class="language-html highlighter-rouge">fd: 0</code> 标准输入</li>
+  <li><code class="language-html highlighter-rouge">fd: 1</code> 标准输出</li>
+  <li><code class="language-html highlighter-rouge">fd: 2</code> 标准错误输出</li>
 </ul>
 
-<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-plaintext highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
+<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-html highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
 
 <h2 id="2-管道">2. 管道</h2>
 
-<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-plaintext highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-plaintext highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
+<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-html highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-html highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
 
 <p>rCore 对管道的设计分为端口设计与缓存设计。</p>
 
 <ul>
-  <li><strong>端口设计</strong> <code class="language-plaintext highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-plaintext highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
-  <li><strong>缓存设计</strong> <code class="language-plaintext highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-plaintext highlighter-rouge">struct Pipe</code> 用 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;PipeRingBuffer&gt;&gt;</code> 维护对 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-plaintext highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
+  <li><strong>端口设计</strong> <code class="language-html highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-html highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
+  <li><strong>缓存设计</strong> <code class="language-html highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-html highlighter-rouge">struct Pipe</code> 用 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">PipeRingBuffer</span><span class="nt">&gt;</span>&gt;</code> 维护对 <code class="language-html highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-html highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-html highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
 </ul>
 
 <blockquote>
@@ -1790,7 +1804,7 @@ Expected equality of these values:
 
 <h2 id="3-标准-io-重定向">3. 标准 I/O 重定向</h2>
 
-<p>重定向的想法在于对 <code class="language-plaintext highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-plaintext highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-plaintext highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-plaintext highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-plaintext highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
+<p>重定向的想法在于对 <code class="language-html highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-html highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-html highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-html highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-html highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/fs.rs</span>
 
@@ -1814,7 +1828,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>为了能让用户端使用重定向， rCore 对 <code class="language-plaintext highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-plaintext highlighter-rouge">args_vec: Vec&lt;String&gt;</code> 中作为参数传入 <code class="language-plaintext highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-plaintext highlighter-rouge">aa</code> 和 <code class="language-plaintext highlighter-rouge">bb</code>。</p>
+<p>为了能让用户端使用重定向， rCore 对 <code class="language-html highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-html highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-html highlighter-rouge">args_vec: Vec<span class="nt">&lt;String&gt;</span></code> 中作为参数传入 <code class="language-html highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-html highlighter-rouge">aa</code> 和 <code class="language-html highlighter-rouge">bb</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -1865,13 +1879,13 @@ Expected equality of these values:
     <font size="2" color="#999"><u>Push stack process 2, HangX-Ma</u></font>
 </div>
 
-<p>压栈完成后 rCore 将 <code class="language-plaintext highlighter-rouge">TrapContext</code>中的 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-plaintext highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-plaintext highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-plaintext highlighter-rouge">&amp;[&amp;str]</code> 的形式。</p>
+<p>压栈完成后 rCore 将 <code class="language-html highlighter-rouge">TrapContext</code>中的 <code class="language-html highlighter-rouge">a0</code> 和 <code class="language-html highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-html highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-html highlighter-rouge">a0</code> 和 <code class="language-html highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-html highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>[<span class="err">&amp;</span>str]</code> 的形式。</p>
 
 <h2 id="4-信号">4. 信号</h2>
 
 <p>信号机制补足了单向事件通知的机制， 这是一种类似于硬件中断的软件级异步通知机制， 使得进程在接收到特定事件的时候能够暂停当前的工作并及时响应事件， 并在响应事件之后可以恢复当前工作继续执行。 如果进程没有接收到任何事件， 它可以执行自己的任务。 这里的暂停与恢复的工作， 都由操作系统来完成， 应用程序只需设置好响应某事件的事件处理例程就够了。</p>
 
-<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-plaintext highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
+<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-html highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
 
 <ul>
   <li>
@@ -1902,7 +1916,7 @@ Expected equality of these values:
 
 <h3 id="41-信号相关的数据结构">4.1 信号相关的数据结构</h3>
 
-<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
+<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-html highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">bitflags!</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalFlags</span><span class="p">:</span> <span class="nb">i32</span> <span class="p">{</span>
@@ -1915,7 +1929,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外为了处理收到的信号， rCore 定义了 <code class="language-plaintext highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-plaintext highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-plaintext highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
+<p>另外为了处理收到的信号， rCore 定义了 <code class="language-html highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-html highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-html highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// Action for a signal</span>
 <span class="nd">#[repr(C,</span> <span class="nd">align(</span><span class="mi">16</span><span class="nd">))]</span>
@@ -1931,14 +1945,14 @@ Expected equality of these values:
 <p>如前所述， 信号产生有异步信号和同步信号， rCore 将其分作三类， 前两类是异步信号， 最后一类是同步信号。</p>
 
 <ol>
-  <li>进程通过 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
+  <li>进程通过 <code class="language-html highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
   <li>内核检测到某些事件给某个进程发送信号， 但这个事件与接收信号的进程的执行无关。</li>
-  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-plaintext highlighter-rouge">SIGILL</code> 非法指令。</li>
+  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-html highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-html highlighter-rouge">SIGILL</code> 非法指令。</li>
 </ol>
 
 <h4 id="kill-系统调用">kill 系统调用</h4>
 
-<p>实现 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-plaintext highlighter-rouge">manager.rs</code> 中增添 <code class="language-plaintext highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-plaintext highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-plaintext highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-plaintext highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
+<p>实现 <code class="language-html highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-html highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-html highlighter-rouge">manager.rs</code> 中增添 <code class="language-html highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-html highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-html highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-html highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -1967,23 +1981,23 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>需要注意的是， 如果 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
+<p>需要注意的是， 如果 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
 
 <h4 id="内核信号生成">内核信号生成</h4>
 
-<p>就是将之前说的 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 以及 <code class="language-plaintext highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
+<p>就是将之前说的 <code class="language-html highlighter-rouge">SIGSEGV</code> 以及 <code class="language-html highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
 
 <h3 id="43-信号的处理">4.3 信号的处理</h3>
 
 <p>与信号处理相关的系统调用则有三个：</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
+  <li><code class="language-html highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
+  <li><code class="language-html highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
+  <li><code class="language-html highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
 </ul>
 
-<p>需要在 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中增加 <code class="language-plaintext highlighter-rouge">signal_mask</code> 以及 <code class="language-plaintext highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-plaintext highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-plaintext highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-plaintext highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
+<p>需要在 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中增加 <code class="language-html highlighter-rouge">signal_mask</code> 以及 <code class="language-html highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-html highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-html highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-html highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-html highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-html highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
@@ -2002,7 +2016,7 @@ Expected equality of these values:
 
 <ul>
   <li>
-    <p>进程可以通过 <code class="language-plaintext highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-plaintext highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-plaintext highlighter-rouge">old_action</code> 中， 而将 <code class="language-plaintext highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
+    <p>进程可以通过 <code class="language-html highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-html highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-html highlighter-rouge">old_action</code> 中， 而将 <code class="language-html highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigaction</span><span class="p">(</span>
       <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
@@ -2025,10 +2039,10 @@ Expected equality of these values:
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
+    <p><code class="language-html highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-plaintext highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-plaintext highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-plaintext highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
+    <p><code class="language-html highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-html highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-html highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-html highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-html highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/syscall/process.rs</span>
 
@@ -2048,7 +2062,7 @@ Expected equality of these values:
   </li>
 </ul>
 
-<p>关于 <code class="language-plaintext highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
+<p>关于 <code class="language-html highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
 
 <h2 id="5-课后练习">5. 课后练习</h2>
 
@@ -2070,7 +2084,7 @@ Expected equality of these values:
   <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
 </blockquote>
 
-<p><code class="language-plaintext highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
+<p><code class="language-html highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
 
 <dl>
   <dt>磁盘块设备接口层</dt>
@@ -2126,16 +2140,16 @@ Expected equality of these values:
 
 <h2 id="2-块设备接口层">2. 块设备接口层</h2>
 
-<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-plaintext highlighter-rouge">Send</code>， <code class="language-plaintext highlighter-rouge">Sync</code>， <code class="language-plaintext highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
+<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-html highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-html highlighter-rouge">Send</code>， <code class="language-html highlighter-rouge">Sync</code>， <code class="language-html highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
 
 <ul>
   <li><em>A type is Send if it is safe to send it to another thread.</em></li>
-  <li><em>A type is Sync if it is safe to share between threads (<code class="language-plaintext highlighter-rouge">T</code> is Sync if and only if <code class="language-plaintext highlighter-rouge">&amp;T</code> is Send).</em></li>
+  <li><em>A type is Sync if it is safe to share between threads (<code class="language-html highlighter-rouge">T</code> is Sync if and only if <code class="language-html highlighter-rouge"><span class="err">&amp;</span>T</code> is Send).</em></li>
 </ul>
 
-<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-plaintext highlighter-rouge">Arc&lt;dyn BlockDevice&gt;</code> 表明该 trait 类型， 被 <code class="language-plaintext highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-plaintext highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-plaintext highlighter-rouge">dyn</code> 关键字。</p>
+<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;dyn</span> <span class="na">BlockDevice</span><span class="nt">&gt;</span></code> 表明该 trait 类型， 被 <code class="language-html highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-html highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-html highlighter-rouge">dyn</code> 关键字。</p>
 
-<p>用到 <code class="language-plaintext highlighter-rouge">Any</code> 与 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-plaintext highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-plaintext highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
+<p>用到 <code class="language-html highlighter-rouge">Any</code> 与 <code class="language-html highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-html highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-html highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_dev.rs</span>
 <span class="k">pub</span> <span class="k">trait</span> <span class="n">BlockDevice</span> <span class="p">:</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span> <span class="o">+</span> <span class="n">Any</span> <span class="p">{</span>
@@ -2166,12 +2180,12 @@ Expected equality of these values:
 <p>每个 BlockCache 缓存一个磁盘块， 这是一个最小单位， rCore 提供了一些对缓存管理的方法：</p>
 
 <ul>
-  <li><strong>new</strong>： <code class="language-plaintext highlighter-rouge">BlockCache</code> 实现了 <code class="language-plaintext highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-plaintext highlighter-rouge">cache</code> 被设置为 <code class="language-plaintext highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
-  <li><strong>addr_of_offset</strong>： 获取 <code class="language-plaintext highlighter-rouge">cache</code> 数组偏移 <code class="language-plaintext highlighter-rouge">offset</code> 大小的字节地址。</li>
-  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-plaintext highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
+  <li><strong>new</strong>： <code class="language-html highlighter-rouge">BlockCache</code> 实现了 <code class="language-html highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-html highlighter-rouge">cache</code> 被设置为 <code class="language-html highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
+  <li><strong>addr_of_offset</strong>： 获取 <code class="language-html highlighter-rouge">cache</code> 数组偏移 <code class="language-html highlighter-rouge">offset</code> 大小的字节地址。</li>
+  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-html highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
 </ul>
 
-<p>rCore 将 <code class="language-plaintext highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-plaintext highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-plaintext highlighter-rouge">BlockCache::read</code> 以及 <code class="language-plaintext highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-plaintext highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
+<p>rCore 将 <code class="language-html highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-html highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-html highlighter-rouge">BlockCache::read</code> 以及 <code class="language-html highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-html highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 
@@ -2187,10 +2201,10 @@ Expected equality of these values:
 </code></pre></div></div>
 
 <blockquote>
-  <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
+  <p>rCore 实现了很多与 <code class="language-html highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
 </blockquote>
 
-<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
+<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">BlockCache</span><span class="nt">&gt;</span>&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
@@ -2198,7 +2212,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-plaintext highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 获取 <code class="language-plaintext highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code> 调用者还需要通过 <code class="language-plaintext highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-plaintext highlighter-rouge">BlockCache</code> 进行操作。</p>
+<p><code class="language-html highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-html highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-html highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-html highlighter-rouge">get_block_cache</code> 获取 <code class="language-html highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">BlockCache</span><span class="nt">&gt;</span>&gt;</code> 调用者还需要通过 <code class="language-html highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-html highlighter-rouge">BlockCache</code> 进行操作。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_cache</span><span class="p">(</span>
     <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
@@ -2245,7 +2259,7 @@ Expected equality of these values:
 <span class="k">type</span> <span class="n">BitmapBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u64</span><span class="p">;</span> <span class="mi">64</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>rCore 教程中的 <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-plaintext highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 中的 <code class="language-plaintext highlighter-rouge">alloc</code> 和 <code class="language-plaintext highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
+<p>rCore 教程中的 <code class="language-html highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-html highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-html highlighter-rouge">struct Bitmap</code> 中的 <code class="language-html highlighter-rouge">alloc</code> 和 <code class="language-html highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            start_block_id(Start ID)
                   v
@@ -2258,7 +2272,7 @@ Expected equality of these values:
         (increase)
 </code></pre></div></div>
 
-<p>这里结合 <code class="language-plaintext highlighter-rouge">alloc</code> 函数阐明 <code class="language-plaintext highlighter-rouge">BlockCache</code> 提供的 <code class="language-plaintext highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-plaintext highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-plaintext highlighter-rouge">&amp;mut BitmapBlock</code> 这样 <code class="language-plaintext highlighter-rouge">modify</code> 中才能将泛型 <code class="language-plaintext highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-plaintext highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-plaintext highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-plaintext highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
+<p>这里结合 <code class="language-html highlighter-rouge">alloc</code> 函数阐明 <code class="language-html highlighter-rouge">BlockCache</code> 提供的 <code class="language-html highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-html highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>mut BitmapBlock</code> 这样 <code class="language-html highlighter-rouge">modify</code> 中才能将泛型 <code class="language-html highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-html highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-html highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-html highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 
@@ -2306,7 +2320,7 @@ Expected equality of these values:
 
 <h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
 
-<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
+<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-html highlighter-rouge">size</code>， 索引节点类型 <code class="language-html highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-html highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-html highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-html highlighter-rouge">DiskInode</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 
@@ -2331,7 +2345,7 @@ Expected equality of these values:
 <p>这里的多级索引是这样理解的， 分为直接索引 (direct) 和 间接索引 (indirect1/indirect2)。</p>
 
 <ul>
-  <li><strong>直接索引</strong> <code class="language-plaintext highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-plaintext highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
+  <li><strong>直接索引</strong> <code class="language-html highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-html highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
 </ul>
 
 <div align="center">
@@ -2343,7 +2357,7 @@ Expected equality of these values:
 <ul>
   <li><strong>间接索引</strong>
     <ul>
-      <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
+      <li>装满 <code class="language-html highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-html highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-html highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-html highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
       <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 通过二级索引先找到一级索引块的 Block ID， 这些一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样再通过一级索引就能确定最终的数据块， 这种设计能额外索引 8 MiB 的额外内容。</li>
     </ul>
   </li>
@@ -2355,19 +2369,19 @@ Expected equality of these values:
     <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
 </div>
 
-<p><code class="language-plaintext success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
+<p><code class="language-html success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DiskInode</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">inner_id</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u32</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>基于直接索引和间接索引， <code class="language-plaintext highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-plaintext highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-plaintext highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-plaintext highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-plaintext highlighter-rouge">Inode</code> 中的 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code> 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
+<p>基于直接索引和间接索引， <code class="language-html highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-html highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-html highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-html highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-html highlighter-rouge">Inode</code> 中的 <code class="language-html highlighter-rouge">direct</code>， <code class="language-html highlighter-rouge">indirect1</code> 以及 <code class="language-html highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
 <blockquote>
-  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-plaintext highlighter-rouge">struct Inode</code> 提供了 <code class="language-plaintext highlighter-rouge">create</code> 方法。</p>
+  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-html highlighter-rouge">struct Inode</code> 提供了 <code class="language-html highlighter-rouge">create</code> 方法。</p>
 </blockquote>
 
-<p>对于 <code class="language-plaintext highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-plaintext highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-plaintext highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-plaintext highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-plaintext highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
+<p>对于 <code class="language-html highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-html highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-html highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-html highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-html highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-10-rcore-note-ch6/inner-id.png" alt="Inner ID, HangX-Ma" width="600" />
@@ -2375,17 +2389,17 @@ Expected equality of these values:
     <font size="2" color="#999"><u>Inner ID, HangX-Ma</u></font>
 </div>
 
-<p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
+<p>后续关于 <code class="language-html highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
 
 <h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
 
-<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-plaintext highlighter-rouge">read_at</code> 以及 <code class="language-plaintext highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
+<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-html highlighter-rouge">read_at</code> 和 <code class="language-html highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-html highlighter-rouge">read_at</code> 以及 <code class="language-html highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 <span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-plaintext highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-plaintext highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-plaintext highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
+<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-html highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-html highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-html highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 <span class="k">const</span> <span class="n">NAME_LENGTH_LIMIT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
@@ -2401,7 +2415,7 @@ Expected equality of these values:
 
 <h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
 
-<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
+<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-html highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-html highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
@@ -2415,9 +2429,9 @@ Expected equality of these values:
 
 <h2 id="6-索引节点">6. 索引节点</h2>
 
-<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-plaintext highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
+<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-html highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
 
-<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-plaintext highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可表示， <code class="language-plaintext highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
+<p><code class="language-html highlighter-rouge">Inode</code> 和 <code class="language-html highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-html highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-html highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-html highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-html highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 即可表示， <code class="language-html highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
@@ -2428,7 +2442,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-plaintext highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-plaintext highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-plaintext highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-plaintext highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-plaintext highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code>， 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
+<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-html highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-html highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-html highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-html highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-html highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-html highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-html highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-html highlighter-rouge">direct</code>， <code class="language-html highlighter-rouge">indirect1</code>， 以及 <code class="language-html highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
 <span class="cd">/// Increase the size of a disk inode</span>
@@ -2462,13 +2476,13 @@ Expected equality of these values:
 
 <h4 id="硬链接">硬链接</h4>
 
-<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-plaintext highlighter-rouge">sys_linkat</code>， <code class="language-plaintext highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_stat</code>。</p>
+<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-html highlighter-rouge">sys_linkat</code>， <code class="language-html highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-html highlighter-rouge">sys_stat</code>。</p>
 
-<p>硬链接需要新的 Inode 的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-plaintext highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-plaintext highlighter-rouge">DirEntry</code> 中的 <code class="language-plaintext highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-plaintext highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-plaintext highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-plaintext highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-plaintext highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-plaintext highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
+<p>硬链接需要新的 Inode 的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-html highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-html highlighter-rouge">DirEntry</code> 中的 <code class="language-html highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-html highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-html highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-html highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-html highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-html highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
 
-<p>对于 <code class="language-plaintext highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-plaintext highlighter-rouge">buf</code> 中查看 <code class="language-plaintext highlighter-rouge">buf</code> 对应的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
+<p>对于 <code class="language-html highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-html highlighter-rouge">file_count</code> 数量的 <code class="language-html highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-html highlighter-rouge">buf</code> 中查看 <code class="language-html highlighter-rouge">buf</code> 对应的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
 
-<p><code class="language-plaintext highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-plaintext highlighter-rouge">fd_table</code> 获取的到的 <code class="language-plaintext highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-plaintext highlighter-rouge">&amp;dyn Any</code> 再通过 <code class="language-plaintext highlighter-rouge">downcast_ref::&lt;OSInode&gt;()</code> 强制转换为 <code class="language-plaintext highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-plaintext highlighter-rouge">OSInode</code> 增加 <code class="language-plaintext highlighter-rouge">get_inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">get_inode_pos</code> 获取 <code class="language-plaintext highlighter-rouge">inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_id</code> 和 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-plaintext highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-plaintext highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
+<p><code class="language-html highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-html highlighter-rouge">fd_table</code> 获取的到的 <code class="language-html highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>dyn Any</code> 再通过 <code class="language-html highlighter-rouge">downcast_ref::<span class="nt">&lt;OSInode&gt;</span>()</code> 强制转换为 <code class="language-html highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-html highlighter-rouge">OSInode</code> 增加 <code class="language-html highlighter-rouge">get_inode_id</code> 以及 <code class="language-html highlighter-rouge">get_inode_pos</code> 获取 <code class="language-html highlighter-rouge">inode_id</code> 以及 <code class="language-html highlighter-rouge">block_id</code> 和 <code class="language-html highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-html highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-html highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-html highlighter-rouge">file_count</code> 数量的 <code class="language-html highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">any</span><span class="p">::</span><span class="n">Any</span><span class="p">;</span>
 

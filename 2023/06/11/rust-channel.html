@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -305,7 +309,7 @@
   </ul>
 </blockquote>
 
-<p>CS110L Spring20 课程的 Lecture 12 提及了 Rust 多线程间的数据共享的问题。 一般来说， 线程之间会通过一块共享内存传递数据， 并使用 <code class="language-plaintext highlighter-rouge">Arc</code> 以及 <code class="language-plaintext highlighter-rouge">Mutex</code> 避免数据竞争 (Race Condition)。</p>
+<p>CS110L Spring20 课程的 Lecture 12 提及了 Rust 多线程间的数据共享的问题。 一般来说， 线程之间会通过一块共享内存传递数据， 并使用 <code class="language-html highlighter-rouge">Arc</code> 以及 <code class="language-html highlighter-rouge">Mutex</code> 避免数据竞争 (Race Condition)。</p>
 
 <p>但是 <strong>使用锁的办法是开销极大的</strong>。 假设内核调度时线程 A 遇到了上锁的数据， 虽然处理这一小段数据可能只需要几纳秒的时间， 但是剩余的时间片因为锁的原因而被浪费了， 而此时该线程又被内核放在了调度队列的末尾， 这意味着线程 A 真正运行时需要经历多轮调度等待很长时间。 那么最好的办法就是使用一种不上锁的数据结构。</p>
 
@@ -317,11 +321,11 @@ Do not communicate by sharing memory; instead, share memory by communicating
 <p align="right">-- Effective Golang</p>
 </div>
 
-<p>早在 1978 年就已经提出了 Channel 的理论模型， 多个线程之间的通信以消息的方式传递， 由于没有使用共享内存， 因而不会产生数据竞争。 但消息传递并不意味着高效， 由于我们没有使用共享内存， 这需要我们将需要传递的数据拷贝进 <code class="language-plaintext highlighter-rouge">Message</code> 中， 这会造成极大的资源浪费和严重的效率问题。</p>
+<p>早在 1978 年就已经提出了 Channel 的理论模型， 多个线程之间的通信以消息的方式传递， 由于没有使用共享内存， 因而不会产生数据竞争。 但消息传递并不意味着高效， 由于我们没有使用共享内存， 这需要我们将需要传递的数据拷贝进 <code class="language-html highlighter-rouge">Message</code> 中， 这会造成极大的资源浪费和严重的效率问题。</p>
 
-<p>在 Rust 中可以通过浅拷贝达到数据共享的目的， 我们需要在 <code class="language-plaintext highlighter-rouge">Message</code> 中传递指针。 用以描述指针的数据结构所占的资源是极小的， 这种 <strong>Partial Shared Memory</strong> 的安全性也能得到保证。 由于 Rust 语言的特性， 指针的所有权会在传递时转移至 Channel 中， 编译器会保证我们在传递指针后无法再在除 Channel 外的任何地方使用这个指针。</p>
+<p>在 Rust 中可以通过浅拷贝达到数据共享的目的， 我们需要在 <code class="language-html highlighter-rouge">Message</code> 中传递指针。 用以描述指针的数据结构所占的资源是极小的， 这种 <strong>Partial Shared Memory</strong> 的安全性也能得到保证。 由于 Rust 语言的特性， 指针的所有权会在传递时转移至 Channel 中， 编译器会保证我们在传递指针后无法再在除 Channel 外的任何地方使用这个指针。</p>
 
-<p>完美的 Channel 模型应当是 <em><strong>MPMC (multi-producer, multi-consumer)</strong></em> 类型， 简单的 <code class="language-plaintext highlighter-rouge">Mutex&lt;T&gt; + CondVar</code> 组合能够实现 MPMC 但正如前述所言， 使用锁会降低效率。 比如在 Go 语言中实现了基于锁的安全的 MPMC Channel， 虽然使用了 <strong>futex (fast userspace mutex)</strong> 但由于锁的存在而效率低下。 因而， 标准的 Rust 库中实现的是 <em><strong>MPSC (multi-producer, single-consumer)</strong></em>， 这种实现方式有如下优缺点：</p>
+<p>完美的 Channel 模型应当是 <em><strong>MPMC (multi-producer, multi-consumer)</strong></em> 类型， 简单的 <code class="language-html highlighter-rouge">Mutex<span class="nt">&lt;T&gt;</span> + CondVar</code> 组合能够实现 MPMC 但正如前述所言， 使用锁会降低效率。 比如在 Go 语言中实现了基于锁的安全的 MPMC Channel， 虽然使用了 <strong>futex (fast userspace mutex)</strong> 但由于锁的存在而效率低下。 因而， 标准的 Rust 库中实现的是 <em><strong>MPSC (multi-producer, single-consumer)</strong></em>， 这种实现方式有如下优缺点：</p>
 
 <ul>
   <li>优点
@@ -553,7 +557,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

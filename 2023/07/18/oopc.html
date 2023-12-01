@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -300,7 +304,7 @@
 
 <p>之前在接触 Linux 驱动的时候其实就浅浅地接触到了 C 面向对象的思想， 例如 MTD 层抽象接口提供给 Block， 我们直接从顶层通过代码索引的方式是没办法找到具体的 Block 调用方法的。 我们只能看到 MTD 抽象出来的接口， 这一定程度上提供了数据的私有化的能力。</p>
 
-<p>网上的相关文章众说纷纭， 但目前看来就是 <em><strong>C 现代编程</strong></em> 这本书讲的最清晰最明白， LW_OOPC 则是 高焕堂 以及其团队 MISOO 设计的方便 C 面向对象的宏定义模块， 能方便相关的开发。 其实这些文章读过来， 主要还是需要开发者用好 <code class="language-plaintext highlighter-rouge">struct</code>， <code class="language-plaintext highlighter-rouge">Macro</code>， <code class="language-plaintext highlighter-rouge">pointer</code>  这三类资源。 <code class="language-plaintext highlighter-rouge">struct</code> 可谓是重中之重， 可以看到在 C++ 中的 struct 和 class 仅在数据接口的私有性上存在差异， 而在 Rust 中则直接删除了 class 的定义， 转向了 struct + trait 的编程模式。</p>
+<p>网上的相关文章众说纷纭， 但目前看来就是 <em><strong>C 现代编程</strong></em> 这本书讲的最清晰最明白， LW_OOPC 则是 高焕堂 以及其团队 MISOO 设计的方便 C 面向对象的宏定义模块， 能方便相关的开发。 其实这些文章读过来， 主要还是需要开发者用好 <code class="language-html highlighter-rouge">struct</code>， <code class="language-html highlighter-rouge">Macro</code>， <code class="language-html highlighter-rouge">pointer</code>  这三类资源。 <code class="language-html highlighter-rouge">struct</code> 可谓是重中之重， 可以看到在 C++ 中的 struct 和 class 仅在数据接口的私有性上存在差异， 而在 Rust 中则直接删除了 class 的定义， 转向了 struct + trait 的编程模式。</p>
 
 <p>这篇文章不定期更新 OOP C 的一些想法， 其实读 <em><strong>C 现代编程</strong></em> 还是有很多疑惑的， 但是没用到就没太深刻的印象， 有问题再好好研究记录！</p>
 
@@ -321,9 +325,9 @@
 
 <h2 id="1-使用-struct-模块化编程">1. 使用 struct 模块化编程</h2>
 
-<p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-plaintext highlighter-rouge">static</code> 对 <code class="language-plaintext highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
+<p>主要想法还是利用 struct 管理方法函数， 利用 <code class="language-html highlighter-rouge">static</code> 对 <code class="language-html highlighter-rouge">.c</code> 文件中的函数进行私有化处理防止命名冲突。</p>
 
-<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-plaintext highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
+<p>另外， struct 也能起到虚函数的功能， 如下定义了一个 <code class="language-html highlighter-rouge">page_t</code> 的结构体， 这个结构体规定了其内实现的方法函数的接口。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">painter</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">);</span>
@@ -333,7 +337,7 @@
 
 <h2 id="2-跨文件的全局变量">2. 跨文件的全局变量</h2>
 
-<p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-plaintext highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-plaintext highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
+<p>另外在整个工程中会需要跨文件使用相关的变量， 例如我在 <code class="language-html highlighter-rouge">encoder.h</code> 定义了一个 <code class="language-html highlighter-rouge">struct Encoder</code> 作为编码器类， 而我希望通过一个 <code class="language-html highlighter-rouge">g_encoder</code> 变量作为跨文件的全局变量被不同文件使用。 例如在 <code class="language-html highlighter-rouge">encoder.c</code> 中初始化方法函数， 而在其他文件中调用这些方法， 此时通过一个全局的变量就非常方便了。 这里需要区分 <strong>声明</strong> 和 <strong>定义</strong> 这两个概念。</p>
 
 <dl>
   <dt>声明</dt>
@@ -342,7 +346,7 @@
   <dd>指明变量、函数存储在哪里，当定义发生时，系统为变量或函数分配内存单元。</dd>
 </dl>
 
-<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-plaintext highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-plaintext highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-plaintext highlighter-rouge">g_encoder</code>， 在 <code class="language-plaintext highlighter-rouge">encoder.h</code> 中则通过 <code class="language-plaintext highlighter-rouge">extern</code> 声明 <code class="language-plaintext highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-plaintext highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-plaintext highlighter-rouge">config.h</code> 以及 <code class="language-plaintext highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-plaintext highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。 但我需要在 <code class="language-plaintext highlighter-rouge">config.h</code> 用注释说明这些全局变量的位置以及功能， 方便后续进行查阅检索。</p>
+<p>我在这里是这样构想的， 对于特定功能的类， 例如 <code class="language-html highlighter-rouge">Encoder</code> 编码器类， 则直接在 <code class="language-html highlighter-rouge">encoder.c</code> 中定义一个这个类型的变量 <code class="language-html highlighter-rouge">g_encoder</code>， 在 <code class="language-html highlighter-rouge">encoder.h</code> 中则通过 <code class="language-html highlighter-rouge">extern</code> 声明 <code class="language-html highlighter-rouge">g_encoder</code>。 这样， 任何包含 <code class="language-html highlighter-rouge">encoder.h</code> 的文件都能直接使用这个变量。 而一些影响设备属性的 primitive 类型的变量则通过 <code class="language-html highlighter-rouge">config.h</code> 以及 <code class="language-html highlighter-rouge">config.c</code> 进行声明和定义。 这样能够分离文件的职能， 不会导致 <code class="language-html highlighter-rouge">config.h</code> 这个管理全局变量的文件不断 include 各种子设备而导致文件管理过于繁杂和臃肿。 但我需要在 <code class="language-html highlighter-rouge">config.h</code> 用注释说明这些全局变量的位置以及功能， 方便后续进行查阅检索。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// encoder.c</span>
 <span class="n">Encoder</span> <span class="n">g_encoder</span><span class="p">;</span>
@@ -517,7 +521,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -283,7 +287,7 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 15, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 11682 words </span>
+                <span> Total 11669 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -327,7 +331,7 @@
   </li>
   <li><strong>rCore</strong>
     <ul>
-      <li>rCore 第八章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch8]</a> <code class="language-plaintext highlighter-rouge">TODO</code></li>
+      <li>rCore 第八章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/">[ch8]</a> <code class="language-html highlighter-rouge">TODO</code></li>
       <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
       <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
       <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
@@ -401,27 +405,27 @@
 <ul>
   <li><strong>线程初始化</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::new</code>： 创建当前处于 <code class="language-plaintext highlighter-rouge">Running</code> 的一个主线程， 并将剩余的线程资源初始化为 <code class="language-plaintext highlighter-rouge">Available</code> 以向量的形式存储在 <code class="language-plaintext highlighter-rouge">Runtime</code> 结构体中方便后续的资源线程创建和管理。</li>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::init</code>： 传递 Runtime 对象的地址至全局变量 <em>RUNTIME</em>， 方便其他函数获取相应的资源线程。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::new</code>： 创建当前处于 <code class="language-html highlighter-rouge">Running</code> 的一个主线程， 并将剩余的线程资源初始化为 <code class="language-html highlighter-rouge">Available</code> 以向量的形式存储在 <code class="language-html highlighter-rouge">Runtime</code> 结构体中方便后续的资源线程创建和管理。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::init</code>： 传递 Runtime 对象的地址至全局变量 <em>RUNTIME</em>， 方便其他函数获取相应的资源线程。</li>
     </ul>
   </li>
   <li><strong>线程创建</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::spawn</code>： 在存储线程资源的向量中查找一个状态为 <code class="language-plaintext highlighter-rouge">Available</code> 的空闲线程， 为调度准备 <em>old return address</em> 以及 <em>new return address</em> 并分配新的空间并设置栈顶的位置， 在返回前将该线程状态设置为 <code class="language-plaintext highlighter-rouge">Ready</code>。
+      <li><code class="language-html highlighter-rouge">Runtime::spawn</code>： 在存储线程资源的向量中查找一个状态为 <code class="language-html highlighter-rouge">Available</code> 的空闲线程， 为调度准备 <em>old return address</em> 以及 <em>new return address</em> 并分配新的空间并设置栈顶的位置， 在返回前将该线程状态设置为 <code class="language-html highlighter-rouge">Ready</code>。
         <blockquote>
-          <p>实际上这里的 <em>old return address</em> 被设置为了 <code class="language-plaintext highlighter-rouge">guard</code> 函数的地址， 该函数内部调用了 <code class="language-plaintext highlighter-rouge">t_return</code> 将当线程的状态重新设置为 <code class="language-plaintext highlighter-rouge">Available</code> 后会调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行线程的切换。 这种设计的作用在讲述 <strong>线程切换</strong> 后再详细说明。</p>
+          <p>实际上这里的 <em>old return address</em> 被设置为了 <code class="language-html highlighter-rouge">guard</code> 函数的地址， 该函数内部调用了 <code class="language-html highlighter-rouge">t_return</code> 将当线程的状态重新设置为 <code class="language-html highlighter-rouge">Available</code> 后会调用 <code class="language-html highlighter-rouge">t_yield</code> 进行线程的切换。 这种设计的作用在讲述 <strong>线程切换</strong> 后再详细说明。</p>
         </blockquote>
       </li>
     </ul>
   </li>
   <li>
     <p><strong>线程切换</strong>
-  线程切换应当是调度中最重要的一个模块， 主要功能由 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以及 <code class="language-plaintext highlighter-rouge">switch</code> 这两个函数提供。 之前提及的 <code class="language-plaintext highlighter-rouge">Runtime::t_return</code>， <code class="language-plaintext highlighter-rouge">Runtime::guard</code> 以及 <code class="language-plaintext highlighter-rouge">Runtime::yield_task</code> 都封装了 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 以完成相应的调度的功能。</p>
+  线程切换应当是调度中最重要的一个模块， 主要功能由 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 以及 <code class="language-html highlighter-rouge">switch</code> 这两个函数提供。 之前提及的 <code class="language-html highlighter-rouge">Runtime::t_return</code>， <code class="language-html highlighter-rouge">Runtime::guard</code> 以及 <code class="language-html highlighter-rouge">Runtime::yield_task</code> 都封装了 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 以完成相应的调度的功能。</p>
 
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::t_yield</code>： 从当前位置开始查找一个状态为 <code class="language-plaintext highlighter-rouge">Ready</code> 的线程， 没找到会返回 false。 如果当前的线程不是 <code class="language-plaintext highlighter-rouge">Available</code>（说明在 <code class="language-plaintext highlighter-rouge">Running</code>） 就将当前的线程重新放到 <code class="language-plaintext highlighter-rouge">Ready</code> 数组中， 另外就是将找到的 <code class="language-plaintext highlighter-rouge">Ready</code> 线程切换为 <code class="language-plaintext highlighter-rouge">Running</code>。 最后调用 <code class="language-plaintext highlighter-rouge">switch</code> 交换新旧线程的上下文。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::t_yield</code>： 从当前位置开始查找一个状态为 <code class="language-html highlighter-rouge">Ready</code> 的线程， 没找到会返回 false。 如果当前的线程不是 <code class="language-html highlighter-rouge">Available</code>（说明在 <code class="language-html highlighter-rouge">Running</code>） 就将当前的线程重新放到 <code class="language-html highlighter-rouge">Ready</code> 数组中， 另外就是将找到的 <code class="language-html highlighter-rouge">Ready</code> 线程切换为 <code class="language-html highlighter-rouge">Running</code>。 最后调用 <code class="language-html highlighter-rouge">switch</code> 交换新旧线程的上下文。</li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">switch</code>： 完成对 <code class="language-plaintext highlighter-rouge">Runtime::t_yield</code> 未进行切换的 <em>当前指令指针(PC)、 通用寄存器集合和栈</em> 的切换， 关键的任务切换在于如何对 PC 指针进行切换。 <code class="language-plaintext highlighter-rouge">x1(ra)</code> 寄存器保存着当前 <code class="language-plaintext highlighter-rouge">switch</code> 函数的返回地址， rCore 设计从 offset 为 0x00 到 0x68 的寄存器都按序存储， 其中也包括了 <code class="language-plaintext highlighter-rouge">ra</code>。 而在 offset 0x70 的位置又存储了一次 <code class="language-plaintext highlighter-rouge">ra</code>， 其作用也很明显， 后续 <code class="language-plaintext highlighter-rouge">ld t0, 0x70(a1)</code> 这句指令载入了新的 Context 中的 <code class="language-plaintext highlighter-rouge">ra</code>， 通过 <code class="language-plaintext highlighter-rouge">jr t0</code> 就能在 switch 之后直接跳转到新的指令运行的位置。</p>
+        <p><code class="language-html highlighter-rouge">switch</code>： 完成对 <code class="language-html highlighter-rouge">Runtime::t_yield</code> 未进行切换的 <em>当前指令指针(PC)、 通用寄存器集合和栈</em> 的切换， 关键的任务切换在于如何对 PC 指针进行切换。 <code class="language-html highlighter-rouge">x1(ra)</code> 寄存器保存着当前 <code class="language-html highlighter-rouge">switch</code> 函数的返回地址， rCore 设计从 offset 为 0x00 到 0x68 的寄存器都按序存储， 其中也包括了 <code class="language-html highlighter-rouge">ra</code>。 而在 offset 0x70 的位置又存储了一次 <code class="language-html highlighter-rouge">ra</code>， 其作用也很明显， 后续 <code class="language-html highlighter-rouge">ld t0, 0x70(a1)</code> 这句指令载入了新的 Context 中的 <code class="language-html highlighter-rouge">ra</code>， 通过 <code class="language-html highlighter-rouge">jr t0</code> 就能在 switch 之后直接跳转到新的指令运行的位置。</p>
 
         <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[naked]</span>
 <span class="nd">#[no_mangle]</span>
@@ -448,14 +452,14 @@
   </li>
   <li><strong>线程执行</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">Runtime::run</code>： 用一个 while 循环调用 <code class="language-plaintext highlighter-rouge">t_yield</code> 进行调度， 所有线程执行完后会退出。</li>
+      <li><code class="language-html highlighter-rouge">Runtime::run</code>： 用一个 while 循环调用 <code class="language-html highlighter-rouge">t_yield</code> 进行调度， 所有线程执行完后会退出。</li>
     </ul>
   </li>
 </ul>
 
-<p>从整体的 rCore 线程设计可以看出， 线程的调度几乎就是按序执行， 所以 <code class="language-plaintext highlighter-rouge">Runtime::spawn</code> 会放入一个 <code class="language-plaintext highlighter-rouge">guard</code> 函数地址作为 <em>old return address</em> 以释放线程资源， 因为当下一次线程位置又切换到这个线程的时候， 实际上该线程已处理完了。 这个设计只能等当前运行的线程主动让出处理器使用权后， 线程管理运行时才能切换检查。</p>
+<p>从整体的 rCore 线程设计可以看出， 线程的调度几乎就是按序执行， 所以 <code class="language-html highlighter-rouge">Runtime::spawn</code> 会放入一个 <code class="language-html highlighter-rouge">guard</code> 函数地址作为 <em>old return address</em> 以释放线程资源， 因为当下一次线程位置又切换到这个线程的时候， 实际上该线程已处理完了。 这个设计只能等当前运行的线程主动让出处理器使用权后， 线程管理运行时才能切换检查。</p>
 
-<p>具体实现细节不表了， rCore 在 <code class="language-plaintext highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
+<p>具体实现细节不表了， rCore 在 <code class="language-html highlighter-rouge">user/src/bin/ch8b_stackful_coroutine.rs</code> 中实现了对用户态的线程管理。</p>
 
 <h3 id="13-内核态的线程管理">1.3 内核态的线程管理</h3>
 
@@ -480,17 +484,17 @@
 
 <ul>
   <li>
-    <p><strong>线程创建</strong> 的系统调用 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 通过 <strong>TID(Thread Identifier)</strong> 区分不同线程， 与进程的 PID 设计很类似， 内核会为每个线程分配专属资源： 用户栈、 Trap 上下文还有内核栈， 前两个在进程地址空间中， 内核栈在内核地址空间中。</p>
+    <p><strong>线程创建</strong> 的系统调用 <code class="language-html highlighter-rouge">sys_thread_create</code> 通过 <strong>TID(Thread Identifier)</strong> 区分不同线程， 与进程的 PID 设计很类似， 内核会为每个线程分配专属资源： 用户栈、 Trap 上下文还有内核栈， 前两个在进程地址空间中， 内核栈在内核地址空间中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_thread_create</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span><span class="p">;</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>线程管理</strong> 通过 TID， <code class="language-plaintext highlighter-rouge">gettid</code> 系统调用能获取当前线程的 TID。</li>
-  <li><strong>线程退出</strong> 通过 <code class="language-plaintext highlighter-rouge">exit</code> 系统调用完成， 约定线程从绑定的函数返回的时候都需要调用 <code class="language-plaintext highlighter-rouge">exit</code> 通知操作系统进行资源回收， 更细粒度的线程取代了进程的作为操作系统的调度单元。</li>
-  <li><strong>线程资源回收</strong> 通过 <code class="language-plaintext highlighter-rouge">waittid</code> 回收收线程占用的用户态和内核态资源。 这个工作一般是进程/主线程完成， 但若是 <strong>主线程</strong> 调用了 <code class="language-plaintext highlighter-rouge">exit</code> <strong>其子线程</strong> 都会全部退出， 被 <strong>父进程</strong> 回收资源。</li>
+  <li><strong>线程管理</strong> 通过 TID， <code class="language-html highlighter-rouge">gettid</code> 系统调用能获取当前线程的 TID。</li>
+  <li><strong>线程退出</strong> 通过 <code class="language-html highlighter-rouge">exit</code> 系统调用完成， 约定线程从绑定的函数返回的时候都需要调用 <code class="language-html highlighter-rouge">exit</code> 通知操作系统进行资源回收， 更细粒度的线程取代了进程的作为操作系统的调度单元。</li>
+  <li><strong>线程资源回收</strong> 通过 <code class="language-html highlighter-rouge">waittid</code> 回收收线程占用的用户态和内核态资源。 这个工作一般是进程/主线程完成， 但若是 <strong>主线程</strong> 调用了 <code class="language-html highlighter-rouge">exit</code> <strong>其子线程</strong> 都会全部退出， 被 <strong>父进程</strong> 回收资源。</li>
 </ul>
 
-<p>rCore 之前描述的线程模型提到不能混用进程和线程的系统调用， 原因在于其设计对线程和进程进行了分离。 若是调用了 <code class="language-plaintext highlighter-rouge">sys_thread_create</code> 生成子线程就只考虑多个线程在一个进程内的交互， 如果涉及到父子进程的交互， 就等价为进程模型。</p>
+<p>rCore 之前描述的线程模型提到不能混用进程和线程的系统调用， 原因在于其设计对线程和进程进行了分离。 若是调用了 <code class="language-html highlighter-rouge">sys_thread_create</code> 生成子线程就只考虑多个线程在一个进程内的交互， 如果涉及到父子进程的交互， 就等价为进程模型。</p>
 
 <h4 id="132-软硬件资源管理">1.3.2 软硬件资源管理</h4>
 
@@ -498,7 +502,7 @@
 
 <ol>
   <li>
-    <p>把原来分配 PID 的数据结构用更通用的 <code class="language-plaintext highlighter-rouge">RecycleAllocator</code> 描述， 能为 PID 以及 TID 分配提供描述结构。 PID 的分配还是延续之前章节， 使用 <code class="language-plaintext highlighter-rouge">PID_ALLOCATOR</code> 这个全局变量。 而线程归属于进程容器， 所以在每个进程控制块的内部可变结构 <code class="language-plaintext highlighter-rouge">ProcessControlBlockInner</code> 中占据一个变量位置， 由进程控制块 <code class="language-plaintext highlighter-rouge">ProcessControlBlock</code> 进行管理。</p>
+    <p>把原来分配 PID 的数据结构用更通用的 <code class="language-html highlighter-rouge">RecycleAllocator</code> 描述， 能为 PID 以及 TID 分配提供描述结构。 PID 的分配还是延续之前章节， 使用 <code class="language-html highlighter-rouge">PID_ALLOCATOR</code> 这个全局变量。 而线程归属于进程容器， 所以在每个进程控制块的内部可变结构 <code class="language-html highlighter-rouge">ProcessControlBlockInner</code> 中占据一个变量位置， 由进程控制块 <code class="language-html highlighter-rouge">ProcessControlBlock</code> 进行管理。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// os/src/task/process.rs</span>
 
@@ -524,19 +528,19 @@
      <font size="2" color="#999"><u>Process address space with threads, rCore</u></font>
  </div>
 
-    <p>这个就和第三章的结构非常类似了， 为此 rCore 提供了 <code class="language-plaintext highlighter-rouge">trap_cx_bottom_from_tid</code> 以及 <code class="language-plaintext highlighter-rouge">ustack_bottom_from_tid</code> 这两个函数索引每个线程的用户栈以及 Trap 上下文的具体位置。</p>
+    <p>这个就和第三章的结构非常类似了， 为此 rCore 提供了 <code class="language-html highlighter-rouge">trap_cx_bottom_from_tid</code> 以及 <code class="language-html highlighter-rouge">ustack_bottom_from_tid</code> 这两个函数索引每个线程的用户栈以及 Trap 上下文的具体位置。</p>
   </li>
   <li>
-    <p>线程资源整合 <code class="language-plaintext highlighter-rouge">TaskUserRes</code>， 将线程的 TID 、用户栈和 Trap 上下文与线程打包， 由于声明周期一致， 能够进行统一的资源分配和回收。</p>
+    <p>线程资源整合 <code class="language-html highlighter-rouge">TaskUserRes</code>， 将线程的 TID 、用户栈和 Trap 上下文与线程打包， 由于声明周期一致， 能够进行统一的资源分配和回收。</p>
   </li>
   <li>
-    <p>内核栈不再与 PID 或 TID 挂钩， 而与 <code class="language-plaintext highlighter-rouge">kstack_id</code> 这个新的内核标识符相关。 需要增加一个 <code class="language-plaintext highlighter-rouge">KSTACK_ALLOCATOR</code> 的通用资源分配器对内核标识符进行分配。</p>
+    <p>内核栈不再与 PID 或 TID 挂钩， 而与 <code class="language-html highlighter-rouge">kstack_id</code> 这个新的内核标识符相关。 需要增加一个 <code class="language-html highlighter-rouge">KSTACK_ALLOCATOR</code> 的通用资源分配器对内核标识符进行分配。</p>
   </li>
 </ol>
 
 <h4 id="133-进程和线程控制块">1.3.3 进程和线程控制块</h4>
 
-<p>对进程和线程两块资源进行分离， 线程已经成为了 CPU 资源的调度单位， 因而与代码执行相关的内容则分配至 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中。</p>
+<p>对进程和线程两块资源进行分离， 线程已经成为了 CPU 资源的调度单位， 因而与代码执行相关的内容则分配至 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 
@@ -584,7 +588,7 @@
 
 <h4 id="134-结语">1.3.4 结语</h4>
 
-<p>任务管理器 <code class="language-plaintext highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。 若是从 chapter7 过渡到 chapter8， 到此时的改写还不足以支撑操作系统的正常运行， 还需添加线程管理的相关机制。</p>
+<p>任务管理器 <code class="language-html highlighter-rouge">TaskManager</code> 与处理器管理结构 <code class="language-html highlighter-rouge">Processor</code> 仅在接口上有所改变。 线程相关的数据结构的实现可以直接阅读 rCore <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/1thread-kernel.html#id19">线程管理机制的设计与实现</a> 章节因而不赘述了。 若是从 chapter7 过渡到 chapter8， 到此时的改写还不足以支撑操作系统的正常运行， 还需添加线程管理的相关机制。</p>
 
 <h2 id="2-sync-mutex-os">2. Sync Mutex OS</h2>
 
@@ -612,22 +616,11 @@
 
 <h4 id="211-软件锁的尝试">2.1.1 软件锁的尝试</h4>
 
-<p>rCore 尝试在用户态通过软件的办法实现锁， 如下代码所示尝试使用 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 这个全局变量表示锁。 可以看到没有获取到锁之前 CPU 会在 while 循环内忙等， 这种策略被称为 <strong>自旋</strong>， 在正确的实现中自旋锁会保证该过程不会被操作系统的调度打断。 在单核操作系统上， 自旋会造成极大的资源浪费， 在分配的一个时间片中， 第一次执行判断后陷入自旋， 由于没有外部量对这个判断条件中的数据进行更改， 自旋的条件始终成立， 相当于这个时间片都会被自旋所浪费。</p>
+<p>rCore 尝试在用户态通过软件的办法实现锁， 如下代码所示尝试使用 <code class="language-html highlighter-rouge">OCCUPIED</code> 这个全局变量表示锁。 可以看到没有获取到锁之前 CPU 会在 while 循环内忙等， 这种策略被称为 <strong>自旋</strong>， 在正确的实现中自旋锁会保证该过程不会被操作系统的调度打断。 在单核操作系统上， 自旋会造成极大的资源浪费， 在分配的一个时间片中， 第一次执行判断后陷入自旋， 由于没有外部量对这个判断条件中的数据进行更改， 自旋的条件始终成立， 相当于这个时间片都会被自旋所浪费。</p>
 
-<p>在该实现中， <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 实际成了一种共享资源， 操作系统可以随时打断当前线程的运行调度到另一个线程， 可以发现这样一种情况： T0 线程发现 <code class="language-plaintext highlighter-rouge">OCCUPIED = false</code> 后准备将 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 修改为 <code class="language-plaintext highlighter-rouge">true</code> (5 - 6 行之间)， 此时突然被操作系统打断调度到 T1 线程， 会导致 T1 也认为其具备进入临界区的权限进而尝试修改 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值。</p>
+<p>在该实现中， <code class="language-html highlighter-rouge">OCCUPIED</code> 实际成了一种共享资源， 操作系统可以随时打断当前线程的运行调度到另一个线程， 可以发现这样一种情况： T0 线程发现 <code class="language-html highlighter-rouge">OCCUPIED = false</code> 后准备将 <code class="language-html highlighter-rouge">OCCUPIED</code> 修改为 <code class="language-html highlighter-rouge">true</code> (5 - 6 行之间)， 此时突然被操作系统打断调度到 T1 线程， 会导致 T1 也认为其具备进入临界区的权限进而尝试修改 <code class="language-html highlighter-rouge">OCCUPIED</code> 的值。</p>
 
-<figure class="highlight"><pre><code class="language-rust" data-lang="rust"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td><td class="code"><pre><span class="c1">// user/src/bin/adder_simple_spin.rs</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// user/src/bin/adder_simple_spin.rs</span>
 <span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
 
 <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
@@ -638,7 +631,7 @@
 <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
     <span class="n">OCCUPIED</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure>
+</code></pre></div></div>
 
 <p>为了解决这个问题， rCore 详细介绍了适用于单核的 Peterson 多标记算法保证两个线程之间的互斥访问， 除此之外还有适用双线程的 Dekkers 算法， 以及多线程的 Eisenberg &amp; McGuire 算法。 但这些算法都具有时代的局限性， 在当前多核系统上使用需要付出极大的资源代价， 并且还很难理解。</p>
 
@@ -651,13 +644,13 @@
 <p><strong>原子指令</strong> 在之前提到过， 它的执行无法被操作系统打断， <strong>原子指令是整个计算机系统中最根本的原子性和互斥性的来源</strong>。 比较常见的指令有 <strong>CAS（Compare-And-Swap）</strong> 以及 <strong>TAS（Test-And-Set）</strong>。 这两条是我之前一直没太理解的， 还有 RISC-V 的 <strong>（Load Reserved / Store Conditional） LR/SC</strong> 原子指令， rCore 对此解释的非常清晰。</p>
 
 <ul>
-  <li><strong>CAS（Compare-And-Swap）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">CAS rd, rs1, rs2, rs3</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 这个值会与 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值进行比较， 若 <em>source == expected</em> 则将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值替换为 <code class="language-plaintext highlighter-rouge">rs3</code> 中的 <em>new</em> 值。 <code class="language-plaintext highlighter-rouge">rs1</code> 最开始存储的 <em>source</em> 值会被存入 <code class="language-plaintext highlighter-rouge">rd</code> 目标寄存器， 这不受比较结果影响。
+  <li><strong>CAS（Compare-And-Swap）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">CAS rd, rs1, rs2, rs3</code>， <code class="language-html highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 这个值会与 <code class="language-html highlighter-rouge">rs2</code> 中的 <em>expected</em> 值进行比较， 若 <em>source == expected</em> 则将 <code class="language-html highlighter-rouge">rs1</code> 的值替换为 <code class="language-html highlighter-rouge">rs3</code> 中的 <em>new</em> 值。 <code class="language-html highlighter-rouge">rs1</code> 最开始存储的 <em>source</em> 值会被存入 <code class="language-html highlighter-rouge">rd</code> 目标寄存器， 这不受比较结果影响。
     <blockquote>
-      <p>具体的使用例程可以参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#cas-tas">常用的 CAS 和 TAS 指令</a> 部分 <code class="language-plaintext highlighter-rouge">adder_atomic.rs</code> 部分。</p>
+      <p>具体的使用例程可以参考 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/2lock.html#cas-tas">常用的 CAS 和 TAS 指令</a> 部分 <code class="language-html highlighter-rouge">adder_atomic.rs</code> 部分。</p>
     </blockquote>
   </li>
   <li>
-    <p><strong>TAS（Test-And-Set）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">TAS rd, rs1, rs2</code>， <code class="language-plaintext highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 他会被直接设置为 <code class="language-plaintext highlighter-rouge">rs2</code> 中的 <em>expected</em> 值， 而 <code class="language-plaintext highlighter-rouge">rd</code> 返回 <code class="language-plaintext highlighter-rouge">rs1</code> 中原来的 <em>source</em> 值。 这个设计也能实现自旋锁， 以如下伪代码为例， 如果有多个线程执行 TAS 原子指令， 仅有一个线程的输入 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 的值为 0， 那么 TAS 返回会为 0， 该线程就能退出循环进入后续的临界区， 而其他的线程只会看到 <code class="language-plaintext highlighter-rouge">OCCUPIED</code> 值为 1 而陷入 while 的自旋中。</p>
+    <p><strong>TAS（Test-And-Set）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">TAS rd, rs1, rs2</code>， <code class="language-html highlighter-rouge">rs1</code> 中是内存存放的某个值 <em>source</em>， 他会被直接设置为 <code class="language-html highlighter-rouge">rs2</code> 中的 <em>expected</em> 值， 而 <code class="language-html highlighter-rouge">rd</code> 返回 <code class="language-html highlighter-rouge">rs1</code> 中原来的 <em>source</em> 值。 这个设计也能实现自旋锁， 以如下伪代码为例， 如果有多个线程执行 TAS 原子指令， 仅有一个线程的输入 <code class="language-html highlighter-rouge">OCCUPIED</code> 的值为 0， 那么 TAS 返回会为 0， 该线程就能退出循环进入后续的临界区， 而其他的线程只会看到 <code class="language-html highlighter-rouge">OCCUPIED</code> 值为 1 而陷入 while 的自旋中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">static</span> <span class="k">mut</span> <span class="n">OCCUPIED</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
@@ -666,9 +659,9 @@
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><strong>LR（Load Reserved）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">LR rd, rs1</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 内存中存放的值写入 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器中。 该指令不能单独使用， 需要配合 SC 指令。</p>
+    <p><strong>LR（Load Reserved）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">LR rd, rs1</code>， 将 <code class="language-html highlighter-rouge">rs1</code> 内存中存放的值写入 <code class="language-html highlighter-rouge">rd</code> 寄存器中。 该指令不能单独使用， 需要配合 SC 指令。</p>
   </li>
-  <li><strong>SC（Store Conditional）：</strong> 其基本用法是 <code class="language-plaintext highlighter-rouge">SC rd, rs1, rs2</code>， 将 <code class="language-plaintext highlighter-rouge">rs1</code> 的值 <em>source</em> 修改为 <code class="language-plaintext highlighter-rouge">rs2</code> 中存放的 <em>new</em> 值， 若修改成功 <code class="language-plaintext highlighter-rouge">rd</code> 返回 0， 否则 <code class="language-plaintext highlighter-rouge">rd</code> 返回任意值。 修改的前提是 LR 和 SC 指令之间， 之前 LR 指令中 <code class="language-plaintext highlighter-rouge">rs1</code> 内存的值没有改变， 这通过 RISC-V 框架下的 <strong>保留集（Reservation Set）</strong> 进行判断。</li>
+  <li><strong>SC（Store Conditional）：</strong> 其基本用法是 <code class="language-html highlighter-rouge">SC rd, rs1, rs2</code>， 将 <code class="language-html highlighter-rouge">rs1</code> 的值 <em>source</em> 修改为 <code class="language-html highlighter-rouge">rs2</code> 中存放的 <em>new</em> 值， 若修改成功 <code class="language-html highlighter-rouge">rd</code> 返回 0， 否则 <code class="language-html highlighter-rouge">rd</code> 返回任意值。 修改的前提是 LR 和 SC 指令之间， 之前 LR 指令中 <code class="language-html highlighter-rouge">rs1</code> 内存的值没有改变， 这通过 RISC-V 框架下的 <strong>保留集（Reservation Set）</strong> 进行判断。</li>
 </ul>
 
 <p>在 RISC-V 架构中可以通过 LR/SC 指令是实现 CAS/TAS 指令的功能。</p>
@@ -714,9 +707,9 @@
 <p>信号量的初始资源可用数量 N 是一个非负整数，它决定了信号量的用途。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">N &gt; 0</code>， 称其为 <strong>计数信号量 (Counting Semaphore)</strong> 或 <strong>一般信号量 (General Semaphore)</strong>， 当 <code class="language-plaintext highlighter-rouge">N = 1</code> 时， 称其为 <strong>二值信号量 (Binary Semaphore)</strong>， 其与互斥锁等价。</li>
+  <li><code class="language-html highlighter-rouge">N &gt; 0</code>， 称其为 <strong>计数信号量 (Counting Semaphore)</strong> 或 <strong>一般信号量 (General Semaphore)</strong>， 当 <code class="language-html highlighter-rouge">N = 1</code> 时， 称其为 <strong>二值信号量 (Binary Semaphore)</strong>， 其与互斥锁等价。</li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">N = 0</code>， 信号量与资源管理无关， 但可用作同步量。 如下图， 在线程 A 需要等待的时候可以对该信号量进行 P 操作， 于是线程会被阻塞。 在线程 B 执行完指定阶段之后再对该信号量进行 V 操作就能够唤醒线程 A 向下执行。 但需要注意 <strong>唤醒丢失</strong> 的问题。</p>
+    <p><code class="language-html highlighter-rouge">N = 0</code>， 信号量与资源管理无关， 但可用作同步量。 如下图， 在线程 A 需要等待的时候可以对该信号量进行 P 操作， 于是线程会被阻塞。 在线程 B 执行完指定阶段之后再对该信号量进行 V 操作就能够唤醒线程 A 向下执行。 但需要注意 <strong>唤醒丢失</strong> 的问题。</p>
 
     <div align="center">
       <img src="/norobots/images/2023-07-15-rcore-note-ch8/semaphore-sync.png" alt="Semaphore sync, rCore" width="400" />
@@ -739,13 +732,13 @@
 
 <p>rCore 实现了 <strong>条件变量 + 互斥锁</strong> 这样一个组合来模拟 <strong>管程</strong> 的实现， 以打破上述组合的局限性。 <strong>管程 (Monitor)</strong> 最早在 Pascal 语言中实现， 现在的 C 以及 Rust 并没有相关的实现机制， 由过程（现在的函数）、共享变量及数据结构等组成。 程序员可以自定义管程的过程和共享资源， 通过过程间接访问这些共享资源。</p>
 
-<p>管程仍是通过互斥锁满足 <strong>互斥访问</strong> 的需求， 另外还支持线程间的同步机制， 通过 <strong>阻塞-唤醒</strong> 实现条件同步。 阻塞和唤醒就是所谓的 <strong>条件变量</strong>， 而在管程的概念中将条件变量的阻塞和唤醒操作分别叫做 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 。 一个管程中可以有多个不同的条件变量， 每个条件变量代表多线程并发执行中需要等待的一种特定的条件， 并保存所有阻塞等待该条件的线程。</p>
+<p>管程仍是通过互斥锁满足 <strong>互斥访问</strong> 的需求， 另外还支持线程间的同步机制， 通过 <strong>阻塞-唤醒</strong> 实现条件同步。 阻塞和唤醒就是所谓的 <strong>条件变量</strong>， 而在管程的概念中将条件变量的阻塞和唤醒操作分别叫做 <code class="language-html highlighter-rouge">wait</code> 和 <code class="language-html highlighter-rouge">signal</code> 。 一个管程中可以有多个不同的条件变量， 每个条件变量代表多线程并发执行中需要等待的一种特定的条件， 并保存所有阻塞等待该条件的线程。</p>
 
-<p>这里的 <code class="language-plaintext highlighter-rouge">wait</code> 和 <code class="language-plaintext highlighter-rouge">signal</code> 有比较特殊的设计：</p>
+<p>这里的 <code class="language-html highlighter-rouge">wait</code> 和 <code class="language-html highlighter-rouge">signal</code> 有比较特殊的设计：</p>
 
 <ul>
-  <li><strong>wait</strong>： <code class="language-plaintext highlighter-rouge">wait</code> 操作会阻塞当前的线程， 但 <strong>不能在持有锁的情况下陷入阻塞</strong>， 在管程过程中线程是持有锁的， 因而 <code class="language-plaintext highlighter-rouge">wait</code> 需要做两件事： 释放锁， 然后阻塞线程。</li>
-  <li><strong>signal</strong>： <code class="language-plaintext highlighter-rouge">signal</code> 则是唤醒当前的线程， 处于互斥访问的需求， 线程被唤醒后需要获取锁， 然后再 <code class="language-plaintext highlighter-rouge">wait</code> 返回继续执行。</li>
+  <li><strong>wait</strong>： <code class="language-html highlighter-rouge">wait</code> 操作会阻塞当前的线程， 但 <strong>不能在持有锁的情况下陷入阻塞</strong>， 在管程过程中线程是持有锁的， 因而 <code class="language-html highlighter-rouge">wait</code> 需要做两件事： 释放锁， 然后阻塞线程。</li>
+  <li><strong>signal</strong>： <code class="language-html highlighter-rouge">signal</code> 则是唤醒当前的线程， 处于互斥访问的需求， 线程被唤醒后需要获取锁， 然后再 <code class="language-html highlighter-rouge">wait</code> 返回继续执行。</li>
 </ul>
 
 <p>由于互斥锁的存在， signal 操作也不只是简单的唤醒操作。 rCore 介绍了基于线程优先级条件的三种唤醒操作语义： Hoare， Hansen， Mesa， 详情可见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id4">管程与条件变量</a>。 在 rCore 内核中实现的是 Mesa 语义， Mesa 语义涉及到锁的竞争， 因而 wait 操作返回之时不见得线程等待的条件一定成立， 有必要重复检查确认之后再继续执行。</p>
@@ -912,7 +905,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

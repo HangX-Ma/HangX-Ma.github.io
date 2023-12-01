@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -308,7 +312,7 @@
 
 <h3 id="question-14"><a href="https://cppquiz.org/quiz/question/14?result=OK&amp;answer=abcBCA&amp;did_answer=Answer">Question 14</a></h3>
 
-<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-plaintext highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-plaintext highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-plaintext highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/basic.start.dynamic#4">basic.start.dynamic</a> 做了相关的解释， 对于 <strong>non-local</strong>， <strong>non-inline</strong> 的 <strong>static storage</strong> 变量， 其初始化过程是 dynamic 的， 要么在 <code class="language-html highlighter-rouge">main()</code> 之前， 或者推迟到进入 <code class="language-html highlighter-rouge">main()</code> 函数之后但先于任何在 <code class="language-html highlighter-rouge">main()</code> 函数中的构造函数。 而具备 <strong>static storage</strong> 属性的变量， 如全局变量， 声明为 static 的变量的析构发生在正常变量之后， 且 <strong>先构造的后释放(reverse order)</strong>。</p>
 
 <h3 id="question-16"><a href="https://cppquiz.org/quiz/question/16?result=OK&amp;answer=abBA&amp;did_answer=Answer">Question 16</a></h3>
 
@@ -324,7 +328,7 @@
 
 <h3 id="question-312"><a href="https://cppquiz.org/quiz/question/312?result=CE&amp;answer=&amp;did_answer=Answer">Question 312</a></h3>
 
-<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-plaintext highlighter-rouge">private</code> 而 struct 都默认 <code class="language-plaintext highlighter-rouge">public</code>。</p>
+<p><a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#1">class.access.base</a>，<a href="https://timsong-cpp.github.io/cppwp/n4659/class.access.base#2">class.access.base</a> 介绍了继承相关的内容。 class 和 struct 在多继承中的默认继承类型和 class 以及 struct 默认成员函数和成员变量类型是一致的， class 中默认的都是 <code class="language-html highlighter-rouge">private</code> 而 struct 都默认 <code class="language-html highlighter-rouge">public</code>。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
@@ -484,7 +488,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

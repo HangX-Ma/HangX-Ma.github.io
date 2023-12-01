@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -290,11 +294,11 @@
                 href="/blog/archive.html?tag=cmu15-445">cmu15-445</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Nov 28, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 12560 words </span>
+                <span> Total 12602 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 35 mins </span>
+                <span> About 36 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s11s28scmu15445-fa23-p2.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-11-28T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,cmu15-445"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -310,39 +314,39 @@
 
 <h2 id="2-task1---readwrite-page-guards">2. task#1 - Read/Write Page Guards</h2>
 
-<p><code class="language-plaintext highlighter-rouge">Page Guard</code> 的作用是实现一个基于 C++ 的 RAII(Resource Acquisition Is Initialization) 机制的 Page 管理类， 这个类能够通过析构或手动 <code class="language-plaintext highlighter-rouge">Drop</code> UnpinPage 并释放相应的 RLock 或者 WLock， 能够避免后续 Extendible Hash Index 实现时由于人为对读写锁的使用失误以及忘记 UnpinPage 导致 BufferPoolManager 的页管理出错。</p>
+<p><code class="language-html highlighter-rouge">Page Guard</code> 的作用是实现一个基于 C++ 的 RAII(Resource Acquisition Is Initialization) 机制的 Page 管理类， 这个类能够通过析构或手动 <code class="language-html highlighter-rouge">Drop</code> UnpinPage 并释放相应的 RLock 或者 WLock， 能够避免后续 Extendible Hash Index 实现时由于人为对读写锁的使用失误以及忘记 UnpinPage 导致 BufferPoolManager 的页管理出错。</p>
 
 <h3 id="21-task1-实现细节提示">2.1 task#1 实现细节提示</h3>
 
-<p>Project Specification 特地将这几个函数的实现放在一起是有其道理的， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 删除了拷贝构造和拷贝赋值， 需要实现移动构造和移动赋值以及其析构函数。 这里会需要较多的代码的复用， 尤其是 <code class="language-plaintext highlighter-rouge">Drop</code> 函数。</p>
+<p>Project Specification 特地将这几个函数的实现放在一起是有其道理的， <code class="language-html highlighter-rouge">BasicPageGuard</code> 删除了拷贝构造和拷贝赋值， 需要实现移动构造和移动赋值以及其析构函数。 这里会需要较多的代码的复用， 尤其是 <code class="language-html highlighter-rouge">Drop</code> 函数。</p>
 
 <ul>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">PageGuard(PageGuard &amp;&amp;that)</code>: Move constructor.</p>
+    <p><code class="language-html highlighter-rouge">PageGuard(PageGuard <span class="err">&amp;&amp;</span>that)</code>: Move constructor.</p>
 
     <blockquote>
-      <p>对于 Basic 版本直接对 <code class="language-plaintext highlighter-rouge">page_</code>， <code class="language-plaintext highlighter-rouge">bpm_</code>， <code class="language-plaintext highlighter-rouge">is_dirty</code> 进行赋值， 出于习惯将右值 <code class="language-plaintext highlighter-rouge">that</code> 中的指针都置为 <code class="language-plaintext highlighter-rouge">nullptr</code>。 而 Upgrade 版本则可方便地通过 <code class="language-plaintext highlighter-rouge">std::move</code> 赋值 <code class="language-plaintext highlighter-rouge">guard_</code>。</p>
+      <p>对于 Basic 版本直接对 <code class="language-html highlighter-rouge">page_</code>， <code class="language-html highlighter-rouge">bpm_</code>， <code class="language-html highlighter-rouge">is_dirty</code> 进行赋值， 出于习惯将右值 <code class="language-html highlighter-rouge">that</code> 中的指针都置为 <code class="language-html highlighter-rouge">nullptr</code>。 而 Upgrade 版本则可方便地通过 <code class="language-html highlighter-rouge">std::move</code> 赋值 <code class="language-html highlighter-rouge">guard_</code>。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">operator=(PageGuard &amp;&amp;that)</code>: Move operator.</p>
+    <p><code class="language-html highlighter-rouge">operator=(PageGuard <span class="err">&amp;&amp;</span>that)</code>: Move operator.</p>
 
     <blockquote>
-      <p>这里需要注意两点： 1. <code class="language-plaintext highlighter-rouge">that</code> 是否为自身； 2. 如果当前的 <code class="language-plaintext highlighter-rouge">guard_.page_</code> 或 <code class="language-plaintext highlighter-rouge">page_</code> 非 <code class="language-plaintext highlighter-rouge">nullptr</code>， 需要先 <code class="language-plaintext highlighter-rouge">Drop</code> 已存储在当前 PageGuard 中的 Page。</p>
+      <p>这里需要注意两点： 1. <code class="language-html highlighter-rouge">that</code> 是否为自身； 2. 如果当前的 <code class="language-html highlighter-rouge">guard_.page_</code> 或 <code class="language-html highlighter-rouge">page_</code> 非 <code class="language-html highlighter-rouge">nullptr</code>， 需要先 <code class="language-html highlighter-rouge">Drop</code> 已存储在当前 PageGuard 中的 Page。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
+    <p><code class="language-html highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
 
     <blockquote>
-      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
+      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-html highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-html highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-html highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-html highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
     </blockquote>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">~PageGuard()</code>: Destructor.</p>
+    <p><code class="language-html highlighter-rouge">~PageGuard()</code>: Destructor.</p>
 
     <blockquote>
-      <p>直接调用 <code class="language-plaintext highlighter-rouge">Drop</code> 就行啦！</p>
+      <p>直接调用 <code class="language-html highlighter-rouge">Drop</code> 就行啦！</p>
     </blockquote>
   </li>
 </ul>
@@ -350,17 +354,17 @@
 <p>至于下面这两个函数则让我面目狰狞， 给的注释说的非常隐晦， 要保证在 Upgrade 的过程中 Page 不被 Evict， 又说 BasicPageGuard 在调用这个函数后会 invalid。 具体细节参考下一小节的 <a href="#pageguardtestbpmtest">PageGuardTest.BPMTest</a> 调试。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">UpgradeRead()</code>: Upgrade to a ReadPageGuard</li>
-  <li><code class="language-plaintext highlighter-rouge">UpgradeWrite()</code>: Upgrade to a WritePageGuard</li>
+  <li><code class="language-html highlighter-rouge">UpgradeRead()</code>: Upgrade to a ReadPageGuard</li>
+  <li><code class="language-html highlighter-rouge">UpgradeWrite()</code>: Upgrade to a WritePageGuard</li>
 </ul>
 
 <p>而下面这四个函数也是清晰的， 对有 Read 和 Write 需求的就相应的给上读/写锁， 但这里考虑到 WritePageGuard 可能会被更改， 我个人认为需要在 Fetch 的同时将相应的 Page 设置为 <em><strong>dirty</strong></em>。</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageBasic(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageRead(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">FetchPageWrite(page_id_t page_id)</code></li>
-  <li><code class="language-plaintext highlighter-rouge">NewPageGuarded(page_id_t *page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageBasic(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageRead(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">FetchPageWrite(page_id_t page_id)</code></li>
+  <li><code class="language-html highlighter-rouge">NewPageGuarded(page_id_t *page_id)</code></li>
 </ul>
 
 <h3 id="22-task1-的调试与解析">2.2 task#1 的调试与解析</h3>
@@ -376,7 +380,7 @@ Expected equality of these values:
     Which is: 3
 </code></pre></div></div>
 
-<p>我自己模仿所给范例写了一些本地的测试都是通过的， 唯一感觉有些不确定的是 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeRead()</code> 和 <code class="language-plaintext highlighter-rouge">BasicPageGuard::UpgradeWrite()</code> 这两个函数， 对于他们的实现细节我不是很清楚。 为了确定 Bug， 我用了 <code class="language-plaintext highlighter-rouge">LOG_DEBUG(...)</code> 打印所有与 <strong>pinCount</strong> 变更相关的信息， 再次提交 Gradescope 后得到了这样的输出：</p>
+<p>我自己模仿所给范例写了一些本地的测试都是通过的， 唯一感觉有些不确定的是 <code class="language-html highlighter-rouge">BasicPageGuard::UpgradeRead()</code> 和 <code class="language-html highlighter-rouge">BasicPageGuard::UpgradeWrite()</code> 这两个函数， 对于他们的实现细节我不是很清楚。 为了确定 Bug， 我用了 <code class="language-html highlighter-rouge">LOG_DEBUG(...)</code> 打印所有与 <strong>pinCount</strong> 变更相关的信息， 再次提交 Gradescope 后得到了这样的输出：</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:210:NewPageGuarded] DEBUG - new basic page guard
 2023-11-27 08:49:55 <span class="o">[</span>buffer_pool_manager.cpp:61:NewPage] DEBUG - Create new page, page_id 0, pinCount <span class="o">[</span>1]
@@ -404,14 +408,14 @@ Expected equality of these values:
 2023-11-27 08:49:55 <span class="o">[</span>page_guard.cpp:23:Drop] DEBUG - page_id 1, pinCount from <span class="o">[</span>2] to <span class="o">[</span>1]
 </code></pre></div></div>
 
-<p>可以看到错误就发生在 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 转为 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code> 的过程中， 按照我之前的理解， 理应 Upgrade 应当增加一次对相应的 Page 的访问， 所以最开始的代码如下：</p>
+<p>可以看到错误就发生在 <code class="language-html highlighter-rouge">BasicPageGuard</code> 转为 <code class="language-html highlighter-rouge">ReadPageGuard</code> 的过程中， 按照我之前的理解， 理应 Upgrade 应当增加一次对相应的 Page 的访问， 所以最开始的代码如下：</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
   <span class="k">return</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>但按照所给测例的输出， <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 应当在 Upgrade 之后释放原有的资源， 这意味着 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code> 在 Upgrade 之后无法再通过 Upgrade 返回一个 <code class="language-plaintext highlighter-rouge">Read/WritePageGuard</code>， 在 Upgrade 完成后需要手动调用 <code class="language-plaintext highlighter-rouge">BasicPageGuard::Drop()</code> 释放原有的资源， 当然这个猜想在所给代码注释中得到了印证：</p>
+<p>但按照所给测例的输出， <code class="language-html highlighter-rouge">BasicPageGuard</code> 应当在 Upgrade 之后释放原有的资源， 这意味着 <code class="language-html highlighter-rouge">BasicPageGuard</code> 在 Upgrade 之后无法再通过 Upgrade 返回一个 <code class="language-html highlighter-rouge">Read/WritePageGuard</code>， 在 Upgrade 完成后需要手动调用 <code class="language-html highlighter-rouge">BasicPageGuard::Drop()</code> 释放原有的资源， 当然这个猜想在所给代码注释中得到了印证：</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
   * The protected page is not evicted from the buffer pool during the upgrade,
@@ -419,11 +423,11 @@ Expected equality of these values:
   */</span>
 </code></pre></div></div>
 
-<p>至于为什么用 <code class="language-plaintext highlighter-rouge">FetchPageRead</code> 而不是直接返回一个全新的 <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， 主要是考虑到在 Upgrade 过程中会 <strong>Drop</strong> 原有的 <strong>Basic Guard</strong>， 而 Upgrade 需要保证这个 Page 不会被缓存池的 LRU-K 算法 Evict， 那需要保证这个 Page 处于一个 Pin 的状态。 Fetch 可以增加一次 <code class="language-plaintext highlighter-rouge">pinCount</code>, 可以与 <code class="language-plaintext highlighter-rouge">Drop</code> 中调用的 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 导致 <code class="language-plaintext highlighter-rouge">pinCount</code> 的一次减少抵消。</p>
+<p>至于为什么用 <code class="language-html highlighter-rouge">FetchPageRead</code> 而不是直接返回一个全新的 <code class="language-html highlighter-rouge">ReadPageGuard</code>， 主要是考虑到在 Upgrade 过程中会 <strong>Drop</strong> 原有的 <strong>Basic Guard</strong>， 而 Upgrade 需要保证这个 Page 不会被缓存池的 LRU-K 算法 Evict， 那需要保证这个 Page 处于一个 Pin 的状态。 Fetch 可以增加一次 <code class="language-html highlighter-rouge">pinCount</code>, 可以与 <code class="language-html highlighter-rouge">Drop</code> 中调用的 <code class="language-html highlighter-rouge">UnpinPage</code> 导致 <code class="language-html highlighter-rouge">pinCount</code> 的一次减少抵消。</p>
 
 <p>后续提交通过了 <strong>BMPTest</strong> 证明了我的猜想。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// reference code</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// reference code</span>
 <span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">UpgradeRead</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ReadPageGuard</span> <span class="p">{</span>
   <span class="n">ReadPageGuard</span> <span class="n">read_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">FetchPageRead</span><span class="p">(</span><span class="n">page_</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">());</span>
   <span class="n">Drop</span><span class="p">();</span>
@@ -463,30 +467,30 @@ Expected equality of these values:
 </span></code></pre></div></div>
 
 <blockquote>
-  <p>这里我偷偷改了 <code class="language-plaintext highlighter-rouge">GetDirectoryPageId</code> 的返回类型， 不然和 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组的类型不统一。</p>
-
-  <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableHeaderPage</span><span class="o">::</span><span class="n">GetDirectoryPageId</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">page_id_t</span>
-</code></pre></div>  </div>
+  <p>这里我偷偷改了 <code class="language-html highlighter-rouge">GetDirectoryPageId</code> 的返回类型， 不然和 <code class="language-html highlighter-rouge">directory_page_ids_</code> 数组的类型不统一。</p>
 </blockquote>
+
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableHeaderPage</span><span class="o">::</span><span class="n">GetDirectoryPageId</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">page_id_t</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h3 id="31-task2-实现细节提示">3.1 task#2 实现细节提示</h3>
 
 <h4 id="hash-table-header-page">Hash Table Header Page</h4>
 
 <ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 需要将 <code class="language-plaintext highlighter-rouge">directory_page_ids_</code> 数组中的 page_id 都初始化为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code>， <code class="language-plaintext highlighter-rouge">max_depth</code> 是有它的上限的。</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">HashToDirectoryIndex</code></strong>： 就比较阴险了， 对于 header 而言， 要获取 directory 的索引值， 是通过 32 位 Hash 的 MSB 实现的。 设想 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零， 32 位 Hash 右移 32 位仍是其本身。 因而需要特殊处理 <code class="language-plaintext highlighter-rouge">max_depth</code> 为零的情况， 应返回一个 0 值。</li>
+  <li><strong><code class="language-html highlighter-rouge">Init</code></strong>： 需要将 <code class="language-html highlighter-rouge">directory_page_ids_</code> 数组中的 page_id 都初始化为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code>， <code class="language-html highlighter-rouge">max_depth</code> 是有它的上限的。</li>
+  <li><strong><code class="language-html highlighter-rouge">HashToDirectoryIndex</code></strong>： 就比较阴险了， 对于 header 而言， 要获取 directory 的索引值， 是通过 32 位 Hash 的 MSB 实现的。 设想 <code class="language-html highlighter-rouge">max_depth</code> 为零， 32 位 Hash 右移 32 位仍是其本身。 因而需要特殊处理 <code class="language-html highlighter-rouge">max_depth</code> 为零的情况， 应返回一个 0 值。</li>
 </ul>
 
 <h4 id="hash-table-directory-page">Hash Table Directory Page</h4>
 
 <ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">Init</code></strong>： 同样需要初始化 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">bucket_page_id_</code> 这两个数组。 <code class="language-plaintext highlighter-rouge">local_depth_</code> 以及 <code class="language-plaintext highlighter-rouge">global_depth_</code> 需要初始化为 0。</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">HashToBucketIndex</code></strong>： 有个比较巧妙的办法就是直接用 hash 值对 <code class="language-plaintext highlighter-rouge">Size()</code> 取模， 这和使用 <code class="language-plaintext highlighter-rouge">GetGlobalDepthMask</code> 是一样的。</li>
+  <li><strong><code class="language-html highlighter-rouge">Init</code></strong>： 同样需要初始化 <code class="language-html highlighter-rouge">local_depth_</code> 以及 <code class="language-html highlighter-rouge">bucket_page_id_</code> 这两个数组。 <code class="language-html highlighter-rouge">local_depth_</code> 以及 <code class="language-html highlighter-rouge">global_depth_</code> 需要初始化为 0。</li>
+  <li><strong><code class="language-html highlighter-rouge">HashToBucketIndex</code></strong>： 有个比较巧妙的办法就是直接用 hash 值对 <code class="language-html highlighter-rouge">Size()</code> 取模， 这和使用 <code class="language-html highlighter-rouge">GetGlobalDepthMask</code> 是一样的。</li>
   <li>
-    <p><strong><code class="language-plaintext highlighter-rouge">GetSplitImageIndex</code></strong>： 主要得理解 Extendible Hash Index 的 Split 的思路， directory 部分扩大事实上就是左移了一个 global depth， 这导致 directory 数量变为原来的两倍。 例如 <code class="language-plaintext highlighter-rouge">00</code> 会分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code> 但二者都指向同一个 bucket。 所以我们只需要得到当前 bucket 并对其 global_depth 位取反， 就能得到镜像的 bucket 的索引值。</p>
+    <p><strong><code class="language-html highlighter-rouge">GetSplitImageIndex</code></strong>： 主要得理解 Extendible Hash Index 的 Split 的思路， directory 部分扩大事实上就是左移了一个 global depth， 这导致 directory 数量变为原来的两倍。 例如 <code class="language-html highlighter-rouge">00</code> 会分裂为 <code class="language-html highlighter-rouge">000</code> 和 <code class="language-html highlighter-rouge">100</code> 但二者都指向同一个 bucket。 所以我们只需要得到当前 bucket 并对其 global_depth 位取反， 就能得到镜像的 bucket 的索引值。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">uint32_t</span> <span class="p">{</span>
+    <div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">GetSplitImageIndex</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="kt">uint32_t</span> <span class="p">{</span>
   <span class="c1">// Ensure the bucket local depth has increased!</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
   <span class="k">return</span> <span class="n">bucket_idx</span> <span class="o">^</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">local_depths_</span><span class="p">[</span><span class="n">bucket_idx</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
@@ -494,9 +498,9 @@ Expected equality of these values:
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><strong><code class="language-plaintext highlighter-rouge">IncrGlobalDepth</code></strong>： 结合上个函数的解析， 如果理解了 Extendible Hash Index 的实现思路， 增加 global_depth 要做的就是拷贝一份原有的 buckets， 如 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 分裂为 <code class="language-plaintext highlighter-rouge">000</code> 和 <code class="language-plaintext highlighter-rouge">100</code>， 把 <code class="language-plaintext highlighter-rouge">00</code> 的内容拷贝一份到 <code class="language-plaintext highlighter-rouge">100</code> 中即可。</p>
+    <p><strong><code class="language-html highlighter-rouge">IncrGlobalDepth</code></strong>： 结合上个函数的解析， 如果理解了 Extendible Hash Index 的实现思路， 增加 global_depth 要做的就是拷贝一份原有的 buckets， 如 bucket_idx <code class="language-html highlighter-rouge">00</code> 分裂为 <code class="language-html highlighter-rouge">000</code> 和 <code class="language-html highlighter-rouge">100</code>， 把 <code class="language-html highlighter-rouge">00</code> 的内容拷贝一份到 <code class="language-html highlighter-rouge">100</code> 中即可。</p>
 
-    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
+    <div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
   <span class="n">assert</span><span class="p">(</span><span class="n">global_depth_</span> <span class="o">&lt;</span> <span class="n">HTABLE_DIRECTORY_MAX_DEPTH</span><span class="p">);</span>
   <span class="kt">uint32_t</span> <span class="n">prev_expansion_num</span> <span class="o">=</span> <span class="n">Size</span><span class="p">();</span>
   <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">prev_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">curr_idx</span> <span class="o">=</span> <span class="n">prev_expansion_num</span><span class="p">;</span> <span class="n">prev_idx</span> <span class="o">&lt;</span> <span class="n">prev_expansion_num</span><span class="p">;</span>
@@ -508,18 +512,18 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong><code class="language-plaintext highlighter-rouge">CanShrink</code></strong>： 检查所有的 bucket 的 local_depth， 如果都比 global depth 要小， 就可以缩小 global_depth。 这个函数在后续 Merge 的时候需要用到。</li>
+  <li><strong><code class="language-html highlighter-rouge">CanShrink</code></strong>： 检查所有的 bucket 的 local_depth， 如果都比 global depth 要小， 就可以缩小 global_depth。 这个函数在后续 Merge 的时候需要用到。</li>
 </ul>
 
 <p>其他的该加加该减减就行， 不用想太多， 就是纯粹的增减！</p>
 
 <h4 id="hash-table-bucket-page">Hash Table Bucket Page</h4>
 
-<p>讲道理开始一点思路没有， 我看到有人在 <a href="https://zhuanlan.zhihu.com/p/664444839">知乎 - zihao 彼方 CMU15-445(2023FALL)-Project#2: Extendible Hash Index</a> 发了篇文章， 里面提到需要对 bucket 中的 <code class="language-plaintext highlighter-rouge">array_</code> 数组全部初始化为一个特殊值 ， <strong>坑爹啊！！！</strong> 这导致我后续花了将近 6 个小时找 <strong>GrowShrinkTest</strong> 的错误。</p>
+<p>讲道理开始一点思路没有， 我看到有人在 <a href="https://zhuanlan.zhihu.com/p/664444839">知乎 - zihao 彼方 CMU15-445(2023FALL)-Project#2: Extendible Hash Index</a> 发了篇文章， 里面提到需要对 bucket 中的 <code class="language-html highlighter-rouge">array_</code> 数组全部初始化为一个特殊值 ， <strong>坑爹啊！！！</strong> 这导致我后续花了将近 6 个小时找 <strong>GrowShrinkTest</strong> 的错误。</p>
 
-<p>实际上 bucket 的实现非常简洁， 我后来在看 <code class="language-plaintext highlighter-rouge">PrintBucket</code> 的实现的时候得到了启发， BUSTUB 直接访问的前 <code class="language-plaintext highlighter-rouge">size_</code> 个元素。 说明每次 <code class="language-plaintext highlighter-rouge">Insert</code> 的时候利用 <code class="language-plaintext highlighter-rouge">size_</code> 可以对数组进行尾部插入， 这是因为 <code class="language-plaintext highlighter-rouge">size_</code> 始终指向下一个插入的位置。而每次 <code class="language-plaintext highlighter-rouge">Remove</code> 的时候只用 <code class="language-plaintext highlighter-rouge">size_</code> 指向当前数组的尾部数据 (人话就是 <code class="language-plaintext highlighter-rouge">size_ -= 1</code>)， 让这个尾部数据填充到 <code class="language-plaintext highlighter-rouge">RemoveAt</code> 的那个 bucket_idx 位置即可。</p>
+<p>实际上 bucket 的实现非常简洁， 我后来在看 <code class="language-html highlighter-rouge">PrintBucket</code> 的实现的时候得到了启发， BUSTUB 直接访问的前 <code class="language-html highlighter-rouge">size_</code> 个元素。 说明每次 <code class="language-html highlighter-rouge">Insert</code> 的时候利用 <code class="language-html highlighter-rouge">size_</code> 可以对数组进行尾部插入， 这是因为 <code class="language-html highlighter-rouge">size_</code> 始终指向下一个插入的位置。而每次 <code class="language-html highlighter-rouge">Remove</code> 的时候只用 <code class="language-html highlighter-rouge">size_</code> 指向当前数组的尾部数据 (人话就是 <code class="language-html highlighter-rouge">size_ -= 1</code>)， 让这个尾部数据填充到 <code class="language-html highlighter-rouge">RemoveAt</code> 的那个 bucket_idx 位置即可。</p>
 
-<p>我们无需对数组进行初始化等操作， <code class="language-plaintext highlighter-rouge">size_</code> 表示当前的数据大小可以很好的控制访问权限。</p>
+<p>我们无需对数组进行初始化等操作， <code class="language-html highlighter-rouge">size_</code> 表示当前的数据大小可以很好的控制访问权限。</p>
 
 <h3 id="32-task2-的调试与解析">3.2 task#2 的调试与解析</h3>
 
@@ -537,21 +541,46 @@ Expected equality of these values:
 
 <h3 id="41-task3-实现细节提示">4.1 task#3 实现细节提示</h3>
 
-<p>这里实现的时候需要考虑 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， <code class="language-plaintext highlighter-rouge">ReadPageGuard</code>， <code class="language-plaintext highlighter-rouge">WritePageGuard</code> 的使用场景。 一般来说， 只有需要通过 <code class="language-plaintext highlighter-rouge">NewPageGuarded</code> 获取新 Page 才会用到 <code class="language-plaintext highlighter-rouge">BasicPageGuard</code>， 之后都会通过 Upgrade 函数将这个获取到的 Page 加上读写锁。 使用 PageGuard 原则就是看是否后续操作会产生对数据的更改， 如果不会更改就尽量使用 Read， 并在适当的时候通过 <code class="language-plaintext highlighter-rouge">Drop</code> 函数提前释放相关的读写锁， 以提高并行效率。</p>
+<p>这里实现的时候需要考虑 <code class="language-html highlighter-rouge">BasicPageGuard</code>， <code class="language-html highlighter-rouge">ReadPageGuard</code>， <code class="language-html highlighter-rouge">WritePageGuard</code> 的使用场景。 一般来说， 只有需要通过 <code class="language-html highlighter-rouge">NewPageGuarded</code> 获取新 Page 才会用到 <code class="language-html highlighter-rouge">BasicPageGuard</code>， 之后都会通过 Upgrade 函数将这个获取到的 Page 加上读写锁。 使用 PageGuard 原则就是看是否后续操作会产生对数据的更改， 如果不会更改就尽量使用 Read， 并在适当的时候通过 <code class="language-html highlighter-rouge">Drop</code> 函数提前释放相关的读写锁， 以提高并行效率。</p>
 
 <h4 id="migrateentries">MigrateEntries</h4>
 
-<p>我相信很多人看到这个函数是懵的， 这个函数究竟什么作用根本没有提示。 这个函数和 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code> 函数都是用在 <strong>Split Bucket</strong> 中的。 试想有一个 bucket_idx 为 <code class="language-plaintext highlighter-rouge">00</code> 的 bucket 存储了两个 KV 数据， 在我们增加 global_depth 和 local_depth 之后， 我们需要将 bucket_idx <code class="language-plaintext highlighter-rouge">00</code> 中的数据填充到新的 <code class="language-plaintext highlighter-rouge">000</code>(原 <code class="language-plaintext highlighter-rouge">00</code>) 和 <code class="language-plaintext highlighter-rouge">100</code> 这两个 bucket， 此时就要用到 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 函数。</p>
+<p>我相信很多人看到这个函数是懵的， 这个函数究竟什么作用根本没有提示。 这个函数和 <code class="language-html highlighter-rouge">UpdateDirectoryMapping</code> 函数都是用在 <strong>Split Bucket</strong> 中的。 试想有一个 bucket_idx 为 <code class="language-html highlighter-rouge">00</code> 的 bucket 存储了两个 KV 数据， 在我们增加 global_depth 和 local_depth 之后， 我们需要将 bucket_idx <code class="language-html highlighter-rouge">00</code> 中的数据填充到新的 <code class="language-html highlighter-rouge">000</code>(原 <code class="language-html highlighter-rouge">00</code>) 和 <code class="language-html highlighter-rouge">100</code> 这两个 bucket， 此时就要用到 <code class="language-html highlighter-rouge">MigrateEntries</code> 函数。</p>
 
-<p>首先将原有数据拷贝出来， 这里需要注意的是， 如果使用 <code class="language-plaintext highlighter-rouge">ExtendibleHTableBucketPage&lt;K, V, KC&gt;::EntryAt</code> 函数会有问题， 我们无法对一个 const 引用进行拷贝构造。 解决办法就是单独用 <code class="language-plaintext highlighter-rouge">KeyAt</code> 和 <code class="language-plaintext highlighter-rouge">ValueAt</code>配合 <code class="language-plaintext highlighter-rouge">std::make_pair</code> 构造一个新的 KV。</p>
+<p>首先将原有数据拷贝出来， 这里需要注意的是， 如果使用 <code class="language-html highlighter-rouge">ExtendibleHTableBucketPage<span class="nt">&lt;K</span><span class="err">,</span> <span class="na">V</span><span class="err">,</span> <span class="na">KC</span><span class="nt">&gt;</span>::EntryAt</code> 函数会有问题， 我们无法对一个 const 引用进行拷贝构造。 解决办法就是单独用 <code class="language-html highlighter-rouge">KeyAt</code> 和 <code class="language-html highlighter-rouge">ValueAt</code>配合 <code class="language-html highlighter-rouge">std::make_pair</code> 构造一个新的 KV。</p>
 
 <blockquote>
-  <p>可以自己尝试用 LOG_DEBUG 看看结果， 不出意外的话 <code class="language-plaintext highlighter-rouge">copied</code> 的 KV 应都是 0 值。</p>
+  <p>可以自己尝试用 LOG_DEBUG 看看结果， 不出意外的话 <code class="language-html highlighter-rouge">copied</code> 的 KV 应都是 0 值。</p>
 </blockquote>
 
 <p>之后根据新的 local_depth 将拷贝的数据按照新的 bucket_idx 插入 old_bucket 或 new_bucket。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre></td><td class="code"><pre><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
 <span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">MigrateEntries</span><span class="p">(</span><span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">old_bucket</span><span class="p">,</span>
                                                        <span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">new_bucket</span><span class="p">,</span>
                                                        <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
@@ -576,13 +605,13 @@ Expected equality of these values:
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</pre></td></tr></tbody></table></code></pre></figure>
 
 <h4 id="updatedirectorymapping">UpdateDirectoryMapping</h4>
 
 <p>这又是做什么？ 可以想象的是， 有时候我们有很多 bucket_idx 指向的是同一个 page_id， 如果不清楚请参考 <a href="#1-理解-extendible-hash">理解-extendible-hash</a> 我们在 Split Bucket 完成后， 需要让原来指向 split_bucket_idx 的那些 buckets 重新分配指向， 要么是 split_bucket_idx， 要么是 image_bucket_idx， 并且都需要设定新的 local_depth。</p>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">KC</span><span class="p">&gt;</span>
 <span class="kt">void</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">UpdateDirectoryMapping</span><span class="p">(</span><span class="n">ExtendibleHTableDirectoryPage</span> <span class="o">*</span><span class="n">directory</span><span class="p">,</span>
                                                                <span class="kt">uint32_t</span> <span class="n">new_bucket_idx</span><span class="p">,</span> <span class="n">page_id_t</span> <span class="n">new_bucket_page_id</span><span class="p">,</span>
                                                                <span class="kt">uint32_t</span> <span class="n">new_local_depth</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">local_depth_mask</span><span class="p">)</span> <span class="p">{</span>
@@ -602,7 +631,7 @@ Expected equality of these values:
 
 <h4 id="getvalue-和-remove">GetValue 和 Remove</h4>
 
-<p>这两个函数的接口都是 <code class="language-plaintext highlighter-rouge">key</code>， 说明有时候可能这个 <code class="language-plaintext highlighter-rouge">key</code> 是不存在于 BufferPool 的， 我们需要在获取 directory index 的时候就可以判断， 如果 directory_idx 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 可以提早返回结果， 因为这个 <code class="language-plaintext highlighter-rouge">key</code> 并不存在。</p>
+<p>这两个函数的接口都是 <code class="language-html highlighter-rouge">key</code>， 说明有时候可能这个 <code class="language-html highlighter-rouge">key</code> 是不存在于 BufferPool 的， 我们需要在获取 directory index 的时候就可以判断， 如果 directory_idx 为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code> 可以提早返回结果， 因为这个 <code class="language-html highlighter-rouge">key</code> 并不存在。</p>
 
 <p>另外注意 Fall 2023 版本是 unique-key， 不存在一个 key 对应多个值的情况。</p>
 
@@ -612,25 +641,25 @@ Expected equality of these values:
 
 <h4 id="insert">Insert</h4>
 
-<p><code class="language-plaintext highlighter-rouge">Insert</code> 中在 directory 的 page_id 为 <code class="language-plaintext highlighter-rouge">INVALID_PAGE_ID</code> 时调用 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code>， 在 <code class="language-plaintext highlighter-rouge">InsertToNewDirectory</code> 中调用 <code class="language-plaintext highlighter-rouge">InsertToNewBucket</code>， 这是这两个函数的使用方式。</p>
+<p><code class="language-html highlighter-rouge">Insert</code> 中在 directory 的 page_id 为 <code class="language-html highlighter-rouge">INVALID_PAGE_ID</code> 时调用 <code class="language-html highlighter-rouge">InsertToNewDirectory</code>， 在 <code class="language-html highlighter-rouge">InsertToNewDirectory</code> 中调用 <code class="language-html highlighter-rouge">InsertToNewBucket</code>， 这是这两个函数的使用方式。</p>
 
 <ul>
   <li>如果发现 directory 索引超过了 header 的最大限制， 需要直接返回 false。</li>
-  <li>判断当前需要插入的 bucket 的情况， 如果没有满则可以直接调用 bucket 的 Insert 函数， 如果满了则调用 <code class="language-plaintext highlighter-rouge">SplitInsert</code> 函数。</li>
+  <li>判断当前需要插入的 bucket 的情况， 如果没有满则可以直接调用 bucket 的 Insert 函数， 如果满了则调用 <code class="language-html highlighter-rouge">SplitInsert</code> 函数。</li>
 </ul>
 
 <h4 id="splitinsert">SplitInsert</h4>
 
-<p>这个函数不进行任何插入操作， 插入操作仅在 <code class="language-plaintext highlighter-rouge">Insert</code> 中进行， 因而在该函数完成对 global_depth 和 local_depth 的扩容后， 需要再次调用 <code class="language-plaintext highlighter-rouge">Insert</code> 完成数据插入。</p>
+<p>这个函数不进行任何插入操作， 插入操作仅在 <code class="language-html highlighter-rouge">Insert</code> 中进行， 因而在该函数完成对 global_depth 和 local_depth 的扩容后， 需要再次调用 <code class="language-html highlighter-rouge">Insert</code> 完成数据插入。</p>
 
 <p><strong>需要注意以下几点</strong>：</p>
 
 <ol>
-  <li>当前的 bucket_idx 获取的 local_depth 已经与传入的 <code class="language-plaintext highlighter-rouge">directory_max_depth_</code> 相等了， 说明 directory 已经扩容到最大， bucket 也扩容到最多， 无法继续扩容， 直接返回 <code class="language-plaintext highlighter-rouge">false</code>。</li>
+  <li>当前的 bucket_idx 获取的 local_depth 已经与传入的 <code class="language-html highlighter-rouge">directory_max_depth_</code> 相等了， 说明 directory 已经扩容到最大， bucket 也扩容到最多， 无法继续扩容， 直接返回 <code class="language-html highlighter-rouge">false</code>。</li>
   <li>如果上述条件不满足， 说明还可以继续扩容， 如果 local_depth 已经和 global_depth 相等了， 先增加 global_depth。</li>
   <li>增加 local_depth。</li>
-  <li>调用 <code class="language-plaintext highlighter-rouge">MigrateEntries</code> 以及 <code class="language-plaintext highlighter-rouge">UpdateDirectoryMapping</code>（有两次） 完成扩容。</li>
-  <li>重新尝试 <code class="language-plaintext highlighter-rouge">Insert</code>。</li>
+  <li>调用 <code class="language-html highlighter-rouge">MigrateEntries</code> 以及 <code class="language-html highlighter-rouge">UpdateDirectoryMapping</code>（有两次） 完成扩容。</li>
+  <li>重新尝试 <code class="language-html highlighter-rouge">Insert</code>。</li>
 </ol>
 
 <h4 id="merge">Merge</h4>
@@ -642,12 +671,12 @@ Expected equality of these values:
 <ol>
   <li>local_depth 为 0， 说明已经到达 Merge 的极限了， 直接返回。</li>
   <li>当前的 bucket_idx 得到的 local_depth 和镜像的 image_bucket_idx 得到的 image_local_depth 不一致， 深度不一致则不能 Merge， 也需要直接返回。</li>
-  <li>我们需要在 Merge 的过程中对 bucket_idx 再进行一次 <code class="language-plaintext highlighter-rouge">IsEmpty</code> 的判断， 如果非空直接返回。 这是因为在 <code class="language-plaintext highlighter-rouge">Remove</code> 函数中我们判断 bucket 为空后， 释放 latch 的瞬间这个 latch 被 Insert 拿走了， 这个 bucket 可能又被塞入了新的值， 后续 Merge 函数获取到锁的时候就可能看到的是这个新值了。</li>
+  <li>我们需要在 Merge 的过程中对 bucket_idx 再进行一次 <code class="language-html highlighter-rouge">IsEmpty</code> 的判断， 如果非空直接返回。 这是因为在 <code class="language-html highlighter-rouge">Remove</code> 函数中我们判断 bucket 为空后， 释放 latch 的瞬间这个 latch 被 Insert 拿走了， 这个 bucket 可能又被塞入了新的值， 后续 Merge 函数获取到锁的时候就可能看到的是这个新值了。</li>
   <li>删除 bucket_idx 对应的 Page 后要将之前所有指向这个 bucket_idx 存储的 Page 的那些 buckets 重新直线新的 image_bucket 对应的 Page 以及设置新的 local_depth。</li>
-  <li>需要循环调用 <code class="language-plaintext highlighter-rouge">CanShrink</code> 缩小 global_depth。</li>
+  <li>需要循环调用 <code class="language-html highlighter-rouge">CanShrink</code> 缩小 global_depth。</li>
 </ol>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">...</span>
+<div class="language-cpp copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">...</span>
   <span class="cm">/* recursive merge */</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">directory_write_page</span><span class="o">-&gt;</span><span class="n">GetGlobalDepth</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
     <span class="kt">uint32_t</span> <span class="n">next_bucket_idx</span> <span class="o">=</span> <span class="n">image_bucket_idx</span> <span class="o">&amp;</span> <span class="n">new_local_depth</span><span class="p">;</span>
@@ -661,13 +690,13 @@ Expected equality of these values:
 
 <h2 id="5-task4--concurrency-control">5. task#4  Concurrency Control</h2>
 
-<p>实现的时候给 <code class="language-plaintext highlighter-rouge">Insert</code>， <code class="language-plaintext highlighter-rouge">Remove</code> 以及自定义的一些会更改 directory 或 bucket 的函数都加上了一把 latch， 在 return 或进入另一个函数前释放 latch， 能完美通过测试。</p>
+<p>实现的时候给 <code class="language-html highlighter-rouge">Insert</code>， <code class="language-html highlighter-rouge">Remove</code> 以及自定义的一些会更改 directory 或 bucket 的函数都加上了一把 latch， 在 return 或进入另一个函数前释放 latch， 能完美通过测试。</p>
 
 <h2 id="6-写在最后">6. 写在最后</h2>
 
 <p>不枉这一个星期的努力， P2 顺利收官了！</p>
 
-<p>虽然最后成功通过了 P2 的所有测试， 但整个 Project 并没有完全独立完成， 设计上也有参考前述的 2021 年的 Extendible Hash Index 的实现。 除了所给函数没注释导致对其功能的理解上的缺失， 还有阅读 Specification 和代码注释不仔细， 对 Extendible Hash Index 的原理以及概念不熟悉不透彻。 对于 Debug 目前能用的就是 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code> 以及配置 VSCode 的 CodeLLDB 实现图形化调试， 一旦遇到多线程的情况， 大多只能依赖 <code class="language-plaintext highlighter-rouge">LOG_DEBUG</code>， 可想而知 P4 将是个令人望而生畏的任务。</p>
+<p>虽然最后成功通过了 P2 的所有测试， 但整个 Project 并没有完全独立完成， 设计上也有参考前述的 2021 年的 Extendible Hash Index 的实现。 除了所给函数没注释导致对其功能的理解上的缺失， 还有阅读 Specification 和代码注释不仔细， 对 Extendible Hash Index 的原理以及概念不熟悉不透彻。 对于 Debug 目前能用的就是 <code class="language-html highlighter-rouge">LOG_DEBUG</code> 以及配置 VSCode 的 CodeLLDB 实现图形化调试， 一旦遇到多线程的情况， 大多只能依赖 <code class="language-html highlighter-rouge">LOG_DEBUG</code>， 可想而知 P4 将是个令人望而生畏的任务。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-11-28-cmu15445-fa23-p2/p2-leaderboard-rank.png" alt="Project2 LeaderBoard Rank, HangX-Ma" width="600" />
@@ -833,7 +862,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {

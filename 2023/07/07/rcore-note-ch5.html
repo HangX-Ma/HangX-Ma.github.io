@@ -262,7 +262,11 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-</head>
+<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
   <body>
     <div class="root" data-is-touch="false">
       <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
@@ -340,11 +344,11 @@
 
 <h2 id="1-进程概念">1. 进程概念</h2>
 
-<p><strong>进程</strong> 就是操作系统选取某个可执行文件并对其进行一次动态执行的过程， 对于可执行文件中给出的需求能相应对 <strong>硬件/虚拟资源</strong> 进行 <strong>动态绑定和解绑</strong>。 进程的引入让开发者能够控制程序的运行， 操作系统能够面向用户进行交互。 rCore 增添了操作系统中最为关键的几个系统调用： <code class="language-plaintext highlighter-rouge">sys_fork</code>， <code class="language-plaintext highlighter-rouge">sys_waitpid</code>， <code class="language-plaintext highlighter-rouge">sys_exec</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_read</code>。 同样的， 通过引入 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 提供动态内存分配支持， 结合这些系统调用， 在用户态 rCore 提供了一个用户初始程序 <strong>initproc</strong>， 这让 rCore 具备了与应用层的交互能力， 但其背后则需依托 rCore 的进程管理。</p>
+<p><strong>进程</strong> 就是操作系统选取某个可执行文件并对其进行一次动态执行的过程， 对于可执行文件中给出的需求能相应对 <strong>硬件/虚拟资源</strong> 进行 <strong>动态绑定和解绑</strong>。 进程的引入让开发者能够控制程序的运行， 操作系统能够面向用户进行交互。 rCore 增添了操作系统中最为关键的几个系统调用： <code class="language-html highlighter-rouge">sys_fork</code>， <code class="language-html highlighter-rouge">sys_waitpid</code>， <code class="language-html highlighter-rouge">sys_exec</code>， 以及 <code class="language-html highlighter-rouge">sys_read</code>。 同样的， 通过引入 <code class="language-html highlighter-rouge">buddy_system_allocator</code> 提供动态内存分配支持， 结合这些系统调用， 在用户态 rCore 提供了一个用户初始程序 <strong>initproc</strong>， 这让 rCore 具备了与应用层的交互能力， 但其背后则需依托 rCore 的进程管理。</p>
 
 <h2 id="2-进程管理的组成结构">2. 进程管理的组成结构</h2>
 
-<p>rCore 为增添了 <code class="language-plaintext highlighter-rouge">struct PidHandle</code> 作为每个进程的标识， 其实现与上一章的 Physical Frame 非常类似。 另外 rCore 改造了 <code class="language-plaintext highlighter-rouge">build.rs</code> 和 <code class="language-plaintext highlighter-rouge">loader.rs</code> 以使 rCore 能够支持应用名而非 task id 加载应用。</p>
+<p>rCore 为增添了 <code class="language-html highlighter-rouge">struct PidHandle</code> 作为每个进程的标识， 其实现与上一章的 Physical Frame 非常类似。 另外 rCore 改造了 <code class="language-html highlighter-rouge">build.rs</code> 和 <code class="language-html highlighter-rouge">loader.rs</code> 以使 rCore 能够支持应用名而非 task id 加载应用。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/pid.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="nf">PidHandle</span><span class="p">(</span><span class="k">pub</span> <span class="nb">usize</span><span class="p">);</span>
@@ -352,7 +356,7 @@
 
 <h3 id="21-应用的内核栈">2.1 应用的内核栈</h3>
 
-<p>由于引入了进程标识 PID， 之前用 task id 进行应用区分的方式需要用 PID 替代， 所有应用的内核栈的创建就与以往有所不同。 rCore 从 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中分离了 <code class="language-plaintext highlighter-rouge">KernelStack</code> 用以初始化与管理每个应用的内核栈。</p>
+<p>由于引入了进程标识 PID， 之前用 task id 进行应用区分的方式需要用 PID 替代， 所有应用的内核栈的创建就与以往有所不同。 rCore 从 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中分离了 <code class="language-html highlighter-rouge">KernelStack</code> 用以初始化与管理每个应用的内核栈。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/pid.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">KernelStack</span> <span class="p">{</span>
@@ -362,7 +366,7 @@
 
 <h3 id="22-进程控制块">2.2 进程控制块</h3>
 
-<p>在内核中，每个进程的执行状态、资源控制等元数据均保存在一个被称为 <strong>进程控制块 (PCB, Process Control Block)</strong> 的结构中，它是内核对进程进行管理的单位。 对于 rCore 而言， PCB 其实是对原来的 TCB 的扩展， 并区分 immutable 与 mutable 两类数据 （ Inner 块使用 <code class="language-plaintext highlighter-rouge">UPSafeCell&lt;T&gt;</code> 管理可变数据）。 第五章新增的是 <code class="language-plaintext highlighter-rouge">parent</code>， <code class="language-plaintext highlighter-rouge">children</code>， 以及 <code class="language-plaintext highlighter-rouge">exit_code</code> 这几个可变量， 使用 <code class="language-plaintext highlighter-rouge">Weak</code> 智能指针能确保不影响父进程的引用计数， 而 <code class="language-plaintext highlighter-rouge">Arc</code> 则提供了对子进程的引用计数， 这两者的配合可以保证父子进程的双向关系以及控制子进程的资源回收了。</p>
+<p>在内核中，每个进程的执行状态、资源控制等元数据均保存在一个被称为 <strong>进程控制块 (PCB, Process Control Block)</strong> 的结构中，它是内核对进程进行管理的单位。 对于 rCore 而言， PCB 其实是对原来的 TCB 的扩展， 并区分 immutable 与 mutable 两类数据 （ Inner 块使用 <code class="language-html highlighter-rouge">UPSafeCell<span class="nt">&lt;T&gt;</span></code> 管理可变数据）。 第五章新增的是 <code class="language-html highlighter-rouge">parent</code>， <code class="language-html highlighter-rouge">children</code>， 以及 <code class="language-html highlighter-rouge">exit_code</code> 这几个可变量， 使用 <code class="language-html highlighter-rouge">Weak</code> 智能指针能确保不影响父进程的引用计数， 而 <code class="language-html highlighter-rouge">Arc</code> 则提供了对子进程的引用计数， 这两者的配合可以保证父子进程的双向关系以及控制子进程的资源回收了。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
@@ -381,7 +385,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外我认为解决了上一章痛点问题的是关于任务控制模块的访问方式， rCore 的第五章提供了 <code class="language-plaintext highlighter-rouge">inner_exclusive_access</code> 方法， 此前我也尝试过类似的返回引用的方式避免直接拷贝一整个 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 以避免巨大的开销， 但当时没有考虑到可以在外层包裹一层 <code class="language-plaintext highlighter-rouge">UPSafeCell&lt;T&gt;</code>。 另外相应的， 增加了外增 Wrapper 以及 PID 后， 原来的 <strong>任务控制块创建</strong> 也要转变为 <strong>进程控制块创建</strong>， 其实主要差异就是 Kernel Stack 的创建以及新增的变量的初始化。</p>
+<p>另外我认为解决了上一章痛点问题的是关于任务控制模块的访问方式， rCore 的第五章提供了 <code class="language-html highlighter-rouge">inner_exclusive_access</code> 方法， 此前我也尝试过类似的返回引用的方式避免直接拷贝一整个 <code class="language-html highlighter-rouge">TaskControlBlock</code> 以避免巨大的开销， 但当时没有考虑到可以在外层包裹一层 <code class="language-html highlighter-rouge">UPSafeCell<span class="nt">&lt;T&gt;</span></code>。 另外相应的， 增加了外增 Wrapper 以及 PID 后， 原来的 <strong>任务控制块创建</strong> 也要转变为 <strong>进程控制块创建</strong>， 其实主要差异就是 Kernel Stack 的创建以及新增的变量的初始化。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 <span class="k">impl</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
@@ -392,15 +396,15 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>除此之外就是在 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中实现几个关键的系统调用了。</p>
+<p>除此之外就是在 <code class="language-html highlighter-rouge">TaskControlBlock</code> 中实现几个关键的系统调用了。</p>
 
 <blockquote>
-  <p>需要一提的是， 由于增添了 <code class="language-plaintext highlighter-rouge">wrapper</code>， <code class="language-plaintext highlighter-rouge">os/src/task/mod.rs</code> 中的代码对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 中数据访问发生了变化， 这一块需要大改。</p>
+  <p>需要一提的是， 由于增添了 <code class="language-html highlighter-rouge">wrapper</code>， <code class="language-html highlighter-rouge">os/src/task/mod.rs</code> 中的代码对 <code class="language-html highlighter-rouge">TaskControlBlockInner</code> 中数据访问发生了变化， 这一块需要大改。</p>
 </blockquote>
 
 <h3 id="23-进程管理器">2.3 进程管理器</h3>
 
-<p><strong>任务管理器</strong> 或称 <strong>进程管理器</strong> <code class="language-plaintext highlighter-rouge">TaskManager</code> 将 CPU 的监控职能拆分到处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 中， 其自身仅负责管理所有进程， 这种分离有助于后续实现多核环境的拓展。 这里比较关键的设计是将 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 用 <code class="language-plaintext highlighter-rouge">Arc</code> 智能指针管理， 并将其存储在堆上， 不仅减少开销也方便维护。</p>
+<p><strong>任务管理器</strong> 或称 <strong>进程管理器</strong> <code class="language-html highlighter-rouge">TaskManager</code> 将 CPU 的监控职能拆分到处理器管理结构 <code class="language-html highlighter-rouge">Processor</code> 中， 其自身仅负责管理所有进程， 这种分离有助于后续实现多核环境的拓展。 这里比较关键的设计是将 <code class="language-html highlighter-rouge">TaskControlBlock</code> 用 <code class="language-html highlighter-rouge">Arc</code> 智能指针管理， 并将其存储在堆上， 不仅减少开销也方便维护。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/manager.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskManager</span> <span class="p">{</span>
@@ -410,7 +414,7 @@
 
 <h3 id="24-cpu-管理器">2.4 CPU 管理器</h3>
 
-<p>处理器管理结构 <code class="language-plaintext highlighter-rouge">Processor</code> 负责维护 CPU 相关的状态。 其中 <code class="language-plaintext highlighter-rouge">current</code> 表示当前处理器上执行的进程任务， 而 <code class="language-plaintext highlighter-rouge">idle_task_cx</code> 则是 idle 控制流的任务上下文。 这个 idle 控制流运行在 CPU 启动栈上， 它会从 <code class="language-plaintext highlighter-rouge">TaskManager</code> 中选择一个进程任务放在当前的 CPU 核上运行。</p>
+<p>处理器管理结构 <code class="language-html highlighter-rouge">Processor</code> 负责维护 CPU 相关的状态。 其中 <code class="language-html highlighter-rouge">current</code> 表示当前处理器上执行的进程任务， 而 <code class="language-html highlighter-rouge">idle_task_cx</code> 则是 idle 控制流的任务上下文。 这个 idle 控制流运行在 CPU 启动栈上， 它会从 <code class="language-html highlighter-rouge">TaskManager</code> 中选择一个进程任务放在当前的 CPU 核上运行。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/processor.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">Processor</span> <span class="p">{</span>
@@ -419,10 +423,10 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>idle 控制流的设计目的在于分离进程调度与 Trap， 换入/换出进程仅需要调用 <code class="language-plaintext highlighter-rouge">schedule</code> 函数， 通过 <code class="language-plaintext highlighter-rouge">__switch</code> 保存自身进程的上下文， 之后程序流会换回 <code class="language-plaintext highlighter-rouge">idle_task_cx_ptr</code> 中的内容重新回到 <code class="language-plaintext highlighter-rouge">run_tasks</code> 的 loop 循环中查找下一个待运行的进程。 这点设计和 xv6 如出一辙， 在 rCore 中则是会持续运行 <code class="language-plaintext highlighter-rouge">run_tasks</code> 用以进程的调度。 引用我自己在 rCore 留言板上的 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/47#issuecomment-1625393985">回答</a> 能帮助理解它的作用：</p>
+<p>idle 控制流的设计目的在于分离进程调度与 Trap， 换入/换出进程仅需要调用 <code class="language-html highlighter-rouge">schedule</code> 函数， 通过 <code class="language-html highlighter-rouge">__switch</code> 保存自身进程的上下文， 之后程序流会换回 <code class="language-html highlighter-rouge">idle_task_cx_ptr</code> 中的内容重新回到 <code class="language-html highlighter-rouge">run_tasks</code> 的 loop 循环中查找下一个待运行的进程。 这点设计和 xv6 如出一辙， 在 rCore 中则是会持续运行 <code class="language-html highlighter-rouge">run_tasks</code> 用以进程的调度。 引用我自己在 rCore 留言板上的 <a href="https://github.com/rcore-os/rCore-Tutorial-Book-v3/issues/47#issuecomment-1625393985">回答</a> 能帮助理解它的作用：</p>
 
 <blockquote>
-  <p>idle 控制流的设计和 xv6 的很像， rCore 让 <code class="language-plaintext highlighter-rouge">run_tasks</code> 始终保持运行， 可以把这个函数想象成一个游戏机，它的作用就是不断挑选可运行的游戏卡（进程）， 然后放到 CPU 这个卡槽中。 一定时间后这个 CPU 卡槽要给别的游戏卡（进程）用了就把这个当前的卡弹出来（这里就用了 <code class="language-plaintext highlighter-rouge">schedule</code> 函数弹出）， 然后游戏机又开始选下一张能用的游戏卡（进程）了。</p>
+  <p>idle 控制流的设计和 xv6 的很像， rCore 让 <code class="language-html highlighter-rouge">run_tasks</code> 始终保持运行， 可以把这个函数想象成一个游戏机，它的作用就是不断挑选可运行的游戏卡（进程）， 然后放到 CPU 这个卡槽中。 一定时间后这个 CPU 卡槽要给别的游戏卡（进程）用了就把这个当前的卡弹出来（这里就用了 <code class="language-html highlighter-rouge">schedule</code> 函数弹出）， 然后游戏机又开始选下一张能用的游戏卡（进程）了。</p>
 
   <p>游戏卡（进程）只知道自己被插上要运行， 以及到某个点自己要弹出来， 它不知道游戏机的存在， 这样就做到了任务调度的透明。</p>
 </blockquote>
@@ -469,7 +473,7 @@
 
 <h3 id="31-初始进程创建">3.1 初始进程创建</h3>
 
-<p>可以先看一下 rCore 在第五章的 <code class="language-plaintext highlighter-rouge">main.rs</code> 做的事情， 可以看到在内存管理模块初始化完成后， 会调用 <code class="language-plaintext highlighter-rouge">task</code> 子模块提供的 <code class="language-plaintext highlighter-rouge">add_initproc</code> 将初始进程 <code class="language-plaintext highlighter-rouge">ch5b_initproc</code> 加入进程任务管理器。 因而在 task 子模块中需要初始化进程控制块 <code class="language-plaintext highlighter-rouge">INITPROC</code>。 另外， <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 相较之前有所变更。</p>
+<p>可以先看一下 rCore 在第五章的 <code class="language-html highlighter-rouge">main.rs</code> 做的事情， 可以看到在内存管理模块初始化完成后， 会调用 <code class="language-html highlighter-rouge">task</code> 子模块提供的 <code class="language-html highlighter-rouge">add_initproc</code> 将初始进程 <code class="language-html highlighter-rouge">ch5b_initproc</code> 加入进程任务管理器。 因而在 task 子模块中需要初始化进程控制块 <code class="language-html highlighter-rouge">INITPROC</code>。 另外， <code class="language-html highlighter-rouge">TaskControlBlock::new</code> 相较之前有所变更。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/main.rs</span>
 <span class="nd">#[no_mangle]</span> <span class="c1">// avoid compiler confusion</span>
@@ -499,17 +503,17 @@
 
 <h3 id="32-进程调度机制">3.2 进程调度机制</h3>
 
-<p>进程调度一方面是 CPU 分给当前进程的时间片用尽触发 <code class="language-plaintext highlighter-rouge">SupervisorTimer</code> 中断需要调度， 另一方面是进程主动让出 CPU 的占用权， 都需要用到 <code class="language-plaintext highlighter-rouge">suspend_current_and_run_next</code> 这个函数。 在引入进程的抽象之后， 调度不需要进程本身更新关于 <code class="language-plaintext highlighter-rouge">__switch</code> 函数相关的内容， 只需要获取当前进程的控制块 TCB 并将其加入 task 队列中后使用 <code class="language-plaintext highlighter-rouge">schedule</code> 即可。 这也是前述引入 idle 控制流的好处之一， 对进程调度的解耦让整个代码流都干净了很多。</p>
+<p>进程调度一方面是 CPU 分给当前进程的时间片用尽触发 <code class="language-html highlighter-rouge">SupervisorTimer</code> 中断需要调度， 另一方面是进程主动让出 CPU 的占用权， 都需要用到 <code class="language-html highlighter-rouge">suspend_current_and_run_next</code> 这个函数。 在引入进程的抽象之后， 调度不需要进程本身更新关于 <code class="language-html highlighter-rouge">__switch</code> 函数相关的内容， 只需要获取当前进程的控制块 TCB 并将其加入 task 队列中后使用 <code class="language-html highlighter-rouge">schedule</code> 即可。 这也是前述引入 idle 控制流的好处之一， 对进程调度的解耦让整个代码流都干净了很多。</p>
 
 <h3 id="33-进程的生成机制">3.3 进程的生成机制</h3>
 
-<p>这块相较而言就会显得复杂一些， 在内核中唯一的初始化进程是 <code class="language-plaintext highlighter-rouge">initproc</code>， 后续的进程都需要通过 <code class="language-plaintext highlighter-rouge">fork/exec</code> 这两个系统调用提供的进程生成机制实现。</p>
+<p>这块相较而言就会显得复杂一些， 在内核中唯一的初始化进程是 <code class="language-html highlighter-rouge">initproc</code>， 后续的进程都需要通过 <code class="language-html highlighter-rouge">fork/exec</code> 这两个系统调用提供的进程生成机制实现。</p>
 
 <ul>
   <li>
     <p><strong>fork</strong></p>
 
-    <p><code class="language-plaintext highlighter-rouge">fork</code> 需要对除了返回值外的父进程所有信息的完全复制， 这甚至要求地址空间的映射方式， 映射页的权限， 映射范围， 以及数据都需要与父进程一致， 不同的是最终映射到的具体的物理地址页 PPN。 在 rCore 中管理这部分信息的是 <code class="language-plaintext highlighter-rouge">memory_set.rs</code>， 为了复制这些信息新增了 <code class="language-plaintext highlighter-rouge">from_another</code> 函数拷贝一个 <strong>逻辑段</strong> 的上述数据。</p>
+    <p><code class="language-html highlighter-rouge">fork</code> 需要对除了返回值外的父进程所有信息的完全复制， 这甚至要求地址空间的映射方式， 映射页的权限， 映射范围， 以及数据都需要与父进程一致， 不同的是最终映射到的具体的物理地址页 PPN。 在 rCore 中管理这部分信息的是 <code class="language-html highlighter-rouge">memory_set.rs</code>， 为了复制这些信息新增了 <code class="language-html highlighter-rouge">from_another</code> 函数拷贝一个 <strong>逻辑段</strong> 的上述数据。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
   <span class="k">impl</span> <span class="n">MapArea</span> <span class="p">{</span>
@@ -518,7 +522,7 @@
   <span class="p">}</span>
 </code></pre></div>    </div>
 
-    <p>这之后真正对整个地址空间进行完全复制的是， <code class="language-plaintext highlighter-rouge">MemorySet</code> 中新增的 <code class="language-plaintext highlighter-rouge">from_existed_user</code> 函数。 该函数将生成一个新的 tranmpoline 并遍历当前用户态虚拟地址空间中所有的逻辑段并拷贝这些数据到目标地址空间。</p>
+    <p>这之后真正对整个地址空间进行完全复制的是， <code class="language-html highlighter-rouge">MemorySet</code> 中新增的 <code class="language-html highlighter-rouge">from_existed_user</code> 函数。 该函数将生成一个新的 tranmpoline 并遍历当前用户态虚拟地址空间中所有的逻辑段并拷贝这些数据到目标地址空间。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
   <span class="k">impl</span> <span class="n">MemorySet</span> <span class="p">{</span>
@@ -527,14 +531,14 @@
   <span class="p">}</span>
 </code></pre></div>    </div>
 
-    <p>可以看到 <code class="language-plaintext highlighter-rouge">TaskControlBlock::fork</code> 的代码和 <code class="language-plaintext highlighter-rouge">new</code> 基本一致， 只是它的数据来源于它的父进程， 子进程的地址空间通过 <code class="language-plaintext highlighter-rouge">MemorySet::from_existed_user</code> 建立。 另外， <code class="language-plaintext highlighter-rouge">sys_fork</code> 的实现中需要更改 <code class="language-plaintext highlighter-rouge">TrapContext</code> 中的 <code class="language-plaintext highlighter-rouge">a0</code> 寄存器， <code class="language-plaintext highlighter-rouge">trap_handler</code> 部分需要配合做出微调， 以保证能够通过返回值区分子进程和父进程。</p>
+    <p>可以看到 <code class="language-html highlighter-rouge">TaskControlBlock::fork</code> 的代码和 <code class="language-html highlighter-rouge">new</code> 基本一致， 只是它的数据来源于它的父进程， 子进程的地址空间通过 <code class="language-html highlighter-rouge">MemorySet::from_existed_user</code> 建立。 另外， <code class="language-html highlighter-rouge">sys_fork</code> 的实现中需要更改 <code class="language-html highlighter-rouge">TrapContext</code> 中的 <code class="language-html highlighter-rouge">a0</code> 寄存器， <code class="language-html highlighter-rouge">trap_handler</code> 部分需要配合做出微调， 以保证能够通过返回值区分子进程和父进程。</p>
   </li>
   <li>
     <p><strong>exec</strong></p>
 
-    <p><code class="language-plaintext highlighter-rouge">exec</code> 系统调用是载入一个新的 ELF 的代码和数据替换当前进程的应用地址空间中的内容并执行。 它要做的事情其实和 <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 也很像， 但我们不需要重新生成进程的 PID 以及分配新的 KernelStack， 这些信息原有的进程已经提供了， 仅需要将我们所需要的 <code class="language-plaintext highlighter-rouge">memory_set</code>， <code class="language-plaintext highlighter-rouge">user_sp</code>， <code class="language-plaintext highlighter-rouge">entry_point</code> 这些信息进行更新即可， 之后我们仅需要完善 <code class="language-plaintext highlighter-rouge">sys_exec</code> 系统调用的实现。</p>
+    <p><code class="language-html highlighter-rouge">exec</code> 系统调用是载入一个新的 ELF 的代码和数据替换当前进程的应用地址空间中的内容并执行。 它要做的事情其实和 <code class="language-html highlighter-rouge">TaskControlBlock::new</code> 也很像， 但我们不需要重新生成进程的 PID 以及分配新的 KernelStack， 这些信息原有的进程已经提供了， 仅需要将我们所需要的 <code class="language-html highlighter-rouge">memory_set</code>， <code class="language-html highlighter-rouge">user_sp</code>， <code class="language-html highlighter-rouge">entry_point</code> 这些信息进行更新即可， 之后我们仅需要完善 <code class="language-html highlighter-rouge">sys_exec</code> 系统调用的实现。</p>
 
-    <p>最为关键的还是 <code class="language-plaintext highlighter-rouge">translated_str</code> 这个函数， <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要对输入的 <code class="language-plaintext highlighter-rouge">path</code> 参数进行解析， 这个 <code class="language-plaintext highlighter-rouge">path</code> 的内容来自应用的虚拟地址空间。 因而 <code class="language-plaintext highlighter-rouge">translated_str</code> 就需要在该应用空间中通过查找 Page Table 的方式逐个拷贝字符串信息到当前 kernel 中的 <code class="language-plaintext highlighter-rouge">string</code> 变量中。</p>
+    <p>最为关键的还是 <code class="language-html highlighter-rouge">translated_str</code> 这个函数， <code class="language-html highlighter-rouge">sys_exec</code> 需要对输入的 <code class="language-html highlighter-rouge">path</code> 参数进行解析， 这个 <code class="language-html highlighter-rouge">path</code> 的内容来自应用的虚拟地址空间。 因而 <code class="language-html highlighter-rouge">translated_str</code> 就需要在该应用空间中通过查找 Page Table 的方式逐个拷贝字符串信息到当前 kernel 中的 <code class="language-html highlighter-rouge">string</code> 变量中。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/page_table.rs</span>
   <span class="k">pub</span> <span class="k">fn</span> <span class="nf">translated_str</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
@@ -557,18 +561,18 @@
   <span class="p">}</span>
 </code></pre></div>    </div>
 
-    <p>在 kernel 中获取到了这个应用信息后就能通过 <code class="language-plaintext highlighter-rouge">loader.rs</code> 提供的 <code class="language-plaintext highlighter-rouge">get_app_data_by_name</code> 在指定的内存地址空间加载应用了。</p>
+    <p>在 kernel 中获取到了这个应用信息后就能通过 <code class="language-html highlighter-rouge">loader.rs</code> 提供的 <code class="language-html highlighter-rouge">get_app_data_by_name</code> 在指定的内存地址空间加载应用了。</p>
   </li>
   <li>
     <p><strong>read</strong></p>
 
-    <p>最后的 <code class="language-plaintext highlighter-rouge">sys_read</code> 实现还没有涉及到文件系统， 因而需要调用 SBI 提供的接口以获取用户的键盘输入。</p>
+    <p>最后的 <code class="language-html highlighter-rouge">sys_read</code> 实现还没有涉及到文件系统， 因而需要调用 SBI 提供的接口以获取用户的键盘输入。</p>
   </li>
 </ul>
 
 <h3 id="34-进程资源回收机制">3.4 进程资源回收机制</h3>
 
-<p>资源回收涉及到进程的退出， 在此之前 task 中实现此功能的是 <code class="language-plaintext highlighter-rouge">exit_current_and_run_next</code>  函数， 但相比之前的章节， ch5 需要该函数传入一个退出码， 这个退出码会写入到当前进程的进程控制块 TCB 中。 这里比较关键的一步操作是将当前进程的所有子进程的父进程更改为 <code class="language-plaintext highlighter-rouge">INITPROC</code>， 这样当前进程被回收后其子进程仍能被管理而不至于进入一种无法定义的状态。</p>
+<p>资源回收涉及到进程的退出， 在此之前 task 中实现此功能的是 <code class="language-html highlighter-rouge">exit_current_and_run_next</code>  函数， 但相比之前的章节， ch5 需要该函数传入一个退出码， 这个退出码会写入到当前进程的进程控制块 TCB 中。 这里比较关键的一步操作是将当前进程的所有子进程的父进程更改为 <code class="language-html highlighter-rouge">INITPROC</code>， 这样当前进程被回收后其子进程仍能被管理而不至于进入一种无法定义的状态。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/mod.rs</span>
 <span class="k">pub</span> <span class="k">fn</span> <span class="nf">exit_current_and_run_next</span><span class="p">(</span><span class="n">exit_code</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">{</span>
@@ -586,13 +590,13 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>父进程的资源回收操作详见 <code class="language-plaintext highlighter-rouge">sys_waitpid</code> 系统调用。</p>
+<p>父进程的资源回收操作详见 <code class="language-html highlighter-rouge">sys_waitpid</code> 系统调用。</p>
 
 <h2 id="4-修复-syscall">4. 修复 syscall</h2>
 
 <h3 id="41-sys_task_info">4.1 sys_task_info</h3>
 
-<p>该系统调用主要是这几个 <code class="language-plaintext highlighter-rouge">get_*</code> 函数需要对应新的 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 的获取方式， 关键需要注意要用 <code class="language-plaintext highlighter-rouge">current_task</code> 获取当前的进程的 TCB 以免获取进程信息时所有权转移。</p>
+<p>该系统调用主要是这几个 <code class="language-html highlighter-rouge">get_*</code> 函数需要对应新的 <code class="language-html highlighter-rouge">TaskControlBlockInner</code> 的获取方式， 关键需要注意要用 <code class="language-html highlighter-rouge">current_task</code> 获取当前的进程的 TCB 以免获取进程信息时所有权转移。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/process.rs</span>
 <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_task_info</span><span class="p">(</span><span class="n">ti</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">TaskInfo</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
@@ -606,7 +610,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外， 记录内核态和用户态的进程开销需要用到一个 <code class="language-plaintext highlighter-rouge">checkpoint</code> 记录时刻点， 这个变量也要放入 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code>， 通过 <code class="language-plaintext highlighter-rouge">update_checkpoint</code> 函数更新时刻点并获取时间变化量。 不过在 <code class="language-plaintext highlighter-rouge">TaskControlBlock::fork</code> 函数中的初始化和 <code class="language-plaintext highlighter-rouge">TaskControlBlock::new</code> 有所不同， 前者需要将 <code class="language-plaintext highlighter-rouge">checkpoint</code> 的值通过 <code class="language-plaintext highlighter-rouge">get_time_ms</code> 更新为进程创建的时刻点， 否则新的子进程的计时仍会以 OS 运行的第一个程序为起始时刻点， 这样我们无法通过 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 时间相关的测试。</p>
+<p>另外， 记录内核态和用户态的进程开销需要用到一个 <code class="language-html highlighter-rouge">checkpoint</code> 记录时刻点， 这个变量也要放入 <code class="language-html highlighter-rouge">TaskControlBlockInner</code>， 通过 <code class="language-html highlighter-rouge">update_checkpoint</code> 函数更新时刻点并获取时间变化量。 不过在 <code class="language-html highlighter-rouge">TaskControlBlock::fork</code> 函数中的初始化和 <code class="language-html highlighter-rouge">TaskControlBlock::new</code> 有所不同， 前者需要将 <code class="language-html highlighter-rouge">checkpoint</code> 的值通过 <code class="language-html highlighter-rouge">get_time_ms</code> 更新为进程创建的时刻点， 否则新的子进程的计时仍会以 OS 运行的第一个程序为起始时刻点， 这样我们无法通过 <code class="language-html highlighter-rouge">ch3_taskinfo.rs</code> 时间相关的测试。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
@@ -627,7 +631,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>对 <code class="language-plaintext highlighter-rouge">ch3_taskinfo.rs</code> 修改就是将其放入了子进程， 不做这个更改应该也不影响最终的结果。 另外 <code class="language-plaintext highlighter-rouge">user_time_start</code> 和 <code class="language-plaintext highlighter-rouge">user_time_end</code> 这一对记录用户态时间开销的函数接口和位置都没有变， <code class="language-plaintext highlighter-rouge">update_task_syscall_times</code> 亦是如此。 更新内核时间开销同样只用在 <code class="language-plaintext highlighter-rouge">exit_current_and_run_next</code> 以及 <code class="language-plaintext highlighter-rouge">suspend_current_and_run_next</code> 这两个临界态函数中调用 <code class="language-plaintext highlighter-rouge">update_checkpoint</code> 更新即可。</p>
+<p>对 <code class="language-html highlighter-rouge">ch3_taskinfo.rs</code> 修改就是将其放入了子进程， 不做这个更改应该也不影响最终的结果。 另外 <code class="language-html highlighter-rouge">user_time_start</code> 和 <code class="language-html highlighter-rouge">user_time_end</code> 这一对记录用户态时间开销的函数接口和位置都没有变， <code class="language-html highlighter-rouge">update_task_syscall_times</code> 亦是如此。 更新内核时间开销同样只用在 <code class="language-html highlighter-rouge">exit_current_and_run_next</code> 以及 <code class="language-html highlighter-rouge">suspend_current_and_run_next</code> 这两个临界态函数中调用 <code class="language-html highlighter-rouge">update_checkpoint</code> 更新即可。</p>
 
 <blockquote>
   <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e887b13ad109771da03f97c25b2723425cd9b37f">commit#e887b13</a></p>
@@ -635,7 +639,7 @@
 
 <h3 id="42-sys_mmap-与-sys_munmap">4.2 sys_mmap 与 sys_munmap</h3>
 
-<p>这个比较简单， 只用根据 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 变更后对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner</code> 的获取方式修改 <code class="language-plaintext highlighter-rouge">get_current_task_page_table</code>， <code class="language-plaintext highlighter-rouge">create_new_map_area</code>， <code class="language-plaintext highlighter-rouge">unmap_consecutive_area</code> 即可。</p>
+<p>这个比较简单， 只用根据 <code class="language-html highlighter-rouge">TaskControlBlock</code> 变更后对 <code class="language-html highlighter-rouge">TaskControlBlockInner</code> 的获取方式修改 <code class="language-html highlighter-rouge">get_current_task_page_table</code>， <code class="language-html highlighter-rouge">create_new_map_area</code>， <code class="language-html highlighter-rouge">unmap_consecutive_area</code> 即可。</p>
 
 <blockquote>
   <p>具体实现可参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/d8e4b55f2243fe3c5808d23b41a8eccaf28edfe7">commit#d8e4b55</a></p>
@@ -653,7 +657,7 @@
 
 <h4 id="实现-spawn-系统调用">实现 spawn 系统调用</h4>
 
-<p>这部分实验要求使用 <code class="language-plaintext highlighter-rouge">fork</code> 和 <code class="language-plaintext highlighter-rouge">exec</code>， 但是可以借鉴这二者的写法， <code class="language-plaintext highlighter-rouge">path</code> 部分获取就是模仿 <code class="language-plaintext highlighter-rouge">exec</code> 写的。 实现该系统调用的主要想法是给新的应用数据 <code class="language-plaintext highlighter-rouge">elf_data</code> 建立一个新的进程模块， 这意味着我们需要以 <code class="language-plaintext highlighter-rouge">exec</code> 的角度去改编 <code class="language-plaintext highlighter-rouge">fork</code>。 一直到 <code class="language-plaintext highlighter-rouge">TrapContext</code> 这部分， 前面的内容和 <code class="language-plaintext highlighter-rouge">fork</code> 基本一致， 但是我们需要运行一个新的应用， 因而不能像 <code class="language-plaintext highlighter-rouge">fork</code> 那样沿用与其父进程一致的配置， 而需要创建一个全新的 <code class="language-plaintext highlighter-rouge">TrapContext</code> 以容纳 <code class="language-plaintext highlighter-rouge">entry_point</code>， <code class="language-plaintext highlighter-rouge">user_sp</code>， <code class="language-plaintext highlighter-rouge">kernel_stack_top</code> 这几个依托当前应用数据生成的信息。 最后也是最关键的， 我们需要返回子进程的 pid， 并且将这个子进程的进程控制模块加入到 task 队列中， 以使得操作系统能够分配资源执行该应用。</p>
+<p>这部分实验要求使用 <code class="language-html highlighter-rouge">fork</code> 和 <code class="language-html highlighter-rouge">exec</code>， 但是可以借鉴这二者的写法， <code class="language-html highlighter-rouge">path</code> 部分获取就是模仿 <code class="language-html highlighter-rouge">exec</code> 写的。 实现该系统调用的主要想法是给新的应用数据 <code class="language-html highlighter-rouge">elf_data</code> 建立一个新的进程模块， 这意味着我们需要以 <code class="language-html highlighter-rouge">exec</code> 的角度去改编 <code class="language-html highlighter-rouge">fork</code>。 一直到 <code class="language-html highlighter-rouge">TrapContext</code> 这部分， 前面的内容和 <code class="language-html highlighter-rouge">fork</code> 基本一致， 但是我们需要运行一个新的应用， 因而不能像 <code class="language-html highlighter-rouge">fork</code> 那样沿用与其父进程一致的配置， 而需要创建一个全新的 <code class="language-html highlighter-rouge">TrapContext</code> 以容纳 <code class="language-html highlighter-rouge">entry_point</code>， <code class="language-html highlighter-rouge">user_sp</code>， <code class="language-html highlighter-rouge">kernel_stack_top</code> 这几个依托当前应用数据生成的信息。 最后也是最关键的， 我们需要返回子进程的 pid， 并且将这个子进程的进程控制模块加入到 task 队列中， 以使得操作系统能够分配资源执行该应用。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// HINT: fork + exec =/= spawn</span>
 <span class="cd">/// ALERT: Don't fork parent process address space</span>
@@ -720,11 +724,11 @@
 
 <h4 id="stride-调度算法">stride 调度算法</h4>
 
-<p>stride 调度需要存储两个变量， 一个是 <code class="language-plaintext highlighter-rouge">stride</code>， 表示当前的进程已经运行的 “长度”， 这个长度是以 <code class="language-plaintext highlighter-rouge">pass</code> 为单位进行更新的。 那么第二个变量就是 <code class="language-plaintext highlighter-rouge">priority</code>， 表示调度的优先级， 于是有公式成立：</p>
+<p>stride 调度需要存储两个变量， 一个是 <code class="language-html highlighter-rouge">stride</code>， 表示当前的进程已经运行的 “长度”， 这个长度是以 <code class="language-html highlighter-rouge">pass</code> 为单位进行更新的。 那么第二个变量就是 <code class="language-html highlighter-rouge">priority</code>， 表示调度的优先级， 于是有公式成立：</p>
 
 \[pass = BIG\_STRIDE/priority\]
 
-<p>其中 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 被定义为一个预定义的极大常数， 则该调度方案为每个进程分配的时间将与其优先级成正比。 实验中对这些变量还有以下的规约：</p>
+<p>其中 <code class="language-html highlighter-rouge">BIG_STRIDE</code> 被定义为一个预定义的极大常数， 则该调度方案为每个进程分配的时间将与其优先级成正比。 实验中对这些变量还有以下的规约：</p>
 
 <ul>
   <li>stride 调度要求进程优先级 \(\ge{2}\) ，所以设定进程优先级 \(\le{1}\) 会导致错误。</li>
@@ -732,7 +736,7 @@
   <li>进程初始优先级设置为 16。</li>
 </ul>
 
-<p>由于 priority \(\ge\) 2， 因而 pass \(\le\) BIG_STRIDE/2， 在不考虑溢出的情况下，  <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code>， 始终成立， 这一点用反证法可以证明。 但现实中必然需要考虑溢出， 那么这里可以利用符号整数的特性， 避免在溢出后某些本应延后调度的进程因为 <code class="language-plaintext highlighter-rouge">stride</code> 值溢出后从小值开始的缘故被优先调度。 所以， 可以将 <code class="language-plaintext highlighter-rouge">BIG_STRIDE</code> 设置为 <code class="language-plaintext highlighter-rouge">u64</code> 类型最大值， 结合 <code class="language-plaintext highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code> 亦会有 <code class="language-plaintext highlighter-rouge">STRIDE_MIN – STRIDE_STRIDE &gt;= -BigStride / 2</code>， 这个与 <code class="language-plaintext highlighter-rouge">i64</code> 的表示方式非常相似， 因而可以这样设计 stride 的比较方式：</p>
+<p>由于 priority \(\ge\) 2， 因而 pass \(\le\) BIG_STRIDE/2， 在不考虑溢出的情况下，  <code class="language-html highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code>， 始终成立， 这一点用反证法可以证明。 但现实中必然需要考虑溢出， 那么这里可以利用符号整数的特性， 避免在溢出后某些本应延后调度的进程因为 <code class="language-html highlighter-rouge">stride</code> 值溢出后从小值开始的缘故被优先调度。 所以， 可以将 <code class="language-html highlighter-rouge">BIG_STRIDE</code> 设置为 <code class="language-html highlighter-rouge">u64</code> 类型最大值， 结合 <code class="language-html highlighter-rouge">STRIDE_MAX – STRIDE_MIN ≤ BigStride / 2</code> 亦会有 <code class="language-html highlighter-rouge">STRIDE_MIN – STRIDE_STRIDE &gt;= -BigStride / 2</code>， 这个与 <code class="language-html highlighter-rouge">i64</code> 的表示方式非常相似， 因而可以这样设计 stride 的比较方式：</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">cmp</span><span class="p">::</span><span class="n">Ordering</span><span class="p">;</span>
 
@@ -751,7 +755,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>我自己尝试了去实现 BinaryHeap 进行调度， 但是程序会卡死在 initproc 中， 作为一个 Rust 新手以及确实很久没接触算法了， 不知道什么地方除了问题， 于是就用了最简单的思路， 在每次 <code class="language-plaintext highlighter-rouge">fetch</code> 下一个 task 之前对这个队列中的 task 做检查， 找到最小的 stride。 这里每次将初始最小值设定为 <code class="language-plaintext highlighter-rouge">0x7FFF_FFFF</code> 是为了解决前述的溢出问题， 本质上利用有符号整数的思想就是把大于 <code class="language-plaintext highlighter-rouge">MAX/2</code> 等价为负数。 这样 TIPs 中说明的 <em>使用 8 bits 存储 stride, BIG_STRIDE = 255, 则: <code class="language-plaintext highlighter-rouge">(125 &lt; 255) == false</code>, <code class="language-plaintext highlighter-rouge">(129 &lt; 255) == true</code></em> 就好理解了。</p>
+<p>我自己尝试了去实现 BinaryHeap 进行调度， 但是程序会卡死在 initproc 中， 作为一个 Rust 新手以及确实很久没接触算法了， 不知道什么地方除了问题， 于是就用了最简单的思路， 在每次 <code class="language-html highlighter-rouge">fetch</code> 下一个 task 之前对这个队列中的 task 做检查， 找到最小的 stride。 这里每次将初始最小值设定为 <code class="language-html highlighter-rouge">0x7FFF_FFFF</code> 是为了解决前述的溢出问题， 本质上利用有符号整数的思想就是把大于 <code class="language-html highlighter-rouge">MAX/2</code> 等价为负数。 这样 TIPs 中说明的 <em>使用 8 bits 存储 stride, BIG_STRIDE = 255, 则: <code class="language-html highlighter-rouge">(125 <span class="nt">&lt;</span> <span class="err">255</span><span class="na">) =</span><span class="s">=</span> <span class="na">false</span></code>, <code class="language-html highlighter-rouge">(129 <span class="nt">&lt;</span> <span class="err">255</span><span class="na">) =</span><span class="s">=</span> <span class="na">true</span></code></em> 就好理解了。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/manager.rs</span>
 <span class="cd">/// A simple FIFO scheduler.</span>
@@ -942,7 +946,8 @@ function toggle() {
     </div>
   </div>
 </footer>
-</div></div>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
     </div><script>(function() {
   var SOURCES = window.TEXT_VARIABLES.sources;
   window.Lazyload.js(SOURCES.jquery, function() {
