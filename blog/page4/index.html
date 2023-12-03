@@ -263,7 +263,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -295,12 +297,12 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=TeXt">TeXt</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>May 18, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>May 31, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Dec 03, 2023</span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-05-18T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,TeXt"></div>
       </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/2023/05/14/cs144-lab1.html"><h2 itemprop="headline" class="item__header">cs144-sp23, Lab Checkpoint 1: stitching substrings into a byte stream</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Lab Checkpoint 0: networking warmup 直接写了 Markdown 记录 Networking by hand 的部分， 另外完成了 ByteStream 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。</div><p><a href="/2023/05/14/cs144-lab1.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">Lab Checkpoint 0: networking warmup 直接写了 Markdown 以记录 Networking by hand 的部分， 另外完成了 ByteStream 部分的框架。 而看完 Lab1 的实验要求之后， 感觉需要具体分析并厘清思路， 故而在此做一个详细的记录。</div><p><a href="/2023/05/14/cs144-lab1.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Course">Course</a>
             </li><li>
@@ -1050,7 +1052,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

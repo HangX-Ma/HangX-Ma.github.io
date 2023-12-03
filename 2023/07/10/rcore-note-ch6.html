@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -309,7 +311,7 @@
   <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
 </blockquote>
 
-<p><code class="language-html highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
+<p><code class="language-plaintext highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
 
 <dl>
   <dt>磁盘块设备接口层</dt>
@@ -365,16 +367,16 @@
 
 <h2 id="2-块设备接口层">2. 块设备接口层</h2>
 
-<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-html highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-html highlighter-rouge">Send</code>， <code class="language-html highlighter-rouge">Sync</code>， <code class="language-html highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
+<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-plaintext highlighter-rouge">Send</code>， <code class="language-plaintext highlighter-rouge">Sync</code>， <code class="language-plaintext highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
 
 <ul>
   <li><em>A type is Send if it is safe to send it to another thread.</em></li>
-  <li><em>A type is Sync if it is safe to share between threads (<code class="language-html highlighter-rouge">T</code> is Sync if and only if <code class="language-html highlighter-rouge"><span class="err">&amp;</span>T</code> is Send).</em></li>
+  <li><em>A type is Sync if it is safe to share between threads (<code class="language-plaintext highlighter-rouge">T</code> is Sync if and only if <code class="language-plaintext highlighter-rouge">&amp;T</code> is Send).</em></li>
 </ul>
 
-<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;dyn</span> <span class="na">BlockDevice</span><span class="nt">&gt;</span></code> 表明该 trait 类型， 被 <code class="language-html highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-html highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-html highlighter-rouge">dyn</code> 关键字。</p>
+<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-plaintext highlighter-rouge">Arc&lt;dyn BlockDevice&gt;</code> 表明该 trait 类型， 被 <code class="language-plaintext highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-plaintext highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-plaintext highlighter-rouge">dyn</code> 关键字。</p>
 
-<p>用到 <code class="language-html highlighter-rouge">Any</code> 与 <code class="language-html highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-html highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-html highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
+<p>用到 <code class="language-plaintext highlighter-rouge">Any</code> 与 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-plaintext highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-plaintext highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_dev.rs</span>
 <span class="k">pub</span> <span class="k">trait</span> <span class="n">BlockDevice</span> <span class="p">:</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span> <span class="o">+</span> <span class="n">Any</span> <span class="p">{</span>
@@ -405,12 +407,12 @@
 <p>每个 BlockCache 缓存一个磁盘块， 这是一个最小单位， rCore 提供了一些对缓存管理的方法：</p>
 
 <ul>
-  <li><strong>new</strong>： <code class="language-html highlighter-rouge">BlockCache</code> 实现了 <code class="language-html highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-html highlighter-rouge">cache</code> 被设置为 <code class="language-html highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
-  <li><strong>addr_of_offset</strong>： 获取 <code class="language-html highlighter-rouge">cache</code> 数组偏移 <code class="language-html highlighter-rouge">offset</code> 大小的字节地址。</li>
-  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-html highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
+  <li><strong>new</strong>： <code class="language-plaintext highlighter-rouge">BlockCache</code> 实现了 <code class="language-plaintext highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-plaintext highlighter-rouge">cache</code> 被设置为 <code class="language-plaintext highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
+  <li><strong>addr_of_offset</strong>： 获取 <code class="language-plaintext highlighter-rouge">cache</code> 数组偏移 <code class="language-plaintext highlighter-rouge">offset</code> 大小的字节地址。</li>
+  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-plaintext highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
 </ul>
 
-<p>rCore 将 <code class="language-html highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-html highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-html highlighter-rouge">BlockCache::read</code> 以及 <code class="language-html highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-html highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
+<p>rCore 将 <code class="language-plaintext highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-plaintext highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-plaintext highlighter-rouge">BlockCache::read</code> 以及 <code class="language-plaintext highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-plaintext highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 
@@ -426,10 +428,10 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>rCore 实现了很多与 <code class="language-html highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
+  <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
 </blockquote>
 
-<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">BlockCache</span><span class="nt">&gt;</span>&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
+<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
@@ -437,7 +439,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-html highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-html highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-html highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-html highlighter-rouge">get_block_cache</code> 获取 <code class="language-html highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-html highlighter-rouge">Arc<span class="nt">&lt;Mutex</span><span class="err">&lt;</span><span class="na">BlockCache</span><span class="nt">&gt;</span>&gt;</code> 调用者还需要通过 <code class="language-html highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-html highlighter-rouge">BlockCache</code> 进行操作。</p>
+<p><code class="language-plaintext highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-plaintext highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 获取 <code class="language-plaintext highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code> 调用者还需要通过 <code class="language-plaintext highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-plaintext highlighter-rouge">BlockCache</code> 进行操作。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_cache</span><span class="p">(</span>
     <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
@@ -484,7 +486,7 @@
 <span class="k">type</span> <span class="n">BitmapBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u64</span><span class="p">;</span> <span class="mi">64</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>rCore 教程中的 <code class="language-html highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-html highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-html highlighter-rouge">struct Bitmap</code> 中的 <code class="language-html highlighter-rouge">alloc</code> 和 <code class="language-html highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
+<p>rCore 教程中的 <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-plaintext highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 中的 <code class="language-plaintext highlighter-rouge">alloc</code> 和 <code class="language-plaintext highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            start_block_id(Start ID)
                   v
@@ -497,7 +499,7 @@
         (increase)
 </code></pre></div></div>
 
-<p>这里结合 <code class="language-html highlighter-rouge">alloc</code> 函数阐明 <code class="language-html highlighter-rouge">BlockCache</code> 提供的 <code class="language-html highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-html highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>mut BitmapBlock</code> 这样 <code class="language-html highlighter-rouge">modify</code> 中才能将泛型 <code class="language-html highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-html highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-html highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-html highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
+<p>这里结合 <code class="language-plaintext highlighter-rouge">alloc</code> 函数阐明 <code class="language-plaintext highlighter-rouge">BlockCache</code> 提供的 <code class="language-plaintext highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-plaintext highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-plaintext highlighter-rouge">&amp;mut BitmapBlock</code> 这样 <code class="language-plaintext highlighter-rouge">modify</code> 中才能将泛型 <code class="language-plaintext highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-plaintext highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-plaintext highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-plaintext highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
 
@@ -545,7 +547,7 @@
 
 <h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
 
-<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-html highlighter-rouge">size</code>， 索引节点类型 <code class="language-html highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-html highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-html highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-html highlighter-rouge">DiskInode</code>。</p>
+<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 
@@ -570,7 +572,7 @@
 <p>这里的多级索引是这样理解的， 分为直接索引 (direct) 和 间接索引 (indirect1/indirect2)。</p>
 
 <ul>
-  <li><strong>直接索引</strong> <code class="language-html highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-html highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
+  <li><strong>直接索引</strong> <code class="language-plaintext highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-plaintext highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
 </ul>
 
 <div align="center">
@@ -582,7 +584,7 @@
 <ul>
   <li><strong>间接索引</strong>
     <ul>
-      <li>装满 <code class="language-html highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-html highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-html highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-html highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
+      <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
       <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 通过二级索引先找到一级索引块的 Block ID， 这些一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样再通过一级索引就能确定最终的数据块， 这种设计能额外索引 8 MiB 的额外内容。</li>
     </ul>
   </li>
@@ -594,19 +596,19 @@
     <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
 </div>
 
-<p><code class="language-html success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
+<p><code class="language-plaintext success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DiskInode</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">inner_id</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u32</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>基于直接索引和间接索引， <code class="language-html highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-html highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-html highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-html highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-html highlighter-rouge">Inode</code> 中的 <code class="language-html highlighter-rouge">direct</code>， <code class="language-html highlighter-rouge">indirect1</code> 以及 <code class="language-html highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
+<p>基于直接索引和间接索引， <code class="language-plaintext highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-plaintext highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-plaintext highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-plaintext highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-plaintext highlighter-rouge">Inode</code> 中的 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code> 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
 <blockquote>
-  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-html highlighter-rouge">struct Inode</code> 提供了 <code class="language-html highlighter-rouge">create</code> 方法。</p>
+  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-plaintext highlighter-rouge">struct Inode</code> 提供了 <code class="language-plaintext highlighter-rouge">create</code> 方法。</p>
 </blockquote>
 
-<p>对于 <code class="language-html highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-html highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-html highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-html highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-html highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
+<p>对于 <code class="language-plaintext highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-plaintext highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-plaintext highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-plaintext highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-plaintext highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-10-rcore-note-ch6/inner-id.png" alt="Inner ID, HangX-Ma" width="600" />
@@ -614,17 +616,17 @@
     <font size="2" color="#999"><u>Inner ID, HangX-Ma</u></font>
 </div>
 
-<p>后续关于 <code class="language-html highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
+<p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
 
 <h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
 
-<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-html highlighter-rouge">read_at</code> 和 <code class="language-html highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-html highlighter-rouge">read_at</code> 以及 <code class="language-html highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
+<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-plaintext highlighter-rouge">read_at</code> 以及 <code class="language-plaintext highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 <span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-html highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-html highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-html highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
+<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-plaintext highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-plaintext highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-plaintext highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
 <span class="k">const</span> <span class="n">NAME_LENGTH_LIMIT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
@@ -640,7 +642,7 @@
 
 <h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
 
-<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-html highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-html highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
+<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
@@ -654,9 +656,9 @@
 
 <h2 id="6-索引节点">6. 索引节点</h2>
 
-<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-html highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
+<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-plaintext highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
 
-<p><code class="language-html highlighter-rouge">Inode</code> 和 <code class="language-html highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-html highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-html highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-html highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-html highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 即可表示， <code class="language-html highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
+<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-plaintext highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可表示， <code class="language-plaintext highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
@@ -667,7 +669,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-html highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-html highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-html highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-html highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-html highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-html highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-html highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-html highlighter-rouge">direct</code>， <code class="language-html highlighter-rouge">indirect1</code>， 以及 <code class="language-html highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
+<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-plaintext highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-plaintext highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-plaintext highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-plaintext highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-plaintext highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code>， 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
 <span class="cd">/// Increase the size of a disk inode</span>
@@ -701,13 +703,13 @@
 
 <h4 id="硬链接">硬链接</h4>
 
-<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-html highlighter-rouge">sys_linkat</code>， <code class="language-html highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-html highlighter-rouge">sys_stat</code>。</p>
+<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-plaintext highlighter-rouge">sys_linkat</code>， <code class="language-plaintext highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_stat</code>。</p>
 
-<p>硬链接需要新的 Inode 的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-html highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-html highlighter-rouge">DirEntry</code> 中的 <code class="language-html highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-html highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-html highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-html highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-html highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-html highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
+<p>硬链接需要新的 Inode 的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-plaintext highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-plaintext highlighter-rouge">DirEntry</code> 中的 <code class="language-plaintext highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-plaintext highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-plaintext highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-plaintext highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-plaintext highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-plaintext highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
 
-<p>对于 <code class="language-html highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-html highlighter-rouge">file_count</code> 数量的 <code class="language-html highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-html highlighter-rouge">buf</code> 中查看 <code class="language-html highlighter-rouge">buf</code> 对应的 <code class="language-html highlighter-rouge">block_id</code> 以及 <code class="language-html highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
+<p>对于 <code class="language-plaintext highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-plaintext highlighter-rouge">buf</code> 中查看 <code class="language-plaintext highlighter-rouge">buf</code> 对应的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
 
-<p><code class="language-html highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-html highlighter-rouge">fd_table</code> 获取的到的 <code class="language-html highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-html highlighter-rouge"><span class="err">&amp;</span>dyn Any</code> 再通过 <code class="language-html highlighter-rouge">downcast_ref::<span class="nt">&lt;OSInode&gt;</span>()</code> 强制转换为 <code class="language-html highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-html highlighter-rouge">OSInode</code> 增加 <code class="language-html highlighter-rouge">get_inode_id</code> 以及 <code class="language-html highlighter-rouge">get_inode_pos</code> 获取 <code class="language-html highlighter-rouge">inode_id</code> 以及 <code class="language-html highlighter-rouge">block_id</code> 和 <code class="language-html highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-html highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-html highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-html highlighter-rouge">file_count</code> 数量的 <code class="language-html highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
+<p><code class="language-plaintext highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-plaintext highlighter-rouge">fd_table</code> 获取的到的 <code class="language-plaintext highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-plaintext highlighter-rouge">&amp;dyn Any</code> 再通过 <code class="language-plaintext highlighter-rouge">downcast_ref::&lt;OSInode&gt;()</code> 强制转换为 <code class="language-plaintext highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-plaintext highlighter-rouge">OSInode</code> 增加 <code class="language-plaintext highlighter-rouge">get_inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">get_inode_pos</code> 获取 <code class="language-plaintext highlighter-rouge">inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_id</code> 和 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-plaintext highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-plaintext highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">any</span><span class="p">::</span><span class="n">Any</span><span class="p">;</span>
 
@@ -1585,7 +1587,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

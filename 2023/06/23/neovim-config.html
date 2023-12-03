@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -311,14 +313,14 @@
 
 <p>使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim release build</a> 的方式， 省心省力。</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
-<span class="nb">tar</span> <span class="nt">-xvf</span> nvim-linux64.tar.gz
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+tar -xvf nvim-linux64.tar.gz
 vim ~/.bashrc
-<span class="c"># .bashrc</span>
-<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/nvim-linux64/bin:<span class="nv">$PATH</span>
-<span class="c"># back to cli</span>
-<span class="nb">source</span> ~/.bashrc
-</code></pre></div></div>
+</span><span class="gp">#</span><span class="w"> </span>.bashrc
+<span class="gp">export PATH=$</span>HOME/nvim-linux64/bin:<span class="nv">$PATH</span>
+<span class="gp">#</span><span class="w"> </span>back to cli
+<span class="go">source ~/.bashrc
+</span></code></pre></div></div>
 
 <h2 id="1-vim-选项配置">1. vim 选项配置</h2>
 
@@ -335,11 +337,11 @@ vim ~/.bashrc
 
 <p>参照 Packer 的 repo 的配置内容快速安装 <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>。</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--depth</span> 1 https://github.com/wbthomason/packer.nvim<span class="se">\</span>
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">git clone --depth 1 https://github.com/wbthomason/packer.nvim\
  ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-</code></pre></div></div>
+</span></code></pre></div></div>
 
-<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-html highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugins.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-html highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-html highlighter-rouge">onedark.lua</code> 之后在 <code class="language-html highlighter-rouge">init.lua</code> 文件中 <code class="language-html highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
+<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugins.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
 
 <h2 id="4-插件安装">4. 插件安装</h2>
 
@@ -362,10 +364,10 @@ vim ~/.bashrc
 
 <h3 id="42-status-line">4.2 Status Line</h3>
 
-<p>主要参考 <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a>， 拷贝 <a href="https://github.com/nvim-lualine/lualine.nvim#default-configuration">default configuration</a> 到 <code class="language-html highlighter-rouge">lua/plugins/lualine.lua</code>， 其余步骤与上述一致。 后续若没有特殊情况就不重复说明相关步骤。</p>
+<p>主要参考 <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a>， 拷贝 <a href="https://github.com/nvim-lualine/lualine.nvim#default-configuration">default configuration</a> 到 <code class="language-plaintext highlighter-rouge">lua/plugins/lualine.lua</code>， 其余步骤与上述一致。 后续若没有特殊情况就不重复说明相关步骤。</p>
 
 <blockquote>
-  <p>值得注意的是， 添加相关的插件后需要在 nvim 中运行 <code class="language-html highlighter-rouge">PackerSync</code> 以安装相关插件， 否则 nvim 会报错。</p>
+  <p>值得注意的是， 添加相关的插件后需要在 nvim 中运行 <code class="language-plaintext highlighter-rouge">PackerSync</code> 以安装相关插件， 否则 nvim 会报错。</p>
 </blockquote>
 
 <h3 id="43-navigation">4.3 Navigation</h3>
@@ -411,7 +413,7 @@ vim ~/.bashrc
 
 <dl>
   <dt>Basic Component: <a href="https://github.com/nvim-lua/popup.nvim">popup.nvim</a></dt>
-  <dd>plenary.nvim 的必要组件， 能够提供与 vim <code class="language-html highlighter-rouge">popup_*</code> 兼容的 API 接口。</dd>
+  <dd>plenary.nvim 的必要组件， 能够提供与 vim <code class="language-plaintext highlighter-rouge">popup_*</code> 兼容的 API 接口。</dd>
   <dt>Basic Component: <a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></dt>
   <dd>telescope.nvim 的必要组件， 能够提供异步编程， 目录扫描等基础功能。</dd>
   <dt>Fuzzy Finder: <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></dt>
@@ -454,7 +456,7 @@ vim ~/.bashrc
   <dt>AutoPair: <a href="https://github.com/windwp/nvim-autopairs">nvim-autopairs</a></dt>
   <dd>自动补全括号的插件， 具体作用之后用了补充。</dd>
   <dt>Completion: <a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a></dt>
-  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-html highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-html highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-html highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-html highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-html highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-html highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-html highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-html highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-html highlighter-rouge">saadparwaiz1/cmp_luasnip</code></dd>
+  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code></dd>
   <dt>Friendly Snippets: <a href="https://github.com/rafamadriz/friendly-snippets">friendly-snippets</a></dt>
   <dd>更够为不同语言提供 Snippets 支持。</dd>
 </dl>
@@ -476,7 +478,7 @@ vim ~/.bashrc
 </dl>
 
 <blockquote>
-  <p>nvim 打开后使用 <code class="language-html highlighter-rouge">:Mason</code> 选择 rust-analyzer 按 i 可以便捷安装。</p>
+  <p>nvim 打开后使用 <code class="language-plaintext highlighter-rouge">:Mason</code> 选择 rust-analyzer 按 i 可以便捷安装。</p>
 </blockquote>
 
 <dl>
@@ -504,9 +506,9 @@ vim ~/.bashrc
 
 <dl>
   <dt>FileType: <a href="https://github.com/nathom/filetype.nvim">filetype.nvim</a></dt>
-  <dd>filetype.nvim 是为了替代 nvim 启动时引用的 <code class="language-html highlighter-rouge">filetype.vim</code> 文件， 该文件的目的是创建一系列自动命令， 根据文件名设置 filetype 变量， 但该文件的载入耗费了大量的时间， filetype.nvim 能优化这一载入过程， 对启动过程进行加速。</dd>
+  <dd>filetype.nvim 是为了替代 nvim 启动时引用的 <code class="language-plaintext highlighter-rouge">filetype.vim</code> 文件， 该文件的目的是创建一系列自动命令， 根据文件名设置 filetype 变量， 但该文件的载入耗费了大量的时间， filetype.nvim 能优化这一载入过程， 对启动过程进行加速。</dd>
   <dt>Lua Loader: <a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a></dt>
-  <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-html highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
+  <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-plaintext highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
 </dl>
 
 <h3 id="414-greeter">4.14 Greeter</h3>
@@ -1381,7 +1383,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

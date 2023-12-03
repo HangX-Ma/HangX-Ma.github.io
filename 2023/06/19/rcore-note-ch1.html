@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -286,7 +288,7 @@
                 href="/blog/archive.html?tag=rCore">rCore</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 19, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 10389 words </span>
+                <span> Total 10393 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -343,14 +345,14 @@
     <p><em>如何使得函数返回时能够跳转到调用该函数的下一条指令，即使该函数在代码中的多个位置被调用？</em></p>
 
     <blockquote>
-      <p>RISC-V 中 <code class="language-html highlighter-rouge">ra</code> 寄存器 （即 <code class="language-html highlighter-rouge">x1</code> 寄存器） 是用来保存函数的返回地址的， 函数调用时会使用相关的跳转指令 <code class="language-html highlighter-rouge">jal</code> 或者 <code class="language-html highlighter-rouge">jalr</code>， 这两条指令都会在函数调用前将 <code class="language-html highlighter-rouge">pc+4</code> 即下一条指令的地址存入 <code class="language-html highlighter-rouge">rd</code> 寄存器， 一般情况下 <code class="language-html highlighter-rouge">rd</code> 寄存器会选为 <code class="language-html highlighter-rouge">ra</code>。 在函数需要返回时， 只需要通过 <code class="language-html highlighter-rouge">ret</code> 汇编伪指令， 即可使主程序继续在 <code class="language-html highlighter-rouge">ra</code> 保存的物理地址继续执行， 这里 <code class="language-html highlighter-rouge">ret</code> 伪指令会被解析为 <code class="language-html highlighter-rouge">jalr x0, 0(ra)</code>。 但在使用 <code class="language-html highlighter-rouge">ra</code> 寄存器时需要注意函数调用上下文， 保证控制流转移前后特定的寄存器值保持不变。</p>
+      <p>RISC-V 中 <code class="language-plaintext highlighter-rouge">ra</code> 寄存器 （即 <code class="language-plaintext highlighter-rouge">x1</code> 寄存器） 是用来保存函数的返回地址的， 函数调用时会使用相关的跳转指令 <code class="language-plaintext highlighter-rouge">jal</code> 或者 <code class="language-plaintext highlighter-rouge">jalr</code>， 这两条指令都会在函数调用前将 <code class="language-plaintext highlighter-rouge">pc+4</code> 即下一条指令的地址存入 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器， 一般情况下 <code class="language-plaintext highlighter-rouge">rd</code> 寄存器会选为 <code class="language-plaintext highlighter-rouge">ra</code>。 在函数需要返回时， 只需要通过 <code class="language-plaintext highlighter-rouge">ret</code> 汇编伪指令， 即可使主程序继续在 <code class="language-plaintext highlighter-rouge">ra</code> 保存的物理地址继续执行， 这里 <code class="language-plaintext highlighter-rouge">ret</code> 伪指令会被解析为 <code class="language-plaintext highlighter-rouge">jalr x0, 0(ra)</code>。 但在使用 <code class="language-plaintext highlighter-rouge">ra</code> 寄存器时需要注意函数调用上下文， 保证控制流转移前后特定的寄存器值保持不变。</p>
     </blockquote>
   </li>
   <li>
     <p><em>对于一个函数而言，保证它调用某个子函数之前，以及该子函数返回到它之后（某些）通用寄存器的值保持不变有何意义？</em></p>
 
     <blockquote>
-      <p>这些特定的寄存器分为 <em><strong>Caller-Saved</strong></em> 和 <em><strong>Callee-Saved</strong></em> 两类， 对于编译器而言， 每个函数的编译是独立的， 子函数的寄存器是未知的， 这些寄存器的值的改变可能会影响整个函数的运行。 例如 <code class="language-html highlighter-rouge">ra</code> 在嵌套函数调用中， 若没有保存通用寄存器的值， 可能会因子函数覆盖了 <code class="language-html highlighter-rouge">ra</code> 的值而使得控制流出现混乱。 因而保证这些特定的通用寄存器的值保持不变可以保证 <strong>多层嵌套调用</strong> 的正确， 以及实现对寄存器的复用 （寄存器资源非常珍贵）。</p>
+      <p>这些特定的寄存器分为 <em><strong>Caller-Saved</strong></em> 和 <em><strong>Callee-Saved</strong></em> 两类， 对于编译器而言， 每个函数的编译是独立的， 子函数的寄存器是未知的， 这些寄存器的值的改变可能会影响整个函数的运行。 例如 <code class="language-plaintext highlighter-rouge">ra</code> 在嵌套函数调用中， 若没有保存通用寄存器的值， 可能会因子函数覆盖了 <code class="language-plaintext highlighter-rouge">ra</code> 的值而使得控制流出现混乱。 因而保证这些特定的通用寄存器的值保持不变可以保证 <strong>多层嵌套调用</strong> 的正确， 以及实现对寄存器的复用 （寄存器资源非常珍贵）。</p>
     </blockquote>
   </li>
   <li>
@@ -367,9 +369,9 @@
       <p>主要还是根据 <strong>调用规范</strong>（Calling Convention）</p>
 
       <ul>
-        <li>a0~a7（<code class="language-html highlighter-rouge">x10~x17</code>）， 用来传递输入参数， 其中的 a0 和 a1 还用来保存返回值。 <strong>调用者保存</strong>。</li>
-        <li>t0~t6(<code class="language-html highlighter-rouge">x5~x7</code>, <code class="language-html highlighter-rouge">x28~x31</code>)， 作为临时寄存器使用，在被调函数中可以随意使用无需保存。</li>
-        <li>s0~s11(<code class="language-html highlighter-rouge">x8~x9</code>, <code class="language-html highlighter-rouge">x18~x27</code>)， 作为临时寄存器使用，被调函数保存后才能在被调函数中使用。 <strong>被调用者保存</strong>。</li>
+        <li>a0~a7（<code class="language-plaintext highlighter-rouge">x10~x17</code>）， 用来传递输入参数， 其中的 a0 和 a1 还用来保存返回值。 <strong>调用者保存</strong>。</li>
+        <li>t0~t6(<code class="language-plaintext highlighter-rouge">x5~x7</code>, <code class="language-plaintext highlighter-rouge">x28~x31</code>)， 作为临时寄存器使用，在被调函数中可以随意使用无需保存。</li>
+        <li>s0~s11(<code class="language-plaintext highlighter-rouge">x8~x9</code>, <code class="language-plaintext highlighter-rouge">x18~x27</code>)， 作为临时寄存器使用，被调函数保存后才能在被调函数中使用。 <strong>被调用者保存</strong>。</li>
       </ul>
     </blockquote>
   </li>
@@ -378,8 +380,8 @@
 
     <blockquote>
       <ul>
-        <li>ra(<code class="language-html highlighter-rouge">x1</code>) 是被调用者保存的。 被调用者函数可能也会调用函数， 在调用之前就需要修改 <code class="language-html highlighter-rouge">ra</code> 使得这次调用能正确返回。 因此，每个函数都需要在开头保存 <code class="language-html highlighter-rouge">ra</code> 到自己的栈帧中，并在结尾使用 <code class="language-html highlighter-rouge">ret</code> 返回之前将其恢复。</li>
-        <li>sp(<code class="language-html highlighter-rouge">x2</code>) 是被调用者保存的。sp 是栈指针 (Stack Pointer) 寄存器， 它指向下一个将要被存储的栈顶位置。 sp 寄存器和 fp 寄存器构成了当前栈帧的空间范围， 同样的被调用函数也会调用其他函数， 这会更新栈帧， 所以 sp 以及 fp 都约定为被调用者保存寄存器。</li>
+        <li>ra(<code class="language-plaintext highlighter-rouge">x1</code>) 是被调用者保存的。 被调用者函数可能也会调用函数， 在调用之前就需要修改 <code class="language-plaintext highlighter-rouge">ra</code> 使得这次调用能正确返回。 因此，每个函数都需要在开头保存 <code class="language-plaintext highlighter-rouge">ra</code> 到自己的栈帧中，并在结尾使用 <code class="language-plaintext highlighter-rouge">ret</code> 返回之前将其恢复。</li>
+        <li>sp(<code class="language-plaintext highlighter-rouge">x2</code>) 是被调用者保存的。sp 是栈指针 (Stack Pointer) 寄存器， 它指向下一个将要被存储的栈顶位置。 sp 寄存器和 fp 寄存器构成了当前栈帧的空间范围， 同样的被调用函数也会调用其他函数， 这会更新栈帧， 所以 sp 以及 fp 都约定为被调用者保存寄存器。</li>
       </ul>
     </blockquote>
   </li>
@@ -394,7 +396,7 @@
 
 <h3 id="12-程序解释与问题记录">1.2 程序解释与问题记录</h3>
 
-<p>在该章节的评论区讨论最多的是 <code class="language-html highlighter-rouge">extern "C"</code> 以及 <code class="language-html highlighter-rouge">*mut u8</code> 裸指针转换的问题， 下面的代码是更改完善后的。 linker script 中的全局变量定义后， 在 C 语言中可以通过 <code class="language-html highlighter-rouge">extern int x</code> 这种形式导入， 这在 rust 中也是可以通过类似的方式实现的， 可以参考 <a href="https://github.com/rustsbi/rustsbi-qemu/blob/main/rustsbi-qemu/src/main.rs#L70">rustsbi</a> 中的方式。 另外， 根据 <em>Rust 程序设计语言</em> 中的 <em>19.1不安全的 Rust: 解引用裸指针</em> 中的 <a href="https://kaisery.github.io/trpl-zh-cn/ch19-01-unsafe-rust.html#%E8%A7%A3%E5%BC%95%E7%94%A8%E8%A3%B8%E6%8C%87%E9%92%88">描述</a> <code class="language-html highlighter-rouge">(ptr as *mut u8)</code> 实际是将 <code class="language-html highlighter-rouge">ptr</code> 所指向的 64 位地址转为 <code class="language-html highlighter-rouge">u8</code> 类型的可变指针， <code class="language-html highlighter-rouge">ptr.write_volatile(0)</code> 方法将 0 写入指针类型 <code class="language-html highlighter-rouge">ptr</code> 存储的地址所指向的 1 字节内存区域。</p>
+<p>在该章节的评论区讨论最多的是 <code class="language-plaintext highlighter-rouge">extern "C"</code> 以及 <code class="language-plaintext highlighter-rouge">*mut u8</code> 裸指针转换的问题， 下面的代码是更改完善后的。 linker script 中的全局变量定义后， 在 C 语言中可以通过 <code class="language-plaintext highlighter-rouge">extern int x</code> 这种形式导入， 这在 rust 中也是可以通过类似的方式实现的， 可以参考 <a href="https://github.com/rustsbi/rustsbi-qemu/blob/main/rustsbi-qemu/src/main.rs#L70">rustsbi</a> 中的方式。 另外， 根据 <em>Rust 程序设计语言</em> 中的 <em>19.1不安全的 Rust: 解引用裸指针</em> 中的 <a href="https://kaisery.github.io/trpl-zh-cn/ch19-01-unsafe-rust.html#%E8%A7%A3%E5%BC%95%E7%94%A8%E8%A3%B8%E6%8C%87%E9%92%88">描述</a> <code class="language-plaintext highlighter-rouge">(ptr as *mut u8)</code> 实际是将 <code class="language-plaintext highlighter-rouge">ptr</code> 所指向的 64 位地址转为 <code class="language-plaintext highlighter-rouge">u8</code> 类型的可变指针， <code class="language-plaintext highlighter-rouge">ptr.write_volatile(0)</code> 方法将 0 写入指针类型 <code class="language-plaintext highlighter-rouge">ptr</code> 存储的地址所指向的 1 字节内存区域。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">clear_bss</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
@@ -412,9 +414,12 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p class="error">但是这种 <code class="language-html highlighter-rouge">static mut var: u64</code> 的实现办法后来在调用 <code class="language-html highlighter-rouge">info!</code> 这类 log 打印的时候出现了问题， 提示找不到 <code class="language-html highlighter-rouge">ebss</code> 所在位置， 或者有几个全局变量的值无法正确读取， 但 <code class="language-html highlighter-rouge">恢复成 fn ebss()</code> 就可以了。</p>
+<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Info </div> </div> <div class="content"> <p>但是这种 <code class="language-plaintext highlighter-rouge">static mut var: u64</code> 的实现办法后来在调用 <code class="language-plaintext highlighter-rouge">info!</code> 这类 log 打印的时候出现了问题， 提示找不到 <code class="language-plaintext highlighter-rouge">ebss</code> 所在位置， 或者有几个全局变量的值无法正确读取， 但 <code class="language-plaintext highlighter-rouge">恢复成 fn ebss()</code> 就可以了。</p>
 
-<p>另外关于栈中在 linker script 中被置于 <code class="language-html highlighter-rouge">.bss</code> 段也有讨论， 在 <em>程序员的修养——链接、装载与库</em> 中就有提及</p>
+
+
+ </div> </div>
+<p>另外关于栈中在 linker script 中被置于 <code class="language-plaintext highlighter-rouge">.bss</code> 段也有讨论， 在 <em>程序员的修养——链接、装载与库</em> 中就有提及</p>
 
 <div style="font-weight: bold; font-style: italic;">
 <p>
@@ -422,7 +427,7 @@
 </p>
 </div>
 
-<p>对于 <code class="language-html highlighter-rouge">.bss</code> 这样的段来说， 分配空间的意义只局限于虚拟地址空间， 因为它在文件中并没有内容。 对于栈的初始化而言， 将其置于 <code class="language-html highlighter-rouge">.bss</code> 段可避免其占用实际的 ELF 文件的空间， 但在后续加载内核内核后， 该部分栈会被分配到 VMA 中占据一定的虚拟内存空间。</p>
+<p>对于 <code class="language-plaintext highlighter-rouge">.bss</code> 这样的段来说， 分配空间的意义只局限于虚拟地址空间， 因为它在文件中并没有内容。 对于栈的初始化而言， 将其置于 <code class="language-plaintext highlighter-rouge">.bss</code> 段可避免其占用实际的 ELF 文件的空间， 但在后续加载内核内核后， 该部分栈会被分配到 VMA 中占据一定的虚拟内存空间。</p>
 
 <h2 id="2-rustsbi">2. RustSBI</h2>
 
@@ -452,7 +457,7 @@
 
 <h2 id="3-print-与-println-宏">3. print 与 println 宏</h2>
 
-<p>借机复习一下 macro， 被 <a href="https://dtolnay.github.io/rust-quiz/1">rust-quiz</a> 痛打的经历历历在目。 宏主要分为 <code class="language-html highlighter-rouge">macro_rules!</code> 这样的声明宏以及 <code class="language-html highlighter-rouge">procedural</code> 过程宏。 在一个文件中调用宏之前必须定义它， 或者将其引入作用域之中。 实现 <code class="language-html highlighter-rouge">print!</code> 宏以及 <code class="language-html highlighter-rouge">println!</code> 宏需要 <code class="language-html highlighter-rouge">#[macro_export]</code> 注解表明引入改宏到作用域之中。 以 <code class="language-html highlighter-rouge">print!</code> 宏为例， 由内向外展开分析， 需要记住 <a href="https://veykril.github.io/tlborm/decl-macros/macros-methodical.html#metavariables">2.1 A Methodical Introduction</a> 中 Repetition 原则， <code class="language-html highlighter-rouge">$ (...) sep rep</code>。</p>
+<p>借机复习一下 macro， 被 <a href="https://dtolnay.github.io/rust-quiz/1">rust-quiz</a> 痛打的经历历历在目。 宏主要分为 <code class="language-plaintext highlighter-rouge">macro_rules!</code> 这样的声明宏以及 <code class="language-plaintext highlighter-rouge">procedural</code> 过程宏。 在一个文件中调用宏之前必须定义它， 或者将其引入作用域之中。 实现 <code class="language-plaintext highlighter-rouge">print!</code> 宏以及 <code class="language-plaintext highlighter-rouge">println!</code> 宏需要 <code class="language-plaintext highlighter-rouge">#[macro_export]</code> 注解表明引入改宏到作用域之中。 以 <code class="language-plaintext highlighter-rouge">print!</code> 宏为例， 由内向外展开分析， 需要记住 <a href="https://veykril.github.io/tlborm/decl-macros/macros-methodical.html#metavariables">2.1 A Methodical Introduction</a> 中 Repetition 原则， <code class="language-plaintext highlighter-rouge">$ (...) sep rep</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[macro_export]</span>
 <span class="nd">macro_rules!</span> <span class="n">print</span> <span class="p">{</span>
@@ -471,13 +476,13 @@
 
 <ul>
   <li>
-    <p><code class="language-html highlighter-rouge">, $($arg: tt)+</code> 该部分会匹配由 <code class="language-html highlighter-rouge">,</code> 分隔的一段重复序列， <code class="language-html highlighter-rouge">+</code> 表示改重复部分至少出现一次， 重复的内容是 token tree， 它将被捕获存放在元变量 <code class="language-html highlighter-rouge">arg</code> 中。</p>
+    <p><code class="language-plaintext highlighter-rouge">, $($arg: tt)+</code> 该部分会匹配由 <code class="language-plaintext highlighter-rouge">,</code> 分隔的一段重复序列， <code class="language-plaintext highlighter-rouge">+</code> 表示改重复部分至少出现一次， 重复的内容是 token tree， 它将被捕获存放在元变量 <code class="language-plaintext highlighter-rouge">arg</code> 中。</p>
   </li>
   <li>
-    <p><code class="language-html highlighter-rouge">$($fmt: literal $(...)?)</code> 该部分有 <code class="language-html highlighter-rouge">literal</code> fragment-specifier， 根据 <a href="https://doc.rust-lang.org/reference/expressions/literal-expr.html">The Rust Reference - 8.2.1. Literal expression</a> 中的描述， <em>literal expression</em> 是主要在编译阶段分析的常量表达式， 由单个 token 构成， 一般而言 <strong>CHAR， STRING， RAW STRING， BYTE， BYTE STRING， RAW BYTE STRING， INTEGER， FLOAT， BOOL</strong> 均为 literal 类型。 根据 <a href="https://doc.rust-lang.org/reference/macros-by-example.html">Rust Reference - 3.1 Macros By Example</a> 中的描述， 在 MacroMatch <code class="language-html highlighter-rouge">() =&gt; {}</code> 中应当由两组匹配模式， 一组是 <code class="language-html highlighter-rouge">$fmt: literal</code> 对应 <code class="language-html highlighter-rouge">$ ( IDENTIFIER_OR_KEYWORD except crate | RAW_IDENTIFIER | _ ) : MacroFragSpec</code>， 另一组就是 <code class="language-html highlighter-rouge">$(, $($arg: tt)+)?</code>， 对应 <code class="language-html highlighter-rouge">$ ( MacroMatch+ ) MacroRepSep? MacroRepOp</code>。</p>
+    <p><code class="language-plaintext highlighter-rouge">$($fmt: literal $(...)?)</code> 该部分有 <code class="language-plaintext highlighter-rouge">literal</code> fragment-specifier， 根据 <a href="https://doc.rust-lang.org/reference/expressions/literal-expr.html">The Rust Reference - 8.2.1. Literal expression</a> 中的描述， <em>literal expression</em> 是主要在编译阶段分析的常量表达式， 由单个 token 构成， 一般而言 <strong>CHAR， STRING， RAW STRING， BYTE， BYTE STRING， RAW BYTE STRING， INTEGER， FLOAT， BOOL</strong> 均为 literal 类型。 根据 <a href="https://doc.rust-lang.org/reference/macros-by-example.html">Rust Reference - 3.1 Macros By Example</a> 中的描述， 在 MacroMatch <code class="language-plaintext highlighter-rouge">() =&gt; {}</code> 中应当由两组匹配模式， 一组是 <code class="language-plaintext highlighter-rouge">$fmt: literal</code> 对应 <code class="language-plaintext highlighter-rouge">$ ( IDENTIFIER_OR_KEYWORD except crate | RAW_IDENTIFIER | _ ) : MacroFragSpec</code>， 另一组就是 <code class="language-plaintext highlighter-rouge">$(, $($arg: tt)+)?</code>， 对应 <code class="language-plaintext highlighter-rouge">$ ( MacroMatch+ ) MacroRepSep? MacroRepOp</code>。</p>
   </li>
   <li>
-    <p>Matcher 的右侧就是 MacroTranscriber， 可以看到我们使用了外部函数 <code class="language-html highlighter-rouge">print</code>， 并用 <code class="language-html highlighter-rouge">format_args!</code> 宏将 <code class="language-html highlighter-rouge">$fmt $(, $($arg)+)?</code> 组装成完整的字符串， 这类似 C/C++ 中的 <code class="language-html highlighter-rouge">sprintf</code>。 另外在 <code class="language-html highlighter-rouge">println!</code> 中使用的 <code class="language-html highlighter-rouge">concat!</code> 宏将多个字符串连接在一起。</p>
+    <p>Matcher 的右侧就是 MacroTranscriber， 可以看到我们使用了外部函数 <code class="language-plaintext highlighter-rouge">print</code>， 并用 <code class="language-plaintext highlighter-rouge">format_args!</code> 宏将 <code class="language-plaintext highlighter-rouge">$fmt $(, $($arg)+)?</code> 组装成完整的字符串， 这类似 C/C++ 中的 <code class="language-plaintext highlighter-rouge">sprintf</code>。 另外在 <code class="language-plaintext highlighter-rouge">println!</code> 中使用的 <code class="language-plaintext highlighter-rouge">concat!</code> 宏将多个字符串连接在一起。</p>
   </li>
 </ul>
 
@@ -514,7 +519,7 @@
      <font size="2" color="#999"><u>Stack Frame, x86</u></font>
  </div>
 
-    <p>根据文档描述， 栈帧存储着函数之间的调用信息， 当前栈帧的头部是 <em>sp(x1)</em> 指向的位置， 尾部是 <em>fp(s0)</em> 指向的位置。 其中 <code class="language-html highlighter-rouge">fp</code> 寄存器中保存了父栈帧的结束地址， x86 架构的结构与 RISC-V 有所不同， <code class="language-html highlighter-rouge">rbp</code> 存储的内容就是父栈帧的 <code class="language-html highlighter-rouge">rbp</code> 地址。 另外， 在调试过程中发现有 <code class="language-html highlighter-rouge">stack overflow</code> 的错误， 参考给出解释需要用到 <code class="language-html highlighter-rouge">libunwind</code> 库解决标准库不存储栈帧指针的问题， 遂仅进行有限个栈帧回溯。 注意需要开启 <code class="language-html highlighter-rouge">force-frame-pointers</code> 编译选项。</p>
+    <p>根据文档描述， 栈帧存储着函数之间的调用信息， 当前栈帧的头部是 <em>sp(x1)</em> 指向的位置， 尾部是 <em>fp(s0)</em> 指向的位置。 其中 <code class="language-plaintext highlighter-rouge">fp</code> 寄存器中保存了父栈帧的结束地址， x86 架构的结构与 RISC-V 有所不同， <code class="language-plaintext highlighter-rouge">rbp</code> 存储的内容就是父栈帧的 <code class="language-plaintext highlighter-rouge">rbp</code> 地址。 另外， 在调试过程中发现有 <code class="language-plaintext highlighter-rouge">stack overflow</code> 的错误， 参考给出解释需要用到 <code class="language-plaintext highlighter-rouge">libunwind</code> 库解决标准库不存储栈帧指针的问题， 遂仅进行有限个栈帧回溯。 注意需要开启 <code class="language-plaintext highlighter-rouge">force-frame-pointers</code> 编译选项。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">arch</span><span class="p">::</span><span class="n">asm</span><span class="p">;</span>
 
@@ -565,7 +570,7 @@
     <p><em>请用相关工具软件分析并给出应用程序A的代码段/数据段/堆/栈的地址空间范围。</em></p>
 
     <blockquote>
-      <p>使用 <code class="language-html highlighter-rouge">readelf -S pro1</code> 查看 section headers 信息， 我的程序的代码段地址空间为 [0x7080, 0x4ef04]， 数据段地址空间范围是 [0x65000, 0x65038] 这里有做地址对齐。 另外， 堆/栈的信息是动态分配的， 根据参考中的说明， 需要在后台查看 <code class="language-html highlighter-rouge">/proc/[pid]/maps</code>。</p>
+      <p>使用 <code class="language-plaintext highlighter-rouge">readelf -S pro1</code> 查看 section headers 信息， 我的程序的代码段地址空间为 [0x7080, 0x4ef04]， 数据段地址空间范围是 [0x65000, 0x65038] 这里有做地址对齐。 另外， 堆/栈的信息是动态分配的， 根据参考中的说明， 需要在后台查看 <code class="language-plaintext highlighter-rouge">/proc/[pid]/maps</code>。</p>
     </blockquote>
   </li>
   <li>
@@ -579,7 +584,7 @@
     <p><em>请基于 QEMU 模拟 RISC—V 的执行过程和 QEMU 源代码， 说明 RISC-V 硬件加电后的几条指令在哪里？ 完成了哪些功能？</em></p>
 
     <blockquote>
-      <p>对 QEMU 的执行流程不是太了解， 但按照前述的 boot flow， 第一阶段肯定是模拟 ROM 中的指令进行初始化， 在 <code class="language-html highlighter-rouge">qemu7.0.0/hw/riscv/boot.c</code> 中可以找到 <code class="language-html highlighter-rouge">riscv_setup_rom_reset_vec</code>， 相当于 ROM 的初始化设置， 具体的配置内容如 <code class="language-html highlighter-rouge">reset_vec</code> 所示。</p>
+      <p>对 QEMU 的执行流程不是太了解， 但按照前述的 boot flow， 第一阶段肯定是模拟 ROM 中的指令进行初始化， 在 <code class="language-plaintext highlighter-rouge">qemu7.0.0/hw/riscv/boot.c</code> 中可以找到 <code class="language-plaintext highlighter-rouge">riscv_setup_rom_reset_vec</code>， 相当于 ROM 的初始化设置， 具体的配置内容如 <code class="language-plaintext highlighter-rouge">reset_vec</code> 所示。</p>
     </blockquote>
 
     <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="cm">/* reset vector */</span>
@@ -606,7 +611,7 @@
 </code></pre></div>    </div>
 
     <blockquote>
-      <p>AUIPC (add upper immediate to pc)， 其作用是计算 PC 的相对地址并将结果存储在 rd 中。 根据 <a href="https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html">9.38.3 RISC-V Assembler Modifiers</a> 中的描述， <code class="language-html highlighter-rouge">%pcrel_hi</code> 以及 <code class="language-html highlighter-rouge">%pcrel_lo</code> 的定义为：</p>
+      <p>AUIPC (add upper immediate to pc)， 其作用是计算 PC 的相对地址并将结果存储在 rd 中。 根据 <a href="https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html">9.38.3 RISC-V Assembler Modifiers</a> 中的描述， <code class="language-plaintext highlighter-rouge">%pcrel_hi</code> 以及 <code class="language-plaintext highlighter-rouge">%pcrel_lo</code> 的定义为：</p>
 
       <dl>
         <dt>%pcrel_hi(symbol)</dt>
@@ -615,14 +620,14 @@
         <dd>The low 12 bits of relative address between pc and symbol.</dd>
       </dl>
 
-      <p>另外需要注意的是 <code class="language-html highlighter-rouge">1b</code> 实际上是 RISC-V 汇编 Label 的一种写法， 拆开来是 <strong>1</strong> <strong>backward</strong>， 表示在 <strong>1</strong> 这个标签值之后的标签。 同样道理可能会出现 <code class="language-html highlighter-rouge">1f</code>， 意思就正好相反表示在 <strong>1</strong> 这个标签之前。 也就是前两句实际是处理 Code Independent 设计的获取 <code class="language-html highlighter-rouge">fw_dyn</code> 的地址。</p>
+      <p>另外需要注意的是 <code class="language-plaintext highlighter-rouge">1b</code> 实际上是 RISC-V 汇编 Label 的一种写法， 拆开来是 <strong>1</strong> <strong>backward</strong>， 表示在 <strong>1</strong> 这个标签值之后的标签。 同样道理可能会出现 <code class="language-plaintext highlighter-rouge">1f</code>， 意思就正好相反表示在 <strong>1</strong> 这个标签之前。 也就是前两句实际是处理 Code Independent 设计的获取 <code class="language-plaintext highlighter-rouge">fw_dyn</code> 的地址。</p>
 
       <dl>
         <dt>mhartid</dt>
         <dd>Hart ID Register (mhartid), 运行当前代码的硬件线程 （hart） 的 ID。</dd>
       </dl>
 
-      <p>因而在获取 <code class="language-html highlighter-rouge">fw_dyn</code> 的地址后， 会将当前代码硬件线程的 ID 存储到 <code class="language-html highlighter-rouge">a0</code> 寄存器中。 另外在跳转到 <code class="language-html highlighter-rouge">fw_dyn</code> 地址后， 由于我们的系统是 RISCV64， 因而 <code class="language-html highlighter-rouge">ld a1, 32(t0)</code> 会将 <code class="language-html highlighter-rouge">fdt_load_addr</code> 即 Flatten Device Tree 的地址写入 <code class="language-html highlighter-rouge">a1</code> 之后更新 <code class="language-html highlighter-rouge">t0</code> 为 <code class="language-html highlighter-rouge">start_addr</code> 后适用 <code class="language-html highlighter-rouge">jr t0</code> 指令跳转到 <code class="language-html highlighter-rouge">start</code> 也就是程序的入口地址处。</p>
+      <p>因而在获取 <code class="language-plaintext highlighter-rouge">fw_dyn</code> 的地址后， 会将当前代码硬件线程的 ID 存储到 <code class="language-plaintext highlighter-rouge">a0</code> 寄存器中。 另外在跳转到 <code class="language-plaintext highlighter-rouge">fw_dyn</code> 地址后， 由于我们的系统是 RISCV64， 因而 <code class="language-plaintext highlighter-rouge">ld a1, 32(t0)</code> 会将 <code class="language-plaintext highlighter-rouge">fdt_load_addr</code> 即 Flatten Device Tree 的地址写入 <code class="language-plaintext highlighter-rouge">a1</code> 之后更新 <code class="language-plaintext highlighter-rouge">t0</code> 为 <code class="language-plaintext highlighter-rouge">start_addr</code> 后适用 <code class="language-plaintext highlighter-rouge">jr t0</code> 指令跳转到 <code class="language-plaintext highlighter-rouge">start</code> 也就是程序的入口地址处。</p>
     </blockquote>
 
     <p><a href="https://stackoverflow.com/questions/73945372/question-aboutpcrel-hi-and-pcrel-lo-for-qemu-virt-machine">[Question about%pcrel_hi and %pcrel_lo for qemu virt machine] - StackOverflow</a><br />
@@ -699,7 +704,7 @@
 </span></code></pre></div>    </div>
 
     <blockquote>
-      <p>根据上述信息， 当前的 <code class="language-html highlighter-rouge">pc</code> 在 <code class="language-html highlighter-rouge">flip</code> 函数的入口位置， 此时的 <code class="language-html highlighter-rouge">sp</code> 在 <code class="language-html highlighter-rouge">0x4007f1310</code> 处， 而 <code class="language-html highlighter-rouge">ra</code> 在 <code class="language-html highlighter-rouge">0x10742</code> 处， 说明 <code class="language-html highlighter-rouge">flip</code> 函数调用后会返回到 <code class="language-html highlighter-rouge">flap</code> 函数中， 此时对应的指令为 <code class="language-html highlighter-rouge">ld ra,8(sp)</code>， 那么读取到的 <code class="language-html highlighter-rouge">ra</code> 为 <code class="language-html highlighter-rouge">0x10750</code>， 返回的位置仍在 <code class="language-html highlighter-rouge">flap</code> 中， 并根据指令其仍会 跳转到 <code class="language-html highlighter-rouge">0x10742</code> 处并继续从栈中取出地址 <code class="language-html highlighter-rouge">0x10772</code> 跳转到 <code class="language-html highlighter-rouge">flip</code> 中的 <code class="language-html highlighter-rouge">j 0x10764</code>。</p>
+      <p>根据上述信息， 当前的 <code class="language-plaintext highlighter-rouge">pc</code> 在 <code class="language-plaintext highlighter-rouge">flip</code> 函数的入口位置， 此时的 <code class="language-plaintext highlighter-rouge">sp</code> 在 <code class="language-plaintext highlighter-rouge">0x4007f1310</code> 处， 而 <code class="language-plaintext highlighter-rouge">ra</code> 在 <code class="language-plaintext highlighter-rouge">0x10742</code> 处， 说明 <code class="language-plaintext highlighter-rouge">flip</code> 函数调用后会返回到 <code class="language-plaintext highlighter-rouge">flap</code> 函数中， 此时对应的指令为 <code class="language-plaintext highlighter-rouge">ld ra,8(sp)</code>， 那么读取到的 <code class="language-plaintext highlighter-rouge">ra</code> 为 <code class="language-plaintext highlighter-rouge">0x10750</code>， 返回的位置仍在 <code class="language-plaintext highlighter-rouge">flap</code> 中， 并根据指令其仍会 跳转到 <code class="language-plaintext highlighter-rouge">0x10742</code> 处并继续从栈中取出地址 <code class="language-plaintext highlighter-rouge">0x10772</code> 跳转到 <code class="language-plaintext highlighter-rouge">flip</code> 中的 <code class="language-plaintext highlighter-rouge">j 0x10764</code>。</p>
     </blockquote>
 
     <p><a href="https://www.openeuler.org/zh/blog/zhangxinhao/risc-v/2020-11-28-RISC-V.html">RISC-V特权级架构与系统启动</a></p>
@@ -708,13 +713,13 @@
 
 <h2 id="5-实验练习">5. 实验练习</h2>
 
-<p><a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/chapter1/index.html">rCore-Tutorial-Guide-2023S</a> 中没有 ch1 相关练习的， 作者已经实现了依赖 <code class="language-html highlighter-rouge">std::log</code> 的打印输出， 既然这样不如直接在我们之前按照文档构建的 LibOS 上进行更改， 另外顺带把 Makefile 文件功能也补补全。</p>
+<p><a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/chapter1/index.html">rCore-Tutorial-Guide-2023S</a> 中没有 ch1 相关练习的， 作者已经实现了依赖 <code class="language-plaintext highlighter-rouge">std::log</code> 的打印输出， 既然这样不如直接在我们之前按照文档构建的 LibOS 上进行更改， 另外顺带把 Makefile 文件功能也补补全。</p>
 
 <dl>
   <dt>Log Info</dt>
   <dd>照着 docs.rs 网址中的 <a href="https://docs.rs/log/0.4.19/log/index.html">Crate log</a> 的说明就可以了。 <a href="https://github.com/HangX-Ma/rcore-sp23/blob/main/ch1/os/src/logging.rs" class="button button--outline-primary button--pill">logging.rs</a></dd>
   <dt>Kernel Info</dt>
-  <dd>打印信息也比较简单， 仿照前面的 <code class="language-html highlighter-rouge">clear_bss</code> 函数的写法获取全局变量的地址即可。 <a href="https://github.com/HangX-Ma/rcore-sp23/blob/main/ch1/os/src/main.rs" class="button button--outline-primary button--pill">main.rs</a></dd>
+  <dd>打印信息也比较简单， 仿照前面的 <code class="language-plaintext highlighter-rouge">clear_bss</code> 函数的写法获取全局变量的地址即可。 <a href="https://github.com/HangX-Ma/rcore-sp23/blob/main/ch1/os/src/main.rs" class="button button--outline-primary button--pill">main.rs</a></dd>
 </dl>
 
 <blockquote>
@@ -1579,7 +1584,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

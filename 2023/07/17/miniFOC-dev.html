@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -369,7 +371,7 @@
   <p>这里配置的是 SPI1 的， 我后面改成 SPI2 之后由于总线的时钟频率不一样， SPI2 只需要 8 分频。 改这个总线的原因还是因为 SPI2 的 DMA 通道给 USART1 给占了， 想玩玩 OLED 得用 SPI + DMA 的方式速率才能跟得上， 虽然最后可能会因为计算资源问题不上 OLED。</p>
 </blockquote>
 
-<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-html highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-html highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-html highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
+<p>除此之外数据手册中的 \(t_{L}\)， \(t_{H}\)， \(t_{CS}\) 这几个关键量需要在编程时在特定位置延时。 LL 库仅定义了毫秒级的延时， 一个简单的办法实现 us 级的延时就是通过 <code class="language-plaintext highlighter-rouge">__NOP</code> 指令， 这样至少不会浪费定时器资源而且目前也不需要这么高精度的延时（64 个 <code class="language-plaintext highlighter-rouge">__NOP</code> 就足够了。 72MHz 主频一个 <code class="language-plaintext highlighter-rouge">__NOP</code> 为 1/72 us）。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-17-miniFOC-dev/spi1-parameter-settings.png" alt="Encoder SPI1 parameter settings, HangX-Ma" width="400" />
@@ -381,7 +383,7 @@
   <p>后续测试若有问题则可将分频倍数调得更高一些， 400 ns 应该也是能接受的， 手册说明最大转速可测 20K rpm， 小电机能有 5K rpm 也不得了了。</p>
 </blockquote>
 
-<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-html highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-html highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-html highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
+<p>另外 16-bits 的数据中， 除了 MSB 开始的 <code class="language-plaintext highlighter-rouge">[D11..D0]</code> 角度数据， 后续有用的还有 <code class="language-plaintext highlighter-rouge">ERR</code>， 能够识别磁铁安装位置是否合适， 在装机的时候非常有用。 <code class="language-plaintext highlighter-rouge">PARC</code> 用以进行奇偶校验， 该位需要和前 15 位数据保持奇数特性。</p>
 
 <p>另外配置片选引脚的时候需要默认输出为高并且将其配置为上拉模式， 这是根据时序图所示， 芯片是在 CS 脚为低的时候工作的， 这样能保证在必要的时候选中相应的片选脚进行数据传输。</p>
 
@@ -409,7 +411,7 @@
 
 <ul>
   <li>一般来说磁编码器就只需要 1 或 2 个滤波电容外加芯片就行， 设计起来很方便， 时间成本允许就自己打样， 还能针对电机安装孔进行定制化设计。</li>
-  <li>SPI 在芯片上的顺序一般都是 <code class="language-html highlighter-rouge">CS</code>, <code class="language-html highlighter-rouge">SCLK</code>, <code class="language-html highlighter-rouge">MISO</code>, <code class="language-html highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
+  <li>SPI 在芯片上的顺序一般都是 <code class="language-plaintext highlighter-rouge">CS</code>, <code class="language-plaintext highlighter-rouge">SCLK</code>, <code class="language-plaintext highlighter-rouge">MISO</code>, <code class="language-plaintext highlighter-rouge">MOSI</code>， 顺序搞错接线会很麻烦。</li>
   <li>磁编码器似乎不是特别耐高温， 我自己把之间用热风枪吹上的芯片拆下来又装到新板子， 老会出毛病， 如果一直出现返回 error 指不定是编码器坏了。</li>
   <li>磁铁需要买径向磁铁， <em>N 极</em> 和 <em>S 极</em> 对向水平分布。</li>
   <li>为了安装磁铁买了 AB 胶， 非常管用， 但除此之外还买了 3mm 轴套增加安装接触面积（热胶枪装不上）。</li>
@@ -419,14 +421,14 @@
 
 <p><strong><a href="https://www.quinapalus.com/qfplib.html">Qfplib: a family of floating-point libraries for ARM Cortex-M cores</a></strong></p>
 
-<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-html highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-html highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-html highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
+<p>一年前就找到了这个库了， 一直没尝试用过。 在 miniFOC 的项目中我是将所有的外部库都放到了 <code class="language-plaintext highlighter-rouge">Driver</code> 这个文件夹下面， 我创建了一个 <code class="language-plaintext highlighter-rouge">Qfplib-M3</code> 的文件夹存储浮点计算的库文件， 只需要在 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 中添加这个库的路径就能使用了。 经过测试， 使用这个浮点库对计算性能有非常大的提升， 在单步调试的时候， 普通的浮点数除法比利用 qfplib 的浮点数除法有肉眼可见的差距。</p>
 
 <h2 id="3-u8g2-库的使用">3. u8g2 库的使用</h2>
 
 <p>u8g2 库的使用参考了两份代码（用的是 SSD1306 驱动芯片）， 但实际上这两篇文章都没有解决我使用 LL 库配置 SPI + DMA 进行数据传输的问题。 很遗憾我没解决这个问题， 最后使用了普通的 SPI 传输的办法， 这是因为我在几个论坛上发现很多人用了 SPI + DMA 就无法做到数据的正常传输， 必须等到 SPI + DMA 的数据传输完成后才能进行下一次传输， 而这需要通过 while 循环不断检查是否传输完毕。 既然需要 CPU 的参与， 不如直接用 SPI 还更省心。</p>
 
 <ul>
-  <li>SPI 发送数据， 需要通过 <code class="language-html highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
+  <li>SPI 发送数据， 需要通过 <code class="language-plaintext highlighter-rouge">LL_SPI_IsActiveFlag_TXE(SPI1)</code> 检查当前传输是否完成， 当前字节传输完成后才能开启下一次传输。</li>
   <li>除此之外， u8g2 将 CS 引脚拉高之前 （Deselect）， 需要确认 SPI 的传输已经结束， 否则会造成数据错误。</li>
 </ul>
 
@@ -487,9 +489,9 @@
 
 <p>这个配置是真的痛苦啊， 前后加起来快有一天了， 主要是对通过 TIM 定时器对 ADC 触发多通道转换这部分的含义不了解。 关于电流采样， 我设想通过 ADC1 完成多通道采样， 并通过定时器定时出发采样， 使用 DMA 对转换结果进行传输。 依据这个思路需要配置 TIM 的 PWM 以及 ADC 的外部触发。</p>
 
-<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-html highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-html highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-html highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
+<p>在 STM32CubeMX 对 ADC 的配置中会看到 <code class="language-plaintext highlighter-rouge">External Trigger Conversion Source</code>， 这个配置网上说啥的都有， 当时我参照 B 站 Up 在 FOC 的配置中选择的 <code class="language-plaintext highlighter-rouge">Timer 2 Capture Compare 2 event</code> 照猫画虎， 配置完后发现根本没办法采到数据。 我发觉这个 Capture Compare 有点像比较器的输出部分， 而 TIM 中配置的则是 <code class="language-plaintext highlighter-rouge">PWM Generation No Output</code>， 这显然对不上。</p>
 
-<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-html highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
+<p>后续参考尝试了很多代码， 最后在 <a href="https://www.guyuehome.com/36010">【STM32】 HAL库 STM32CubeMX教程九—ADC</a> 看到了对这几个参数的相关解释， 发现只有 ADC1 仅对 TIM3 有一个 <code class="language-plaintext highlighter-rouge">Timer 3 Trigger Out event</code> 的选项。</p>
 
 <ul>
   <li><strong>Regular Conversion launched by software:</strong> 规则的软件触发， 调用函数触发即可</li>
@@ -497,13 +499,13 @@
   <li><strong>Timer X Trigger Out event:</strong> 定时器通道输出触发， 需要设置相应的定时器设置</li>
 </ul>
 
-<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-html highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-html highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
+<p>根据 ADC 中的选项的字面意思， TIM3 中的 <code class="language-plaintext highlighter-rouge">Trigger Event Selection</code> 配置为 <code class="language-plaintext highlighter-rouge">Update Event</code>， 最后终于能采到数据了。</p>
 
 <p>另外需要注意配置中的几个点：</p>
 
 <ul>
   <li>DMA 配置需要在 ADC 配置之前。</li>
-  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-html highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
+  <li>ADC 的外部触发需要定义为上升沿触发， 这一点可以在数据手册的 ADC 章节看到。 LL 库需要调用 <code class="language-plaintext highlighter-rouge">LL_ADC_REG_StartConversionExtTrig</code> 函数。</li>
   <li>PWM 有 Mode 1 和 Mode 2 两种， 分别表示计数器在达到 ARR 值之有为有效电平， 以及在达到 ARR 后为有效电平。 因而对于上升沿触发的要求， 需要配置 PWM 的极性为 Mode 1 为 Low， Mode 2 为 High。 这样， Mode 1 有效电平为 Low， 而 Mode 2 有效电平为 High， 均能达到上升沿的效果。</li>
   <li>
     <p>ADC 校准的代码如下所示， 需要注意结合不同的型号进行差异化配置。 F103 要求在校准之前开启 ADC， 并且需要等待 ADC 的电压稳定。</p>
@@ -531,7 +533,7 @@
 
 <h2 id="6-速度环调试">6. 速度环调试</h2>
 
-<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-html highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-html highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
+<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-plaintext highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-plaintext highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
 
 <p>用 PI 控制器几乎没办法解决这个问题， 凑巧的是我到 SimpleFOC 的官方文档看了看， 我发现他们的速度环实际上是用 PID 控制器实现的， 其中微分 Kd 仅为 0.001 大小。 微分的作用就是应对控制量的快速变化， 意识到这一点后我认为速度环电机的电角度的快速变化很可能让 PI 控制器没办法以较快的响应速度稳定到需要控制的角度， 因而产生了控制的滞后， 这在电机上的表现就是卡顿与抖动。 尝试加入了微小的微分量后， 电机的速度环果然稳定了下来并且表现优异。</p>
 
@@ -569,10 +571,10 @@
 <p>位置环和速度环切换出现电机的跳动， 也就是切换之后电机基于当前的状态值会产生转动速度， 本质上的原因就是前一个环的状态量没有处理妥当。 如下代码所示， 我是这样解决的：</p>
 
 <ul>
-  <li>位置传感器仿照电机初始化时的流程， 让当前的从位置传感芯片的 SPI 获取到的 <code class="language-html highlighter-rouge">raw_angle_data</code> 赋值给 <code class="language-html highlighter-rouge">raw_angle_data_prev</code>， 那么在调用 <code class="language-html highlighter-rouge">get_angle</code> 的时候， 返回值会重新归零。</li>
-  <li>获取转轴速度的时候是基于当前的角度以及与上次获取的角度差的， 因而重新更新 <code class="language-html highlighter-rouge">angle_prev</code> 为当前的角度， 那么后续获取 <code class="language-html highlighter-rouge">get_velocity</code> 的时候返回值就为零了， 那么电机的状态中的速度也就归零了。</li>
-  <li>另外我们需要更新当前的机械角度值为 <code class="language-html highlighter-rouge">get_shaft_angle</code>， 这是叠加上 Sensor Dir 的机械角度值， 本质上是调用了 <code class="language-html highlighter-rouge">get_angle</code>， 此时的值也归零。</li>
-  <li>最后设定位置环的目标位置 <code class="language-html highlighter-rouge">target_angle</code> 为当前的机械角度， 这样就不产生位置误差， 位置环能保持静止。 另外直接设定速度环的 <code class="language-html highlighter-rouge">target_speed</code> 为 0， 这样速度环也没有速度量的输出。</li>
+  <li>位置传感器仿照电机初始化时的流程， 让当前的从位置传感芯片的 SPI 获取到的 <code class="language-plaintext highlighter-rouge">raw_angle_data</code> 赋值给 <code class="language-plaintext highlighter-rouge">raw_angle_data_prev</code>， 那么在调用 <code class="language-plaintext highlighter-rouge">get_angle</code> 的时候， 返回值会重新归零。</li>
+  <li>获取转轴速度的时候是基于当前的角度以及与上次获取的角度差的， 因而重新更新 <code class="language-plaintext highlighter-rouge">angle_prev</code> 为当前的角度， 那么后续获取 <code class="language-plaintext highlighter-rouge">get_velocity</code> 的时候返回值就为零了， 那么电机的状态中的速度也就归零了。</li>
+  <li>另外我们需要更新当前的机械角度值为 <code class="language-plaintext highlighter-rouge">get_shaft_angle</code>， 这是叠加上 Sensor Dir 的机械角度值， 本质上是调用了 <code class="language-plaintext highlighter-rouge">get_angle</code>， 此时的值也归零。</li>
+  <li>最后设定位置环的目标位置 <code class="language-plaintext highlighter-rouge">target_angle</code> 为当前的机械角度， 这样就不产生位置误差， 位置环能保持静止。 另外直接设定速度环的 <code class="language-plaintext highlighter-rouge">target_speed</code> 为 0， 这样速度环也没有速度量的输出。</li>
 </ul>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">encoder_reset</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
@@ -609,11 +611,11 @@
 
 <h3 id="x1-debug">X.1 Debug</h3>
 
-<p>CubeMX 中的 <code class="language-html highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
+<p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
 
 <h3 id="x2-tim1-配置-pwm-输出">X.2 TIM1 配置 PWM 输出</h3>
 
-<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-html highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-html highlighter-rouge">Prescaler</code> 以及 <code class="language-html highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-html highlighter-rouge">36 - 1</code> 配置成 <code class="language-html highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
+<p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Core/Src/tim.c</span>
 <span class="kt">void</span> <span class="nf">MX_TIM1_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
@@ -624,7 +626,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外， 要使能 TIM1 的输出， <code class="language-html highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-html highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-html highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
+<p>另外， 要使能 TIM1 的输出， <code class="language-plaintext highlighter-rouge">LL_TIM_CC_EnableChannel</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableCounter</code>， <code class="language-plaintext highlighter-rouge">LL_TIM_EnableAllOutputs</code> 这几条函数必须逐个使用， 具体含义可以参考 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;cad=rja&amp;uact=8&amp;ved=2ahUKEwj4k_zr4ZWAAxUKAt4KHS_0D60QFnoECBwQAQ&amp;url=https%3A%2F%2Fwww.st.com%2Fresource%2Fen%2Fuser_manual%2Fum1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf&amp;usg=AOvVaw1DzMCa42sT0JPpOP1EH-0j&amp;opi=89978449">ST - Description of STM32F1 HAL and low-layer drivers</a></p>
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
@@ -632,7 +634,7 @@
 
 <h3 id="x3-spi">X.3 SPI</h3>
 
-<p>需要增加 <code class="language-html highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
+<p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
 
 <p>另外发现一个问题， SPI 的收发需要共用一个函数（纯发送不用， 我在 OLED 中测试过）， 这是因为 SPI 从机没有自己的 SCLK 时钟， 这就需要主机提供。 而双工 SPI 的接收和发送是用两套缓存空间的， 因而可以通过主机向从机发送相应的字节提供 SCLK 时钟， 才能进行同步进行数据接收。 因而， 磁编码器的 SPI 接收函数是这样的。</p>
 
@@ -666,11 +668,11 @@
 <span class="n">LL_USART_EnableDMAReq_TX</span><span class="p">(</span><span class="n">USARTx_INSTANCE</span><span class="p">);</span>
 </code></pre></div></div>
 
-<p>除此之外， 对于配置了 <code class="language-html highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-html highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-html highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
+<p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
 
 <h3 id="x5-重定向-printf">X.5 重定向 printf</h3>
 
-<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-html highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
+<p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-plaintext highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
 </span><span class="kt">int</span> <span class="nf">__io_putchar</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">)</span> <span class="p">{</span>
@@ -691,14 +693,14 @@
 
 <h3 id="x6-printf-浮点输出">X.6 printf 浮点输出</h3>
 
-<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-html highlighter-rouge">-O0</code>。</p>
+<p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
 
 <div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_link_options</span><span class="p">(</span>LINKER:-u _printf_float<span class="p">)</span>
 </code></pre></div></div>
 
 <p>尝试了很多办法， Vofa+ 上位机程序应该对接收进行了解析所以才能输出 float 类型数据， 直接通过串口一个个发 4 bytes 的 float 还得自己去转换太麻烦了， 干脆就转成整数相关类型输出算了。</p>
 
-<p><em><strong>2023-08-04 UPDATE:</strong></em> 这个编译选项还是需要打开的， 我后来在 OLED 中使用 <code class="language-html highlighter-rouge">sprintf</code> 做浮点数转义的时候， 如果不开启这个编译选项是无法成功将 float 类型转为字符串类型的。</p>
+<p><em><strong>2023-08-04 UPDATE:</strong></em> 这个编译选项还是需要打开的， 我后来在 OLED 中使用 <code class="language-plaintext highlighter-rouge">sprintf</code> 做浮点数转义的时候， 如果不开启这个编译选项是无法成功将 float 类型转为字符串类型的。</p>
 
 <blockquote>
   <p><a href="https://community.st.com/t5/stm32-mcu-products/printf-and-float/td-p/108690">printf and float - ST Community</a><br />
@@ -1564,7 +1566,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

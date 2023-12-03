@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -310,7 +312,7 @@
 <!-- end custom article top snippet -->
 <div class="article__content" itemprop="articleBody"><p><strong>Github Repo:</strong> <a href="https://github.com/HangX-Ma/cs61b-sp21">https://github.com/HangX-Ma/cs61b-sp21</a></p>
 
-<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-html highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
+<p>在实现这个项目之前自己先尝试摸索着做了一些工作， 构思了一下工程结构， 但确实由于项目经验较少， 很难做到 Josh Hug 课上说的 Strategic Programming， 刚开始就对 <code class="language-plaintext highlighter-rouge">interactWithInputString</code> 的字符串处理部分重构了多次。 既然没办法避免 Tactical Programming， 我的想法是先看看别人实现的文件架构以及构建框架， 这样能够有个比较清晰的实现脉络。</p>
 
 <p>我参考的是 <a href="https://github.com/YinY1/CS61B-sp21">YinY1</a> 的 Proj3 实现， 但我认为具体的细节是需要自己去思考的， 文件结构的设计已经给了我足够的启发。 这篇文章就详细介绍一下地图的生成， 这块难度比较高， Phase2 关于游戏交互的我就完成了基础功能没啥好说的。</p>
 
@@ -442,7 +444,7 @@
   <li>
     <p>地图过于拥挤</p>
 
-    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-html highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
+    <p>现在生成的地图和样例所给的相去甚远， 太拥挤了， 有没有办法将生成的 Maze Path 缩小一些？ 我的比较粗浅的想法就是限制之前的 Wall Tiles 锚点的位置， 在判断是否落在地图范围内的时候就直接缩小地图的比例， 例如设定一个 <code class="language-plaintext highlighter-rouge">GEN_RATIO</code> 的系数约束生成区域。</p>
   </li>
   <li>
     <p><strong>Dead End</strong> 过多</p>
@@ -1336,7 +1338,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

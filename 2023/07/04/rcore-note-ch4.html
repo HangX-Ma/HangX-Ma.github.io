@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -305,7 +307,7 @@
     <meta itemprop="keywords" content="Rust,rCore"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-html highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-html highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-html highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
+<div class="article__content" itemprop="articleBody"><p>该章节是目前最复杂的一个章节， 涉及到操作系统的内存管理的策略和方法。 在 <code class="language-plaintext highlighter-rouge">no_std</code> 裸机环境下， rCore 使用 <code class="language-plaintext highlighter-rouge">buddy_system_allocator</code> 为需要动态内存分配的数据结构提供 <code class="language-plaintext highlighter-rouge">Global Allocator</code>。 该章节的主要目的就是实现一个 <strong>地址空间（Address Space）</strong> 抽象， 并在内核中建立虚实地址空间的映射机制， 给应用程序提供一个基于地址空间的安全虚拟内存环境并灵活使用内存。</p>
 
 <p>现代计算机基本使用 <strong>分页内存管理</strong>， 以使得内核始终以一个固定的极小单位管理应用数据， 这既能利用插槽式的简单的内存分配算法避免生成 <strong>内存外碎片</strong>， 又能使未使用的 <strong>内存内碎片</strong> 尽可能小以提高内存的使用率。 关于内存地址映射个人觉得 rCore 讲的比较啰嗦， MIT 的 xv6 的教材很简略但很容易理解可以先阅读 <a href="https://pdos.csail.mit.edu/6.1810/2022/xv6/book-riscv-rev3.pdf">xv6 book - Page tables</a> 建立相关概念再阅读 rCore 的教材。</p>
 
@@ -361,7 +363,7 @@
 
 <p>上图描述了三级页表的查询方式， Sv48 可以使用四级页表， 具体的设计依具体情况而定。 多级页表的构建是为了节省内存开销， 我们只需要按需增添 PTE。 我们可以通过三级页表进行逐级索引， 依据上图由 <em>L2</em> 的 512 个一级页表可以索引， <em>L1</em> 的 \(512\times{512}\) 个二级页表， 这样的开销会比直接映射的页表小得多。 例如我们当前仅需要建立一个地址映射， 那么只需要各使用 <em>L2</em>， <em>L1</em>， <em>L0</em> 三级页表中的一个 PTE， 我们节省了 511 个 <em>L1</em> PTE， \(511\times{512}\) 个 <em>L0</em> PTE。</p>
 
-<p>如果每个地址映射都需要经历三级查表效率肯定会低， 因而 MMU 会提供 <strong>TLB (Translation Look-Aside Buffer)</strong> 缓存来加快映射查询， 但需要注意的是， 映射关系发生改变后缓存就失效了， 我们需要通过 <code class="language-html highlighter-rouge">sfence.vma</code> 指令刷新 TLB。</p>
+<p>如果每个地址映射都需要经历三级查表效率肯定会低， 因而 MMU 会提供 <strong>TLB (Translation Look-Aside Buffer)</strong> 缓存来加快映射查询， 但需要注意的是， 映射关系发生改变后缓存就失效了， 我们需要通过 <code class="language-plaintext highlighter-rouge">sfence.vma</code> 指令刷新 TLB。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-04-rcore-note-ch4/page-table.png" alt="Translation process, rCore" width="600" />
@@ -375,7 +377,7 @@
 
 <h3 id="21-frame-allocator---物理页帧管理">2.1 frame allocator - 物理页帧管理</h3>
 
-<p>rCore 中内核直接管理了虚拟内存和物理内存。 <em>Frame</em> 所在的空间位于 <code class="language-html highlighter-rouge">ekernel</code> 与 <code class="language-html highlighter-rouge">MEMORY_END</code> 之间。 rCore 使用 <code class="language-html highlighter-rouge">struct StackFrameAllocator</code> 实现 <strong>FRAME_ALLOCATOR</strong>， 并开放给其他内核模块两个用以分配和回收物理地址 <em>frame</em> 的接口： <code class="language-html highlighter-rouge">frame_alloc</code> 以及 <code class="language-html highlighter-rouge">frame_dealloc</code>。 值得注意的是 <code class="language-html highlighter-rouge">frame_alloc</code> 返回的类型是封装 <code class="language-html highlighter-rouge">PhysPageNum</code> 的 <code class="language-html highlighter-rouge">FrameTracker</code> 类型， 该类型实现了 <code class="language-html highlighter-rouge">Drop</code> Trait， 这是一种 RAII 的思想， 当 <code class="language-html highlighter-rouge">FrameTracker</code> 的声明周期结束， 其包裹的 <code class="language-html highlighter-rouge">PhysPageNum</code> 能通过编译器自动回收到 <code class="language-html highlighter-rouge">FRAME_ALLOCATOR</code>。</p>
+<p>rCore 中内核直接管理了虚拟内存和物理内存。 <em>Frame</em> 所在的空间位于 <code class="language-plaintext highlighter-rouge">ekernel</code> 与 <code class="language-plaintext highlighter-rouge">MEMORY_END</code> 之间。 rCore 使用 <code class="language-plaintext highlighter-rouge">struct StackFrameAllocator</code> 实现 <strong>FRAME_ALLOCATOR</strong>， 并开放给其他内核模块两个用以分配和回收物理地址 <em>frame</em> 的接口： <code class="language-plaintext highlighter-rouge">frame_alloc</code> 以及 <code class="language-plaintext highlighter-rouge">frame_dealloc</code>。 值得注意的是 <code class="language-plaintext highlighter-rouge">frame_alloc</code> 返回的类型是封装 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 的 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 类型， 该类型实现了 <code class="language-plaintext highlighter-rouge">Drop</code> Trait， 这是一种 RAII 的思想， 当 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的声明周期结束， 其包裹的 <code class="language-plaintext highlighter-rouge">PhysPageNum</code> 能通过编译器自动回收到 <code class="language-plaintext highlighter-rouge">FRAME_ALLOCATOR</code>。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/frame_allocator.rs</span>
 
@@ -405,10 +407,10 @@
 
 <h3 id="22-page-table---映射表构建">2.2 Page Table - 映射表构建</h3>
 
-<p>构建页表的基本单元就是 <strong>PTE(Page Table Entry)</strong>， 这里有个关键概念需要澄清， 页表的存储位置。 其实从 xv6 的那张 <a href="#translation-details"><em>RISC-V address translation details, MIT xv6</em></a> 也可以看出， 通过索引从 <em>Lx</em> 定位到的 PPN 会指向下一级 Page Table， 这意味着 Page Table 实际上也是存储在具体的物理页帧上的， 并且每个 PTE 对应唯一的一个 PPN。 因而 rCore 对 Page Table 的数据结构的设计就包括了定位 Page Table 的 <code class="language-html highlighter-rouge">root_ppn</code> 以及 Page Table 中包含的各个 PTE 项 <code class="language-html highlighter-rouge">frames</code>。</p>
+<p>构建页表的基本单元就是 <strong>PTE(Page Table Entry)</strong>， 这里有个关键概念需要澄清， 页表的存储位置。 其实从 xv6 的那张 <a href="#translation-details"><em>RISC-V address translation details, MIT xv6</em></a> 也可以看出， 通过索引从 <em>Lx</em> 定位到的 PPN 会指向下一级 Page Table， 这意味着 Page Table 实际上也是存储在具体的物理页帧上的， 并且每个 PTE 对应唯一的一个 PPN。 因而 rCore 对 Page Table 的数据结构的设计就包括了定位 Page Table 的 <code class="language-plaintext highlighter-rouge">root_ppn</code> 以及 Page Table 中包含的各个 PTE 项 <code class="language-plaintext highlighter-rouge">frames</code>。</p>
 
 <blockquote>
-  <p>估计是为了让 <code class="language-html highlighter-rouge">root_ppn</code> 和 <code class="language-html highlighter-rouge">frames</code> 的指向和含义统一才把 PTE 命名为 frame， 个人感觉直接用 PTE 会清晰很多。 这里 rCore 又提及 RAII 的思想， <code class="language-html highlighter-rouge">frames</code> 内部变量通过 <code class="language-html highlighter-rouge">Vec</code> 数据结构绑定 <code class="language-html highlighter-rouge">FrameTracker</code>， 可以保证声明周期结束后对 <code class="language-html highlighter-rouge">FrameTracker</code> 的内存自动回收。</p>
+  <p>估计是为了让 <code class="language-plaintext highlighter-rouge">root_ppn</code> 和 <code class="language-plaintext highlighter-rouge">frames</code> 的指向和含义统一才把 PTE 命名为 frame， 个人感觉直接用 PTE 会清晰很多。 这里 rCore 又提及 RAII 的思想， <code class="language-plaintext highlighter-rouge">frames</code> 内部变量通过 <code class="language-plaintext highlighter-rouge">Vec</code> 数据结构绑定 <code class="language-plaintext highlighter-rouge">FrameTracker</code>， 可以保证声明周期结束后对 <code class="language-plaintext highlighter-rouge">FrameTracker</code> 的内存自动回收。</p>
 </blockquote>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
@@ -419,11 +421,11 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>这样就不难理解 <code class="language-html highlighter-rouge">struct PageTable</code> 初始化的流程了， 每个 Page Table 都需要向 frame allocator 先申请一个物理页帧将其 PPN 作为 <code class="language-html highlighter-rouge">root_ppn</code> 唯一标识。</p>
+<p>这样就不难理解 <code class="language-plaintext highlighter-rouge">struct PageTable</code> 初始化的流程了， 每个 Page Table 都需要向 frame allocator 先申请一个物理页帧将其 PPN 作为 <code class="language-plaintext highlighter-rouge">root_ppn</code> 唯一标识。</p>
 
 <h3 id="23-建立-va-与-pa-的映射关系">2.3 建立 VA 与 PA 的映射关系</h3>
 
-<p>Page Table 必然是动态变化的， 程序运行的时候会通过 <code class="language-html highlighter-rouge">Page Fault</code> Trap 来实现对内存页的按需分配。 当我们知道虚拟地址空间的某个 VA 的时候， 需要通过前述的 Page Table 找到或建立一个关于物理页帧映射。 Xv6 中是通过 <code class="language-html highlighter-rouge">walk</code> 函数实现的， rCore 提供了两个基础函数 <code class="language-html highlighter-rouge">find_pte_create</code> 以及 <code class="language-html highlighter-rouge">find_pte</code>， 区别就在于是否在某一级页表的 PTE 未创建时创建一个新的 PTE。</p>
+<p>Page Table 必然是动态变化的， 程序运行的时候会通过 <code class="language-plaintext highlighter-rouge">Page Fault</code> Trap 来实现对内存页的按需分配。 当我们知道虚拟地址空间的某个 VA 的时候， 需要通过前述的 Page Table 找到或建立一个关于物理页帧映射。 Xv6 中是通过 <code class="language-plaintext highlighter-rouge">walk</code> 函数实现的， rCore 提供了两个基础函数 <code class="language-plaintext highlighter-rouge">find_pte_create</code> 以及 <code class="language-plaintext highlighter-rouge">find_pte</code>， 区别就在于是否在某一级页表的 PTE 未创建时创建一个新的 PTE。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/address.rs</span>
 
@@ -447,7 +449,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>rCore 通过 <code class="language-html highlighter-rouge">indexes</code> 解析 VPN (Virtual Page Number)， 找到三级页表每一级中的 leaf PTE 的索引号。 这里会用到 PTE 中的 Flags 部分的信息。 标志位 <code class="language-html highlighter-rouge">V</code> 表示当前的 PTE 为合法有效的， 在建立新的 PTE 的时候需要更新该标志位， 否则会引起 Page Fault。 基于这几个函数， rCore 封装了两个更便利的函数方便 Page Table 的维护， 用 <code class="language-html highlighter-rouge">map/unmap</code> 为当前的 Page Table 增加或删除 PTE。</p>
+<p>rCore 通过 <code class="language-plaintext highlighter-rouge">indexes</code> 解析 VPN (Virtual Page Number)， 找到三级页表每一级中的 leaf PTE 的索引号。 这里会用到 PTE 中的 Flags 部分的信息。 标志位 <code class="language-plaintext highlighter-rouge">V</code> 表示当前的 PTE 为合法有效的， 在建立新的 PTE 的时候需要更新该标志位， 否则会引起 Page Fault。 基于这几个函数， rCore 封装了两个更便利的函数方便 Page Table 的维护， 用 <code class="language-plaintext highlighter-rouge">map/unmap</code> 为当前的 Page Table 增加或删除 PTE。</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/page_table.rs</span>
 
@@ -466,7 +468,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p><strong>手动页表查询</strong>： Page Table 还实现了两个特殊的函数模仿 MMU 获取 Page Table。 <code class="language-html highlighter-rouge">from_token</code> 直接读取 <code class="language-html highlighter-rouge">satp</code> 寄存器中的 PPN 段获取一个 Page Table， 之后就能直接通过 <code class="language-html highlighter-rouge">translate</code> 函数得到 VPN 对应的第三级的 PTE。</p>
+  <p><strong>手动页表查询</strong>： Page Table 还实现了两个特殊的函数模仿 MMU 获取 Page Table。 <code class="language-plaintext highlighter-rouge">from_token</code> 直接读取 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器中的 PPN 段获取一个 Page Table， 之后就能直接通过 <code class="language-plaintext highlighter-rouge">translate</code> 函数得到 VPN 对应的第三级的 PTE。</p>
 </blockquote>
 
 <h2 id="3-地址空间与抽象">3. 地址空间与抽象</h2>
@@ -483,14 +485,14 @@
   <li>
     <p><strong>逻辑段： 一段连续地址的虚拟内存</strong></p>
 
-    <p>rCore 使用 <code class="language-html highlighter-rouge">sruct MapArea</code> 表示逻辑段。</p>
+    <p>rCore 使用 <code class="language-plaintext highlighter-rouge">sruct MapArea</code> 表示逻辑段。</p>
 
     <ul>
-      <li><code class="language-html highlighter-rouge">vpn_range</code> 表明该逻辑段的在虚拟地址的范围以及长度；</li>
-      <li><code class="language-html highlighter-rouge">map_type</code> 则表示了虚拟地址和物理地址的映射办法， 直接映射 （<code class="language-html highlighter-rouge">MapType::Identical</code>） 又或是通过 <strong>FRAME_ALLOCATOR</strong> 随机分配物理帧 （<code class="language-html highlighter-rouge">MapType::Framed</code>） （外设地址都是直接映射的， 这样区分有助于后续的应用拓展）；</li>
-      <li>既然区分了映射方式， 存储映射关系的数据结构也会不同， <code class="language-html highlighter-rouge">data_frames</code> 用于存储 leaf PTE 的 PPN 与其对应的 VPN 之间的关系， 仅用在 <code class="language-html highlighter-rouge">Framed</code> 映射办法。</li>
+      <li><code class="language-plaintext highlighter-rouge">vpn_range</code> 表明该逻辑段的在虚拟地址的范围以及长度；</li>
+      <li><code class="language-plaintext highlighter-rouge">map_type</code> 则表示了虚拟地址和物理地址的映射办法， 直接映射 （<code class="language-plaintext highlighter-rouge">MapType::Identical</code>） 又或是通过 <strong>FRAME_ALLOCATOR</strong> 随机分配物理帧 （<code class="language-plaintext highlighter-rouge">MapType::Framed</code>） （外设地址都是直接映射的， 这样区分有助于后续的应用拓展）；</li>
+      <li>既然区分了映射方式， 存储映射关系的数据结构也会不同， <code class="language-plaintext highlighter-rouge">data_frames</code> 用于存储 leaf PTE 的 PPN 与其对应的 VPN 之间的关系， 仅用在 <code class="language-plaintext highlighter-rouge">Framed</code> 映射办法。</li>
       <li>
-        <p>最后的 <code class="language-html highlighter-rouge">map_perm</code> 其实就和 Linux 系统的 RWXU 的含义基本接近了。</p>
+        <p>最后的 <code class="language-plaintext highlighter-rouge">map_perm</code> 其实就和 Linux 系统的 RWXU 的含义基本接近了。</p>
 
         <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/mm/memory_set.rs</span>
 
@@ -507,7 +509,7 @@
   <li>
     <p><strong>地址空间：一系列有关联的逻辑段</strong></p>
 
-    <p>rCore 通过 <code class="language-html highlighter-rouge">struct MemorySet</code> 封装这些逻辑段， 这是因为虽然逻辑段本身是连续的一段虚拟地址， 但多个逻辑段之间可能并不是连续的。 注意这里的 <code class="language-html highlighter-rouge">page_table</code> 是一个 <em>Root Page Table</em>， 包含了该所有的 PTE 的物理页帧， 而 <code class="language-html highlighter-rouge">areas</code> 则包含了数据所在的物理页帧， 这样的的设计构成了一个地址空间所需的所有的物理页帧。</p>
+    <p>rCore 通过 <code class="language-plaintext highlighter-rouge">struct MemorySet</code> 封装这些逻辑段， 这是因为虽然逻辑段本身是连续的一段虚拟地址， 但多个逻辑段之间可能并不是连续的。 注意这里的 <code class="language-plaintext highlighter-rouge">page_table</code> 是一个 <em>Root Page Table</em>， 包含了该所有的 PTE 的物理页帧， 而 <code class="language-plaintext highlighter-rouge">areas</code> 则包含了数据所在的物理页帧， 这样的的设计构成了一个地址空间所需的所有的物理页帧。</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/mm/memory_set.rs</span>
 
@@ -549,13 +551,13 @@
 
 <h3 id="41-trampoline">4.1 Trampoline</h3>
 
-<p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-html highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
+<p><strong>Trampoline</strong> 部分的代码是由原来的 <code class="language-plaintext highlighter-rouge">trap.S</code> 更改得到的， 其特殊之处在于 Kernel 以及 App 的地址空间的同一位置都有这一段数据， 并且被映射到同一个存放该段代码的物理页帧。 这种设计保证内核态和用户态的虚拟地址空间的切换使用的映射方式相同， 保证这段切换地址空间的指令控制流可以平滑执行。 为方便实现， rCore 直接在多级页表中插入了对 trampoline 的映射而不是新增一个逻辑段。</p>
 
-<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-html highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-html highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-html highlighter-rouge">satp</code> 与 <code class="language-html highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-html highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>
+<p>另外这里提到了虚拟地址空间的切换， 这是 trampoline 命名的由来以及其需要解决的问题。 由于 RISC-V 仅提供了一个 <code class="language-plaintext highlighter-rouge">sscratch</code> 寄存器用以周转数据， 但开启虚拟映射后， 应用地址空间切换到内核应用空间需要用到 <code class="language-plaintext highlighter-rouge">satp</code> 寄存器， 我们无法通过一个寄存器完成 <code class="language-plaintext highlighter-rouge">satp</code> 与 <code class="language-plaintext highlighter-rouge">sp</code> 两个寄存器信息的流转。 因而， 比较合适的办法就是将应用的 <code class="language-plaintext highlighter-rouge">Trap Context</code> 保存在每个应用的用户态虚拟地址空间的 High Half， 紧贴着 Trampoline。</p>
 
 <h3 id="42-改进-syscall">4.2 改进 syscall</h3>
 
-<p>rCore 的手册更改了 <code class="language-html highlighter-rouge">sys_write</code> 系统调用， 通过 <code class="language-html highlighter-rouge">translated_byte_buffer</code> 在内核空间中开辟了一个可以访问应用数据的区域（实际上是将应用数据从用户态虚拟地址空间拷贝到了内核态虚拟地址空间以供内核访问）。 相应的， 前述章节需要访问应用态数据的系统调用均需要通过这种间接的方式进行数据的访问与更改。 这也就是 <code class="language-html highlighter-rouge">sys_get_time</code> 以及 <code class="language-html highlighter-rouge">sys_task_info</code> 在第四章失效的原因。</p>
+<p>rCore 的手册更改了 <code class="language-plaintext highlighter-rouge">sys_write</code> 系统调用， 通过 <code class="language-plaintext highlighter-rouge">translated_byte_buffer</code> 在内核空间中开辟了一个可以访问应用数据的区域（实际上是将应用数据从用户态虚拟地址空间拷贝到了内核态虚拟地址空间以供内核访问）。 相应的， 前述章节需要访问应用态数据的系统调用均需要通过这种间接的方式进行数据的访问与更改。 这也就是 <code class="language-plaintext highlighter-rouge">sys_get_time</code> 以及 <code class="language-plaintext highlighter-rouge">sys_task_info</code> 在第四章失效的原因。</p>
 
 <h2 id="5-课后练习">5. 课后练习</h2>
 
@@ -1570,7 +1572,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

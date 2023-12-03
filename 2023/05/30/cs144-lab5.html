@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -326,7 +328,7 @@
   <li>确定下一跳的 IP 地址</li>
 </ul>
 
-<p>在 Lab5 中需要实现一个新的 <code class="language-html highlighter-rouge">Router</code> 类， 该类能够 <em>跟踪路由表信息</em> 并且 <em>将接收到的每个 datagram 通过正确的输出端 <strong>NetworkInterface</strong> 正确转发到下一跳 （hop）</em>。 在项目指导书中明确解释了 <em><strong>route</strong></em> 的相关含义， 后续需要通过 IP 的最长前缀匹配来实现路由的功能， 这也是实验中最为棘手的部分。</p>
+<p>在 Lab5 中需要实现一个新的 <code class="language-plaintext highlighter-rouge">Router</code> 类， 该类能够 <em>跟踪路由表信息</em> 并且 <em>将接收到的每个 datagram 通过正确的输出端 <strong>NetworkInterface</strong> 正确转发到下一跳 （hop）</em>。 在项目指导书中明确解释了 <em><strong>route</strong></em> 的相关含义， 后续需要通过 IP 的最长前缀匹配来实现路由的功能， 这也是实验中最为棘手的部分。</p>
 
 <h2 id="2-ip-router-实现">2. IP Router 实现</h2>
 
@@ -338,7 +340,7 @@
                  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">next_hop</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">interface_num</span><span class="p">);</span>
 </code></pre></div>    </div>
 
-    <p>根据 <code class="language-html highlighter-rouge">add_route</code> 所给的参数以及 <a href="https://en.wikipedia.org/wiki/Routing_table">wiki</a> 中对 routing table 内容的描述， 我们需要自己创建如下的数据结构。</p>
+    <p>根据 <code class="language-plaintext highlighter-rouge">add_route</code> 所给的参数以及 <a href="https://en.wikipedia.org/wiki/Routing_table">wiki</a> 中对 routing table 内容的描述， 我们需要自己创建如下的数据结构。</p>
 
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// Routing table data structure</span>
  <span class="k">using</span> <span class="n">route_t</span> <span class="o">=</span> <span class="k">struct</span> <span class="p">{</span>
@@ -362,7 +364,7 @@
       <li>在匹配的路由方案中路由器选择 <em>prefix_length</em> 值最大的那个， 选中的就是满足 “最长前缀匹配” 的路由。</li>
       <li>如果没有匹配的路由信息， 则丢弃该项 datagram。</li>
       <li>每一跳的路由器都需要减少 datagrams 的 ttl。 如果 ttl 已经归零或者在本次减除后触及零的下界， 路由器同样需要丢弃该项 datagram。</li>
-      <li>最终， 路由器需要将修改过的 datagram 通过合适的网络接口 （<code class="language-html highlighter-rouge">interface(interface num).send datagram()</code>） 发送到下一跳。</li>
+      <li>最终， 路由器需要将修改过的 datagram 通过合适的网络接口 （<code class="language-plaintext highlighter-rouge">interface(interface num).send datagram()</code>） 发送到下一跳。</li>
     </ul>
 
     <p>整个过程中， 路由器仅需要和 datagram 以及链接层的网络接口抽象进行交互， 完全不需要考虑 TCP， ARP 以及以太网帧， 较好实现了分层隔离， 降低了路由器的处理负担。</p>
@@ -382,70 +384,70 @@
 
 <h2 id="4-坑点记录">4. 坑点记录</h2>
 
-<p>测试的时候有这样一条记录（就是第一个测试都没过啦）， 当时觉得很奇怪怎么会有 <code class="language-html highlighter-rouge">bad IPv4 datagram</code> 的打印， 查看后是 <code class="language-html highlighter-rouge">InternetDatagram</code> 的 <code class="language-html highlighter-rouge">parse</code> 返回了错误。 于是我给 <code class="language-html highlighter-rouge">set_error</code> 的部分都加上了打印才发现是 <strong>checksum</strong> 未匹配。 我还以为是 <em><strong>NetworkInterface</strong></em> 部分的接收部分没有写好， 调试了半天就想着要不要用 <code class="language-html highlighter-rouge">compute_checksum</code> 在 <code class="language-html highlighter-rouge">recv_frame</code> 中重新把 checksum 计算一下， 这时候突然发现这个函数的接口都是 <code class="language-html highlighter-rouge">const</code> 类型， 并且结合 <em><strong>NetworkInterface</strong></em> 在 <em>link layer</em> 与 <em>application</em> 之间的情况， 以及错误是出现在以太网帧传输到 router 再转发出去的， 唯一有嫌疑的应当还是刚刚写的 <em><strong>Router</strong></em> 类。</p>
+<p>测试的时候有这样一条记录（就是第一个测试都没过啦）， 当时觉得很奇怪怎么会有 <code class="language-plaintext highlighter-rouge">bad IPv4 datagram</code> 的打印， 查看后是 <code class="language-plaintext highlighter-rouge">InternetDatagram</code> 的 <code class="language-plaintext highlighter-rouge">parse</code> 返回了错误。 于是我给 <code class="language-plaintext highlighter-rouge">set_error</code> 的部分都加上了打印才发现是 <strong>checksum</strong> 未匹配。 我还以为是 <em><strong>NetworkInterface</strong></em> 部分的接收部分没有写好， 调试了半天就想着要不要用 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 在 <code class="language-plaintext highlighter-rouge">recv_frame</code> 中重新把 checksum 计算一下， 这时候突然发现这个函数的接口都是 <code class="language-plaintext highlighter-rouge">const</code> 类型， 并且结合 <em><strong>NetworkInterface</strong></em> 在 <em>link layer</em> 与 <em>application</em> 之间的情况， 以及错误是出现在以太网帧传输到 router 再转发出去的， 唯一有嫌疑的应当还是刚刚写的 <em><strong>Router</strong></em> 类。</p>
 
-<p>在读 <code class="language-html highlighter-rouge">router.cc</code> 代码考虑把 <code class="language-html highlighter-rouge">compute_checksum</code> 加在哪里的时候我突然看到 ttl 的值被我更改了。 这不就是问题根源嘛， 我们更新了 <em><strong>InternetDatagram</strong></em> 的内容， 那么 checksum 也需要重新计算。</p>
+<p>在读 <code class="language-plaintext highlighter-rouge">router.cc</code> 代码考虑把 <code class="language-plaintext highlighter-rouge">compute_checksum</code> 加在哪里的时候我突然看到 ttl 的值被我更改了。 这不就是问题根源嘛， 我们更新了 <em><strong>InternetDatagram</strong></em> 的内容， 那么 checksum 也需要重新计算。</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Testing traffic between two ordinary hosts <span class="o">(</span>applesauce to cherrypie<span class="o">)</span>...
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">Testing traffic between two ordinary hosts (applesauce to cherrypie)...
 
-Host applesauce trying to send datagram <span class="o">(</span>with next hop <span class="o">=</span> 10.0.0.1<span class="o">)</span>: 
-    IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 
-    <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+Host applesauce trying to send datagram (with next hop = 10.0.0.1): 
+    IPv4, len=2f, protocol=6, src=10.0.0.2, dst=192.168.0.2 
+    payload="random payload: {613419936}"
 
 Transferring frame from applesauce to router.eth0: 
-    <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, 
-    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, 
-    <span class="nv">sender</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/10.0.0.1
+    dst=ff:ff:ff:ff:ff:ff, src=16:4e:eb:3a:a2:3d, 
+    type=ARP, payload: ARP: opcode=REQUEST, 
+    sender=16:4e:eb:3a:a2:3d/10.0.0.2, target=00:00:00:00:00:00/10.0.0.1
 
 Transferring frame from router.eth0 to applesauce: 
-    <span class="nv">dst</span><span class="o">=</span>16:4e:eb:3a:a2:3d, <span class="nv">src</span><span class="o">=</span>02:00:00:dd:27:73, 
-    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, 
-    <span class="nv">sender</span><span class="o">=</span>02:00:00:dd:27:73/10.0.0.1, <span class="nv">target</span><span class="o">=</span>16:4e:eb:3a:a2:3d/10.0.0.2
+    dst=16:4e:eb:3a:a2:3d, src=02:00:00:dd:27:73, 
+    type=ARP, payload: ARP: opcode=REPLY, 
+    sender=02:00:00:dd:27:73/10.0.0.1, target=16:4e:eb:3a:a2:3d/10.0.0.2
 
 Transferring frame from applesauce to router.eth0: 
-    <span class="nv">dst</span><span class="o">=</span>02:00:00:dd:27:73, <span class="nv">src</span><span class="o">=</span>16:4e:eb:3a:a2:3d, 
-    <span class="nb">type</span><span class="o">=</span>IPv4, payload: IPv4: IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, 
-    <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2 <span class="nv">payload</span><span class="o">=</span><span class="s2">"random payload: {613419936}"</span>
+    dst=02:00:00:dd:27:73, src=16:4e:eb:3a:a2:3d, 
+    type=IPv4, payload: IPv4: IPv4, len=2f, protocol=6, 
+    src=10.0.0.2, dst=192.168.0.2 payload="random payload: {613419936}"
 
 Transferring frame from router.eth2 to cherrypie: 
-    <span class="nv">dst</span><span class="o">=</span>ff:ff:ff:ff:ff:ff, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nb">type</span><span class="o">=</span>ARP, 
-    payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REQUEST, 
-    <span class="nv">sender</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1, <span class="nv">target</span><span class="o">=</span>00:00:00:00:00:00/192.168.0.2
+    dst=ff:ff:ff:ff:ff:ff, src=02:00:00:a1:96:8d, type=ARP, 
+    payload: ARP: opcode=REQUEST, 
+    sender=02:00:00:a1:96:8d/192.168.0.1, target=00:00:00:00:00:00/192.168.0.2
 
 Transferring frame from cherrypie to router.eth2: 
-    <span class="nv">dst</span><span class="o">=</span>02:00:00:a1:96:8d, <span class="nv">src</span><span class="o">=</span>ea:80:f1:26:53:c8, 
-    <span class="nb">type</span><span class="o">=</span>ARP, payload: ARP: <span class="nv">opcode</span><span class="o">=</span>REPLY, 
-    <span class="nv">sender</span><span class="o">=</span>ea:80:f1:26:53:c8/192.168.0.2, <span class="nv">target</span><span class="o">=</span>02:00:00:a1:96:8d/192.168.0.1
+    dst=02:00:00:a1:96:8d, src=ea:80:f1:26:53:c8, 
+    type=ARP, payload: ARP: opcode=REPLY, 
+    sender=ea:80:f1:26:53:c8/192.168.0.2, target=02:00:00:a1:96:8d/192.168.0.1
 
 Transferring frame from router.eth2 to cherrypie: 
-    <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
-    <span class="nv">dst</span><span class="o">=</span>ea:80:f1:26:53:c8, <span class="nv">src</span><span class="o">=</span>02:00:00:a1:96:8d, 
-    <span class="nb">type</span><span class="o">=</span>IPv4, payload: bad IPv4 datagram
-    <span class="o">[</span>ERROR]: <span class="s1">'IPv4Header::parse'</span> Checksum is not matched
-    <span class="o">[</span>NetworkInterface ERROR]: <span class="s1">'recv_frame'</span> IPV4 parse error
+    [ERROR]: 'IPv4Header::parse' Checksum is not matched
+    dst=ea:80:f1:26:53:c8, src=02:00:00:a1:96:8d, 
+    type=IPv4, payload: bad IPv4 datagram
+    [ERROR]: 'IPv4Header::parse' Checksum is not matched
+    [NetworkInterface ERROR]: 'recv_frame' IPV4 parse error
 
 
 
 Error: Host cherrypie did NOT receive an expected Internet datagram: 
-        IPv4, <span class="nv">len</span><span class="o">=</span>2f, <span class="nv">protocol</span><span class="o">=</span>6, <span class="nv">src</span><span class="o">=</span>10.0.0.2, <span class="nv">dst</span><span class="o">=</span>192.168.0.2
-</code></pre></div></div>
+        IPv4, len=2f, protocol=6, src=10.0.0.2, dst=192.168.0.2
+</span></code></pre></div></div>
 
 <h2 id="5-测试结果">5. 测试结果</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check5
-Test project /home/cs144/minnow/build
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">cs144@cs144-ubuntu22:~/minnow$</span><span class="w"> </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check5
+<span class="go">Test project /home/cs144/minnow/build
     Start  1: compile with bug-checkers
-1/3 Test  <span class="c">#1: compile with bug-checkers ........   Passed   44.90 sec</span>
-    Start 35: net_interface
-2/3 Test <span class="c">#35: net_interface ....................   Passed    0.20 sec</span>
-    Start 36: router
-3/3 Test <span class="c">#36: router ...........................   Passed    0.17 sec</span>
-
+</span><span class="gp">1/3 Test  #</span>1: compile with bug-checkers ........   Passed   44.90 sec
+<span class="go">    Start 35: net_interface
+</span><span class="gp">2/3 Test #</span>35: net_interface ....................   Passed    0.20 sec
+<span class="go">    Start 36: router
+</span><span class="gp">3/3 Test #</span>36: router ...........................   Passed    0.17 sec
+<span class="go">
 100% tests passed, 0 tests failed out of 3
 
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  45.41 sec
+Total Test time (real) =  45.41 sec
 Built target check5
-</code></pre></div></div>
+</span></code></pre></div></div>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
@@ -1305,7 +1307,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

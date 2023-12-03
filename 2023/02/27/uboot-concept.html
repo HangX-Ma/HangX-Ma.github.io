@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -325,7 +327,7 @@
   <li>Kconfig, <a href="https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html">Kconfig Language</a> 同样用在了 u-boot 中需要对其有一定的了解。</li>
 </ul>
 
-<p>如果对 DM(Driver Model) 有兴趣， 可以阅读 <a href="https://lwn.net/Kernel/LDD3/">Linux Device Driver, Third Edition</a>，但具备以上几块知识已经足够理解 u-boot 启动流程。 Das U-Boot 提供的文档以及 u-boot 源码中提供的 <code class="language-html highlighter-rouge">README</code> 这类文档不需要仔细读完， 这些仅供学习参考， 但 <a href="https://elinux.org/Boot_Loaders#U-Boot">elinux_talks</a> 这部分资源也值得查阅。</p>
+<p>如果对 DM(Driver Model) 有兴趣， 可以阅读 <a href="https://lwn.net/Kernel/LDD3/">Linux Device Driver, Third Edition</a>，但具备以上几块知识已经足够理解 u-boot 启动流程。 Das U-Boot 提供的文档以及 u-boot 源码中提供的 <code class="language-plaintext highlighter-rouge">README</code> 这类文档不需要仔细读完， 这些仅供学习参考， 但 <a href="https://elinux.org/Boot_Loaders#U-Boot">elinux_talks</a> 这部分资源也值得查阅。</p>
 
 <h2 id="3-u-boot-框架与启动阶段">3. U-Boot 框架与启动阶段</h2>
 
@@ -340,27 +342,27 @@
 <ul>
   <li>CPU 层级依赖文件
     <ul>
-      <li><code class="language-html highlighter-rouge">arch/arm/cpu/armv8/*c;*S;*lds</code></li>
-      <li><code class="language-html highlighter-rouge">arch/arm/include/asm/armv8/*h</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8/*c;*S;*lds</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/armv8/*h</code></li>
     </ul>
   </li>
   <li>ARCH(arm) 层级依赖文件
     <ul>
-      <li><code class="language-html highlighter-rouge">arch/arm/lib/*c;*S;*lds</code></li>
-      <li><code class="language-html highlighter-rouge">arch/arm/include/asm/*h;*S</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/lib/*c;*S;*lds</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/*h;*S</code></li>
     </ul>
   </li>
   <li>Board 层级依赖文件
     <ul>
-      <li><code class="language-html highlighter-rouge">board/rockchip/evb_px30/*c</code></li>
-      <li><code class="language-html highlighter-rouge">arch/arm/mach-rockchip/px30/*c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/*c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/*c</code></li>
     </ul>
   </li>
   <li>Board 层级配置文件
     <ul>
-      <li><code class="language-html highlighter-rouge">arch/arm/include/asm/arch-rockchip/*h;*S</code></li>
-      <li><code class="language-html highlighter-rouge">include/rockchip/*h</code></li>
-      <li><code class="language-html highlighter-rouge">include/px30_common.h;evb_px30.h</code></li>
+      <li><code class="language-plaintext highlighter-rouge">arch/arm/include/asm/arch-rockchip/*h;*S</code></li>
+      <li><code class="language-plaintext highlighter-rouge">include/rockchip/*h</code></li>
+      <li><code class="language-plaintext highlighter-rouge">include/px30_common.h;evb_px30.h</code></li>
     </ul>
   </li>
   <li>Board 层级非依赖文件
@@ -377,142 +379,142 @@
     <font size="2" color="#999"><u>U-Boot Hierarchy, HangX-Ma</u></font>
 </div>
 
-<p>u-boot 的初始化过程就是 CPU $\rightarrow$ ARCH $\rightarrow$ Board 的过程， 但并不严格划归， ARCH部分的通用代码会调用 Board 相关的接口。 在 <a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">wowo</a> 的文章中提到曾经存在于 ARCH 和 Board 之间的 machine 层级由于最新的ARM64架构引入了 device tree 的缘故， 已经将 machine 概念删除了， 在当前 u-boot 中看到的 <code class="language-html highlighter-rouge">mach-xxx</code> 的目录或文件就属于 machine 层级， 虽然 u-boot 还未更新相关的架构概念， 但在开发层面 u-boot 和 linux 内核几乎同时适用了 device tree， 这意味着 u-boot 也很可能在之后的更新中删除类似的 <code class="language-html highlighter-rouge">mach-xxx</code> 文件。</p>
+<p>u-boot 的初始化过程就是 CPU $\rightarrow$ ARCH $\rightarrow$ Board 的过程， 但并不严格划归， ARCH部分的通用代码会调用 Board 相关的接口。 在 <a href="http://www.wowotech.net/x_project/bubblegum_uboot_porting.html">wowo</a> 的文章中提到曾经存在于 ARCH 和 Board 之间的 machine 层级由于最新的ARM64架构引入了 device tree 的缘故， 已经将 machine 概念删除了， 在当前 u-boot 中看到的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 的目录或文件就属于 machine 层级， 虽然 u-boot 还未更新相关的架构概念， 但在开发层面 u-boot 和 linux 内核几乎同时适用了 device tree， 这意味着 u-boot 也很可能在之后的更新中删除类似的 <code class="language-plaintext highlighter-rouge">mach-xxx</code> 文件。</p>
 
 <h4 id="311-举例从-kconfig-自底向上">3.1.1 举例——从 Kconfig 自底向上</h4>
 
-<p>从 <code class="language-html highlighter-rouge">Kconfig</code> 中自底向上梳理整个编译框架， 假设我们使用的目标板是 rockchip-px30 系列的 evb-px30， 那么 <code class="language-html highlighter-rouge">board/rockchip/evb_px30</code> 文件夹中定义了目标板的一些依赖代码， 在 <code class="language-html highlighter-rouge">include/configs/evb_px30.h</code> 会有该目标板的配置信息， 类似的配置信息和编译是息息相关的需要格外留意。</p>
+<p>从 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中自底向上梳理整个编译框架， 假设我们使用的目标板是 rockchip-px30 系列的 evb-px30， 那么 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30</code> 文件夹中定义了目标板的一些依赖代码， 在 <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code> 会有该目标板的配置信息， 类似的配置信息和编译是息息相关的需要格外留意。</p>
 
-<p>从顶层的 <code class="language-html highlighter-rouge">board/rockchip/evb_px30/Kconfig</code> 查看， 可以找到 <code class="language-html highlighter-rouge">TARGET_EVB_PX30</code> 整个关键量以及定义的 <code class="language-html highlighter-rouge">BORAD</code>， <code class="language-html highlighter-rouge">VENDOR</code> 等编译相关的变量。</p>
+<p>从顶层的 <code class="language-plaintext highlighter-rouge">board/rockchip/evb_px30/Kconfig</code> 查看， 可以找到 <code class="language-plaintext highlighter-rouge">TARGET_EVB_PX30</code> 整个关键量以及定义的 <code class="language-plaintext highlighter-rouge">BORAD</code>， <code class="language-plaintext highlighter-rouge">VENDOR</code> 等编译相关的变量。</p>
 
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># board/rockchip/evb_px30/Kconfig</span>
-if TARGET_EVB_PX30
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># board/rockchip/evb_px30/Kconfig
+</span><span class="n">if</span> <span class="n">TARGET_EVB_PX30</span>
 
-config SYS_BOARD
-    default <span class="s2">"evb_px30"</span>
+<span class="n">config</span> <span class="n">SYS_BOARD</span>
+    <span class="n">default</span> <span class="s2">"evb_px30"</span>
 
-config SYS_VENDOR
-    default <span class="s2">"rockchip"</span>
+<span class="n">config</span> <span class="n">SYS_VENDOR</span>
+    <span class="n">default</span> <span class="s2">"rockchip"</span>
 
-config SYS_CONFIG_NAME
-    default <span class="s2">"evb_px30"</span>
+<span class="n">config</span> <span class="n">SYS_CONFIG_NAME</span>
+    <span class="n">default</span> <span class="s2">"evb_px30"</span>
 
-config BOARD_SPECIFIC_OPTIONS <span class="c1"># dummy</span>
-    def_bool y
+<span class="n">config</span> <span class="n">BOARD_SPECIFIC_OPTIONS</span> <span class="c"># dummy
+</span>    <span class="n">def_bool</span> <span class="n">y</span>
 
-endif
+<span class="n">endif</span>
 </code></pre></div></div>
 
-<p>顺着前述所提及的关键量， 在 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/px30/Kconfig</code> 中能找到引用信息（尤其是 source 了前述的 <code class="language-html highlighter-rouge">Kconfig</code> 文件）， 由于当前使用的就是 evb-px30 板， <code class="language-html highlighter-rouge">EVB_PX30</code> 该 <code class="language-html highlighter-rouge">bool</code> 变量是 <code class="language-html highlighter-rouge">true</code>。 可以看到该 <code class="language-html highlighter-rouge">Kconfig</code> 文件在框架中属于亟待更新的 machine 层级， 所以在该部分可以看到 <code class="language-html highlighter-rouge">SYS_SOC</code> 这个配置变量。 在该 <code class="language-html highlighter-rouge">Kconfig</code> 文件中还覆盖定义了 <code class="language-html highlighter-rouge">SYS_MALLOC_F_LEN</code> 和 <code class="language-html highlighter-rouge">SPL_SERIAL_SUPPORT</code>。</p>
+<p>顺着前述所提及的关键量， 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/px30/Kconfig</code> 中能找到引用信息（尤其是 source 了前述的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件）， 由于当前使用的就是 evb-px30 板， <code class="language-plaintext highlighter-rouge">EVB_PX30</code> 该 <code class="language-plaintext highlighter-rouge">bool</code> 变量是 <code class="language-plaintext highlighter-rouge">true</code>。 可以看到该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件在框架中属于亟待更新的 machine 层级， 所以在该部分可以看到 <code class="language-plaintext highlighter-rouge">SYS_SOC</code> 这个配置变量。 在该 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件中还覆盖定义了 <code class="language-plaintext highlighter-rouge">SYS_MALLOC_F_LEN</code> 和 <code class="language-plaintext highlighter-rouge">SPL_SERIAL_SUPPORT</code>。</p>
 
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/px30/Kconfig</span>
-if ROCKCHIP_PX30
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># arch/arm/mach-rockchip/px30/Kconfig
+</span><span class="n">if</span> <span class="n">ROCKCHIP_PX30</span>
 
-config TARGET_EVB_PX30
-    bool <span class="s2">"EVB_PX30"</span>
-    select BOARD_LATE_INIT
+<span class="n">config</span> <span class="n">TARGET_EVB_PX30</span>
+    <span class="n">bool</span> <span class="s2">"EVB_PX30"</span>
+    <span class="n">select</span> <span class="n">BOARD_LATE_INIT</span>
 
-config SYS_SOC
-    default <span class="s2">"rockchip"</span>
+<span class="n">config</span> <span class="n">SYS_SOC</span>
+    <span class="n">default</span> <span class="s2">"rockchip"</span>
 
-config SYS_MALLOC_F_LEN
-    default 0x400
+<span class="n">config</span> <span class="n">SYS_MALLOC_F_LEN</span>
+    <span class="n">default</span> <span class="m">0</span><span class="n">x400</span>
 
-config SPL_SERIAL_SUPPORT
-    default y
+<span class="n">config</span> <span class="n">SPL_SERIAL_SUPPORT</span>
+    <span class="n">default</span> <span class="n">y</span>
 
-source <span class="s2">"board/rockchip/evb_px30/Kconfig"</span>
+<span class="n">source</span> <span class="s2">"board/rockchip/evb_px30/Kconfig"</span>
 
-endif
+<span class="n">endif</span>
 </code></pre></div></div>
 
-<p>在更上一级目录则看到更为通用的 <code class="language-html highlighter-rouge">Kconfig</code> 文件会配置 <code class="language-html highlighter-rouge">ROCKCHIP_PX30</code> 这个定义量。 可以看到在该目录下配置了 px30 系列使用默认配置。 我们再向上一级的查找 <code class="language-html highlighter-rouge">ARCH_ROCKCHIP</code> 变量以其找到顶层的 <code class="language-html highlighter-rouge">xxx_defconfig</code> 配置文件。</p>
+<p>在更上一级目录则看到更为通用的 <code class="language-plaintext highlighter-rouge">Kconfig</code> 文件会配置 <code class="language-plaintext highlighter-rouge">ROCKCHIP_PX30</code> 这个定义量。 可以看到在该目录下配置了 px30 系列使用默认配置。 我们再向上一级的查找 <code class="language-plaintext highlighter-rouge">ARCH_ROCKCHIP</code> 变量以其找到顶层的 <code class="language-plaintext highlighter-rouge">xxx_defconfig</code> 配置文件。</p>
 
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/mach-rockchip/Kconfig</span>
-if ARCH_ROCKCHIP
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># arch/arm/mach-rockchip/Kconfig
+</span><span class="n">if</span> <span class="n">ARCH_ROCKCHIP</span>
 
-config ROCKCHIP_PX30
-    bool <span class="s2">"Support Rockchip PX30"</span>
-    select ARM64 if !ARM64_BOOT_AARCH32
-    select GICV2
-    select ARM_SMCCC
-    select SUPPORT_SPL
-    select SUPPORT_TPL
-    select SPL if !ARM64_BOOT_AARCH32
-    select TPL if !ARM64_BOOT_AARCH32
-    select TPL_TINY_FRAMEWORK if TPL
+<span class="n">config</span> <span class="n">ROCKCHIP_PX30</span>
+    <span class="n">bool</span> <span class="s2">"Support Rockchip PX30"</span>
+    <span class="n">select</span> <span class="n">ARM64</span> <span class="n">if</span> !<span class="n">ARM64_BOOT_AARCH32</span>
+    <span class="n">select</span> <span class="n">GICV2</span>
+    <span class="n">select</span> <span class="n">ARM_SMCCC</span>
+    <span class="n">select</span> <span class="n">SUPPORT_SPL</span>
+    <span class="n">select</span> <span class="n">SUPPORT_TPL</span>
+    <span class="n">select</span> <span class="n">SPL</span> <span class="n">if</span> !<span class="n">ARM64_BOOT_AARCH32</span>
+    <span class="n">select</span> <span class="n">TPL</span> <span class="n">if</span> !<span class="n">ARM64_BOOT_AARCH32</span>
+    <span class="n">select</span> <span class="n">TPL_TINY_FRAMEWORK</span> <span class="n">if</span> <span class="n">TPL</span>
 
-    imply SPL_SEPARATE_BSS
-    imply SPL_SERIAL_SUPPORT
-    imply TPL_SERIAL_SUPPORT
-    help
-      The Rockchip PX30 is a ARM-based SoC with a quad-core Cortex-A35
-      including NEON and GPU, Mali-400 graphics, several DDR3 options
-      and video codec support. Peripherals include Gigabit Ethernet,
-      USB2 host and OTG, SDIO, I2S, UART, SPI, I2C and PWMs.
+    <span class="n">imply</span> <span class="n">SPL_SEPARATE_BSS</span>
+    <span class="n">imply</span> <span class="n">SPL_SERIAL_SUPPORT</span>
+    <span class="n">imply</span> <span class="n">TPL_SERIAL_SUPPORT</span>
+    <span class="n">help</span>
+      <span class="n">The</span> <span class="n">Rockchip</span> <span class="n">PX30</span> <span class="n">is</span> <span class="n">a</span> <span class="n">ARM</span>-<span class="n">based</span> <span class="n">SoC</span> <span class="n">with</span> <span class="n">a</span> <span class="n">quad</span>-<span class="n">core</span> <span class="n">Cortex</span>-<span class="n">A35</span>
+      <span class="n">including</span> <span class="n">NEON</span> <span class="n">and</span> <span class="n">GPU</span>, <span class="n">Mali</span>-<span class="m">400</span> <span class="n">graphics</span>, <span class="n">several</span> <span class="n">DDR3</span> <span class="n">options</span>
+      <span class="n">and</span> <span class="n">video</span> <span class="n">codec</span> <span class="n">support</span>. <span class="n">Peripherals</span> <span class="n">include</span> <span class="n">Gigabit</span> <span class="n">Ethernet</span>,
+      <span class="n">USB2</span> <span class="n">host</span> <span class="n">and</span> <span class="n">OTG</span>, <span class="n">SDIO</span>, <span class="n">I2S</span>, <span class="n">UART</span>, <span class="n">SPI</span>, <span class="n">I2C</span> <span class="n">and</span> <span class="n">PWMs</span>.
 
-if ROCKCHIP_PX30
+<span class="n">if</span> <span class="n">ROCKCHIP_PX30</span>
 
-config TPL_LDSCRIPT
-    default <span class="s2">"arch/arm/mach-rockchip/u-boot-tpl-v8.lds"</span>
+<span class="n">config</span> <span class="n">TPL_LDSCRIPT</span>
+    <span class="n">default</span> <span class="s2">"arch/arm/mach-rockchip/u-boot-tpl-v8.lds"</span>
 
-config TPL_TEXT_BASE
-    default 0xff0e1000
+<span class="n">config</span> <span class="n">TPL_TEXT_BASE</span>
+    <span class="n">default</span> <span class="m">0</span><span class="n">xff0e1000</span>
 
-config TPL_MAX_SIZE
-    default 10240
+<span class="n">config</span> <span class="n">TPL_MAX_SIZE</span>
+    <span class="n">default</span> <span class="m">10240</span>
 
-config ROCKCHIP_RK3326
-    bool <span class="s2">"Support Rockchip RK3326 "</span>
-    help
-      RK3326 can use most code from PX30, but at some situations we have
-      to distinguish between RK3326 and PX30, so this macro gives help.
-      It is usually selected in rk3326 board defconfig.
-endif
+<span class="n">config</span> <span class="n">ROCKCHIP_RK3326</span>
+    <span class="n">bool</span> <span class="s2">"Support Rockchip RK3326 "</span>
+    <span class="n">help</span>
+      <span class="n">RK3326</span> <span class="n">can</span> <span class="n">use</span> <span class="n">most</span> <span class="n">code</span> <span class="n">from</span> <span class="n">PX30</span>, <span class="n">but</span> <span class="n">at</span> <span class="n">some</span> <span class="n">situations</span> <span class="n">we</span> <span class="n">have</span>
+      <span class="n">to</span> <span class="n">distinguish</span> <span class="n">between</span> <span class="n">RK3326</span> <span class="n">and</span> <span class="n">PX30</span>, <span class="n">so</span> <span class="n">this</span> <span class="n">macro</span> <span class="n">gives</span> <span class="n">help</span>.
+      <span class="n">It</span> <span class="n">is</span> <span class="n">usually</span> <span class="n">selected</span> <span class="n">in</span> <span class="n">rk3326</span> <span class="n">board</span> <span class="n">defconfig</span>.
+<span class="n">endif</span>
 ...
 </code></pre></div></div>
 
-<p>在更上一级， 我们先找到了 <code class="language-html highlighter-rouge">arch/arm/Kconfig</code>， ARCH 层级的默认配置。</p>
+<p>在更上一级， 我们先找到了 <code class="language-plaintext highlighter-rouge">arch/arm/Kconfig</code>， ARCH 层级的默认配置。</p>
 
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># arch/arm/Kconfig</span>
-...
-config ARCH_ROCKCHIP
-    bool <span class="s2">"Support Rockchip SoCs"</span>
-    select OF_CONTROL
-    select BLK
-    select DM
-    select SPL_DM if SPL
-    select SYS_MALLOC_F
-    select SYS_THUMB_BUILD if !ARM64
-    select SPL_SYS_MALLOC_SIMPLE if SPL
-    imply DM_GPIO
-    select DM_SERIAL
-    select DM_SPI
-    select DM_SPI_FLASH
-    select DM_USB if USB
-    select CMD_ROCKUSB if USB_GADGET_DOWNLOAD
-    select ENABLE_ARM_SOC_BOOT0_HOOK
-    select SYS_NS16550
-    select SPI
-    select DEBUG_UART_BOARD_INIT
-    select PANIC_HANG
-    imply DM_MMC
-    imply DM_I2C
-    imply DM_PWM
-    imply DM_REGULATOR
-    imply CMD_FASTBOOT
-    imply FASTBOOT
-    imply FAT_WRITE
-    imply USB_FUNCTION_FASTBOOT
-    imply USB_FUNCTION_ROCKUSB
-    imply SPL_SYSRESET
-    imply TPL_SYSRESET
-    imply ADC
-    imply SARADC_ROCKCHIP
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># arch/arm/Kconfig
+</span>...
+<span class="n">config</span> <span class="n">ARCH_ROCKCHIP</span>
+    <span class="n">bool</span> <span class="s2">"Support Rockchip SoCs"</span>
+    <span class="n">select</span> <span class="n">OF_CONTROL</span>
+    <span class="n">select</span> <span class="n">BLK</span>
+    <span class="n">select</span> <span class="n">DM</span>
+    <span class="n">select</span> <span class="n">SPL_DM</span> <span class="n">if</span> <span class="n">SPL</span>
+    <span class="n">select</span> <span class="n">SYS_MALLOC_F</span>
+    <span class="n">select</span> <span class="n">SYS_THUMB_BUILD</span> <span class="n">if</span> !<span class="n">ARM64</span>
+    <span class="n">select</span> <span class="n">SPL_SYS_MALLOC_SIMPLE</span> <span class="n">if</span> <span class="n">SPL</span>
+    <span class="n">imply</span> <span class="n">DM_GPIO</span>
+    <span class="n">select</span> <span class="n">DM_SERIAL</span>
+    <span class="n">select</span> <span class="n">DM_SPI</span>
+    <span class="n">select</span> <span class="n">DM_SPI_FLASH</span>
+    <span class="n">select</span> <span class="n">DM_USB</span> <span class="n">if</span> <span class="n">USB</span>
+    <span class="n">select</span> <span class="n">CMD_ROCKUSB</span> <span class="n">if</span> <span class="n">USB_GADGET_DOWNLOAD</span>
+    <span class="n">select</span> <span class="n">ENABLE_ARM_SOC_BOOT0_HOOK</span>
+    <span class="n">select</span> <span class="n">SYS_NS16550</span>
+    <span class="n">select</span> <span class="n">SPI</span>
+    <span class="n">select</span> <span class="n">DEBUG_UART_BOARD_INIT</span>
+    <span class="n">select</span> <span class="n">PANIC_HANG</span>
+    <span class="n">imply</span> <span class="n">DM_MMC</span>
+    <span class="n">imply</span> <span class="n">DM_I2C</span>
+    <span class="n">imply</span> <span class="n">DM_PWM</span>
+    <span class="n">imply</span> <span class="n">DM_REGULATOR</span>
+    <span class="n">imply</span> <span class="n">CMD_FASTBOOT</span>
+    <span class="n">imply</span> <span class="n">FASTBOOT</span>
+    <span class="n">imply</span> <span class="n">FAT_WRITE</span>
+    <span class="n">imply</span> <span class="n">USB_FUNCTION_FASTBOOT</span>
+    <span class="n">imply</span> <span class="n">USB_FUNCTION_ROCKUSB</span>
+    <span class="n">imply</span> <span class="n">SPL_SYSRESET</span>
+    <span class="n">imply</span> <span class="n">TPL_SYSRESET</span>
+    <span class="n">imply</span> <span class="n">ADC</span>
+    <span class="n">imply</span> <span class="n">SARADC_ROCKCHIP</span>
 ...
 </code></pre></div></div>
 
-<p>最终我们能在 <code class="language-html highlighter-rouge">configs/evb-px30_defconfig</code><strong>(Target)</strong> 中找到用户自定义的基本宏信息， 另外一些信息则在前述提及的配置文件中。 例如 <code class="language-html highlighter-rouge">include/configs/px30_common.h</code>， <code class="language-html highlighter-rouge">include/configs/evb_px30.h</code>， 以及 <code class="language-html highlighter-rouge">include/configs/rockchip-common.h</code>。 我们自底向上， 特定的板级文件开始溯源， 找到了最终顶层的配置文件。 根据顶层的配置文件以及每个层级的配置文件可以梳理出编译特定板所需的功能。 另外， 在底层的 TARGET 的配置中可以看到诸如 <code class="language-html highlighter-rouge">SYS_xxx</code> 的一系列配置， 这些配置会在更上层的 <code class="language-html highlighter-rouge">arch/Kconfig</code> 中定义。 所以综上可以总结出如下配置关系图。</p>
+<p>最终我们能在 <code class="language-plaintext highlighter-rouge">configs/evb-px30_defconfig</code><strong>(Target)</strong> 中找到用户自定义的基本宏信息， 另外一些信息则在前述提及的配置文件中。 例如 <code class="language-plaintext highlighter-rouge">include/configs/px30_common.h</code>， <code class="language-plaintext highlighter-rouge">include/configs/evb_px30.h</code>， 以及 <code class="language-plaintext highlighter-rouge">include/configs/rockchip-common.h</code>。 我们自底向上， 特定的板级文件开始溯源， 找到了最终顶层的配置文件。 根据顶层的配置文件以及每个层级的配置文件可以梳理出编译特定板所需的功能。 另外， 在底层的 TARGET 的配置中可以看到诸如 <code class="language-plaintext highlighter-rouge">SYS_xxx</code> 的一系列配置， 这些配置会在更上层的 <code class="language-plaintext highlighter-rouge">arch/Kconfig</code> 中定义。 所以综上可以总结出如下配置关系图。</p>
 
 <div class="mermaid" align="center">
 flowchart
@@ -597,12 +599,12 @@ flowchart LR
 
 <h2 id="4-浅析-tpl">4. 浅析 TPL</h2>
 
-<p>嵌入式的代码铁定有个名为 <code class="language-html highlighter-rouge">start.S</code> 的入口汇编代码， 但在进行源码分析之前， 我比较喜欢阅读链接脚本以此获悉 u-boot 的构成以及分析启动过程中的一些工作。 在 <code class="language-html highlighter-rouge">arch/arm/cpu/armv8</code> 目录下有两个 <code class="language-html highlighter-rouge">lds</code> 文件， armv8 的 BootROM $\rightarrow$ u-boot 的引导使用 <code class="language-html highlighter-rouge">u-boot.lds</code> 进行链接， 而在 u-boot 之前存在 SPL/TPL 阶段则会使用 <code class="language-html highlighter-rouge">u-boot-spl.lds</code> 或 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/u-boot-tpl-v8.lds</code> 进行链接。</p>
+<p>嵌入式的代码铁定有个名为 <code class="language-plaintext highlighter-rouge">start.S</code> 的入口汇编代码， 但在进行源码分析之前， 我比较喜欢阅读链接脚本以此获悉 u-boot 的构成以及分析启动过程中的一些工作。 在 <code class="language-plaintext highlighter-rouge">arch/arm/cpu/armv8</code> 目录下有两个 <code class="language-plaintext highlighter-rouge">lds</code> 文件， armv8 的 BootROM $\rightarrow$ u-boot 的引导使用 <code class="language-plaintext highlighter-rouge">u-boot.lds</code> 进行链接， 而在 u-boot 之前存在 SPL/TPL 阶段则会使用 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 或 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/u-boot-tpl-v8.lds</code> 进行链接。</p>
 
 <p>在上述流程中提及 TPL 的存在， 这也是让我比较困惑的， TPL 如何 与 SPL 进行配合实现对 bootloader 的引导启动， 这一块内容值得深入探究。 不妨先从 TPL 的链接脚本入手， 厘清 TPL 阶段的相关逻辑。</p>
 
 <blockquote>
-  <p>这两篇文章关于 <code class="language-html highlighter-rouge">u-boot-spl.lds</code> 有着不同详略的解析， 可以用以了解 u-boot 相关的链接脚本的 section 的基本功能以及了解链接脚本的基本概念， 这些内容已有前人做了充分的解析不再赘述。</p>
+  <p>这两篇文章关于 <code class="language-plaintext highlighter-rouge">u-boot-spl.lds</code> 有着不同详略的解析， 可以用以了解 u-boot 相关的链接脚本的 section 的基本功能以及了解链接脚本的基本概念， 这些内容已有前人做了充分的解析不再赘述。</p>
 
   <ul>
     <li><a href="https://blog.csdn.net/u013440753/article/details/105879835">Armv8架构UBOOT 启动篇——SPL(u-boot-spl.lds链接脚本), Kernel_Nuts</a></li>
@@ -612,9 +614,9 @@ flowchart LR
 
 <h3 id="41-tpl-configurations">4.1 TPL Configurations</h3>
 
-<p>根据前述配置， evb-px30 在启动时会经由 TPL 以及 SPL 引导 u-boot。 在 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中可以看到与 TPL 相关的一些定义：<code class="language-html highlighter-rouge">TPL</code>， <code class="language-html highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-html highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-html highlighter-rouge">TPL_LDSCRIPT</code>， <code class="language-html highlighter-rouge">TPL_TEXT_BASE</code>， <code class="language-html highlighter-rouge">TPL_MAX_SIZE</code>， <code class="language-html highlighter-rouge">SUPPORT_TPL</code>, 这些宏定义会影响后续编译的过程。</p>
+<p>根据前述配置， evb-px30 在启动时会经由 TPL 以及 SPL 引导 u-boot。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中可以看到与 TPL 相关的一些定义：<code class="language-plaintext highlighter-rouge">TPL</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_TINY_FRAMEWORK</code>， <code class="language-plaintext highlighter-rouge">TPL_LDSCRIPT</code>， <code class="language-plaintext highlighter-rouge">TPL_TEXT_BASE</code>， <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， <code class="language-plaintext highlighter-rouge">SUPPORT_TPL</code>, 这些宏定义会影响后续编译的过程。</p>
 
-<p>其中， <code class="language-html highlighter-rouge">CONFIG_TPL_BUILD</code> 这个宏定义非常重要。 网上很多博客提及相关内容仅说明在定义 <code class="language-html highlighter-rouge">CONFIG_TPL</code> 之后 <code class="language-html highlighter-rouge">CONFIG_TPL_BUILD</code> 会自动定义， 但没有详细说明具体位置。 在 <code class="language-html highlighter-rouge">scripts/Makefile.autoconf</code> 文件的 85-87 行可以看到几行规则， 实际上向 <code class="language-html highlighter-rouge">tpl/u-boot.cfg</code> 传递了 <code class="language-html highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-html highlighter-rouge">CONFIG_TPL_BUILD</code> 这两个量。 在其他任何 <code class="language-html highlighter-rouge">config.mk</code>，<code class="language-html highlighter-rouge">Kconfig</code>， <code class="language-html highlighter-rouge">Kbuild</code> 这样的文件中都不会找到这两个量的定义。</p>
+<p>其中， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这个宏定义非常重要。 网上很多博客提及相关内容仅说明在定义 <code class="language-plaintext highlighter-rouge">CONFIG_TPL</code> 之后 <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 会自动定义， 但没有详细说明具体位置。 在 <code class="language-plaintext highlighter-rouge">scripts/Makefile.autoconf</code> 文件的 85-87 行可以看到几行规则， 实际上向 <code class="language-plaintext highlighter-rouge">tpl/u-boot.cfg</code> 传递了 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 这两个量。 在其他任何 <code class="language-plaintext highlighter-rouge">config.mk</code>，<code class="language-plaintext highlighter-rouge">Kconfig</code>， <code class="language-plaintext highlighter-rouge">Kbuild</code> 这样的文件中都不会找到这两个量的定义。</p>
 
 <div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># scripts/Makefile.autoconf
 </span><span class="nl">tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
@@ -622,14 +624,14 @@ flowchart LR
     <span class="nf">$(</span><span class="nb">call</span> cmd,u_boot_cfg,-DCONFIG_SPL_BUILD <span class="nt">-DCONFIG_TPL_BUILD</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>另外在顶层的 <code class="language-html highlighter-rouge">Makefile</code> 文件我们可以找到这样一则规则， 是 <code class="language-html highlighter-rouge">script/Makefile.autoconf</code> 的上一级引用。</p>
+<p>另外在顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件我们可以找到这样一则规则， 是 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 的上一级引用。</p>
 
 <div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Makefile
 </span><span class="nl">u-boot.cfg spl/u-boot.cfg tpl/u-boot.cfg</span><span class="o">:</span> <span class="nf">include/config.h FORCE</span>
     <span class="err">$(Q)$(MAKE)</span> <span class="err">-f</span> <span class="err">$(srctree)/scripts/Makefile.autoconf</span> <span class="err">$(@)</span>
 </code></pre></div></div>
 
-<p>而当我们查看 <code class="language-html highlighter-rouge">script/Makefile.autoconf</code> 所描述的功能时， 可以看到前述的 <code class="language-html highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-html highlighter-rouge">CONFIG_TPL_BUILD</code> 以及其他生成的宏定义最终会被转移到 <code class="language-html highlighter-rouge">Kconfig</code> 中以完成全局性的定义。</p>
+<p>而当我们查看 <code class="language-plaintext highlighter-rouge">script/Makefile.autoconf</code> 所描述的功能时， 可以看到前述的 <code class="language-plaintext highlighter-rouge">CONFIG_SPL_BUILD</code>， <code class="language-plaintext highlighter-rouge">CONFIG_TPL_BUILD</code> 以及其他生成的宏定义最终会被转移到 <code class="language-plaintext highlighter-rouge">Kconfig</code> 中以完成全局性的定义。</p>
 
 <div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># This helper makefile is used for creating
 #  - symbolic links (arch/$ARCH/include/asm/arch
@@ -645,86 +647,86 @@ flowchart LR
 
 <p>BootROM 完成基本的初始化后首先会在 iRAM 中载入 TPL 段的运行代码。</p>
 
-<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">OUTPUT_FORMAT(</span><span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">,</span> <span class="s2">"elf64-littleaarch64"</span><span class="err">)</span>
-<span class="err">OUTPUT_ARCH(aarch64)</span>
-<span class="err">ENTRY(_start)</span>
-<span class="err">SECTIONS</span>
-<span class="err">{</span>
-    <span class="nv">.</span> <span class="o">=</span> 0x00000000<span class="p">;</span>
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">OUTPUT_FORMAT</span>(<span class="s2">"elf64-littleaarch64"</span>, <span class="s2">"elf64-littleaarch64"</span>, <span class="s2">"elf64-littleaarch64"</span>)
+<span class="n">OUTPUT_ARCH</span>(<span class="n">aarch64</span>)
+<span class="n">ENTRY</span>(<span class="err">_</span><span class="n">start</span>)
+<span class="n">SECTIONS</span>
+{
+    . = <span class="m">0</span><span class="n">x00000000</span>;
 
-    <span class="nl">.text </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__image_copy_start)</span>
-        <span class="err">CPUDIR/start.o</span> <span class="err">(.text*)</span>
-        <span class="err">*(.text*)</span>
-    <span class="err">}</span>
+    .<span class="n">text</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        *(.<span class="err">__</span><span class="n">image_copy_start</span>)
+        <span class="n">CPUDIR</span>/<span class="n">start</span>.<span class="n">o</span> (.<span class="n">text</span>*)
+        *(.<span class="n">text</span>*)
+    }
 
-    <span class="nl">.rodata </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))</span>
-    <span class="err">}</span>
+    .<span class="n">rodata</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        *(<span class="n">SORT_BY_ALIGNMENT</span>(<span class="n">SORT_BY_NAME</span>(.<span class="n">rodata</span>*)))
+    }
 
-    <span class="nl">.data </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.data*)</span>
-    <span class="err">}</span>
+    .<span class="n">data</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        *(.<span class="n">data</span>*)
+    }
 
-    <span class="nl">.u_boot_list </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">KEEP(*(SORT(.u_boot_list*)));</span>
-    <span class="err">}</span>
+    .<span class="n">u_boot_list</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        <span class="n">KEEP</span>(*(<span class="n">SORT</span>(.<span class="n">u_boot_list</span>*)));
+    }
 
-    <span class="nl">.image_copy_end </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__image_copy_end)</span>
-    <span class="err">}</span>
+    .<span class="n">image_copy_end</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        *(.<span class="err">__</span><span class="n">image_copy_end</span>)
+    }
 
-    <span class="nl">.end </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">*(.__end)</span>
-    <span class="err">}</span>
+    .<span class="n">end</span> : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        *(.<span class="err">__</span><span class="n">end</span>)
+    }
 
-    <span class="nv">_image_binary_end</span> <span class="o">=</span> .<span class="p">;</span>
+    <span class="err">_</span><span class="n">image_binary_end</span> = .;
 
-    <span class="nl">.bss_start (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-        <span class="err">KEEP(*(.__bss_start));</span>
-    <span class="err">}</span>
+    .<span class="n">bss_start</span> (<span class="n">NOLOAD</span>) : {
+        . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+        <span class="n">KEEP</span>(*(.<span class="err">__</span><span class="n">bss_start</span>));
+    }
 
-    <span class="nl">.bss (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="err">*(.bss*)</span>
-         <span class="nv">.</span> <span class="o">=</span> ALIGN<span class="o">(</span>8<span class="o">)</span><span class="p">;</span>
-    <span class="err">}</span>
+    .<span class="n">bss</span> (<span class="n">NOLOAD</span>) : {
+        *(.<span class="n">bss</span>*)
+         . = <span class="n">ALIGN</span>(<span class="m">8</span>);
+    }
 
-    <span class="nl">.bss_end (NOLOAD) </span><span class="o">:</span> <span class="nf">{</span>
-        <span class="err">KEEP(*(.__bss_end));</span>
-    <span class="err">}</span>
+    .<span class="n">bss_end</span> (<span class="n">NOLOAD</span>) : {
+        <span class="n">KEEP</span>(*(.<span class="err">__</span><span class="n">bss_end</span>));
+    }
 
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynsym) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynstr*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.dynamic*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.plt*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.interp*) }</span>
-    <span class="nl">/DISCARD/ </span><span class="o">:</span> <span class="nf">{ *(.gnu*) }</span>
-<span class="err">}</span>
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">dynsym</span>) }
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">dynstr</span>*) }
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">dynamic</span>*) }
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">plt</span>*) }
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">interp</span>*) }
+    /<span class="n">DISCARD</span>/ : { *(.<span class="n">gnu</span>*) }
+}
 
 <span class="c">#if defined(CONFIG_TPL_MAX_SIZE)
-</span><span class="err">ASSERT(__image_copy_end</span> <span class="err">-</span> <span class="err">__image_copy_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_SIZE),</span> <span class="err">\</span>
- <span class="s2">"TPL image too big"</span><span class="err">);</span>
+</span><span class="n">ASSERT</span>(<span class="err">__</span><span class="n">image_copy_end</span> - <span class="err">__</span><span class="n">image_copy_start</span> &lt; (<span class="n">CONFIG_TPL_MAX_SIZE</span>), \
+ <span class="s2">"TPL image too big"</span>);
 <span class="c">#endif
 </span>
 <span class="c">#if defined(CONFIG_TPL_BSS_MAX_SIZE)
-</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">__bss_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_BSS_MAX_SIZE),</span> <span class="err">\</span>
- <span class="s2">"TPL image BSS too big"</span><span class="err">);</span>
+</span><span class="n">ASSERT</span>(<span class="err">__</span><span class="n">bss_end</span> - <span class="err">__</span><span class="n">bss_start</span> &lt; (<span class="n">CONFIG_TPL_BSS_MAX_SIZE</span>), \
+ <span class="s2">"TPL image BSS too big"</span>);
 <span class="c">#endif
 </span>
 <span class="c">#if defined(CONFIG_TPL_MAX_FOOTPRINT)
-</span><span class="err">ASSERT(__bss_end</span> <span class="err">-</span> <span class="err">_start</span> <span class="err">&lt;</span> <span class="err">(CONFIG_TPL_MAX_FOOTPRINT),</span> <span class="err">\</span>
- <span class="s2">"TPL image plus BSS too big"</span><span class="err">);</span>
+</span><span class="n">ASSERT</span>(<span class="err">__</span><span class="n">bss_end</span> - <span class="err">_</span><span class="n">start</span> &lt; (<span class="n">CONFIG_TPL_MAX_FOOTPRINT</span>), \
+ <span class="s2">"TPL image plus BSS too big"</span>);
 <span class="c">#endif
 </span></code></pre></div></div>
 
-<p><code class="language-html highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-html highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-html highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-html highlighter-rouge">__image_copy_start</code> 和 <code class="language-html highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-html highlighter-rouge">bss</code> 段都被声明了 <code class="language-html highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-html highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
+<p><code class="language-plaintext highlighter-rouge">ENTRY(_start)</code> 实际上声明了程序的入口地址， 对 TPL 而言这是显而易见的， 因为 TPL 需要在该阶段获得程序的控制权完成一系列基本的初始化进程。 与其他 <code class="language-plaintext highlighter-rouge">ld</code> 文件不同的是， TPL 的链接脚本对 TPL 程序本身的大小有严格的控制。 在 machine 级的 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 中我们定义了 <code class="language-plaintext highlighter-rouge">TPL_MAX_SIZE</code>， 这使得我们可以检查 TPL image 的大小以满足 iRAM 的空间限制要求。一般来说，<code class="language-plaintext highlighter-rouge">__image_copy_start</code> 和 <code class="language-plaintext highlighter-rouge">__image_copy_end</code> 这两个变量常用来辅助 u-boot 的重定位， 但在此处被赋予了新的功能。 另外可以看到 <code class="language-plaintext highlighter-rouge">bss</code> 段都被声明了 <code class="language-plaintext highlighter-rouge">NOLOAD</code> 属性， 这意味着 <code class="language-plaintext highlighter-rouge">bss</code> 段在 image 中并不占用任何空间， 但相关的地址信息会被保留用以在 u-boot加载时的一些数据初始化操作。 因而可以归纳得到 TPL 加载时实际的内存分布情况。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-02-27-uboot-concept/mem.png" alt="TPL Loading Memory, HangX-Ma" width="300" />
@@ -732,29 +734,29 @@ flowchart LR
     <font size="2" color="#999"><u>TPL Loading Memory, HangX-Ma</u></font>
 </div>
 
-<p>另外可以从 <code class="language-html highlighter-rouge">ld</code> 文件中看到， 入口程序是 <code class="language-html highlighter-rouge">CPUDIR/start.o</code>, <code class="language-html highlighter-rouge">CPUDIR</code> 可以依据层级划分从各个较为顶层的 <code class="language-html highlighter-rouge">Makefile</code> 文件中找到具体定义。 但根据架构分析中的概念， 不难得出此处的 <code class="language-html highlighter-rouge">CPUDIR</code> 是 <code class="language-html highlighter-rouge">arch/arm/armv8</code>。 <code class="language-html highlighter-rouge">start.S</code> 最终会定位到 <code class="language-html highlighter-rouge">_main</code> 程序入口继续执行流程。（关于 <code class="language-html highlighter-rouge">start.S</code> 的详细流程可以参考  <a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a> 由于我们的编译是 AArch64 架构， 那么 C Runtime Environment 的建立也应当是 <code class="language-html highlighter-rouge">crt0_64.S</code>， 可以在这个文件中看到， <code class="language-html highlighter-rouge">board_init_f_alloc_reserve</code>， <code class="language-html highlighter-rouge">board_init_f_init_reserve</code>， <code class="language-html highlighter-rouge">board_init_f_boot_flags</code> 几个函数通过在栈顶预留内存来达到给 <code class="language-html highlighter-rouge">GD(Global Data)</code> 开辟内存空间， 在 AArch64 架构中 <code class="language-html highlighter-rouge">GD</code> 指针地址会被保留在 <code class="language-html highlighter-rouge">x18</code> 寄存器中供全局使用， 之后跳转到 <code class="language-html highlighter-rouge">board_init_f</code>。 这是一个分水岭， TPL， SPL 以及 u-boot 都会执行这个函数。</p>
+<p>另外可以从 <code class="language-plaintext highlighter-rouge">ld</code> 文件中看到， 入口程序是 <code class="language-plaintext highlighter-rouge">CPUDIR/start.o</code>, <code class="language-plaintext highlighter-rouge">CPUDIR</code> 可以依据层级划分从各个较为顶层的 <code class="language-plaintext highlighter-rouge">Makefile</code> 文件中找到具体定义。 但根据架构分析中的概念， 不难得出此处的 <code class="language-plaintext highlighter-rouge">CPUDIR</code> 是 <code class="language-plaintext highlighter-rouge">arch/arm/armv8</code>。 <code class="language-plaintext highlighter-rouge">start.S</code> 最终会定位到 <code class="language-plaintext highlighter-rouge">_main</code> 程序入口继续执行流程。（关于 <code class="language-plaintext highlighter-rouge">start.S</code> 的详细流程可以参考  <a href="https://blog.csdn.net/maybeYoc/article/details/122960357">ARMv8架构u-boot启动流程详细分析(二), 内核新视界</a> 由于我们的编译是 AArch64 架构， 那么 C Runtime Environment 的建立也应当是 <code class="language-plaintext highlighter-rouge">crt0_64.S</code>， 可以在这个文件中看到， <code class="language-plaintext highlighter-rouge">board_init_f_alloc_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_init_reserve</code>， <code class="language-plaintext highlighter-rouge">board_init_f_boot_flags</code> 几个函数通过在栈顶预留内存来达到给 <code class="language-plaintext highlighter-rouge">GD(Global Data)</code> 开辟内存空间， 在 AArch64 架构中 <code class="language-plaintext highlighter-rouge">GD</code> 指针地址会被保留在 <code class="language-plaintext highlighter-rouge">x18</code> 寄存器中供全局使用， 之后跳转到 <code class="language-plaintext highlighter-rouge">board_init_f</code>。 这是一个分水岭， TPL， SPL 以及 u-boot 都会执行这个函数。</p>
 
-<p>一般来说可以将 u-boot 的启动过程划分为两个阶段， 也就是前述的 BL2 和 BL3 的区分。 Pre-relocation(<code class="language-html highlighter-rouge">common/board_f.c</code>)， 此处的 <code class="language-html highlighter-rouge">f</code> 表示程序执行所在的存储介质是 <code class="language-html highlighter-rouge">flash</code>， 以及 After-relocation(<code class="language-html highlighter-rouge">common/board_r.c</code>)， 此处的 <code class="language-html highlighter-rouge">r</code> 表示程序执行所在的存储介质是 <code class="language-html highlighter-rouge">RAM</code>。</p>
+<p>一般来说可以将 u-boot 的启动过程划分为两个阶段， 也就是前述的 BL2 和 BL3 的区分。 Pre-relocation(<code class="language-plaintext highlighter-rouge">common/board_f.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">f</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">flash</code>， 以及 After-relocation(<code class="language-plaintext highlighter-rouge">common/board_r.c</code>)， 此处的 <code class="language-plaintext highlighter-rouge">r</code> 表示程序执行所在的存储介质是 <code class="language-plaintext highlighter-rouge">RAM</code>。</p>
 
-<p>我们知道 TPL 只完成一些很基本的初始化流程， 对于 TPL 而言实际上不存在重定位的需求， 所以关键就在 <code class="language-html highlighter-rouge">board_init_f</code> 这个函数。</p>
+<p>我们知道 TPL 只完成一些很基本的初始化流程， 对于 TPL 而言实际上不存在重定位的需求， 所以关键就在 <code class="language-plaintext highlighter-rouge">board_init_f</code> 这个函数。</p>
 
 <ul>
-  <li>SPL： <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/spl.c</code></li>
-  <li>TPL： <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/tpl.c</code></li>
-  <li>U-Boot： <code class="language-html highlighter-rouge">common/board_f.c</code></li>
+  <li>SPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/spl.c</code></li>
+  <li>TPL： <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/tpl.c</code></li>
+  <li>U-Boot： <code class="language-plaintext highlighter-rouge">common/board_f.c</code></li>
 </ul>
 
-<p>在编译链接时， 编译组件就会对这几个文件进行区分， 以保证绑定正确的可执行文件。 在 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/Makefile</code> 中就巧妙的在编译 TPL 文件时取消了 SPL 相关文件的生成， 而在编译 SPL 文件时则不受 TPL 的相关定义影响。</p>
+<p>在编译链接时， 编译组件就会对这几个文件进行区分， 以保证绑定正确的可执行文件。 在 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Makefile</code> 中就巧妙的在编译 TPL 文件时取消了 SPL 相关文件的生成， 而在编译 SPL 文件时则不受 TPL 的相关定义影响。</p>
 
-<p>根据之前的宏定义梳理的在 TPL 阶段的 <code class="language-html highlighter-rouge">board_init_f</code> 所做的工作如下， 时钟初始化， CPU 部分初始化， UART 串口初始化， SDRAM 初始化。 这些工作都完成之后会通过 <code class="language-html highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 默认定义的 <code class="language-html highlighter-rouge">TPL_ROCKCHIP_BACK_TO_BROM</code> 宏引导的 <code class="language-html highlighter-rouge">back_to_bootrom</code> 返回 BootROM 阶段再进行下一阶段的 SPL。</p>
+<p>根据之前的宏定义梳理的在 TPL 阶段的 <code class="language-plaintext highlighter-rouge">board_init_f</code> 所做的工作如下， 时钟初始化， CPU 部分初始化， UART 串口初始化， SDRAM 初始化。 这些工作都完成之后会通过 <code class="language-plaintext highlighter-rouge">arch/arm/mach-rockchip/Kconfig</code> 默认定义的 <code class="language-plaintext highlighter-rouge">TPL_ROCKCHIP_BACK_TO_BROM</code> 宏引导的 <code class="language-plaintext highlighter-rouge">back_to_bootrom</code> 返回 BootROM 阶段再进行下一阶段的 SPL。</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>board_init_f
-    rockchip_stimer_init
-    arch_cpu_init
-    debug_uart_init
-    timer_init
-    sdram_init
-    back_to_bootrom
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">board_init_f</span>
+    <span class="n">rockchip_stimer_init</span>
+    <span class="n">arch_cpu_init</span>
+    <span class="n">debug_uart_init</span>
+    <span class="n">timer_init</span>
+    <span class="n">sdram_init</span>
+    <span class="n">back_to_bootrom</span>
 </code></pre></div></div>
 
 <div class="mermaid" align="center">
@@ -1676,7 +1678,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

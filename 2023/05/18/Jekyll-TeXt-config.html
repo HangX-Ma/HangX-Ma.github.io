@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -314,15 +316,15 @@
 <i class="far fa-calendar-alt"></i> <span>May 18, 2023</span>
             </li>
 <li>
-<i class="far fa-edit"></i> <span>May 31, 2023</span>
+<i class="far fa-edit"></i> <span>Dec 03, 2023</span>
             </li>
 <li>
 <i class="fas fa-file-word"></i>
-                <span> Total 14148 words </span>
+                <span> Total 22292 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 40 mins </span>
+                <span> About 62 mins </span>
             </li>
 <li>
 <i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li>
@@ -352,23 +354,29 @@
 
 <!-- end custom article top snippet -->
 <div class="article__content" itemprop="articleBody">
-<p>之前用 Hexo 搭 Git Pages 的经历实在是惨痛， 个人对前端没什么研究配置非常痛苦， 尤其是还需要装大量的依赖库尝试解决 <strong>图片显示</strong>、 <strong>Markdown显示</strong>， <strong>数学公式显示</strong> 等问题， Node.js 也非常不省心， 库版本冲突也很严重。 咬咬牙用了一段时间博客园， 不简洁， 不优雅， 不顺我心。 偶然间在知乎上看到了一些关于 Hugo， Jekyll， Hexo 相关的比较， Jekyll 虽然用 Ruby 构建速度稍慢 （实际感觉还挺快）， 但关键是 Github 的支持非常友好， 能自动编译并部署网站， 而且相关的社区建设也很不错， 对于只想专注记录并做点代码微调的人而言显得非常良心。 偶然间发现了 <code class="language-html highlighter-rouge">TeXt</code> 这款主题， 文档很新而且很全面， 样式也吸引人， 就此入坑了。 前后花了两天去踩坑配自己心仪的样式， 在此记录一些配置细节， 不定期更新。</p>
+<p>之前用 Hexo 搭 Git Pages 的经历实在是惨痛， 个人对前端没什么研究配置非常痛苦， 尤其是还需要装大量的依赖库尝试解决 <strong>图片显示</strong>、 <strong>Markdown显示</strong>， <strong>数学公式显示</strong> 等问题， Node.js 也非常不省心， 库版本冲突也很严重。 咬咬牙用了一段时间博客园， 不简洁， 不优雅， 不顺我心。 偶然间在知乎上看到了一些关于 Hugo， Jekyll， Hexo 相关的比较， Jekyll 虽然用 Ruby 构建速度稍慢 （实际感觉还挺快）， 但关键是 Github 的支持非常友好， 能自动编译并部署网站， 而且相关的社区建设也很不错， 对于只想专注记录并做点代码微调的人而言显得非常良心。 偶然间发现了 <code class="language-plaintext highlighter-rouge">TeXt</code> 这款主题， 文档很新而且很全面， 样式也吸引人， 就此入坑了。 前后花了两天去踩坑配自己心仪的样式， 在此记录一些配置细节， 不定期更新。</p>
 
-<p class="info"><code class="language-html highlighter-rouge">_data/variables.yml</code> 中的配置对 <code class="language-html highlighter-rouge">_config.yml</code> 会进行覆写有更高的优先级。</p>
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Warning </div> </div> <div class="content"> <p><code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 中的配置对 <code class="language-plaintext highlighter-rouge">_config.yml</code> 会进行覆写有更高的优先级。</p>
 
+
+
+ </div> </div>
 <h2 id="logo">logo</h2>
 
-<p>给自己的网站增加一个独一无二的 logo 是很多人第一件要做的事， 但这个 logo 尺寸也是有要求的， 例如 Bing 网页抓取的页面不能超过 125 KB。 因而 <code class="language-html highlighter-rouge">logo.svg</code> 尺寸尽可能要小， 否则会导致页面尺寸过大出现网页抓取的 SEO 问题。</p>
+<p>给自己的网站增加一个独一无二的 logo 是很多人第一件要做的事， 但这个 logo 尺寸也是有要求的， 例如 Bing 网页抓取的页面不能超过 125 KB。 因而 <code class="language-plaintext highlighter-rouge">logo.svg</code> 尺寸尽可能要小， 否则会导致页面尺寸过大出现网页抓取的 SEO 问题。</p>
 
 <h2 id="bootcdn">bootcdn</h2>
 
-<p>BootCDN 域名已经迁移到 <code class="language-html highlighter-rouge">https://cdn.bootcdn.net/</code>， 以 <code class="language-html highlighter-rouge">https://cdn.bootcss.com/</code> 开头的链接已经全部不可用， 需要在新的 BootCDN 往网站中找到相应的 js 文件进行更新。 需要在 <code class="language-html highlighter-rouge">_data/variables.yml</code> 更新这些链接并适当更新版本， 老旧版本可能会造成一些问题。</p>
+<p>BootCDN 域名已经迁移到 <code class="language-plaintext highlighter-rouge">https://cdn.bootcdn.net/</code>， 以 <code class="language-plaintext highlighter-rouge">https://cdn.bootcss.com/</code> 开头的链接已经全部不可用， 需要在新的 BootCDN 往网站中找到相应的 js 文件进行更新。 需要在 <code class="language-plaintext highlighter-rouge">_data/variables.yml</code> 更新这些链接并适当更新版本， 老旧版本可能会造成一些问题。</p>
 
-<p class="warning">需要注意的是， <code class="language-html highlighter-rouge">mathjax</code> 需要更换为 <code class="language-html highlighter-rouge">https://unpkg.com/</code> 源， BootCDN 源出现 <code class="language-html highlighter-rouge">Uncaught ReferenceError: MathJax is not defined</code>。</p>
+<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Info </div> </div> <div class="content"> <p>需要注意的是， <code class="language-plaintext highlighter-rouge">mathjax</code> 需要更换为 <code class="language-plaintext highlighter-rouge">https://unpkg.com/</code> 源， BootCDN 源出现 <code class="language-plaintext highlighter-rouge">Uncaught ReferenceError: MathJax is not defined</code>。</p>
 
+
+
+ </div> </div>
 <h2 id="leancloud">leancloud</h2>
 
-<p>使用 leancloud 国际版需要更新 <code class="language-html highlighter-rouge">_includes/pageview-providers/leancloud.js</code> 的 <code class="language-html highlighter-rouge">serverURLs</code> 为如下形式。</p>
+<p>使用 leancloud 国际版需要更新 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud.js</code> 的 <code class="language-plaintext highlighter-rouge">serverURLs</code> 为如下形式。</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">serverURLs</span><span class="pi">:</span> <span class="s">https://xxxxxxxx.api.lncldglobal.com</span> <span class="c1"># 把xxxxxxxx替换成你自己AppID的前8位字符</span>
 </code></pre></div></div>
@@ -382,12 +390,12 @@
 <h3 id="1-自动生成文章标识-key">1. 自动生成文章标识 <em>key</em>
 </h3>
 
-<p>按照文档配置好 leancloud 之后发现文章的 views 一直都没有变化， 后检查文档说明发现需要给每篇文章增加一个 <em>unique key</em> 才能进行阅读量的统计。 找到 <code class="language-html highlighter-rouge">_includes/pageview-providers/leancloud/post.html</code> 发现几个 <code class="language-html highlighter-rouge">page.key</code> 的变量， 以及 <code class="language-html highlighter-rouge">_includes/article-info.html</code> 中有这么一句代码给 <code class="language-html highlighter-rouge">data-page-key</code> 进行了赋值。 <code class="language-html highlighter-rouge">data-page-key</code> 是 <code class="language-html highlighter-rouge">post.html</code> 用以判断是否对 pageview 进行增加的依据。</p>
+<p>按照文档配置好 leancloud 之后发现文章的 views 一直都没有变化， 后检查文档说明发现需要给每篇文章增加一个 <em>unique key</em> 才能进行阅读量的统计。 找到 <code class="language-plaintext highlighter-rouge">_includes/pageview-providers/leancloud/post.html</code> 发现几个 <code class="language-plaintext highlighter-rouge">page.key</code> 的变量， 以及 <code class="language-plaintext highlighter-rouge">_includes/article-info.html</code> 中有这么一句代码给 <code class="language-plaintext highlighter-rouge">data-page-key</code> 进行了赋值。 <code class="language-plaintext highlighter-rouge">data-page-key</code> 是 <code class="language-plaintext highlighter-rouge">post.html</code> 用以判断是否对 pageview 进行增加的依据。</p>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.key }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
 </code></pre></div></div>
 
-<p>对于 Jekyll 而言， <code class="language-html highlighter-rouge">page.id</code> 以及 <code class="language-html highlighter-rouge">page.url</code> 都是内置的变量， 且对于一个网页而言， 这两个值都可以作为唯一标识， 其作用与 <em>unique key</em> 的作用别无二致。 那么可以选择其中一个对原有的 <code class="language-html highlighter-rouge">page.key</code> 进行替代。 但是， <code class="language-html highlighter-rouge">page.id</code> 当时产生了一个问题， 虽然文章中的 views 部分会增加了， 但文章列表中仍然显示为 0， 我怀疑当时将 <code class="language-html highlighter-rouge">data-page-key</code> 直接改为 <code class="language-html highlighter-rouge">page.id</code>， 并且没有对 <code class="language-html highlighter-rouge">/</code> 进行处理有关系。 实际的更改如下所示：</p>
+<p>对于 Jekyll 而言， <code class="language-plaintext highlighter-rouge">page.id</code> 以及 <code class="language-plaintext highlighter-rouge">page.url</code> 都是内置的变量， 且对于一个网页而言， 这两个值都可以作为唯一标识， 其作用与 <em>unique key</em> 的作用别无二致。 那么可以选择其中一个对原有的 <code class="language-plaintext highlighter-rouge">page.key</code> 进行替代。 但是， <code class="language-plaintext highlighter-rouge">page.id</code> 当时产生了一个问题， 虽然文章中的 views 部分会增加了， 但文章列表中仍然显示为 0， 我怀疑当时将 <code class="language-plaintext highlighter-rouge">data-page-key</code> 直接改为 <code class="language-plaintext highlighter-rouge">page.id</code>， 并且没有对 <code class="language-plaintext highlighter-rouge">/</code> 进行处理有关系。 实际的更改如下所示：</p>
 
 <ul>
   <li>
@@ -419,12 +427,12 @@
 
 <h3 id="2-home-界面的多余的-views">2. Home 界面的多余的 views</h3>
 
-<p>开启 pageview 之后在 Home/Archive/About 界面的右上角也能看到 views 这个字样， 感觉非常多余， 其实只需要在上述的那句 <code class="language-html highlighter-rouge">data-page-key</code> 的代码前加一些判断， 让这个字样在 Home/Archive/About 界面不显示即可。 对于 Archive 以及 About 两个界面， 需要判断 <code class="language-html highlighter-rouge">page.url != '/archive.html'</code> 以及 <code class="language-html highlighter-rouge">page.url != '/about.html'</code>， 但对于 Home 界面就有些麻烦， 这些 views 在 Home 界面是全关联的， 如果右上角的 views 消失了， 后面的 article list 中的也会跟着消失， 所以需要区分 Home 界面本身的 article 和我们的在 <code class="language-html highlighter-rouge">_posts</code> 文件夹下的 article。</p>
+<p>开启 pageview 之后在 Home/Archive/About 界面的右上角也能看到 views 这个字样， 感觉非常多余， 其实只需要在上述的那句 <code class="language-plaintext highlighter-rouge">data-page-key</code> 的代码前加一些判断， 让这个字样在 Home/Archive/About 界面不显示即可。 对于 Archive 以及 About 两个界面， 需要判断 <code class="language-plaintext highlighter-rouge">page.url != '/archive.html'</code> 以及 <code class="language-plaintext highlighter-rouge">page.url != '/about.html'</code>， 但对于 Home 界面就有些麻烦， 这些 views 在 Home 界面是全关联的， 如果右上角的 views 消失了， 后面的 article list 中的也会跟着消失， 所以需要区分 Home 界面本身的 article 和我们的在 <code class="language-plaintext highlighter-rouge">_posts</code> 文件夹下的 article。</p>
 
-<p>发现 <code class="language-html highlighter-rouge">home.html</code> 实际也是一种特殊的 post， 只是它的 title 被认为设置隐藏了。 所以， 只需要给这篇特殊的文章设定 <code class="language-html highlighter-rouge">pageview: false</code> 就能让它的 pageview 字样消失而不影响 Home 界面其他文章的 pageview 字样的显示。</p>
+<p>发现 <code class="language-plaintext highlighter-rouge">home.html</code> 实际也是一种特殊的 post， 只是它的 title 被认为设置隐藏了。 所以， 只需要给这篇特殊的文章设定 <code class="language-plaintext highlighter-rouge">pageview: false</code> 就能让它的 pageview 字样消失而不影响 Home 界面其他文章的 pageview 字样的显示。</p>
 
 <blockquote>
-  <p>后来想想对于 Archive 和 About 这两个界面而言也是同样的道理， 都应该能用 <code class="language-html highlighter-rouge">pageview: false</code> 将 pageview 字样去除。 实践证明确实可行！</p>
+  <p>后来想想对于 Archive 和 About 这两个界面而言也是同样的道理， 都应该能用 <code class="language-plaintext highlighter-rouge">pageview: false</code> 将 pageview 字样去除。 实践证明确实可行！</p>
 </blockquote>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--  article-info.html --&gt;</span>
@@ -441,17 +449,17 @@
 
 <p>从博客园换成 Git Pages 的另外一个原因是评论系统的便利性， Github 账号登陆省去了评论需要重新创建账号的麻烦。 尝试过使用 valine 作为评论系统， 虽然可以和 leancloud 公用 key， 但界面有些复杂不简洁不如 gitalk 赏心悦目。</p>
 
-<p class="info">gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-html highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
+<p class="info">gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-plaintext highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
 
 <h3 id="1-让-gitalk-摆脱-pagekey">1. 让 gitalk 摆脱 page.key</h3>
 
-<p>这里就不能直接改成把 <code class="language-html highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中的 <code class="language-html highlighter-rouge">page.key</code> 直接改成 <code class="language-html highlighter-rouge">page.url</code>， 不然在 Home 和 About 这两个界面也会出现评论框， 我改成了 <code class="language-html highlighter-rouge">page.id</code> 就神奇的解决了问题。</p>
+<p>这里就不能直接改成把 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中的 <code class="language-plaintext highlighter-rouge">page.key</code> 直接改成 <code class="language-plaintext highlighter-rouge">page.url</code>， 不然在 Home 和 About 这两个界面也会出现评论框， 我改成了 <code class="language-plaintext highlighter-rouge">page.id</code> 就神奇的解决了问题。</p>
 
-<p>另外在 issue 版面我看到一条 <a href="https://github.com/mzlogin/mzlogin.github.io/issues/63">发布的新文章提示“未找到相关的 Issues 进行评论，请联系xxx初始化创建” #63</a> 的问题， 如果自己是管理员的话登陆一下就能自动创建评论区解决问题。 关键的是这一句， 文章链接过长 （超过 50 个字符） 也会导致创建失败出现 <code class="language-html highlighter-rouge">Error: Validation Failed.</code>， 按照 <a href="https://github.com/mzlogin/mzlogin.github.io/commit/5ef353c011b21c04193df19096bc67a7b7140bec">Prevent comments initialize issue</a> 中的记录， 只需要将 <code class="language-html highlighter-rouge">page.id</code> 改为 <code class="language-html highlighter-rouge">page.id | truncate: 50, ''</code> 即可解决问题。</p>
+<p>另外在 issue 版面我看到一条 <a href="https://github.com/mzlogin/mzlogin.github.io/issues/63">发布的新文章提示“未找到相关的 Issues 进行评论，请联系xxx初始化创建” #63</a> 的问题， 如果自己是管理员的话登陆一下就能自动创建评论区解决问题。 关键的是这一句， 文章链接过长 （超过 50 个字符） 也会导致创建失败出现 <code class="language-plaintext highlighter-rouge">Error: Validation Failed.</code>， 按照 <a href="https://github.com/mzlogin/mzlogin.github.io/commit/5ef353c011b21c04193df19096bc67a7b7140bec">Prevent comments initialize issue</a> 中的记录， 只需要将 <code class="language-plaintext highlighter-rouge">page.id</code> 改为 <code class="language-plaintext highlighter-rouge">page.id | truncate: 50, ''</code> 即可解决问题。</p>
 
 <h3 id="2-error-request-failed-with-status-code-403">2. Error: Request failed with status code 403</h3>
 
-<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-html highlighter-rouge">proxy</code> 在 <code class="language-html highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-html highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-html highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-html highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <a href="https://xxxx.netlify.app">https://xxxx.netlify.app</a> 的 site 地址， 如果在网页中输入 <a href="https://xxxx.netlify.app/github_access_token">https://xxxx.netlify.app/github_access_token</a> 会出现 <code class="language-html highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-html highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <em>github_access_token</em> 也是可以的。</p>
+<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-plaintext highlighter-rouge">proxy</code> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-plaintext highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-plaintext highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-plaintext highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <a href="https://xxxx.netlify.app">https://xxxx.netlify.app</a> 的 site 地址， 如果在网页中输入 <a href="https://xxxx.netlify.app/github_access_token">https://xxxx.netlify.app/github_access_token</a> 会出现 <code class="language-plaintext highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-plaintext highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <em>github_access_token</em> 也是可以的。</p>
 
 <blockquote>
   <p><strong>vercel</strong>: <a href="https://vercel.prohibitorum.top/github_access_token">https://vercel.prohibitorum.top/github_access_token</a><br>
@@ -460,14 +468,14 @@
 
 <h3 id="3-error-uconcatjoin-is-not-a-function">3. Error: u.concat(…).join is not a function</h3>
 
-<p>在 gitalk repository 的 issue 界面就可以找到这条问题的处理办法， <a href="https://github.com/gitalk/gitalk/issues/114">Error: u.concat(…).join is not a function! #114</a> 在 <code class="language-html highlighter-rouge">_config.yml</code> 配置界面给 gitalk 加上如下代码。</p>
+<p>在 gitalk repository 的 issue 界面就可以找到这条问题的处理办法， <a href="https://github.com/gitalk/gitalk/issues/114">Error: u.concat(…).join is not a function! #114</a> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 配置界面给 gitalk 加上如下代码。</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gitalk</span><span class="pi">:</span>
   <span class="na">labels</span><span class="pi">:</span>
     <span class="pi">-</span> <span class="s">gitalk</span>
 </code></pre></div></div>
 
-<p>另外在 <code class="language-html highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中进行修改。</p>
+<p>另外在 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中进行修改。</p>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const gitalk = new Gitalk({
     // ...
@@ -479,7 +487,7 @@ gitalk.render('gitalk-container');
 
 <h2 id="site-exposure">site exposure</h2>
 
-<p>注册 google analytics 并且配置好 <code class="language-html highlighter-rouge">_config.yml</code> 文件中的 <code class="language-html highlighter-rouge">analytics</code> 部分的信息， 会发现 <a href="https://analytics.google.com/">google analytics</a> 好像并没有开始工作。 实际上是 google 并没有将网站纳入搜索索引中， 在 google 搜索中输入 <code class="language-html highlighter-rouge">site:YOUR_GIT_PAGES_ADDRESS</code> 会发现没有任何内容。 要么等着 google 的搜索引擎来抓网页， 要么就自己主动先进行配置申请。</p>
+<p>注册 google analytics 并且配置好 <code class="language-plaintext highlighter-rouge">_config.yml</code> 文件中的 <code class="language-plaintext highlighter-rouge">analytics</code> 部分的信息， 会发现 <a href="https://analytics.google.com/">google analytics</a> 好像并没有开始工作。 实际上是 google 并没有将网站纳入搜索索引中， 在 google 搜索中输入 <code class="language-plaintext highlighter-rouge">site:YOUR_GIT_PAGES_ADDRESS</code> 会发现没有任何内容。 要么等着 google 的搜索引擎来抓网页， 要么就自己主动先进行配置申请。</p>
 
 <blockquote>
   <p><a href="https://evanli.github.io/blog/2018/10/25/let-jekyll-github-pages-be-searched-by-google/">让Google搜索到用Jekyll搭建在Github Pages上的博客</a><br>
@@ -488,15 +496,15 @@ gitalk.render('gitalk-container');
 
 <h3 id="1-sitemap">1. sitemap</h3>
 
-<p>站点地图(Site Map)是用来注明网站结构的文件，我们希望搜索引擎的爬虫了解我们的网站结构,以便于高效爬取内容，快速建立索引。 使用 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 生成我们的 Git Pages 的 sitemap.xml 文件， 然后将其放在自己网站文件的根目录。 之后就需要在对应的 Google Search Console 中增加 sitemap URL 进行验证。 <code class="language-html highlighter-rouge">sitemap.xml</code> 需要在我们增添新的博文或内容后手动进行更新， 以使得搜索引擎能够获取网站的最新内容。 或者通过 jekyll-sitemap 插件自动生成更新。</p>
+<p>站点地图(Site Map)是用来注明网站结构的文件，我们希望搜索引擎的爬虫了解我们的网站结构,以便于高效爬取内容，快速建立索引。 使用 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 生成我们的 Git Pages 的 sitemap.xml 文件， 然后将其放在自己网站文件的根目录。 之后就需要在对应的 Google Search Console 中增加 sitemap URL 进行验证。 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 需要在我们增添新的博文或内容后手动进行更新， 以使得搜索引擎能够获取网站的最新内容。 或者通过 jekyll-sitemap 插件自动生成更新。</p>
 
 <h3 id="2-google-search-console">2. Google Search Console</h3>
 
-<p>资源类型选择 “网站前缀”， 提交我们的 <code class="language-html highlighter-rouge">sitemap.xml</code> 并对需要的网址进行网站检查， 然后申请编入索引。</p>
+<p>资源类型选择 “网站前缀”， 提交我们的 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 并对需要的网址进行网站检查， 然后申请编入索引。</p>
 
 <h3 id="3-bing-webmasters">3. Bing Webmasters</h3>
 
-<p>如果想要在 Bing 中增加自己的网站索引也是类似的操作， 只是我们需要用到 <a href="https://www.bing.com/webmasters/">Bing Webmaster Tools</a>。 如果用 Google Search Console 顺利的话， 可以用同一个 Google 账号导入相关的信息， 但 <code class="language-html highlighter-rouge">sitemap.xml</code> 验证好像还是需要自己添加。</p>
+<p>如果想要在 Bing 中增加自己的网站索引也是类似的操作， 只是我们需要用到 <a href="https://www.bing.com/webmasters/">Bing Webmaster Tools</a>。 如果用 Google Search Console 顺利的话， 可以用同一个 Google 账号导入相关的信息， 但 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 验证好像还是需要自己添加。</p>
 
 <h3 id="4-url-上传搜索引擎索引">4. URL 上传搜索引擎索引</h3>
 
@@ -513,7 +521,7 @@ gitalk.render('gitalk-container');
   http://www.your-site.com/2.html
 </code></pre></div>    </div>
 
-    <p>我们可以手动通过 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 网站生成 sitemap， 或者通过 Github 支持的 <code class="language-html highlighter-rouge">jekyll-sitemap</code> 插件在部署后自动生成， 这个插件可以在 <code class="language-html highlighter-rouge">_config.yml</code> 中看到是已经被添加了的。 那么之后就可以用以下 Linux 命令提取 <code class="language-html highlighter-rouge">sitemap.xml</code> 文件中的 URL， 筛选我们最新添加的部分。</p>
+    <p>我们可以手动通过 <a href="https://www.xml-sitemaps.com/">XML-Sitemaps</a> 网站生成 sitemap， 或者通过 Github 支持的 <code class="language-plaintext highlighter-rouge">jekyll-sitemap</code> 插件在部署后自动生成， 这个插件可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中看到是已经被添加了的。 那么之后就可以用以下 Linux 命令提取 <code class="language-plaintext highlighter-rouge">sitemap.xml</code> 文件中的 URL， 筛选我们最新添加的部分。</p>
 
     <blockquote>
       <p>可以使用诸如 compareit 这类插件进行更高效的对比筛选</p>
@@ -522,10 +530,10 @@ gitalk.render('gitalk-container');
   <li>
     <p>API 推送递交</p>
 
-    <p>Bing 以及 Baidu 都提供了 API 接口进行提交。 根据 <a href="https://www.bing.com/webmasters/">Bing Webmasters</a> 以及 <a href="https://ziyuan.baidu.com/linksubmit/">Baidu linksubmit</a> 提供的 API 结构， 可以更改如下 <code class="language-html highlighter-rouge">commit_urls.py</code> 的相应信息， 使用 <code class="language-html highlighter-rouge">python commit_urls.py</code> 提交网站， 该办法是通过 Git Log 获取最新一条更改信息， 并将其中与 URL 对应部分进行裁剪组合获取所需的 URLs。</p>
+    <p>Bing 以及 Baidu 都提供了 API 接口进行提交。 根据 <a href="https://www.bing.com/webmasters/">Bing Webmasters</a> 以及 <a href="https://ziyuan.baidu.com/linksubmit/">Baidu linksubmit</a> 提供的 API 结构， 可以更改如下 <code class="language-plaintext highlighter-rouge">commit_urls.py</code> 的相应信息， 使用 <code class="language-plaintext highlighter-rouge">python commit_urls.py</code> 提交网站， 该办法是通过 Git Log 获取最新一条更改信息， 并将其中与 URL 对应部分进行裁剪组合获取所需的 URLs。</p>
 
     <details>
-      <summary> <code class="language-html highlighter-rouge">commit_urls.py</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
+      <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">commit_urls.py</code> </summary>
 
       <div class="language-python highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  <span class="kn">import</span> <span class="n">os</span>
@@ -624,10 +632,10 @@ gitalk.render('gitalk-container');
 
 <h2 id="copyright">Copyright</h2>
 
-<p>复制博客内容的时候增加版权信息感觉也是挺有用的， 需要确认版权声明的位置， 对于文章而言， 主题内容肯定在 <code class="language-html highlighter-rouge">content</code> 中。 F12 使用开发者工具可以确定 TeXt 主题的文章主题内容是在 <code class="language-html highlighter-rouge"><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"page__content"</span><span class="nt">&gt;</span></code> 中。 我在 <code class="language-html highlighter-rouge">_includes/custom</code> 中创建了一个 <code class="language-html highlighter-rouge">copyright.js</code> 监听版权声明， 之后只需要在 <code class="language-html highlighter-rouge">_layouts/page.html</code> 中引用该 js 文件即可。 当然为了灵活处理， 可以在 <code class="language-html highlighter-rouge">_config.yml</code> 增加 copyright 的开关并在引用时加入条件语句。</p>
+<p>复制博客内容的时候增加版权信息感觉也是挺有用的， 需要确认版权声明的位置， 对于文章而言， 主题内容肯定在 <code class="language-plaintext highlighter-rouge">content</code> 中。 F12 使用开发者工具可以确定 TeXt 主题的文章主题内容是在 <code class="language-plaintext highlighter-rouge">&lt;div class="page__content"&gt;</code> 中。 我在 <code class="language-plaintext highlighter-rouge">_includes/custom</code> 中创建了一个 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听版权声明， 之后只需要在 <code class="language-plaintext highlighter-rouge">_layouts/page.html</code> 中引用该 js 文件即可。 当然为了灵活处理， 可以在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 增加 copyright 的开关并在引用时加入条件语句。</p>
 
 <details>
-  <summary> <code class="language-html highlighter-rouge">copyright.js</code> <i class="fas fa-file-code" style="color: #ff4040;"></i></summary>
+  <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">copyright.js</code> </summary>
 
   <div class="language-javascript highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
@@ -689,7 +697,7 @@ gitalk.render('gitalk-container');
 </code></pre></div>    </div>
   </li>
   <li>
-    <p>将 <code class="language-html highlighter-rouge">copyright.js</code> 监听 javascript 文件在 head 中引用。</p>
+    <p>将 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听 javascript 文件在 head 中引用。</p>
 
     <div class="language-html highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- _layouts/page.html 底部增添 copyright.js --&gt;</span>
@@ -711,7 +719,7 @@ gitalk.render('gitalk-container');
 
 <h3 id="1-代码块-liquid-代码误解析">1. 代码块 Liquid 代码误解析</h3>
 
-<p>如果页面是通过Jekyll引擎进行渲染的, 那么在文章中写了 Liquid 代码, 引擎也会将其解析。 找了一圈发现最方便的是针对块内容进行特殊的解释。 这样在 <code class="language-html highlighter-rouge">{% raw %}</code> 以及 <code class="language-html highlighter-rouge">{% endraw %}</code> 之间的代码就不会被解析了， 但也需要注意空白符此时也会被作为 raw 的一部分显示在代码块中。</p>
+<p>如果页面是通过Jekyll引擎进行渲染的, 那么在文章中写了 Liquid 代码, 引擎也会将其解析。 找了一圈发现最方便的是针对块内容进行特殊的解释。 这样在 <code class="language-plaintext highlighter-rouge">{% raw %}</code> 以及 <code class="language-plaintext highlighter-rouge">{% endraw %}</code> 之间的代码就不会被解析了， 但也需要注意空白符此时也会被作为 raw 的一部分显示在代码块中。</p>
 
 <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% raw %}
 {% this %}
@@ -751,7 +759,7 @@ YOUR_CODE_HERE
 
 <h3 id="1-back-to-top">1. Back To Top</h3>
 
-<p>给网页增加返回顶部的功能能提供阅读的便利， 尝试过很多自己添加 js 代码的方式都没成功， 或者是中间没有过渡动画。 Github 上的一个开源的库倒是非常好用， 配置也很简单。 我在 <code class="language-html highlighter-rouge">_layouts/base.html</code> 的 body 部分增加了配置代码， 毕竟所有的页面都是继承自 base， 这样这个 Back-To-Top 按钮就能全局可见了。</p>
+<p>给网页增加返回顶部的功能能提供阅读的便利， 尝试过很多自己添加 js 代码的方式都没成功， 或者是中间没有过渡动画。 Github 上的一个开源的库倒是非常好用， 配置也很简单。 我在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 的 body 部分增加了配置代码， 毕竟所有的页面都是继承自 base， 这样这个 Back-To-Top 按钮就能全局可见了。</p>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- _layouts/base.html --&gt;</span>
 <span class="nt">&lt;body&gt;</span>
@@ -771,15 +779,15 @@ YOUR_CODE_HERE
 
 <h3 id="2-隐藏-addtoany-悬浮按钮">2. 隐藏 AddToAny 悬浮按钮</h3>
 
-<p>摸索了有一阵子， 发现 AddToAny 的按钮实际上是通过 <code class="language-html highlighter-rouge"><span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">"a2a_button_copy_link"</span><span class="nt">&gt;&lt;/a&gt;</span></code> 这样的语句添加的， 那我们只需要对这些语句段进行控制就能控制 AddToAny 的按钮的隐藏和显示了。 这对于手机阅读非常重要， 读者也不希望一个特占位置的分享按钮影响阅读体验， 把它缩小成一个小三角就很优雅了。</p>
+<p>摸索了有一阵子， 发现 AddToAny 的按钮实际上是通过 <code class="language-plaintext highlighter-rouge">&lt;a class="a2a_button_copy_link"&gt;&lt;/a&gt;</code> 这样的语句添加的， 那我们只需要对这些语句段进行控制就能控制 AddToAny 的按钮的隐藏和显示了。 这对于手机阅读非常重要， 读者也不希望一个特占位置的分享按钮影响阅读体验， 把它缩小成一个小三角就很优雅了。</p>
 
 <blockquote>
-  <p>主要通过切换 <code class="language-html highlighter-rouge">display: block</code> 和 <code class="language-html highlighter-rouge">display: none</code> 两种状态完成显示和隐藏。</p>
+  <p>主要通过切换 <code class="language-plaintext highlighter-rouge">display: block</code> 和 <code class="language-plaintext highlighter-rouge">display: none</code> 两种状态完成显示和隐藏。</p>
 </blockquote>
 
 <h3 id="3-访客与阅读统计">3. 访客与阅读统计</h3>
 
-<p>用 “不蒜子”， 非常简易！ 只需要在 <code class="language-html highlighter-rouge">_includes/footer.html</code> 中加入如下代码， 就能获得和咱一样的显示效果了。</p>
+<p>用 “不蒜子”， 非常简易！ 只需要在 <code class="language-plaintext highlighter-rouge">_includes/footer.html</code> 中加入如下代码， 就能获得和咱一样的显示效果了。</p>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"site-info mt-2"</span><span class="nt">&gt;</span>
       ...
@@ -797,7 +805,7 @@ YOUR_CODE_HERE
 
 <h3 id="4-个性化页签">4. 个性化页签</h3>
 
-<p>个性化 Tab 标签。 相信很多人都看过 Tab 标签显示突然崩溃， 然后点回去又是好的。 我创建了 <code class="language-html highlighter-rouge">_include/custom/funny-title.js</code> 文件， 并在 <code class="language-html highlighter-rouge">_layouts/base.html</code> 中以 script 的形式引用了该文件。 这样我的网站的 Tab 也能跟读者开个小小的玩笑了 <img class="emoji" title=":stuck_out_tongue_closed_eyes:" alt=":stuck_out_tongue_closed_eyes:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f61d.png" height="20" width="20">。</p>
+<p>个性化 Tab 标签。 相信很多人都看过 Tab 标签显示突然崩溃， 然后点回去又是好的。 我创建了 <code class="language-plaintext highlighter-rouge">_include/custom/funny-title.js</code> 文件， 并在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 中以 script 的形式引用了该文件。 这样我的网站的 Tab 也能跟读者开个小小的玩笑了 <img class="emoji" title=":stuck_out_tongue_closed_eyes:" alt=":stuck_out_tongue_closed_eyes:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f61d.png" height="20" width="20">。</p>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// funny-title.js</span>
 <span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
@@ -822,11 +830,11 @@ YOUR_CODE_HERE
 
 <h3 id="5-增加-last_modified-标签">5. 增加 last_modified 标签</h3>
 
-<p>想给有些文章加上 <strong>最后的修改日期</strong> 以方便标识和记忆， 但这个主题的 <code class="language-html highlighter-rouge">last_date</code> 的功能是在文章末尾添加一句最后修改日期， 我想自己加一个和文章日期非常像的样式， 也在文章列表中显示出来的那种。 既然之前操作过 pageview， 已经知道是在 <code class="language-html highlighter-rouge">article-info.html</code> 修改文章样式， 那就模仿已有格式增加。</p>
+<p>想给有些文章加上 <strong>最后的修改日期</strong> 以方便标识和记忆， 但这个主题的 <code class="language-plaintext highlighter-rouge">last_date</code> 的功能是在文章末尾添加一句最后修改日期， 我想自己加一个和文章日期非常像的样式， 也在文章列表中显示出来的那种。 既然之前操作过 pageview， 已经知道是在 <code class="language-plaintext highlighter-rouge">article-info.html</code> 修改文章样式， 那就模仿已有格式增加。</p>
 
 <ul>
   <li>
-    <p>增加 <code class="language-html highlighter-rouge">_show_last_modified</code> 标识以判断是否显示最后修改日期。</p>
+    <p>增加 <code class="language-plaintext highlighter-rouge">_show_last_modified</code> 标识以判断是否显示最后修改日期。</p>
 
     <div class="language-html highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  {%- assign _show_last_modified = include.article.last_modified -%}
@@ -870,9 +878,9 @@ YOUR_CODE_HERE
 
 <h3 id="8-代码自动换行与行号设置">8. 代码自动换行与行号设置</h3>
 
-<h4 id="自动换行">自动换行</h4>
+<h4 id="81-自动换行">8.1 自动换行</h4>
 
-<p>在 <code class="language-html highlighter-rouge">_sass/custom.scss</code> 中加入如下代码即可。</p>
+<p>在 <code class="language-plaintext highlighter-rouge">_sass/custom.scss</code> 中加入如下代码即可， 但一般不建议使用， 代码多了容易臃肿混乱。</p>
 
 <div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* auto wrap code */</span>
 <span class="nt">pre</span> <span class="p">{</span>
@@ -885,9 +893,9 @@ YOUR_CODE_HERE
   <p><a href="https://www.jarods.org/2001.html">让pre标签的代码块自动换行</a></p>
 </blockquote>
 
-<h4 id="代码行号设置">代码行号设置</h4>
+<h4 id="82-代码行号设置">8.2 代码行号设置</h4>
 
-<p>按这种方法可以对常规的 Markdown 的代码段自动显示行号， 在 <code class="language-html highlighter-rouge">_config.yml</code> 中加入以下代码即可。 但这种方式会在 code 外层套上一个 table 的框， 不美观。</p>
+<p>按这种方法可以对常规的 Markdown 的代码段自动显示行号， 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中加入以下代码即可。 但这种方式会在 code 外层套上一个 table 的框， 不美观。</p>
 
 <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># More › http://kramdown.gettalong.org/quickref.html</span>
 <span class="c1"># Options › http://kramdown.gettalong.org/options.html</span>
@@ -900,7 +908,7 @@ YOUR_CODE_HERE
   <span class="c1"># span, block element options fall back to global</span>
   <span class="na">syntax_highlighter_opts</span><span class="pi">:</span>
     <span class="c1"># Rouge Options › https://github.com/jneen/rouge#full-options</span>
-    <span class="na">default_lang</span><span class="pi">:</span> <span class="s">c</span> 
+    <span class="na">default_lang</span><span class="pi">:</span> <span class="s">c</span>
     <span class="na">css_class</span><span class="pi">:</span> <span class="s1">'</span><span class="s">highlight'</span>
     <span class="c1">#line_numbers: true # bad idea, spans don't need linenos and would inherit this option</span>
     <span class="na">span</span><span class="pi">:</span>
@@ -911,21 +919,80 @@ YOUR_CODE_HERE
 </code></pre></div></div>
 
 <blockquote>
-  <p><a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a><br>
-<a href="https://www.luxiyue.com/server/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AEhighlight-js%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%B7%BB%E5%8A%A0%E8%A1%8C%E5%8F%B7/">代码高亮Highlight.Js的使用以及添加行号</a><br>
-<a href="https://www.wannaexpresso.com/2020/03/04/jekyll-blog-troubleshooting/">Jekyll博客搭建答疑解惑</a><br>
-<a href="https://mrcn.ski/jekyll-syntax-highlighting-and-line-numbers/">Jekyll: Syntax Highlighting And Line Numbers</a><br>
-<a href="https://www.drewsilcock.co.uk/proper-linenumbers">Proper line numbers with Jekyll</a><br>
-<a href="https://botleg.com/stories/line-numbers-in-jekyll-code-blocks/">Line numbers in Jekyll code blocks</a><br>
-<a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br>
+  <p><a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br>
 <a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
+
 </blockquote>
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>(2023-12-03 更新)： 感觉原版的 Tomorrow 主题的 syntax highlight 不咋好看， 自己替换成了 OneDark(可参考<a href="https://gist.github.com/HangX-Ma/20d155a196efacf565e86467094aba1e">HangX-Ma/onedark.scss</a>) 但不知咋滴渲染还是不正常， 应该是 rouge 本身的问题。 后来又折腾了一波 <strong>Gungnir</strong> 的 <code class="language-plaintext highlighter-rouge">Highlight.js</code> 配置， 效果也不尽如人意。 如果有小伙伴喜欢 <strong>Gungnir</strong> 的主题可以参考这个 <a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a>。</p>
 
-<h3 id="9-取消滚动条但不影响滚动">9. 取消滚动条但不影响滚动</h3>
 
-<p>使用 <code class="language-html highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-html highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
 
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
+ </div> </div>
+<p>偶然间发现了一个 <a href="https://github.com/HangX-Ma/jekyll-code-style">jekyll-code-style</a> 的仓库， 作者用 js 实现了对行号的加载， 对 <code class="language-plaintext highlighter-rouge">Terminal</code> 类型的代码则在前添加 <code class="language-plaintext highlighter-rouge">~$</code> 符号。 对于前端小白而言， 这几个功能真的是直击我心。 如此一来， 就不用管 Jekyll 原生的 highlight 语法导致无法正常缩进代码块的问题， 使用的时候也按照原来的 Markdown 的代码块风格， 减少了使用者的负担。 更重要的是， 这与我之前添加的代码一键复制的功能不冲突， 这是 Jekyll 的代码渲染所做不到的。</p>
+
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Conflict </div> </div> <div class="content"> <p>而后测试发现， 如果使用这套脚本， 虽然在样式上能够表现得比较完美， 手动复制时也不会选中行号， 但使用 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 进行一键复制则会出现行号被拷贝的情况。 究其原因， 这个 js 脚本是重构了文本内容， 在文本前添加了特殊的字符串。 我尝试过自己重构一个类似 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 的脚本， 但是个人功力不足， 总有一些不合心意的地方， 而这个打包好的脚本也没有提供更改结果字符串的接口。 因而， 我参考了 <a href="https://blog.csdn.net/qq_16992475/article/details/129978432">CSDN</a> 和 <a href="https://www.bilibili.com/video/BV1M94y1o7Cz/?vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">Bilibili - 给你的网页代码框添加一个行号吧！！！</a> 的写法， 利用 <code class="language-plaintext highlighter-rouge">ul</code> 和 <code class="language-plaintext highlighter-rouge">li</code> 元素实现了行号， 但由于没有利用更为合适的 table， 行对齐显得极为困难， 调参花费了不少时间， 并且容易在缩放时产生问题。 建议后续直接转用 <strong>Highlight.js</strong> （我目前打算弃用一键复制功能）。</p>
+
+
+
+ </div> </div>
+<p>相关的代码就参照仓库的指导， 把 <code class="language-plaintext highlighter-rouge">put-code-elements.js</code> 脚本文件放在 <code class="language-plaintext highlighter-rouge">&lt;head&gt;&lt;/head&gt;</code> 块之间：</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">'{{ "/js/put-code-elements.js" }}'</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+</code></pre></div></div>
+
+<p>如果你参照了我之前的配置希望用 <code class="language-plaintext highlighter-rouge">{:.copyable}</code> 给想要的代码块增加一键复制的按钮， 还需要对这个脚本文件以及与 highlight syntax 相关的文件进行一些更改：</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">put-code-elements.js</code> 中需要添加对 <code class="language-plaintext highlighter-rouge">.copyable</code> class 的筛选， 增加拷贝按钮之后 children 的起始位置需要向后延一个， copy button 占用了一个位置。</p>
+
+    <div class="language-js highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nb">window</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">DOMContentLoaded</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">codeBlocks</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelectorAll</span><span class="p">(</span><span class="dl">"</span><span class="s2">pre.highlight</span><span class="dl">"</span><span class="p">)</span>
+  <span class="nx">codeBlocks</span><span class="p">.</span><span class="nf">forEach</span><span class="p">((</span><span class="nx">element</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nb">self</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="kd">var</span> <span class="nx">highlighterClassName</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">parentElement</span><span class="p">.</span><span class="nx">parentElement</span><span class="p">.</span><span class="nx">className</span>
+
+    <span class="c1">// Added By HangX-Ma(2023-12-01): fix copy-to-clipboard element influence</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nf">closest</span><span class="p">(</span><span class="dl">'</span><span class="s1">.copyable</span><span class="dl">'</span><span class="p">)</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">self</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">_highlight.scss</code> 这部分是这个 Jekyll 主题的 highlight syntax 文件， 当然如果不想自定义的话可以直接用代码仓库提供的 <code class="language-plaintext highlighter-rouge">jekyll-code-style.css</code> 文件。 可以看到样例给的 language 出现的地方在最右侧， 这会与 copy button 出现重合。 可以通过更改此处的代码调整位置， 其他的属性可以自定义。</p>
+
+    <div class="language-scss highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="cm">/* Language parser */</span>
+<span class="na">pre</span><span class="err">.</span><span class="na">highlight</span><span class="p">:</span><span class="o">:</span><span class="n">before</span> <span class="p">{</span>
+  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">-15px</span><span class="p">;</span>
+  <span class="nl">margin-right</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="nl">float</span><span class="p">:</span> <span class="nb">right</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>我个人用了另一种左对齐的样式规避了这个问题， 另外由于 language 可能会对代码产生遮挡， 可以选择在 <code class="language-plaintext highlighter-rouge">code</code> 区块增加 <code class="language-plaintext highlighter-rouge">margin-top</code> 解决该问题。</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">code</span> <span class="p">{</span>
+    <span class="nl">margin-top</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="9-滚动条设置">9 滚动条设置</h3>
+
+<h4 id="91-取消滚动条但不影响滚动">9.1 取消滚动条但不影响滚动</h4>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-plaintext highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// custom.scss</span>
+<span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
   <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
 <span class="p">}</span>
 
@@ -944,6 +1011,286 @@ YOUR_CODE_HERE
 <blockquote>
   <p><a href="https://zxuqian.cn/css-how-to-hide-scrollbars/">CSS 如何隐藏滚动条，但不影响内容滚动</a></p>
 </blockquote>
+
+<h4 id="92-更优雅的滚动条">9.2 更优雅的滚动条</h4>
+
+<p>按照上述设置可以取消滚动条的显示， 但对用户的使用产生了一定的障碍， 很可能用户不会注意到滚动条的存在而遗漏更多的被隐藏的内容。 因而可以对代码块部分的滚动条进行定制化， hover 和 normal 两种情况显示不同的颜色， 并让底色与代码块保持一致。</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* scroll bar */</span>
+<span class="nt">pre</span> <span class="p">{</span>
+  <span class="nl">overflow</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+  <span class="na">-webkit-overflow-scrolling</span><span class="p">:</span> <span class="n">touch</span><span class="p">;</span>
+  <span class="k">&amp;</span><span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="n">inline-flexbox</span><span class="p">;</span>
+    <span class="nl">height</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+    <span class="nl">width</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+    <span class="nl">background-color</span><span class="p">:</span> <span class="mh">#282c34</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="cm">/* Handle */</span>
+  <span class="k">&amp;</span><span class="nd">::-webkit-scrollbar-thumb</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="mh">#555</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="cm">/* Handle on hover */</span>
+  <span class="k">&amp;</span><span class="nd">::-webkit-scrollbar-thumb:hover</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="mh">#888</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># This is a test</span>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula <span class="k">in </span>ultrices sodales, ante enim scelerisque diam, nec molestie lorem nulla sit amet dolor. Aenean <span class="nb">id </span>augue ante. Duis ut mi faucibus, pellentesque sem quis, gravida nisi. Nam cursus.        <span class="nt">--</span> Mark Twain
+</code></pre></div></div>
+
+<blockquote>
+  <p><a href="http://hoyouly.fun/2018/05/05/jeklly-highlighting-overflow-linenumber/">我的代码块也能显示行数，滑动，高亮和一键复制 - hoyouly</a></p>
+</blockquote>
+
+<h3 id="10-提示框优化">10. 提示框优化</h3>
+
+<p>对于这套 Jekyll 主题自带的诸如 <code class="language-plaintext highlighter-rouge">{:.info}</code>， <code class="language-plaintext highlighter-rouge">{:.error}</code> 等改变文字的 background 以及 border color 的形式， 我一直想找一个替代品， 偶然间发现了 <a href="https://lisz.me/tech/new-theme-h2o-ac.html">H2O-ac</a> 这套主题， 其中介绍了 <a href="https://github.com/lazee/premonition">lazee/premonition</a> 这个库， 能够通过简易的设置改变原有的 Quote 的形式， 实现多用途且兼具美观的目的。</p>
+
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>The body of the note goes here. Premonition allows you to write any Markdown inside the block.</p>
+
+
+
+ </div> </div>
+<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Info </div> </div> <div class="content"> <p>The body of the info goes here. Premonition allows you to write any Markdown inside the block.</p>
+
+
+
+ </div> </div>
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Warning </div> </div> <div class="content"> <p>The body of the warning goes here. Premonition allows you to write any Markdown inside the block.</p>
+
+
+
+ </div> </div>
+<div class="premonition error"> <div class="header"> <i class="fas fa-times-circle" style="color: #fb7478;"></i> <div class="title"> Error </div> </div> <div class="content"> <p>The body of the error goes here. Premonition allows you to write any Markdown inside the block.</p>
+
+
+
+ </div> </div>
+<div class="premonition citation"> <div class="header"> <i class="fas fa-quote-left" style="color: #acb1b9;"></i> </div> <div class="content"> <p>Look, this is a <code class="language-plaintext highlighter-rouge">Citation</code> style.</p>
+
+
+
+ </div> <div class="ref"> ------ Citation </div> </div>
+<p>当然配置上不是特别简易， premonition 库的 svg 不能够在这款 Jekyll theme 正常显示， 如果可以正常显示就直接按照上述仓库的指导配置即可。 如果不行， 按照如下方式进行配置（魔改自 <a href="https://github.com/zhonger/jekyll-theme-H2O-ac">zhonger/jekyll-theme-H2O-ac</a>）：</p>
+
+<ul>
+  <li>按照仓库所给指导， 在 <code class="language-plaintext highlighter-rouge">Gemfile</code>， <code class="language-plaintext highlighter-rouge">_config.yml</code> 处增添 premonition 插件， 并用 <code class="language-plaintext highlighter-rouge">bundle install</code> 进行安装。</li>
+  <li>
+    <p>在 <code class="language-plaintext highlighter-rouge">_sass/additional</code> 目录下增加 <code class="language-plaintext highlighter-rouge">_premonition.scss</code> 文件， 拷贝如下代码：</p>
+
+    <details>
+      <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">_premonition.scss</code> </summary>
+
+      <div class="language-scss highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// https://github.com/zhonger/jekyll-theme-H2O-ac/blob/551145e14e46ab62cfdca5eb2dc90510b98f8e02/dev/sass/premonition.scss</span>
+<span class="nv">$color-info-dark</span><span class="p">:</span> <span class="mh">#009400</span><span class="p">;</span>
+<span class="nv">$color-info-darker</span><span class="p">:</span> <span class="mh">#008b00</span><span class="p">;</span>
+<span class="nv">$color-info-darkest</span><span class="p">:</span> <span class="mh">#007300</span><span class="p">;</span>
+<span class="nv">$color-info-light</span><span class="p">:</span> <span class="mh">#26b226</span><span class="p">;</span>
+<span class="nv">$color-info-lighter</span><span class="p">:</span> <span class="mh">#4dbf4d</span><span class="p">;</span>
+<span class="nv">$color-info-lightest</span><span class="p">:</span> <span class="mh">#80d280</span><span class="p">;</span>
+<span class="nv">$color-info-contrast-background</span><span class="p">:</span> <span class="mh">#e6f6e6</span><span class="p">;</span>
+<span class="nv">$color-info-contrast-foreground</span><span class="p">:</span> <span class="mh">#003100</span><span class="p">;</span>
+<span class="nv">$color-info-code-background</span><span class="p">:</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="o">,</span><span class="m">164</span><span class="o">,</span><span class="m">0</span><span class="o">,.</span><span class="m">15</span><span class="p">);</span>
+<span class="nv">$color-note-dark</span><span class="p">:</span> <span class="mh">#4cb3d4</span><span class="p">;</span>
+<span class="nv">$color-note-darker</span><span class="p">:</span> <span class="mh">#47a9c9</span><span class="p">;</span>
+<span class="nv">$color-note-darkest</span><span class="p">:</span> <span class="mh">#3b8ba5</span><span class="p">;</span>
+<span class="nv">$color-note-light</span><span class="p">:</span> <span class="mh">#6ecfef</span><span class="p">;</span>
+<span class="nv">$color-note-lighter</span><span class="p">:</span> <span class="mh">#87d8f2</span><span class="p">;</span>
+<span class="nv">$color-note-lightest</span><span class="p">:</span> <span class="mh">#aae3f6</span><span class="p">;</span>
+<span class="nv">$color-note-contrast-background</span><span class="p">:</span> <span class="mh">#eef9fd</span><span class="p">;</span>
+<span class="nv">$color-note-contrast-foreground</span><span class="p">:</span> <span class="mh">#193c47</span><span class="p">;</span>
+<span class="nv">$color-note-code-background</span><span class="p">:</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">84</span><span class="o">,</span><span class="m">199</span><span class="o">,</span><span class="m">236</span><span class="o">,.</span><span class="m">15</span><span class="p">);</span>
+<span class="nv">$color-warning-dark</span><span class="p">:</span> <span class="mh">#e6a700</span><span class="p">;</span>
+<span class="nv">$color-warning-darker</span><span class="p">:</span> <span class="mh">#d99e00</span><span class="p">;</span>
+<span class="nv">$color-warning-darkest</span><span class="p">:</span> <span class="mh">#b38200</span><span class="p">;</span>
+<span class="nv">$color-warning-light</span><span class="p">:</span> <span class="mh">#ffc426</span><span class="p">;</span>
+<span class="nv">$color-warning-lighter</span><span class="p">:</span> <span class="mh">#ffcf4d</span><span class="p">;</span>
+<span class="nv">$color-warning-lightest</span><span class="p">:</span> <span class="mh">#ffdd80</span><span class="p">;</span>
+<span class="nv">$color-warning-contrast-background</span><span class="p">:</span> <span class="mh">#fff8e6</span><span class="p">;</span>
+<span class="nv">$color-warning-contrast-foreground</span><span class="p">:</span> <span class="mh">#4d3800</span><span class="p">;</span>
+<span class="nv">$color-warning-code-background</span><span class="p">:</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">255</span><span class="o">,</span><span class="m">186</span><span class="o">,</span><span class="m">0</span><span class="o">,.</span><span class="m">15</span><span class="p">);</span>
+<span class="nv">$color-error-dark</span><span class="p">:</span> <span class="mh">#e13238</span><span class="p">;</span>
+<span class="nv">$color-error-darker</span><span class="p">:</span> <span class="mh">#d53035</span><span class="p">;</span>
+<span class="nv">$color-error-darkest</span><span class="p">:</span> <span class="mh">#af272b</span><span class="p">;</span>
+<span class="nv">$color-error-light</span><span class="p">:</span> <span class="mh">#fb565b</span><span class="p">;</span>
+<span class="nv">$color-error-lighter</span><span class="p">:</span> <span class="mh">#fb7478</span><span class="p">;</span>
+<span class="nv">$color-error-lightest</span><span class="p">:</span> <span class="mh">#fd9c9f</span><span class="p">;</span>
+<span class="nv">$color-error-contrast-background</span><span class="p">:</span> <span class="mh">#fdf7f7</span><span class="p">;</span>
+<span class="nv">$color-error-contrast-foreground</span><span class="p">:</span> <span class="mh">#4b1113</span><span class="p">;</span>
+<span class="nv">$color-error-code-background</span><span class="p">:</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">250</span><span class="o">,</span><span class="m">56</span><span class="o">,</span><span class="m">62</span><span class="o">,.</span><span class="m">15</span><span class="p">);</span>
+<span class="nv">$color-citation-darkest</span><span class="p">:</span> <span class="mh">#495057</span><span class="p">;</span>
+<span class="nv">$color-citation-contrast-background</span><span class="p">:</span> <span class="mh">#f8f9fa</span><span class="p">;</span>
+<span class="nv">$color-citation-contrast-foreground</span><span class="p">:</span> <span class="mh">#323940</span><span class="p">;</span>
+<span class="nv">$color-citation-code-background</span><span class="p">:</span> <span class="mh">#fdfdfe</span><span class="p">;</span>
+
+<span class="nc">.premonition</span> <span class="p">{</span>
+    <span class="nt">p</span> <span class="p">{</span>
+        <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.note</span><span class="o">,</span> <span class="k">&amp;</span><span class="nc">.info</span><span class="o">,</span> <span class="k">&amp;</span><span class="nc">.warning</span><span class="o">,</span> <span class="k">&amp;</span><span class="nc">.error</span><span class="o">,</span> <span class="k">&amp;</span><span class="nc">.citation</span><span class="p">{</span>
+        <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6</span><span class="mi">.4px</span><span class="p">;</span>
+        <span class="nl">padding</span><span class="p">:</span> <span class="m">1rem</span><span class="p">;</span>
+        <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">1em</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.note</span><span class="p">{</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-note-contrast-background</span><span class="p">;</span>
+        <span class="nl">border-left</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="nv">$color-note-darkest</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-note-darkest</span><span class="p">;</span>
+        <span class="nt">code</span><span class="p">{</span>
+            <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-note-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-note-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.info</span><span class="p">{</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-info-contrast-background</span><span class="p">;</span>
+        <span class="nl">border-left</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="nv">$color-info-dark</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-info-dark</span><span class="p">;</span>
+        <span class="nt">code</span><span class="p">{</span>
+            <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-info-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-info-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.warning</span><span class="p">{</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-warning-contrast-background</span><span class="p">;</span>
+        <span class="nl">border-left</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="nv">$color-warning-dark</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-warning-dark</span><span class="p">;</span>
+        <span class="nt">code</span><span class="p">{</span>
+            <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-warning-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-warning-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.error</span><span class="p">{</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-error-contrast-background</span><span class="p">;</span>
+        <span class="nl">border-left</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="nv">$color-error-dark</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-error-dark</span><span class="p">;</span>
+        <span class="nt">code</span><span class="p">{</span>
+            <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-error-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-error-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">&amp;</span><span class="nc">.citation</span><span class="p">{</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-citation-contrast-background</span><span class="p">;</span>
+        <span class="nl">border-left</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="nv">$color-citation-darkest</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-citation-darkest</span><span class="p">;</span>
+        <span class="nt">code</span><span class="p">{</span>
+            <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-citation-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-citation-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nc">.ref</span><span class="p">{</span>
+            <span class="nl">text-align</span><span class="p">:</span> <span class="nb">right</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nc">.header</span><span class="p">{</span>
+        <span class="nl">font-weight</span><span class="p">:</span> <span class="m">700</span><span class="p">;</span>
+        <span class="nl">line-height</span><span class="p">:</span> <span class="m">17</span><span class="mi">.5px</span><span class="p">;</span>
+        <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">0</span><span class="mi">.3rem</span><span class="p">;</span>
+        <span class="nl">background-color</span><span class="p">:</span> <span class="nb">transparent</span> <span class="o">!</span><span class="n">important</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nt">code</span><span class="p">{</span>
+        <span class="nl">text-shadow</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nc">.icon</span><span class="p">{</span>
+        <span class="nl">width</span><span class="p">:</span> <span class="m">18px</span><span class="p">;</span>
+        <span class="nl">height</span><span class="p">:</span> <span class="m">18px</span><span class="p">;</span>
+        <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">-2px</span><span class="p">;</span>
+        <span class="nl">margin-right</span><span class="p">:</span> <span class="m">5px</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nc">.title</span><span class="p">{</span>
+        <span class="nl">display</span><span class="p">:</span> <span class="n">inline-block</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>      </div>
+
+    </details>
+  </li>
+  <li>
+    <p>在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中增加如下代码， 将默认的 premonition svg 图片替换为 font-awesome 中的图标， 注意使用的 font-awesome 的版本需要与自己的 Jekyll 主题使用的保持一致， 我的主题用的使 v5.15.4 版本：</p>
+
+    <details>
+      <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">_config.yml</code> </summary>
+
+      <div class="language-yml highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1"># premonition</span>
+<span class="na">premonition</span><span class="pi">:</span>
+  <span class="na">default</span><span class="pi">:</span>
+    <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+          <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+            <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-quote-left"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#acb1b9;"&gt;&lt;/i&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="title"&gt;</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+            <span class="s">{{content}}</span>
+          <span class="s">&lt;/div&gt;</span>
+        <span class="s">&lt;/div&gt;'</span>
+  <span class="na">types</span><span class="pi">:</span>
+    <span class="na">citation</span><span class="pi">:</span>
+      <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+          <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+            <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-quote-left"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#acb1b9;"&gt;&lt;/i&gt;</span>
+          <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+            <span class="s">{{content}}</span>
+          <span class="s">&lt;/div&gt;</span>
+          <span class="s">{%</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">title</span><span class="nv"> </span><span class="s">%}&lt;div</span><span class="nv"> </span><span class="s">class="ref"&gt;</span><span class="nv"> </span><span class="s">------</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;{%</span><span class="nv"> </span><span class="s">endif</span><span class="nv"> </span><span class="s">%}</span>
+        <span class="s">&lt;/div&gt;'</span>
+      <span class="na">default_title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">'</span>
+    <span class="na">note</span><span class="pi">:</span>
+      <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+              <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-sticky-note"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#87d8f2;"&gt;&lt;/i&gt;</span>
+              <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="title"&gt;</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+              <span class="s">{{content}}</span>
+            <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;/div&gt;'</span>
+      <span class="na">default_title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">Note'</span>
+    <span class="na">info</span><span class="pi">:</span>
+      <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+              <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-exclamation-circle"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#4dbf4d;"&gt;&lt;/i&gt;</span>
+              <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="title"&gt;</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+              <span class="s">{{content}}</span>
+            <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;/div&gt;'</span>
+      <span class="na">default_title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">Info'</span>
+    <span class="na">warning</span><span class="pi">:</span>
+      <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+              <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-exclamation-triangle"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#ffcf4d;"&gt;&lt;/i&gt;</span>
+              <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="title"&gt;</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+              <span class="s">{{content}}</span>
+            <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;/div&gt;'</span>
+      <span class="na">default_title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">Warning'</span>
+    <span class="na">error</span><span class="pi">:</span>
+      <span class="na">template</span><span class="pi">:</span> <span class="s1">'</span><span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="premonition</span><span class="nv"> </span><span class="s">{{type}}"&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="header"&gt;</span>
+              <span class="s">&lt;i</span><span class="nv"> </span><span class="s">class="fas</span><span class="nv"> </span><span class="s">fa-times-circle"</span><span class="nv"> </span><span class="s">style="color:</span><span class="nv"> </span><span class="s">#fb7478;"&gt;&lt;/i&gt;</span>
+              <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="title"&gt;</span><span class="nv"> </span><span class="s">{{title}}</span><span class="nv"> </span><span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;/div&gt;</span>
+            <span class="s">&lt;div</span><span class="nv"> </span><span class="s">class="content"&gt;</span>
+              <span class="s">{{content}}</span>
+            <span class="s">&lt;/div&gt;</span>
+          <span class="s">&lt;/div&gt;'</span>
+      <span class="na">default_title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">Error'</span>
+</code></pre></div>      </div>
+
+    </details>
+  </li>
+</ul>
 </div>
 <section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -1839,7 +2186,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

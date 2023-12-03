@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -346,11 +348,11 @@
   \end{aligned}
 \end{equation*}\]
 
-<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-html highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
+<p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
 
 <h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
 
-<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-html highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
+<p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
 
 <p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
 
@@ -363,9 +365,9 @@
 
 <h3 id="x31-ratchet-棘轮模式">X3.1 Ratchet 棘轮模式</h3>
 
-<p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-html highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
+<p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-plaintext highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
 
-<p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-html highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-html highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-html highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
+<p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-plaintext highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-plaintext highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-plaintext highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// attractor angle variable</span>
 <span class="k">static</span> <span class="kt">float</span> <span class="n">attract_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">;</span>
@@ -383,9 +385,9 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>下图是参阅博客园对棘轮模式原理的电压与角度关系图， 这里设定的棘轮角度为 45°， 可以看到棘轮的作用力的分界点在 <code class="language-html highlighter-rouge">45°/2 = 22.5°</code> 的位置。</p>
+<p>下图是参阅博客园对棘轮模式原理的电压与角度关系图， 这里设定的棘轮角度为 45°， 可以看到棘轮的作用力的分界点在 <code class="language-plaintext highlighter-rouge">45°/2 = 22.5°</code> 的位置。</p>
 
-<p>这很容易理解， 这个点是两个棘轮齿的中心点， 若 <code class="language-html highlighter-rouge">shaft_angle &gt; 22.5°</code> 则 <code class="language-html highlighter-rouge">find_attractor</code> 会找到下一个棘轮位置， 反之则仍是当前的棘轮位置。 我们知道闭环负反馈的作用是使作用对象稳定在目标位置， 在 <code class="language-html highlighter-rouge">[0;22.5°]</code> 之间， 越靠近中心点 <code class="language-html highlighter-rouge">22.5°</code> 距离误差越大， 受到反向的力矩越大； 而一旦跨过中心点位置， 棘轮齿更新为下一个位置， 此时的距离误差方向就与原来的相反了， 因而受到的是正向力矩的推力， 这里会有一个明显的电压的方向的改变， 力矩方向顺应改变， 这是人感受到棘轮齿的重要原因。</p>
+<p>这很容易理解， 这个点是两个棘轮齿的中心点， 若 <code class="language-plaintext highlighter-rouge">shaft_angle &gt; 22.5°</code> 则 <code class="language-plaintext highlighter-rouge">find_attractor</code> 会找到下一个棘轮位置， 反之则仍是当前的棘轮位置。 我们知道闭环负反馈的作用是使作用对象稳定在目标位置， 在 <code class="language-plaintext highlighter-rouge">[0;22.5°]</code> 之间， 越靠近中心点 <code class="language-plaintext highlighter-rouge">22.5°</code> 距离误差越大， 受到反向的力矩越大； 而一旦跨过中心点位置， 棘轮齿更新为下一个位置， 此时的距离误差方向就与原来的相反了， 因而受到的是正向力矩的推力， 这里会有一个明显的电压的方向的改变， 力矩方向顺应改变， 这是人感受到棘轮齿的重要原因。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-28-miniFOC-concept/ratchet_mode.png" alt="Ratchet mode Voltage-Angle relationship, HangX-Ma" width="400" />
@@ -1255,7 +1257,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -319,19 +321,19 @@
 </ul>
 
 <blockquote>
-  <p>64 位机器编译时， 由于库不支持 32 位代码编译， 因而需要下载 <code class="language-html highlighter-rouge">gcc-multilib</code>。</p>
+  <p>64 位机器编译时， 由于库不支持 32 位代码编译， 因而需要下载 <code class="language-plaintext highlighter-rouge">gcc-multilib</code>。</p>
 </blockquote>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>build-essential make
-<span class="nb">sudo </span>apt <span class="nb">install </span>gcc gcc-multilib gdb
-</code></pre></div></div>
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">sudo apt install build-essential make
+sudo apt install gcc gcc-multilib gdb
+</span></code></pre></div></div>
 
 <h2 id="题解与分析">题解与分析</h2>
 
 <h3 id="1-bitxor">1. bitXor</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * bitXor - x^y using only ~ and &amp; 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * bitXor - x^y using only ~ and &amp;
  *   Example: bitXor(4, 5) = 1
  *   Legal ops: ~ &amp;
  *   Max ops: 14
@@ -348,8 +350,8 @@
 
 <h3 id="2-tmin">2. tmin</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * tmin - return minimum two's complement integer 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 4
  *   Rating: 1
@@ -359,13 +361,13 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>32 位机最小的补码是 <code class="language-html highlighter-rouge">0x80000000</code>， 既然能用 <code class="language-html highlighter-rouge"><span class="nt">&lt;</span><span class="err">&lt;</span></code> 操作符就直接向左移位 31 位。</p>
+<p>32 位机最小的补码是 <code class="language-plaintext highlighter-rouge">0x80000000</code>， 既然能用 <code class="language-plaintext highlighter-rouge">&lt;&lt;</code> 操作符就直接向左移位 31 位。</p>
 
 <h3 id="3-istmax">3. isTmax</h3>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * isTmax - returns 1 if x is the maximum, two's complement number,
- *     and 0 otherwise 
+ *     and 0 otherwise
  *   Legal ops: ! ~ &amp; ^ | +
  *   Max ops: 10
  *   Rating: 1
@@ -375,7 +377,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>由于不能使用移位操作符， 需要用替代办法实现。 以 4 位 $TMax_4 = 0111_2$ 为例， $TMax_4 + 1 = 1000_2$， 该数取反也会得到 $TMax_4$， 那么以 <code class="language-html highlighter-rouge">!（~(x + 1) ^ x)</code> 就可以满足要求。 但是用 <code class="language-html highlighter-rouge">btest</code> 检查的时候却报错如下， 发现 <code class="language-html highlighter-rouge">-1</code> 这个例外同样满足上式。 但发现存在 <code class="language-html highlighter-rouge">-1 + 1 = 0</code> 这个特殊性质， 故而可以借此进行两数的区分， <code class="language-html highlighter-rouge">!(x + 1)</code> 若为零则说明输入 <code class="language-html highlighter-rouge">x</code> 是除 <code class="language-html highlighter-rouge">-1</code> 以外的数。</p>
+<p>由于不能使用移位操作符， 需要用替代办法实现。 以 4 位 $TMax_4 = 0111_2$ 为例， $TMax_4 + 1 = 1000_2$， 该数取反也会得到 $TMax_4$， 那么以 <code class="language-plaintext highlighter-rouge">!（~(x + 1) ^ x)</code> 就可以满足要求。 但是用 <code class="language-plaintext highlighter-rouge">btest</code> 检查的时候却报错如下， 发现 <code class="language-plaintext highlighter-rouge">-1</code> 这个例外同样满足上式。 但发现存在 <code class="language-plaintext highlighter-rouge">-1 + 1 = 0</code> 这个特殊性质， 故而可以借此进行两数的区分， <code class="language-plaintext highlighter-rouge">!(x + 1)</code> 若为零则说明输入 <code class="language-plaintext highlighter-rouge">x</code> 是除 <code class="language-plaintext highlighter-rouge">-1</code> 以外的数。</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: Test isTmax<span class="o">(</span><span class="nt">-1</span><span class="o">[</span>0xffffffff]<span class="o">)</span> failed...
 ...Gives 1[0x1]. Should be 0[0x0]
@@ -383,7 +385,7 @@
 
 <h3 id="4-alloddbits">4. allOddBits</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
  *   where bits are numbered from 0 (least significant) to 31 (most significant)
  *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
@@ -404,23 +406,23 @@
 
 <h3 id="5-negate">5. negate</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * negate - return -x 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * negate - return -x
  *   Example: negate(1) = -1.
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 5
  *   Rating: 2
  */</span>
 <span class="kt">int</span> <span class="nf">negate</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+  <span class="k">return</span> <span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-html highlighter-rouge">x + ~x = -1</code> 因而 <code class="language-html highlighter-rouge">-x = ~x + 1</code>， 需注意补码， 反码， 原码之间的关系。</p>
+<p><code class="language-plaintext highlighter-rouge">x + ~x = -1</code> 因而 <code class="language-plaintext highlighter-rouge">-x = ~x + 1</code>， 需注意补码， 反码， 原码之间的关系。</p>
 
 <h3 id="6-isasciidigit">6. isAsciiDigit</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters '0' to '9')
  *   Example: isAsciiDigit(0x35) = 1.
  *            isAsciiDigit(0x3a) = 0.
@@ -430,19 +432,19 @@
  *   Rating: 3
  */</span>
 <span class="kt">int</span> <span class="nf">isAsciiDigit</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kt">int</span> <span class="n">hbits_fit</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0x3</span><span class="p">;</span> 
-  <span class="kt">int</span> <span class="n">lbits_fit</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="o">~</span><span class="mh">0xA</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">);</span> 
+  <span class="kt">int</span> <span class="n">hbits_fit</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0x3</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">lbits_fit</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="o">~</span><span class="mh">0xA</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="p">(</span><span class="o">!</span><span class="n">hbits_fit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">!!</span><span class="n">lbits_fit</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-html highlighter-rouge">0x30 = 0011 0000</code> 以及 <code class="language-html highlighter-rouge">0x39 = 0011 1001</code> 可以看出 <code class="language-html highlighter-rouge">0011</code> 也就是 <code class="language-html highlighter-rouge">0x3_</code> 部分对于二者而言是一致的， 因而 <code class="language-html highlighter-rouge">x &gt;&gt; 4 == 3</code> 是首要的判断条件。 另外就是保证末尾 4 位位于 0 ~ 9 之间即可。 那么首先通过 <code class="language-html highlighter-rouge"><span class="err">&amp;</span> 0xF</code> 运算读取最后 4 位的数据， 根据前面的 <code class="language-html highlighter-rouge">negate</code> 实现方式使 <code class="language-html highlighter-rouge">0xA</code> 成为负数方便做差， 若结果是负数则说明尾数在范围之内。</p>
+<p><code class="language-plaintext highlighter-rouge">0x30 = 0011 0000</code> 以及 <code class="language-plaintext highlighter-rouge">0x39 = 0011 1001</code> 可以看出 <code class="language-plaintext highlighter-rouge">0011</code> 也就是 <code class="language-plaintext highlighter-rouge">0x3_</code> 部分对于二者而言是一致的， 因而 <code class="language-plaintext highlighter-rouge">x &gt;&gt; 4 == 3</code> 是首要的判断条件。 另外就是保证末尾 4 位位于 0 ~ 9 之间即可。 那么首先通过 <code class="language-plaintext highlighter-rouge">&amp; 0xF</code> 运算读取最后 4 位的数据， 根据前面的 <code class="language-plaintext highlighter-rouge">negate</code> 实现方式使 <code class="language-plaintext highlighter-rouge">0xA</code> 成为负数方便做差， 若结果是负数则说明尾数在范围之内。</p>
 
 <h3 id="7-conditional">7. conditional</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * conditional - same as x ? y : z 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * conditional - same as x ? y : z
  *   Example: conditional(2,4,5) = 4
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 16
@@ -450,26 +452,26 @@
  */</span>
 <span class="kt">int</span> <span class="nf">conditional</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt">int</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
   <span class="kt">int</span> <span class="n">ifTrue</span> <span class="o">=</span> <span class="o">!!</span><span class="n">x</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">cond</span> <span class="o">=</span> <span class="o">~</span><span class="n">ifTrue</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+  <span class="kt">int</span> <span class="n">cond</span> <span class="o">=</span> <span class="o">~</span><span class="n">ifTrue</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">neg_y</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">y</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">cond</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">neg_z</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">z</span> <span class="o">&amp;</span> <span class="n">cond</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
   <span class="k">return</span> <span class="n">y</span> <span class="o">+</span> <span class="n">neg_y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">+</span> <span class="n">neg_z</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>判断 <code class="language-html highlighter-rouge">x</code> 的属性是第一优先级， <code class="language-html highlighter-rouge">!!x</code> 可以将其转换为 0 和 1 两个数。 这步判断也比较关键， 若为 1 则返回 <code class="language-html highlighter-rouge">y</code> 反之则返回 <code class="language-html highlighter-rouge">z</code>， 故而需要利用对 <code class="language-html highlighter-rouge">x</code> 的判断结果。</p>
+<p>判断 <code class="language-plaintext highlighter-rouge">x</code> 的属性是第一优先级， <code class="language-plaintext highlighter-rouge">!!x</code> 可以将其转换为 0 和 1 两个数。 这步判断也比较关键， 若为 1 则返回 <code class="language-plaintext highlighter-rouge">y</code> 反之则返回 <code class="language-plaintext highlighter-rouge">z</code>， 故而需要利用对 <code class="language-plaintext highlighter-rouge">x</code> 的判断结果。</p>
 
 <ul>
-  <li>需要依据判断结果消除 <code class="language-html highlighter-rouge">y</code> 或 <code class="language-html highlighter-rouge">z</code> 对结果的影响。</li>
-  <li><code class="language-html highlighter-rouge">-y</code> 和 <code class="language-html highlighter-rouge">-z</code> 与前述结果进行条件加和可以达到目的。</li>
+  <li>需要依据判断结果消除 <code class="language-plaintext highlighter-rouge">y</code> 或 <code class="language-plaintext highlighter-rouge">z</code> 对结果的影响。</li>
+  <li><code class="language-plaintext highlighter-rouge">-y</code> 和 <code class="language-plaintext highlighter-rouge">-z</code> 与前述结果进行条件加和可以达到目的。</li>
 </ul>
 
-<p>可知对 0 和 1 分别取反可以得到 <code class="language-html highlighter-rouge">0xFFFFFFFF</code> 以及 <code class="language-html highlighter-rouge">0xFFFFFFFE</code>， 若再加上 1 则可以得到 <code class="language-html highlighter-rouge">0x00000000</code> 与 <code class="language-html highlighter-rouge">0xFFFFFFFF</code>， 这个结果正是进行条件选择的依据。 利用 <code class="language-html highlighter-rouge"><span class="err">&amp;</span></code> 操作符即可选择 <code class="language-html highlighter-rouge">-y</code> 与 <code class="language-html highlighter-rouge">-z</code> 之一为 0， 则该数对后续返回值不会造成影响。</p>
+<p>可知对 0 和 1 分别取反可以得到 <code class="language-plaintext highlighter-rouge">0xFFFFFFFF</code> 以及 <code class="language-plaintext highlighter-rouge">0xFFFFFFFE</code>， 若再加上 1 则可以得到 <code class="language-plaintext highlighter-rouge">0x00000000</code> 与 <code class="language-plaintext highlighter-rouge">0xFFFFFFFF</code>， 这个结果正是进行条件选择的依据。 利用 <code class="language-plaintext highlighter-rouge">&amp;</code> 操作符即可选择 <code class="language-plaintext highlighter-rouge">-y</code> 与 <code class="language-plaintext highlighter-rouge">-z</code> 之一为 0， 则该数对后续返回值不会造成影响。</p>
 
 <h3 id="8-islessorequal">8. isLessOrEqual</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * isLessOrEqual - if x &lt;= y  then return 1, else return 0 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * isLessOrEqual - if x &lt;= y  then return 1, else return 0
  *   Example: isLessOrEqual(4,5) = 1.
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 24
@@ -489,32 +491,32 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>可以容易得到 <code class="language-html highlighter-rouge">-x</code> 以及关于 <code class="language-html highlighter-rouge">-x + y</code> 的比较关系， 也就是上式中的 <code class="language-html highlighter-rouge">neg_x</code> 和 <code class="language-html highlighter-rouge">isLess</code>。</p>
+<p>可以容易得到 <code class="language-plaintext highlighter-rouge">-x</code> 以及关于 <code class="language-plaintext highlighter-rouge">-x + y</code> 的比较关系， 也就是上式中的 <code class="language-plaintext highlighter-rouge">neg_x</code> 和 <code class="language-plaintext highlighter-rouge">isLess</code>。</p>
 
 <ul>
-  <li>若 <code class="language-html highlighter-rouge">x</code> 为负数， 而 <code class="language-html highlighter-rouge">y</code> 为正数， 显然 <code class="language-html highlighter-rouge">x <span class="nt">&lt;</span> <span class="nt">y</span></code>。 但在 <code class="language-html highlighter-rouge">isLess</code> 的判断式中可能会产生溢出导致相反的结果。 那么索性将这部分的判断交由两数的符号而不使用 <code class="language-html highlighter-rouge">isLess</code> 判断式。 因而当 <code class="language-html highlighter-rouge">negxy</code> 为 <code class="language-html highlighter-rouge">1</code> 就无需判断后续的表达式。</li>
-  <li>若 <code class="language-html highlighter-rouge">x</code> 为正数， 而 <code class="language-html highlighter-rouge">y</code> 为负数， 显然 <code class="language-html highlighter-rouge">x &gt; y</code>， 那么只需要返回 <code class="language-html highlighter-rouge">!negyx</code> 就可避免溢出。</li>
-  <li><code class="language-html highlighter-rouge">x</code> 与 <code class="language-html highlighter-rouge">y</code> 同号时交予 <code class="language-html highlighter-rouge">isLess</code> 判断即可， 但这个判断是与 <code class="language-html highlighter-rouge">negyx</code> 或者 <code class="language-html highlighter-rouge">negxy</code> 相关联的， 因而需要选其一进行相与操作， 否则前两点叙述中对 <em>后续部分无需判断</em> 的叙述就不成立了。</li>
+  <li>若 <code class="language-plaintext highlighter-rouge">x</code> 为负数， 而 <code class="language-plaintext highlighter-rouge">y</code> 为正数， 显然 <code class="language-plaintext highlighter-rouge">x &lt; y</code>。 但在 <code class="language-plaintext highlighter-rouge">isLess</code> 的判断式中可能会产生溢出导致相反的结果。 那么索性将这部分的判断交由两数的符号而不使用 <code class="language-plaintext highlighter-rouge">isLess</code> 判断式。 因而当 <code class="language-plaintext highlighter-rouge">negxy</code> 为 <code class="language-plaintext highlighter-rouge">1</code> 就无需判断后续的表达式。</li>
+  <li>若 <code class="language-plaintext highlighter-rouge">x</code> 为正数， 而 <code class="language-plaintext highlighter-rouge">y</code> 为负数， 显然 <code class="language-plaintext highlighter-rouge">x &gt; y</code>， 那么只需要返回 <code class="language-plaintext highlighter-rouge">!negyx</code> 就可避免溢出。</li>
+  <li><code class="language-plaintext highlighter-rouge">x</code> 与 <code class="language-plaintext highlighter-rouge">y</code> 同号时交予 <code class="language-plaintext highlighter-rouge">isLess</code> 判断即可， 但这个判断是与 <code class="language-plaintext highlighter-rouge">negyx</code> 或者 <code class="language-plaintext highlighter-rouge">negxy</code> 相关联的， 因而需要选其一进行相与操作， 否则前两点叙述中对 <em>后续部分无需判断</em> 的叙述就不成立了。</li>
   <li>另外额外考虑两者相等， 通过异或操作符即可判断。</li>
 </ul>
 
 <h3 id="9-logicalneg">9. logicalNeg</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * logicalNeg - implement the ! operator, using all of 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * logicalNeg - implement the ! operator, using all of
  *              the legal operators except !
  *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
  *   Legal ops: ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 12
- *   Rating: 4 
+ *   Rating: 4
  */</span>
 <span class="kt">int</span> <span class="nf">logicalNeg</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kt">int</span> <span class="n">ifzero</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="p">((</span><span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">);</span> 
+  <span class="kt">int</span> <span class="n">ifzero</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="p">((</span><span class="o">~</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">);</span>
   <span class="k">return</span> <span class="n">ifzero</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>要求除了 <code class="language-html highlighter-rouge">!</code> 操作符外， 使用任何其他的操作符来实现 <code class="language-html highlighter-rouge">!</code> 的效果。 <code class="language-html highlighter-rouge">0</code> 这个数取负仍然是其本身， 因而可以利用这个特点， 对符号位进行判断。 由于我们需要在输入为 <code class="language-html highlighter-rouge">0</code> 时返回 <code class="language-html highlighter-rouge">1</code>， 以及输入非零时返回 <code class="language-html highlighter-rouge">0</code>， 因而对所获取的符号位需要再取反。 除了 <code class="language-html highlighter-rouge">0</code> 以外的数其负数和正数的符号必然相异， 据此即可得到结果。</p>
+<p>要求除了 <code class="language-plaintext highlighter-rouge">!</code> 操作符外， 使用任何其他的操作符来实现 <code class="language-plaintext highlighter-rouge">!</code> 的效果。 <code class="language-plaintext highlighter-rouge">0</code> 这个数取负仍然是其本身， 因而可以利用这个特点， 对符号位进行判断。 由于我们需要在输入为 <code class="language-plaintext highlighter-rouge">0</code> 时返回 <code class="language-plaintext highlighter-rouge">1</code>， 以及输入非零时返回 <code class="language-plaintext highlighter-rouge">0</code>， 因而对所获取的符号位需要再取反。 除了 <code class="language-plaintext highlighter-rouge">0</code> 以外的数其负数和正数的符号必然相异， 据此即可得到结果。</p>
 
 <h3 id="10-howmanybits">10. howManyBits</h3>
 
@@ -528,9 +530,9 @@
  */</span>
 </code></pre></div></div>
 
-<p>需要分析 example 中所表达的意思， 对于正数而言其实不难推导， <code class="language-html highlighter-rouge">12 = 1100</code> 但返回的位数为 5， 说明对于正数其实是加上了符号位， 那么只需要找到最高位的 1 即可知道该数用补码表示的位数为 <code class="language-html highlighter-rouge">n+1</code> 位， 其中 <code class="language-html highlighter-rouge">n（1~31）</code> 为 1 所在位置。</p>
+<p>需要分析 example 中所表达的意思， 对于正数而言其实不难推导， <code class="language-plaintext highlighter-rouge">12 = 1100</code> 但返回的位数为 5， 说明对于正数其实是加上了符号位， 那么只需要找到最高位的 1 即可知道该数用补码表示的位数为 <code class="language-plaintext highlighter-rouge">n+1</code> 位， 其中 <code class="language-plaintext highlighter-rouge">n（1~31）</code> 为 1 所在位置。</p>
 
-<p>但是负数部分着实有些迷惑， 看来看去都像是取负之后的结果。 比如 <code class="language-html highlighter-rouge">-5</code> 取负后为 <code class="language-html highlighter-rouge">5 = 0101</code> 加上符号位正好结果为 4。 但是 <code class="language-html highlighter-rouge">-1</code> 和 <code class="language-html highlighter-rouge">0</code> 的结果都为 1 说明对于这两个特殊数字而言符号位是不需要加上的， 那么同理若输入为 <code class="language-html highlighter-rouge">1</code> 也不需要。 （在具体实现中满足了这点要求）</p>
+<p>但是负数部分着实有些迷惑， 看来看去都像是取负之后的结果。 比如 <code class="language-plaintext highlighter-rouge">-5</code> 取负后为 <code class="language-plaintext highlighter-rouge">5 = 0101</code> 加上符号位正好结果为 4。 但是 <code class="language-plaintext highlighter-rouge">-1</code> 和 <code class="language-plaintext highlighter-rouge">0</code> 的结果都为 1 说明对于这两个特殊数字而言符号位是不需要加上的， 那么同理若输入为 <code class="language-plaintext highlighter-rouge">1</code> 也不需要。 （在具体实现中满足了这点要求）</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -565,7 +567,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>利用分治法， 这部分借鉴了网上的代码。 例如 <code class="language-html highlighter-rouge">div16</code> 实际上就是判断高 16 位是否存在为 1 的 bit， 若存在则至少有 16 位， 那么接着在高 16 位进一步分治。 否则， 在 [16， 8] 之间进行 8 位的分治依次类推。 最差的情况是 [32, 16], [16, 8], [8, 4], [4, 2], [2, 1] 这些区间内都需要进行判断。</p>
+<p>利用分治法， 这部分借鉴了网上的代码。 例如 <code class="language-plaintext highlighter-rouge">div16</code> 实际上就是判断高 16 位是否存在为 1 的 bit， 若存在则至少有 16 位， 那么接着在高 16 位进一步分治。 否则， 在 [16， 8] 之间进行 8 位的分治依次类推。 最差的情况是 [32, 16], [16, 8], [8, 4], [4, 2], [2, 1] 这些区间内都需要进行判断。</p>
 
 <h3 id="11-floatscale2">11. floatScale2</h3>
 
@@ -581,13 +583,13 @@
     <font size="2" color="#999"><u>Categories of single-precision floating-point values, Figure 2.33</u></font>
 </div>
 
-<p>根据书中所描述的 float32 的定义， 需要将输入的 <code class="language-html highlighter-rouge">uint32</code> 的数拆分成符号位 <code class="language-html highlighter-rouge">S(31)</code>， 指数位 <code class="language-html highlighter-rouge">exp(23-30)</code>， 以及小数位 <code class="language-html highlighter-rouge">frac(0-22)</code> 并根据这些数的值区分 Normalized， Denormalized, 以及特殊类型 Infinity, NaN。</p>
+<p>根据书中所描述的 float32 的定义， 需要将输入的 <code class="language-plaintext highlighter-rouge">uint32</code> 的数拆分成符号位 <code class="language-plaintext highlighter-rouge">S(31)</code>， 指数位 <code class="language-plaintext highlighter-rouge">exp(23-30)</code>， 以及小数位 <code class="language-plaintext highlighter-rouge">frac(0-22)</code> 并根据这些数的值区分 Normalized， Denormalized, 以及特殊类型 Infinity, NaN。</p>
 
 \[V = (-1)^{S} \times M \times 2^{E}\]
 
-<p>对于此道题而言， 输入 <code class="language-html highlighter-rouge">uf</code> 需要返回 <code class="language-html highlighter-rouge">2 * uf</code>， 根据上述公式， <code class="language-html highlighter-rouge">E</code> 的值应当加 1。</p>
+<p>对于此道题而言， 输入 <code class="language-plaintext highlighter-rouge">uf</code> 需要返回 <code class="language-plaintext highlighter-rouge">2 * uf</code>， 根据上述公式， <code class="language-plaintext highlighter-rouge">E</code> 的值应当加 1。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatScale2 - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -604,7 +606,7 @@
 
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">exp</span> <span class="o">^</span> <span class="mh">0x7F800000</span><span class="p">))</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">uf</span><span class="p">;</span>
-  <span class="p">}</span> <span class="c1">// NaN or Infinity </span>
+  <span class="p">}</span> <span class="c1">// NaN or Infinity</span>
 
   <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="p">;</span> <span class="c1">// acquire exp</span>
 
@@ -621,7 +623,7 @@
 
 <p>对尾数 M 部分的作用以及实现逻辑的理解有缺失， 查阅资料后发现尾数的 M 实际隐藏了一个 1。 严格来说尾数应当是 24 位， $2^0 + 2^{-1} + 2^{-2} + … + 2^{-23}$， 其实际表示的范围为 $[1, 2 - 2^{-23}]$。 （本质上 Normalized 和 Denormalized 是一致的， 书上列了一张表显示二者之间是可以精确衔接的。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
  *   for floating point argument f.
  *   Argument is passed as unsigned int, but
@@ -634,7 +636,7 @@
  *   Rating: 4
  */</span>
 <span class="kt">int</span> <span class="nf">floatFloat2Int</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">uf</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// fraction should be cut off </span>
+  <span class="c1">// fraction should be cut off</span>
   <span class="kt">int</span> <span class="n">exponent</span><span class="p">;</span>
   <span class="kt">unsigned</span> <span class="n">bias</span> <span class="o">=</span> <span class="mi">127</span><span class="p">;</span>
   <span class="kt">unsigned</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">uf</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x80000000</span><span class="p">);</span> <span class="c1">// 1 bit</span>
@@ -643,7 +645,7 @@
 
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">exp</span> <span class="o">^</span> <span class="mh">0x7F800000</span><span class="p">))</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mh">0x80000000u</span><span class="p">;</span>
-  <span class="p">}</span> <span class="c1">// NaN or Infinity </span>
+  <span class="p">}</span> <span class="c1">// NaN or Infinity</span>
 
   <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="p">;</span> <span class="c1">// get exponent value</span>
   <span class="n">exponent</span> <span class="o">=</span> <span class="n">exp</span> <span class="o">-</span> <span class="n">bias</span><span class="p">;</span>
@@ -655,7 +657,7 @@
   <span class="k">if</span> <span class="p">(</span><span class="n">exponent</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
- 
+
   <span class="c1">// give frac the hiden main part</span>
   <span class="n">frac</span> <span class="o">|=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">23</span><span class="p">;</span>
   <span class="c1">// fill the gap and move the binary point</span>
@@ -668,20 +670,20 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>另外在计算的时候需要考虑 <code class="language-html highlighter-rouge">bias</code> 对的影响， 32 位机的 <code class="language-html highlighter-rouge">bias</code> 依照公式应当为 $2^k - 1 = 127$， 其中 <code class="language-html highlighter-rouge">k</code> 为 <code class="language-html highlighter-rouge">exp</code> 部分的位数。</p>
+<p>另外在计算的时候需要考虑 <code class="language-plaintext highlighter-rouge">bias</code> 对的影响， 32 位机的 <code class="language-plaintext highlighter-rouge">bias</code> 依照公式应当为 $2^k - 1 = 127$， 其中 <code class="language-plaintext highlighter-rouge">k</code> 为 <code class="language-plaintext highlighter-rouge">exp</code> 部分的位数。</p>
 
 <p>由于 exponent 部分的范围是 $[-127, 128]$， 小于零的 exponent 最终截断后的结果为 0， 这是因为尾数 M 部分的范围是 $[1, 2 - 2^{23}]$， 这是一个介于 1 和 2 之间的数， 只要 $exponent &lt;0, exponent \in \scriptstyle{Z}$ 则必有尾数小于 1 成立。 而对于 exponent 大于 31 的情况则以溢出进行处理。</p>
 
-<p>有一处报错值得注意， 当时对于符号部分 <code class="language-html highlighter-rouge">sign</code> 我是与 <code class="language-html highlighter-rouge">frac</code> 做了 <code class="language-html highlighter-rouge"><span class="err">&amp;</span></code> 操作， 这其实是对浮点数和整数关系的混淆。 浮点数的 <code class="language-html highlighter-rouge">sign</code> 是一种标志， 说明当前的这个浮点数为负数， 因而在转换过程中也应当将其作为符号处理。</p>
+<p>有一处报错值得注意， 当时对于符号部分 <code class="language-plaintext highlighter-rouge">sign</code> 我是与 <code class="language-plaintext highlighter-rouge">frac</code> 做了 <code class="language-plaintext highlighter-rouge">&amp;</code> 操作， 这其实是对浮点数和整数关系的混淆。 浮点数的 <code class="language-plaintext highlighter-rouge">sign</code> 是一种标志， 说明当前的这个浮点数为负数， 因而在转换过程中也应当将其作为符号处理。</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: Test floatFloat2Int<span class="o">(</span><span class="nt">-1082130432</span><span class="o">[</span>0xbf800000]<span class="o">)</span> failed
-...
-...Gives <span class="nt">-2147483647</span><span class="o">[</span>0x80000001]. Should be <span class="nt">-1</span><span class="o">[</span>0xffffffff]
-</code></pre></div></div>
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">ERROR: Test floatFloat2Int(-1082130432[0xbf800000]) failed
+</span><span class="c">...
+</span><span class="go">...Gives -2147483647[0x80000001]. Should be -1[0xffffffff]
+</span></code></pre></div></div>
 
 <h3 id="13-floatpower2">13. floatPower2</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
  *   (2.0 raised to the power x) for any 32-bit integer x.
  *
@@ -689,9 +691,9 @@
  *   representation as the single-precision floating-point number 2.0^x.
  *   If the result is too small to be represented as a denorm, return
  *   0. If too large, return +INF.
- * 
- *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. Also if, while 
- *   Max ops: 30 
+ *
+ *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. Also if, while
+ *   Max ops: 30
  *   Rating: 4
  */</span>
 <span class="kt">unsigned</span> <span class="nf">floatPower2</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
@@ -700,23 +702,23 @@
   <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mh">0x7F800000</span><span class="p">;</span> <span class="c1">// +INF(S = 0, exp = 0xFF)</span>
   <span class="p">}</span>
-  
+
   <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">127</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// exp = E + bias</span>
-  <span class="n">exp</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">bias</span><span class="p">;</span> 
+  <span class="n">exp</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">bias</span><span class="p">;</span>
   <span class="k">return</span> <span class="n">exp</span> <span class="o">&lt;&lt;</span> <span class="mi">23</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>最后一题反倒是容易许多， 需要留意 <code class="language-html highlighter-rouge">E</code> 指数部分的范围， 输入的 <code class="language-html highlighter-rouge">x</code> 实际上就是这个指数， 之后只需要将 <code class="language-html highlighter-rouge">exp</code> 通过公式计算出来即可。</p>
+<p>最后一题反倒是容易许多， 需要留意 <code class="language-plaintext highlighter-rouge">E</code> 指数部分的范围， 输入的 <code class="language-plaintext highlighter-rouge">x</code> 实际上就是这个指数， 之后只需要将 <code class="language-plaintext highlighter-rouge">exp</code> 通过公式计算出来即可。</p>
 
 <h2 id="总结">总结</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># dlc checker</span>
-dlc:bits.c:149:bitXor: 8 operators
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">#</span><span class="w"> </span>dlc checker
+<span class="go">dlc:bits.c:149:bitXor: 8 operators
 dlc:bits.c:158:tmin: 1 operators
 dlc:bits.c:169:isTmax: 8 operators
 dlc:bits.c:184:allOddBits: 9 operators
@@ -729,10 +731,10 @@ dlc:bits.c:287:howManyBits: 36 operators
 dlc:bits.c:316:floatScale2: 14 operators
 dlc:bits.c:360:floatFloat2Int: 18 operators
 dlc:bits.c:388:floatPower2: 5 operators
-</code></pre></div></div>
+</span></code></pre></div></div>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># btest checker</span>
-Score   Rating  Errors  Function
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">#</span><span class="w"> </span>btest checker
+<span class="go">Score   Rating  Errors  Function
  1      1       0       bitXor
  1      1       0       tmin
  1      1       0       isTmax
@@ -747,7 +749,7 @@ Score   Rating  Errors  Function
  4      4       0       floatFloat2Int
  4      4       0       floatPower2
 Total points: 36/36
-</code></pre></div></div>
+</span></code></pre></div></div>
 
 <p>整整做了一天半， 还有一些题目参考了别人的思路， 不然想破脑袋也难解决， 在做 Lab 之前还以为这种基础性框架性的书给的 Lab 应该不算太难， 结果是眼高手低。</p>
 
@@ -1623,7 +1625,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {

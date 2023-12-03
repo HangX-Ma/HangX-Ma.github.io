@@ -262,7 +262,9 @@
     window.TEXT_VARIABLES = TEXT_VARIABLES;
   })();
 </script>
-<!-- <link rel="stylesheet" href="/css/atom-one-dark.min.css">
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
     <script src="/js/gungnir/highlight.min.js"></script>
     <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
     <script src="/js/gungnir/gungnir.js"></script> -->
@@ -351,19 +353,19 @@
 
 <h2 id="1-内容简述">1. 内容简述</h2>
 
-<p>Lab2 将实现 TCP 协议的具体细节， <em><strong>TCPReceiver</strong></em>， 以处理传入的字符流数据。 如果还记得 Lab1 中的实验框图， <em><strong>TCPReceiver</strong></em> 是 <em><strong>Reassembler</strong></em> 和 <em><strong>ByteStream</strong></em> 的上层封装， 它通过 <code class="language-html highlighter-rouge">receive()</code> 函数从 peer 端接收数据， 经过 <em><strong>Reassembler</strong></em> 处理写入 <em><strong>ByteStream</strong></em> 缓存， 应用层就可以通过 <em><strong>TCPSocket</strong></em> 读取数据。</p>
+<p>Lab2 将实现 TCP 协议的具体细节， <em><strong>TCPReceiver</strong></em>， 以处理传入的字符流数据。 如果还记得 Lab1 中的实验框图， <em><strong>TCPReceiver</strong></em> 是 <em><strong>Reassembler</strong></em> 和 <em><strong>ByteStream</strong></em> 的上层封装， 它通过 <code class="language-plaintext highlighter-rouge">receive()</code> 函数从 peer 端接收数据， 经过 <em><strong>Reassembler</strong></em> 处理写入 <em><strong>ByteStream</strong></em> 缓存， 应用层就可以通过 <em><strong>TCPSocket</strong></em> 读取数据。</p>
 
-<p>在接收 peer 端数据的同时， <em><strong>TCPReceiver</strong></em> 通过 <code class="language-html highlighter-rouge">send()</code> 函数承担着告知 peer 一些重要信息的职责， 这些信息包括这两个部分：</p>
+<p>在接收 peer 端数据的同时， <em><strong>TCPReceiver</strong></em> 通过 <code class="language-plaintext highlighter-rouge">send()</code> 函数承担着告知 peer 一些重要信息的职责， 这些信息包括这两个部分：</p>
 
 <ul>
   <li>
-<strong>Acknowledgment:</strong> <code class="language-html highlighter-rouge">first_unassembled_index</code> 又称 <code class="language-html highlighter-rouge">ackno</code>， 是 <em><strong>TCPReceiver</strong></em> 从 peer 发送端希望收到的 <strong>第一个字节的索引号</strong>。</li>
+<strong>Acknowledgment:</strong> <code class="language-plaintext highlighter-rouge">first_unassembled_index</code> 又称 <code class="language-plaintext highlighter-rouge">ackno</code>， 是 <em><strong>TCPReceiver</strong></em> 从 peer 发送端希望收到的 <strong>第一个字节的索引号</strong>。</li>
   <li>
-<strong>Flow Control:</strong> <code class="language-html highlighter-rouge">window size</code>， 是输出到 ByteStream 的剩余空间， 限制了 <em><strong>TCPSender</strong></em> 发送数据的 <em><strong>index</strong></em> 的实际范围。 通过这个 <code class="language-html highlighter-rouge">window</code>， <em><strong>TCPReceiver</strong></em> 能够 <strong>对输入的数据流量进行控制</strong>， 限制发送端的数据直到接收端准备好继续接收。</li>
+<strong>Flow Control:</strong> <code class="language-plaintext highlighter-rouge">window size</code>， 是输出到 ByteStream 的剩余空间， 限制了 <em><strong>TCPSender</strong></em> 发送数据的 <em><strong>index</strong></em> 的实际范围。 通过这个 <code class="language-plaintext highlighter-rouge">window</code>， <em><strong>TCPReceiver</strong></em> 能够 <strong>对输入的数据流量进行控制</strong>， 限制发送端的数据直到接收端准备好继续接收。</li>
 </ul>
 
 <blockquote>
-  <p>通常将 <code class="language-html highlighter-rouge">ackno</code> 称作 <code class="language-html highlighter-rouge">window</code> 的索引左边界 （Smallest Index）， 将 <code class="language-html highlighter-rouge">ackno + window size</code> 称作 <code class="language-html highlighter-rouge">window</code> 的索引右边界 （Largest Index）。</p>
+  <p>通常将 <code class="language-plaintext highlighter-rouge">ackno</code> 称作 <code class="language-plaintext highlighter-rouge">window</code> 的索引左边界 （Smallest Index）， 将 <code class="language-plaintext highlighter-rouge">ackno + window size</code> 称作 <code class="language-plaintext highlighter-rouge">window</code> 的索引右边界 （Largest Index）。</p>
 </blockquote>
 
 <h2 id="2-64-bit-索引与-32-bit-序列号的转换">2. 64-bit 索引与 32-bit 序列号的转换</h2>
@@ -374,12 +376,12 @@
     <font size="2" color="#999"><u>TCP segment, wikipedia</u></font>
 </div>
 
-<p><em><strong>Reassembler</strong></em> 重组 substrings 时每一个字节的索引号都是 64-bit， 并且其首位 <em><strong>index</strong></em> 始终是从零开始。 这是一组在当前技术条件下永远不可能溢出的数据流索引号组。 但是在 TCP segment 的头部数据中， 这一组 <code class="language-html highlighter-rouge">sequence number</code> 又被称为 <code class="language-html highlighter-rouge">seqno</code> 是 32-bit 的， 这组索引号与前述的数据流索引号在长度上不匹配。 32-bit 的数据可以在 100 gigabits/sec 的传输速率下在 1/3 秒内传输完， 因而其可能溢出。 这种不匹配引入了一些复杂性：</p>
+<p><em><strong>Reassembler</strong></em> 重组 substrings 时每一个字节的索引号都是 64-bit， 并且其首位 <em><strong>index</strong></em> 始终是从零开始。 这是一组在当前技术条件下永远不可能溢出的数据流索引号组。 但是在 TCP segment 的头部数据中， 这一组 <code class="language-plaintext highlighter-rouge">sequence number</code> 又被称为 <code class="language-plaintext highlighter-rouge">seqno</code> 是 32-bit 的， 这组索引号与前述的数据流索引号在长度上不匹配。 32-bit 的数据可以在 100 gigabits/sec 的传输速率下在 1/3 秒内传输完， 因而其可能溢出。 这种不匹配引入了一些复杂性：</p>
 
 <ul>
-  <li>TCP 的数据流长度是不固定的， 但数据段的头部 <code class="language-html highlighter-rouge">seqno</code> 仅有 32 位， 4 GiB 大小。 当 <code class="language-html highlighter-rouge">seqno</code> 到达 \(2^{32} - 1\) 大小后， <code class="language-html highlighter-rouge">seqno</code> 会置零。</li>
-  <li>TCP <code class="language-html highlighter-rouge">seqno</code> 的起始位置是任意的， ISN （Initial Sequence Number） 可以是 32-bit 中的任意值， 避免数据混淆和提高协议的鲁棒性。 那么 ISN 就代表了当前数据流的 “零点 （zero point）”， 或称其为 SYN （beginning of stream）。</li>
-  <li>有 SYN （beginning of stream） 自然也有 FIN （end of stream）， 它们不属于数据流中的任意字节， 仅作为数据流的起始和末尾的两个标识符存在， 但他们分别占有一个 <code class="language-html highlighter-rouge">seqno</code>。</li>
+  <li>TCP 的数据流长度是不固定的， 但数据段的头部 <code class="language-plaintext highlighter-rouge">seqno</code> 仅有 32 位， 4 GiB 大小。 当 <code class="language-plaintext highlighter-rouge">seqno</code> 到达 \(2^{32} - 1\) 大小后， <code class="language-plaintext highlighter-rouge">seqno</code> 会置零。</li>
+  <li>TCP <code class="language-plaintext highlighter-rouge">seqno</code> 的起始位置是任意的， ISN （Initial Sequence Number） 可以是 32-bit 中的任意值， 避免数据混淆和提高协议的鲁棒性。 那么 ISN 就代表了当前数据流的 “零点 （zero point）”， 或称其为 SYN （beginning of stream）。</li>
+  <li>有 SYN （beginning of stream） 自然也有 FIN （end of stream）， 它们不属于数据流中的任意字节， 仅作为数据流的起始和末尾的两个标识符存在， 但他们分别占有一个 <code class="language-plaintext highlighter-rouge">seqno</code>。</li>
 </ul>
 
 <div align="center">
@@ -389,13 +391,13 @@
     <font size="2" color="#999"><u>Sequence Numbers, Absolute Sequence Numbers, Stream Indices</u></font>
 </div>
 
-<p>cs144 区分了三种类型的索引值， 并给出了一个 “cat” 数据的例子。 <code class="language-html highlighter-rouge">seqno</code>， <code class="language-html highlighter-rouge">absolute seqno</code>， 以及 <code class="language-html highlighter-rouge">stream index</code>， 这些索引需要我们实现相互之间的转换， 并保持转换前后不同数据的这三类索引值之间的关系一致。</p>
+<p>cs144 区分了三种类型的索引值， 并给出了一个 “cat” 数据的例子。 <code class="language-plaintext highlighter-rouge">seqno</code>， <code class="language-plaintext highlighter-rouge">absolute seqno</code>， 以及 <code class="language-plaintext highlighter-rouge">stream index</code>， 这些索引需要我们实现相互之间的转换， 并保持转换前后不同数据的这三类索引值之间的关系一致。</p>
 
 <ul>
   <li>
-<code class="language-html highlighter-rouge">wrap</code> 是将 <code class="language-html highlighter-rouge">absolute seqno</code> 转换为 <code class="language-html highlighter-rouge">seqno</code>， 64-bit 数据本就是 32-bit 数据的倍数， 进行 <code class="language-html highlighter-rouge">absolute seqno</code> 截断直接和 <code class="language-html highlighter-rouge">zero_point</code> 加和就是 wrap 后的结果。
+<code class="language-plaintext highlighter-rouge">wrap</code> 是将 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 转换为 <code class="language-plaintext highlighter-rouge">seqno</code>， 64-bit 数据本就是 32-bit 数据的倍数， 进行 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 截断直接和 <code class="language-plaintext highlighter-rouge">zero_point</code> 加和就是 wrap 后的结果。
     <blockquote>
-      <p><code class="language-html highlighter-rouge">uint32_t</code> 数据类型自动将溢出部分进行了 wrap 操作。</p>
+      <p><code class="language-plaintext highlighter-rouge">uint32_t</code> 数据类型自动将溢出部分进行了 wrap 操作。</p>
     </blockquote>
 
     <div class="language-cpp highlighter-rouge">
@@ -403,29 +405,29 @@
 </code></pre></div>    </div>
   </li>
   <li>
-    <p><code class="language-html highlighter-rouge">unwrap</code> 麻烦一些， 但指导书表明 10 行也能搞定 <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">。 给了 <code class="language-html highlighter-rouge">absolute seqno</code> 中的 <code class="language-html highlighter-rouge">checkpoint</code> 以及 <code class="language-html highlighter-rouge">seqno</code> 中的 <code class="language-html highlighter-rouge">zero_point</code>， <code class="language-html highlighter-rouge">checkpoint</code> 是 \([SYN,FIN] \in {64 bit}\) 之间的任意一个值。 在指导书中有这么一句：</p>
+    <p><code class="language-plaintext highlighter-rouge">unwrap</code> 麻烦一些， 但指导书表明 10 行也能搞定 <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">。 给了 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 中的 <code class="language-plaintext highlighter-rouge">checkpoint</code> 以及 <code class="language-plaintext highlighter-rouge">seqno</code> 中的 <code class="language-plaintext highlighter-rouge">zero_point</code>， <code class="language-plaintext highlighter-rouge">checkpoint</code> 是 \([SYN,FIN] \in {64 bit}\) 之间的任意一个值。 在指导书中有这么一句：</p>
 
     <p><em>“Given a sequence number (the Wrap32), the Initial Sequence Number (zero point), and an absolute checkpoint sequence number, find the corresponding absolute sequence number that is closest to the checkpoint.”</em></p>
 
-    <p>说明我们实际要转换的是一个 <code class="language-html highlighter-rouge">Wrap32</code> 类型的数据， 这个数据源就是 <code class="language-html highlighter-rouge">this-&gt;raw_data_</code>， 属于 <code class="language-html highlighter-rouge">seqno</code>。</p>
+    <p>说明我们实际要转换的是一个 <code class="language-plaintext highlighter-rouge">Wrap32</code> 类型的数据， 这个数据源就是 <code class="language-plaintext highlighter-rouge">this-&gt;raw_data_</code>， 属于 <code class="language-plaintext highlighter-rouge">seqno</code>。</p>
 
     <div class="language-cpp highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  <span class="kt">uint64_t</span> <span class="n">unwrap</span><span class="p">(</span><span class="n">Wrap32</span> <span class="n">zero_point</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">checkpoint</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
 </code></pre></div>    </div>
 
-    <p>对于 <code class="language-html highlighter-rouge">checkpoint</code> 的作用指导书也说的很明确， <code class="language-html highlighter-rouge">seqno</code> 中 17 可能对应着 <code class="language-html highlighter-rouge">absolute seqno</code> 的 17， 也可能是 \(17 + 2^{32}\) 等等。 我们确定变量 <code class="language-html highlighter-rouge">seqno_offset = this-&gt;raw_data_ - zero_point.raw_data_</code>， 写过 Lab0 和 Lab1 应该都清楚， <code class="language-html highlighter-rouge">checkpoint</code> 是 first_unassembled_index， 它应当比传入的 <code class="language-html highlighter-rouge">seqno_offset</code> 的值要小， 若 <code class="language-html highlighter-rouge">checkpoint &gt;= seqno_offset</code>， 我们就需要找到具体偏移了几个 \(2^{32}\)， 那最终的 <code class="language-html highlighter-rouge">absolute seqno = seqno_offset + UINT32_SIZE_num * UINT32_SIZE</code>。</p>
+    <p>对于 <code class="language-plaintext highlighter-rouge">checkpoint</code> 的作用指导书也说的很明确， <code class="language-plaintext highlighter-rouge">seqno</code> 中 17 可能对应着 <code class="language-plaintext highlighter-rouge">absolute seqno</code> 的 17， 也可能是 \(17 + 2^{32}\) 等等。 我们确定变量 <code class="language-plaintext highlighter-rouge">seqno_offset = this-&gt;raw_data_ - zero_point.raw_data_</code>， 写过 Lab0 和 Lab1 应该都清楚， <code class="language-plaintext highlighter-rouge">checkpoint</code> 是 first_unassembled_index， 它应当比传入的 <code class="language-plaintext highlighter-rouge">seqno_offset</code> 的值要小， 若 <code class="language-plaintext highlighter-rouge">checkpoint &gt;= seqno_offset</code>， 我们就需要找到具体偏移了几个 \(2^{32}\)， 那最终的 <code class="language-plaintext highlighter-rouge">absolute seqno = seqno_offset + UINT32_SIZE_num * UINT32_SIZE</code>。</p>
   </li>
 </ul>
 
 <h2 id="3-tcp-receiver-实现">3. TCP Receiver 实现</h2>
 
-<p>cs144 提供了 <code class="language-html highlighter-rouge">TCPSenderMessage</code> 和 <code class="language-html highlighter-rouge">TCPReceiverMessage</code>, 前者用于 <code class="language-html highlighter-rouge">receive</code> 后者用于 <code class="language-html highlighter-rouge">send</code>。</p>
+<p>cs144 提供了 <code class="language-plaintext highlighter-rouge">TCPSenderMessage</code> 和 <code class="language-plaintext highlighter-rouge">TCPReceiverMessage</code>, 前者用于 <code class="language-plaintext highlighter-rouge">receive</code> 后者用于 <code class="language-plaintext highlighter-rouge">send</code>。</p>
 
 <ol>
   <li>
 <em><strong>receive：</strong></em> 该部分有两个要求
     <ul>
-      <li>在必要时， 也就是 message 中包含 SYN 时， 需要保存这个 SYN 的 <code class="language-html highlighter-rouge">seqno</code>。</li>
+      <li>在必要时， 也就是 message 中包含 SYN 时， 需要保存这个 SYN 的 <code class="language-plaintext highlighter-rouge">seqno</code>。</li>
       <li>将 payload 部分的数据推送给 <em><strong>Reassembler</strong></em>， FIN 作为标识符控制 push 过程的终止。</li>
     </ul>
 
@@ -435,18 +437,18 @@
 
     <p>可以明确的是， 在 <em><strong>TCPReceiver</strong></em> 还没有接收到 SYN 时， 所有的数据都不应当被送入 <em><strong>Reassembler</strong></em>， 因为此时的数据传输还没有开始， 所以我们需要有一个标志位表明数据开始传输。</p>
 
-    <p>另外传输的时候使用的是 <code class="language-html highlighter-rouge">stream_index</code>， 而我们得到的是 <code class="language-html highlighter-rouge">seqno</code>， 首先需要将 <code class="language-html highlighter-rouge">seqno</code> 转为 <code class="language-html highlighter-rouge">absolute seqno</code>， 我们已经写好了 <code class="language-html highlighter-rouge">unwarp</code> 函数， 需要提供 <code class="language-html highlighter-rouge">checkpoint</code>。 <code class="language-html highlighter-rouge">checkpoint</code> 是 <em>first_unassembled_index</em>， 也就是下一个需要被 buffer 存储的字节。 在 Lab0 中我们完成的 <code class="language-html highlighter-rouge">Writer</code> 类有一个 <code class="language-html highlighter-rouge">bytes_pushed()</code> 函数， <code class="language-html highlighter-rouge">bytes_pushed() + 1 = checkpoint</code>。</p>
+    <p>另外传输的时候使用的是 <code class="language-plaintext highlighter-rouge">stream_index</code>， 而我们得到的是 <code class="language-plaintext highlighter-rouge">seqno</code>， 首先需要将 <code class="language-plaintext highlighter-rouge">seqno</code> 转为 <code class="language-plaintext highlighter-rouge">absolute seqno</code>， 我们已经写好了 <code class="language-plaintext highlighter-rouge">unwarp</code> 函数， 需要提供 <code class="language-plaintext highlighter-rouge">checkpoint</code>。 <code class="language-plaintext highlighter-rouge">checkpoint</code> 是 <em>first_unassembled_index</em>， 也就是下一个需要被 buffer 存储的字节。 在 Lab0 中我们完成的 <code class="language-plaintext highlighter-rouge">Writer</code> 类有一个 <code class="language-plaintext highlighter-rouge">bytes_pushed()</code> 函数， <code class="language-plaintext highlighter-rouge">bytes_pushed() + 1 = checkpoint</code>。</p>
 
-    <p><code class="language-html highlighter-rouge">absolute_seqno</code> 转换为 <code class="language-html highlighter-rouge">stream_index</code> 时需要考虑当前的 message 是否有 SYN 部分。 我们给 <code class="language-html highlighter-rouge">unwrap</code> 提供的 <code class="language-html highlighter-rouge">zero_point</code> 是以 SYN 对应的 <code class="language-html highlighter-rouge">seqno</code>， 若 SYN 在当前的 message 中不存在， 则 <code class="language-html highlighter-rouge">zero_point</code> 应当为当前 payload 的第一个字节。 所以有如下转换满足：</p>
+    <p><code class="language-plaintext highlighter-rouge">absolute_seqno</code> 转换为 <code class="language-plaintext highlighter-rouge">stream_index</code> 时需要考虑当前的 message 是否有 SYN 部分。 我们给 <code class="language-plaintext highlighter-rouge">unwrap</code> 提供的 <code class="language-plaintext highlighter-rouge">zero_point</code> 是以 SYN 对应的 <code class="language-plaintext highlighter-rouge">seqno</code>， 若 SYN 在当前的 message 中不存在， 则 <code class="language-plaintext highlighter-rouge">zero_point</code> 应当为当前 payload 的第一个字节。 所以有如下转换满足：</p>
 
     <div class="language-cpp highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code> <span class="kt">uint64_t</span> <span class="n">stream_index</span> <span class="o">=</span> <span class="n">abs_seqno</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">message</span><span class="p">.</span><span class="n">SYN</span><span class="p">;</span>
 </code></pre></div>    </div>
 
-    <p>之后我们只需要提供 <code class="language-html highlighter-rouge">inbound_stream.insert()</code> 所需要的各个变量即可。</p>
+    <p>之后我们只需要提供 <code class="language-plaintext highlighter-rouge">inbound_stream.insert()</code> 所需要的各个变量即可。</p>
   </li>
   <li>
-    <p><em><strong>send：</strong></em> 这里只需要注意只有 <code class="language-html highlighter-rouge">ackno</code> 是 optional 属性， <code class="language-html highlighter-rouge">window_size</code> 是每次都要发送的。 如果已经收到 FIN 那段 message， 满足 <code class="language-html highlighter-rouge">inbound_stream.is_closed() == true</code> 那我们需要增加 FIN 部分的长度。 但也别忘了传输开始后， SYN 也是占有一个 <code class="language-html highlighter-rouge">seqno</code> 位置的。</p>
+    <p><em><strong>send：</strong></em> 这里只需要注意只有 <code class="language-plaintext highlighter-rouge">ackno</code> 是 optional 属性， <code class="language-plaintext highlighter-rouge">window_size</code> 是每次都要发送的。 如果已经收到 FIN 那段 message， 满足 <code class="language-plaintext highlighter-rouge">inbound_stream.is_closed() == true</code> 那我们需要增加 FIN 部分的长度。 但也别忘了传输开始后， SYN 也是占有一个 <code class="language-plaintext highlighter-rouge">seqno</code> 位置的。</p>
 
     <div class="language-cpp highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code> <span class="n">TCPReceiverMessage</span> <span class="n">send</span><span class="p">(</span><span class="k">const</span> <span class="n">Writer</span> <span class="o">&amp;</span><span class="n">inbound_stream</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
@@ -456,39 +458,39 @@
 
 <h2 id="4-测试结果">4. 测试结果</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cs144@cs144-ubuntu22:~/cs144-sp23/minnow<span class="nv">$ </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check2
-Test project /home/cs144/cs144-sp23/minnow/build
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">cs144@cs144-ubuntu22:~/cs144-sp23/minnow$</span><span class="w"> </span>cmake <span class="nt">--build</span> build <span class="nt">--target</span> check2
+<span class="go">Test project /home/cs144/cs144-sp23/minnow/build
       Start  1: compile with bug-checkers
- 1/29 Test  <span class="c">#1: compile with bug-checkers ........   Passed   20.37 sec</span>
- ...
-      Start 21: recv_connect
-20/29 Test <span class="c">#21: recv_connect .....................   Passed    0.09 sec</span>
-      Start 22: recv_transmit
-21/29 Test <span class="c">#22: recv_transmit ....................   Passed    0.75 sec</span>
-      Start 23: recv_window
-22/29 Test <span class="c">#23: recv_window ......................   Passed    0.09 sec</span>
-      Start 24: recv_reorder
-23/29 Test <span class="c">#24: recv_reorder .....................   Passed    0.09 sec</span>
-      Start 25: recv_reorder_more
-24/29 Test <span class="c">#25: recv_reorder_more ................   Passed    1.86 sec</span>
-      Start 26: recv_close
-25/29 Test <span class="c">#26: recv_close .......................   Passed    0.09 sec</span>
-      Start 27: recv_special
-26/29 Test <span class="c">#27: recv_special .....................   Passed    0.10 sec</span>
-      Start 28: compile with optimization
-27/29 Test <span class="c">#28: compile with optimization ........   Passed   18.11 sec</span>
-      Start 29: byte_stream_speed_test
+</span><span class="gp"> 1/29 Test  #</span>1: compile with bug-checkers ........   Passed   20.37 sec
+<span class="c"> ...
+</span><span class="go">      Start 21: recv_connect
+</span><span class="gp">20/29 Test #</span>21: recv_connect .....................   Passed    0.09 sec
+<span class="go">      Start 22: recv_transmit
+</span><span class="gp">21/29 Test #</span>22: recv_transmit ....................   Passed    0.75 sec
+<span class="go">      Start 23: recv_window
+</span><span class="gp">22/29 Test #</span>23: recv_window ......................   Passed    0.09 sec
+<span class="go">      Start 24: recv_reorder
+</span><span class="gp">23/29 Test #</span>24: recv_reorder .....................   Passed    0.09 sec
+<span class="go">      Start 25: recv_reorder_more
+</span><span class="gp">24/29 Test #</span>25: recv_reorder_more ................   Passed    1.86 sec
+<span class="go">      Start 26: recv_close
+</span><span class="gp">25/29 Test #</span>26: recv_close .......................   Passed    0.09 sec
+<span class="go">      Start 27: recv_special
+</span><span class="gp">26/29 Test #</span>27: recv_special .....................   Passed    0.10 sec
+<span class="go">      Start 28: compile with optimization
+</span><span class="gp">27/29 Test #</span>28: compile with optimization ........   Passed   18.11 sec
+<span class="go">      Start 29: byte_stream_speed_test
              ByteStream throughput: 0.63 Gbit/s
-28/29 Test <span class="c">#29: byte_stream_speed_test ...........   Passed    0.71 sec</span>
-      Start 30: reassembler_speed_test
+</span><span class="gp">28/29 Test #</span>29: byte_stream_speed_test ...........   Passed    0.71 sec
+<span class="go">      Start 30: reassembler_speed_test
              Reassembler throughput: 1.33 Gbit/s
-29/29 Test <span class="c">#30: reassembler_speed_test ...........   Passed    1.23 sec</span>
-
+</span><span class="gp">29/29 Test #</span>30: reassembler_speed_test ...........   Passed    1.23 sec
+<span class="go">
 100% tests passed, 0 tests failed out of 29
 
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  47.45 sec
+Total Test time (real) =  47.45 sec
 Built target check2
-</code></pre></div></div>
+</span></code></pre></div></div>
 
 <h2 id="website">Website</h2>
 
@@ -1389,7 +1391,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 	var snippets = document.querySelectorAll('pre');
 	[].forEach.call(snippets, function(snippet) {
 		if (snippet.closest('.copyable') !== null) {
-			snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
 		}
 	});
 	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
