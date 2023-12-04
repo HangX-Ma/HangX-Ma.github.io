@@ -1839,7 +1839,7 @@ html {
 body {
   padding: 0;
   margin: 0;
-  font: 400 1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font: 400 1rem/1.6 -apple-system, Verdana, "Helvetica Neue", "Helvetica", "Arial", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Noto Serif CJK SC", sans-serif;
 }
 body ::-moz-selection {
   background: rgba(252, 77, 80, 0.5);
@@ -1873,7 +1873,7 @@ table,
 }
 
 input, textarea, select, button {
-  font: 400 1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font: 400 1rem/1.6 -apple-system, Verdana, "Helvetica Neue", "Helvetica", "Arial", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Noto Serif CJK SC", sans-serif;
   color: #222;
 }
 
@@ -6303,6 +6303,9 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
   background-color: rgba(84, 199, 236, 0.15);
   color: #3b8ba5 !important;
 }
+.premonition.note a {
+  color: #3b8ba5 !important;
+}
 .premonition.info {
   background-color: #e6f6e6;
   border-left: 5px solid #009400;
@@ -6310,6 +6313,9 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
 }
 .premonition.info code {
   background-color: rgba(0, 164, 0, 0.15);
+  color: #009400 !important;
+}
+.premonition.info a {
   color: #009400 !important;
 }
 .premonition.warning {
@@ -6321,6 +6327,9 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
   background-color: rgba(255, 186, 0, 0.15);
   color: #e6a700 !important;
 }
+.premonition.warning a {
+  color: #e6a700 !important;
+}
 .premonition.error {
   background-color: #fdf7f7;
   border-left: 5px solid #e13238;
@@ -6330,6 +6339,9 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
   background-color: rgba(250, 56, 62, 0.15);
   color: #e13238 !important;
 }
+.premonition.error a {
+  color: #e13238 !important;
+}
 .premonition.citation {
   background-color: #f8f9fa;
   border-left: 5px solid #495057;
@@ -6337,6 +6349,9 @@ a > .item__header.disabled, a > .item__header:disabled, a.item__header.disabled,
 }
 .premonition.citation code {
   background-color: #fdfdfe;
+  color: #495057 !important;
+}
+.premonition.citation a {
   color: #495057 !important;
 }
 .premonition.citation .ref {

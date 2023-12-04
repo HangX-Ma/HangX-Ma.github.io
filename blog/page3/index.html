@@ -1084,9 +1084,26 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 			return trigger.nextElementSibling;
 		}
 	});
-	clipboardSnippets.on('success', function(e) {
-		e.clearSelection();
-		showTooltip(e.trigger, 'Copied!');
+    // ref: https://www.freecodecamp.org/chinese/news/copy-text-to-clipboard-javascript/
+    clipboardSnippets.on('success', function(e) {
+        e.clearSelection();
+        var res = "";
+        var regex_terminal = /^\$\s{2}/g;
+        var split_text = e.text.split('\n');
+        split_text.forEach((element, index) => {
+            // replace heading '$' and space
+            if (regex_terminal.test(element)) {
+                res += element.replace(regex_terminal, '') + "\n";
+            } else {
+                // replace heading number and space
+                res += element.replace(/^([1-9]\s{3}|[1-9][0-9]\s{2}|[1-9][0-9][0-9]\s{1})/g, '') + "\n";
+            }
+        })
+        navigator.clipboard.writeText(res).then(() => {
+            showTooltip(e.trigger, 'Copied!');
+        },() => {
+		    showTooltip(e.trigger, fallbackMessage(e.action));
+        });
 	});
 	clipboardSnippets.on('error', function(e) {
 		showTooltip(e.trigger, fallbackMessage(e.action));

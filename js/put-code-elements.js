@@ -41,7 +41,7 @@ function putDollarSigns(lines) {
   var lineWithSign = ""
   var codeWithSigns = ""
   lines.forEach((element, index) => {
-    if (index !== lines.length - 1) { // if this is not the last line (empty line)
+    if (index !== lines.length - 1 && index !== 0) { // if this is not the last line (empty line)
       lineWithSign = "<span class='ln'>$&ensp;&ensp;</span>" + element
       codeWithSigns += lineWithSign + "\n"
     }
@@ -58,7 +58,7 @@ function putLineNumbers(lines) {
       var number = index + 1
       if (number < 10) {
         numberAndSpace = "<span class='ln'>" + number + "&ensp;&ensp;&ensp;</span>"
-        // if I do not put these &ensp whitespaces, when digit numbers increase, 
+        // if I do not put these &ensp whitespaces, when digit numbers increase,
         // the current code line would be shifted one character.
       }
       else if (number < 100) {

@@ -316,15 +316,15 @@
 <i class="far fa-calendar-alt"></i> <span>May 18, 2023</span>
             </li>
 <li>
-<i class="far fa-edit"></i> <span>Dec 03, 2023</span>
+<i class="far fa-edit"></i> <span>Dec 04, 2023</span>
             </li>
 <li>
 <i class="fas fa-file-word"></i>
-                <span> Total 22292 words </span>
+                <span> Total 25120 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 62 mins </span>
+                <span> About 70 mins </span>
             </li>
 <li>
 <i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s05s18sJekyll-TeXt-config.html">0</span> views</li>
@@ -871,6 +871,89 @@ YOUR_CODE_HERE
 
 <p>文章倒是没咋看， 主要看 PR 的 commit 部分更改了啥自己加上了， 感觉效果还挺不错的。</p>
 
+<details>
+  <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">copy-to-clipboard.js</code> </summary>
+
+  <div class="language-js highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// This script is built on clipboard.js, cf: https://clipboardjs.com/</span>
+    <span class="c1">// 1. find all code blocks defined under snippet class</span>
+    <span class="kd">var</span> <span class="nx">snippets</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelectorAll</span><span class="p">(</span><span class="dl">'</span><span class="s1">pre</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">[].</span><span class="nx">forEach</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">snippets</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">snippet</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="nx">snippet</span><span class="p">.</span><span class="nf">closest</span><span class="p">(</span><span class="dl">'</span><span class="s1">.copyable</span><span class="dl">'</span><span class="p">)</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">snippet</span><span class="p">.</span><span class="nx">firstChild</span><span class="p">.</span><span class="nf">insertAdjacentHTML</span><span class="p">(</span><span class="dl">'</span><span class="s1">beforebegin</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">&lt;button class="btn" data-clipboard-snippet&gt;&lt;i class="far fa-copy"&gt;&lt;/i&gt;&lt;/button&gt;</span><span class="dl">'</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+    <span class="kd">var</span> <span class="nx">clipboardSnippets</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClipboardJS</span><span class="p">(</span><span class="dl">'</span><span class="s1">[data-clipboard-snippet]</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">target</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">trigger</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">trigger</span><span class="p">.</span><span class="nx">nextElementSibling</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+    <span class="c1">// ref: https://www.freecodecamp.org/chinese/news/copy-text-to-clipboard-javascript/</span>
+    <span class="nx">clipboardSnippets</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">success</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nf">clearSelection</span><span class="p">();</span>
+        <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="dl">""</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">regex_terminal</span> <span class="o">=</span> <span class="sr">/^</span><span class="se">\$\s{2}</span><span class="sr">/g</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">split_text</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">);</span>
+        <span class="nx">split_text</span><span class="p">.</span><span class="nf">forEach</span><span class="p">((</span><span class="nx">element</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="c1">// replace heading '$' and space</span>
+            <span class="k">if </span><span class="p">(</span><span class="nx">regex_terminal</span><span class="p">.</span><span class="nf">test</span><span class="p">(</span><span class="nx">element</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">res</span> <span class="o">+=</span> <span class="nx">element</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="nx">regex_terminal</span><span class="p">,</span> <span class="dl">''</span><span class="p">)</span> <span class="o">+</span> <span class="dl">"</span><span class="se">\n</span><span class="dl">"</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="c1">// replace heading number and space</span>
+                <span class="nx">res</span> <span class="o">+=</span> <span class="nx">element</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sr">/^</span><span class="se">([</span><span class="sr">1-9</span><span class="se">]\s{3}</span><span class="sr">|</span><span class="se">[</span><span class="sr">1-9</span><span class="se">][</span><span class="sr">0-9</span><span class="se">]\s{2}</span><span class="sr">|</span><span class="se">[</span><span class="sr">1-9</span><span class="se">][</span><span class="sr">0-9</span><span class="se">][</span><span class="sr">0-9</span><span class="se">]\s{1})</span><span class="sr">/g</span><span class="p">,</span> <span class="dl">''</span><span class="p">)</span> <span class="o">+</span> <span class="dl">"</span><span class="se">\n</span><span class="dl">"</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="nb">navigator</span><span class="p">.</span><span class="nx">clipboard</span><span class="p">.</span><span class="nf">writeText</span><span class="p">(</span><span class="nx">res</span><span class="p">).</span><span class="nf">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nf">showTooltip</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">trigger</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Copied!</span><span class="dl">'</span><span class="p">);</span>
+        <span class="p">},()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nf">showTooltip</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">trigger</span><span class="p">,</span> <span class="nf">fallbackMessage</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">action</span><span class="p">));</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">clipboardSnippets</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">showTooltip</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">trigger</span><span class="p">,</span> <span class="nf">fallbackMessage</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">action</span><span class="p">));</span>
+    <span class="p">});</span>
+
+    <span class="c1">// 2. add event listener for all created copy button</span>
+    <span class="kd">var</span> <span class="nx">btns</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelectorAll</span><span class="p">(</span><span class="dl">'</span><span class="s1">.btn</span><span class="dl">'</span><span class="p">);</span>
+    <span class="k">for </span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">btns</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">btns</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">mouseleave</span><span class="dl">'</span><span class="p">,</span> <span class="nx">clearTooltip</span><span class="p">);</span>
+        <span class="nx">btns</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">blur</span><span class="dl">'</span><span class="p">,</span> <span class="nx">clearTooltip</span><span class="p">);</span>
+        <span class="nx">btns</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">mouseenter</span><span class="dl">'</span><span class="p">,</span> <span class="nx">showToolhint</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nf">clearTooltip</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">class</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">btn</span><span class="dl">'</span><span class="p">);</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nf">removeAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">aria-label</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nf">showTooltip</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">elem</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">class</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">btn tooltipped tooltipped-s</span><span class="dl">'</span><span class="p">);</span>
+        <span class="nx">elem</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">aria-label</span><span class="dl">'</span><span class="p">,</span> <span class="nx">msg</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nf">showToolhint</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">class</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">btn tooltipped tooltipped-s</span><span class="dl">'</span><span class="p">);</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">aria-label</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">copy to clipboard</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nf">fallbackMessage</span><span class="p">(</span><span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">actionMsg</span> <span class="o">=</span> <span class="dl">''</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">actionKey</span> <span class="o">=</span> <span class="p">(</span><span class="nx">action</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">cut</span><span class="dl">'</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">C</span><span class="dl">'</span><span class="p">);</span>
+        <span class="k">if </span><span class="p">(</span><span class="sr">/iPhone|iPad/i</span><span class="p">.</span><span class="nf">test</span><span class="p">(</span><span class="nb">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">actionMsg</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">No support :(</span><span class="dl">'</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if </span><span class="p">(</span><span class="sr">/Mac/i</span><span class="p">.</span><span class="nf">test</span><span class="p">(</span><span class="nb">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">actionMsg</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Press ⌘-</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">actionKey</span> <span class="o">+</span> <span class="dl">'</span><span class="s1"> to </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">action</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">actionMsg</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Press Ctrl-</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">actionKey</span> <span class="o">+</span> <span class="dl">'</span><span class="s1"> to </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">action</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">actionMsg</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">})();</span>
+</code></pre></div>  </div>
+
+</details>
+
 <blockquote>
   <p><a href="https://be-my-only.xyz/blog/TeXt-copy-to-clipboard/">为博客添加代码块一键复制功能 - Yuze Zou</a><br>
 <a href="https://github.com/kitian616/jekyll-TeXt-theme/pull/218/commits">feat: copy to clipboard for code blocks #218</a></p>
@@ -921,16 +1004,16 @@ YOUR_CODE_HERE
 <blockquote>
   <p><a href="https://github.com/jekyll/jekyll/issues/4619">Enabling line numbers with rouge #4619</a><br>
 <a href="https://cotes.page/posts/jekyll-code-snippet/">Jekyll 代码块展示</a></p>
-
 </blockquote>
-<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>(2023-12-03 更新)： 感觉原版的 Tomorrow 主题的 syntax highlight 不咋好看， 自己替换成了 OneDark(可参考<a href="https://gist.github.com/HangX-Ma/20d155a196efacf565e86467094aba1e">HangX-Ma/onedark.scss</a>) 但不知咋滴渲染还是不正常， 应该是 rouge 本身的问题。 后来又折腾了一波 <strong>Gungnir</strong> 的 <code class="language-plaintext highlighter-rouge">Highlight.js</code> 配置， 效果也不尽如人意。 如果有小伙伴喜欢 <strong>Gungnir</strong> 的主题可以参考这个 <a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a>。</p>
+
+<p>偶然间发现了一个 <a href="https://github.com/HangX-Ma/jekyll-code-style">jekyll-code-style</a> 的仓库， 作者用 js 实现了对行号的加载， 对 <code class="language-plaintext highlighter-rouge">Terminal</code> 类型的代码则在前添加 <code class="language-plaintext highlighter-rouge">~$</code> 符号。 对于前端小白而言， 这几个功能真的是直击我心。 如此一来， 就不用管 Jekyll 原生的 highlight 语法导致无法正常缩进代码块的问题， 使用的时候也按照原来的 Markdown 的代码块风格， 减少了使用者的负担。 更重要的是， 这与我之前添加的代码一键复制的功能不冲突， 这是 Jekyll 的代码渲染所做不到的。</p>
+
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Conflict (2023-12-03) </div> </div> <div class="content"> <p>而后测试发现， 如果使用这套脚本， 虽然在样式上能够表现得比较完美， 手动复制时也不会选中行号， 但使用 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 进行一键复制则会出现行号被拷贝的情况。 究其原因， 这个 js 脚本是重构了文本内容， 在文本前添加了特殊的字符串。 我尝试过自己重构一个类似 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 的脚本， 但是个人功力不足， 总有一些不合心意的地方， 而这个打包好的脚本也没有提供更改结果字符串的接口。 因而， 我参考了 <a href="https://blog.csdn.net/qq_16992475/article/details/129978432">CSDN</a> 和 <a href="https://www.bilibili.com/video/BV1M94y1o7Cz/?vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">Bilibili - 给你的网页代码框添加一个行号吧！！！</a> 的写法， 利用 <code class="language-plaintext highlighter-rouge">ul</code> 和 <code class="language-plaintext highlighter-rouge">li</code> 元素实现了行号， 但由于没有利用更为合适的 table， 行对齐显得极为困难， 调参花费了不少时间， 并且容易在缩放时产生问题。</p>
 
 
 
  </div> </div>
-<p>偶然间发现了一个 <a href="https://github.com/HangX-Ma/jekyll-code-style">jekyll-code-style</a> 的仓库， 作者用 js 实现了对行号的加载， 对 <code class="language-plaintext highlighter-rouge">Terminal</code> 类型的代码则在前添加 <code class="language-plaintext highlighter-rouge">~$</code> 符号。 对于前端小白而言， 这几个功能真的是直击我心。 如此一来， 就不用管 Jekyll 原生的 highlight 语法导致无法正常缩进代码块的问题， 使用的时候也按照原来的 Markdown 的代码块风格， 减少了使用者的负担。 更重要的是， 这与我之前添加的代码一键复制的功能不冲突， 这是 Jekyll 的代码渲染所做不到的。</p>
-
-<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Conflict </div> </div> <div class="content"> <p>而后测试发现， 如果使用这套脚本， 虽然在样式上能够表现得比较完美， 手动复制时也不会选中行号， 但使用 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 进行一键复制则会出现行号被拷贝的情况。 究其原因， 这个 js 脚本是重构了文本内容， 在文本前添加了特殊的字符串。 我尝试过自己重构一个类似 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 的脚本， 但是个人功力不足， 总有一些不合心意的地方， 而这个打包好的脚本也没有提供更改结果字符串的接口。 因而， 我参考了 <a href="https://blog.csdn.net/qq_16992475/article/details/129978432">CSDN</a> 和 <a href="https://www.bilibili.com/video/BV1M94y1o7Cz/?vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">Bilibili - 给你的网页代码框添加一个行号吧！！！</a> 的写法， 利用 <code class="language-plaintext highlighter-rouge">ul</code> 和 <code class="language-plaintext highlighter-rouge">li</code> 元素实现了行号， 但由于没有利用更为合适的 table， 行对齐显得极为困难， 调参花费了不少时间， 并且容易在缩放时产生问题。 建议后续直接转用 <strong>Highlight.js</strong> （我目前打算弃用一键复制功能）。</p>
+<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Solver (2023-12-04) </div> </div> <div class="content"> <p>经过尝试， 也找到了解决思路， 我发现 <code class="language-plaintext highlighter-rouge">clipboard.js</code> 会在最后暴露一个 <code class="language-plaintext highlighter-rouge">Event</code> 接口， <code class="language-plaintext highlighter-rouge">Event.text</code> 存储了拷贝的结果。 既然有这个结果， 就能够通过正则表达式匹配去删除之前添加在每行开头的数字或美元符号以及多余的空格了。 于是我更改了 <code class="language-plaintext highlighter-rouge">copy-to-clipboard.js</code> 文件中的一些内容， 使得目前的拷贝支持 1000 行以下的数据。 虽然这种办法需要重写剪贴板， 但好在博客的中的代码量并没有太多， 而且重写剪贴板有一个意外之喜， 这番更改将原来复制增加的 Copyright 内容给去掉了， 这样拷贝代码的时候就能直接使用了！ 相关代码可以看前面的 <a href="#7-%E4%B8%80%E9%94%AE%E4%BB%A3%E7%A0%81%E5%A4%8D%E5%88%B6">7.一键代码复制</a>。</p>
 
 
 
@@ -1053,27 +1136,27 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
 
 <p>对于这套 Jekyll 主题自带的诸如 <code class="language-plaintext highlighter-rouge">{:.info}</code>， <code class="language-plaintext highlighter-rouge">{:.error}</code> 等改变文字的 background 以及 border color 的形式， 我一直想找一个替代品， 偶然间发现了 <a href="https://lisz.me/tech/new-theme-h2o-ac.html">H2O-ac</a> 这套主题， 其中介绍了 <a href="https://github.com/lazee/premonition">lazee/premonition</a> 这个库， 能够通过简易的设置改变原有的 Quote 的形式， 实现多用途且兼具美观的目的。</p>
 
-<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>The body of the note goes here. Premonition allows you to write any Markdown inside the block.</p>
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>The body of the note goes here. Premonition allows you to write any <code class="language-plaintext highlighter-rouge">Markdown</code> inside the block. [<a href="#10-%E6%8F%90%E7%A4%BA%E6%A1%86%E4%BC%98%E5%8C%96">Link</a>]</p>
 
 
 
  </div> </div>
-<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Info </div> </div> <div class="content"> <p>The body of the info goes here. Premonition allows you to write any Markdown inside the block.</p>
+<div class="premonition info"> <div class="header"> <i class="fas fa-exclamation-circle" style="color: #4dbf4d;"></i> <div class="title"> Info </div> </div> <div class="content"> <p>The body of the info goes here. Premonition allows you to write any <code class="language-plaintext highlighter-rouge">Markdown</code> inside the block. [<a href="#10-%E6%8F%90%E7%A4%BA%E6%A1%86%E4%BC%98%E5%8C%96">Link</a>]</p>
 
 
 
  </div> </div>
-<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Warning </div> </div> <div class="content"> <p>The body of the warning goes here. Premonition allows you to write any Markdown inside the block.</p>
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Warning </div> </div> <div class="content"> <p>The body of the warning goes here. Premonition allows you to write any <code class="language-plaintext highlighter-rouge">Markdown</code> inside the block. [<a href="#10-%E6%8F%90%E7%A4%BA%E6%A1%86%E4%BC%98%E5%8C%96">Link</a>]</p>
 
 
 
  </div> </div>
-<div class="premonition error"> <div class="header"> <i class="fas fa-times-circle" style="color: #fb7478;"></i> <div class="title"> Error </div> </div> <div class="content"> <p>The body of the error goes here. Premonition allows you to write any Markdown inside the block.</p>
+<div class="premonition error"> <div class="header"> <i class="fas fa-times-circle" style="color: #fb7478;"></i> <div class="title"> Error </div> </div> <div class="content"> <p>The body of the error goes here. Premonition allows you to write any <code class="language-plaintext highlighter-rouge">Markdown</code> inside the block. [<a href="#10-%E6%8F%90%E7%A4%BA%E6%A1%86%E4%BC%98%E5%8C%96">Link</a>]</p>
 
 
 
  </div> </div>
-<div class="premonition citation"> <div class="header"> <i class="fas fa-quote-left" style="color: #acb1b9;"></i> </div> <div class="content"> <p>Look, this is a <code class="language-plaintext highlighter-rouge">Citation</code> style.</p>
+<div class="premonition citation"> <div class="header"> <i class="fas fa-quote-left" style="color: #acb1b9;"></i> </div> <div class="content"> <p>Look, this is a <code class="language-plaintext highlighter-rouge">Citation</code> style. [<a href="#10-%E6%8F%90%E7%A4%BA%E6%A1%86%E4%BC%98%E5%8C%96">Link</a>]</p>
 
 
 
@@ -1148,6 +1231,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
             <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-note-code-background</span><span class="p">;</span>
             <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-note-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="nt">a</span><span class="p">{</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-note-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">&amp;</span><span class="nc">.info</span><span class="p">{</span>
         <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-info-contrast-background</span><span class="p">;</span>
@@ -1155,6 +1241,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
         <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-info-dark</span><span class="p">;</span>
         <span class="nt">code</span><span class="p">{</span>
             <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-info-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-info-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nt">a</span><span class="p">{</span>
             <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-info-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -1166,6 +1255,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
             <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-warning-code-background</span><span class="p">;</span>
             <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-warning-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="nt">a</span><span class="p">{</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-warning-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">&amp;</span><span class="nc">.error</span><span class="p">{</span>
         <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-error-contrast-background</span><span class="p">;</span>
@@ -1175,6 +1267,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
             <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-error-code-background</span><span class="p">;</span>
             <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-error-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="nt">a</span><span class="p">{</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-error-dark</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">&amp;</span><span class="nc">.citation</span><span class="p">{</span>
         <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-citation-contrast-background</span><span class="p">;</span>
@@ -1182,6 +1277,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
         <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-citation-darkest</span><span class="p">;</span>
         <span class="nt">code</span><span class="p">{</span>
             <span class="nl">background-color</span><span class="p">:</span> <span class="nv">$color-citation-code-background</span><span class="p">;</span>
+            <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-citation-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nt">a</span><span class="p">{</span>
             <span class="nl">color</span><span class="p">:</span> <span class="nv">$color-citation-darkest</span><span class="o">!</span><span class="n">important</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="nc">.ref</span><span class="p">{</span>
@@ -1291,6 +1389,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
     </details>
   </li>
 </ul>
+
+<h3 id="11-onedark-主题配置">11. OneDark 主题配置</h3>
+
+<p>感觉原版的 Tomorrow 主题的 syntax highlight 不咋好看， 自己替换成了 OneDark(可参考<a href="https://gist.github.com/HangX-Ma/20d155a196efacf565e86467094aba1e">HangX-Ma/onedark.scss</a>) 但不知咋滴部分渲染还是不正常， 应该是 rouge 本身的问题。 后来又折腾了一波 <strong>Gungnir</strong> 的 <code class="language-plaintext highlighter-rouge">Highlight.js</code> 配置， 效果也不尽如人意。 如果有小伙伴喜欢 <strong>Gungnir</strong> 的主题可以参考这个 <a href="https://github.com/Renovamen/jekyll-theme-gungnir">jekyll-theme-gungnir</a>。</p>
+
+<blockquote>
+  <p>OneDark 主题是参考 <a href="https://github.com/bryanchapel/jekyllHighlighterAtomOneDarkTheme">bryanchapel/jekyllHighlighterAtomOneDarkTheme</a> 做的更改， 我调成了 <strong>Vivid</strong> 配色， 跟 VSCode 中使用的更接近。</p>
+</blockquote>
 </div>
 <section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
@@ -2194,9 +2300,26 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 			return trigger.nextElementSibling;
 		}
 	});
-	clipboardSnippets.on('success', function(e) {
-		e.clearSelection();
-		showTooltip(e.trigger, 'Copied!');
+    // ref: https://www.freecodecamp.org/chinese/news/copy-text-to-clipboard-javascript/
+    clipboardSnippets.on('success', function(e) {
+        e.clearSelection();
+        var res = "";
+        var regex_terminal = /^\$\s{2}/g;
+        var split_text = e.text.split('\n');
+        split_text.forEach((element, index) => {
+            // replace heading '$' and space
+            if (regex_terminal.test(element)) {
+                res += element.replace(regex_terminal, '') + "\n";
+            } else {
+                // replace heading number and space
+                res += element.replace(/^([1-9]\s{3}|[1-9][0-9]\s{2}|[1-9][0-9][0-9]\s{1})/g, '') + "\n";
+            }
+        })
+        navigator.clipboard.writeText(res).then(() => {
+            showTooltip(e.trigger, 'Copied!');
+        },() => {
+		    showTooltip(e.trigger, fallbackMessage(e.action));
+        });
 	});
 	clipboardSnippets.on('error', function(e) {
 		showTooltip(e.trigger, fallbackMessage(e.action));
@@ -2253,7 +2376,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
         // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
         // data: 一个 DOMString表示要添加到 drag object的数据。
-        if (text.length > 100) {
+        if (text.length > 20) {
             var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
             + '\nEmail: m-contour@qq.com'
             + '\nArticle Address: ' + window.location.hostname + window.location.pathname
