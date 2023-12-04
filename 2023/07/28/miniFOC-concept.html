@@ -369,7 +369,7 @@
 
 <p>可参阅如下代码， 例如我们将机械角度 360° 等分为 6 份， 也就是设定每 60° 会有一个吸引点， 当前的电机转轴机械角度为 <code class="language-plaintext highlighter-rouge">shaft_angle</code>， 那么与 <code class="language-plaintext highlighter-rouge">attract_angle</code> 之间的角度误差为 <code class="language-plaintext highlighter-rouge">attract_angle - shaft_angle</code>， 就可以将该误差项作为输入给到力矩控制器， 力矩控制器会进行比例调整， 并对输出的电压或电流进行限幅。 每个控制周期我们都需要重新确认邻近的棘轮引力点以保证棘轮感触的位置的正确性。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// attractor angle variable</span>
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// attractor angle variable</span>
 <span class="k">static</span> <span class="kt">float</span> <span class="n">attract_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">;</span>
 <span class="c1">// distance between attraction points</span>
 <span class="k">static</span> <span class="kt">float</span> <span class="n">attractor_distance</span> <span class="o">=</span> <span class="mi">60</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span> <span class="o">/</span> <span class="mi">180</span><span class="p">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">_PI</span><span class="p">;</span> <span class="c1">// dimp each 45 degrees</span>

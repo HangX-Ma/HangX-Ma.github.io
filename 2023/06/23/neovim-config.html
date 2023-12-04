@@ -313,14 +313,14 @@
 
 <p>使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim release build</a> 的方式， 省心省力。</p>
 
-<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
-tar -xvf nvim-linux64.tar.gz
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+<span class="nb">tar</span> <span class="nt">-xvf</span> nvim-linux64.tar.gz
 vim ~/.bashrc
-</span><span class="gp">#</span><span class="w"> </span>.bashrc
-<span class="gp">export PATH=$</span>HOME/nvim-linux64/bin:<span class="nv">$PATH</span>
-<span class="gp">#</span><span class="w"> </span>back to cli
-<span class="go">source ~/.bashrc
-</span></code></pre></div></div>
+<span class="c"># .bashrc</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/nvim-linux64/bin:<span class="nv">$PATH</span>
+<span class="c"># back to cli</span>
+<span class="nb">source</span> ~/.bashrc
+</code></pre></div></div>
 
 <h2 id="1-vim-选项配置">1. vim 选项配置</h2>
 
@@ -337,9 +337,9 @@ vim ~/.bashrc
 
 <p>参照 Packer 的 repo 的配置内容快速安装 <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>。</p>
 
-<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--depth</span> 1 https://github.com/wbthomason/packer.nvim<span class="se">\</span>
  ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-</span></code></pre></div></div>
+</code></pre></div></div>
 
 <p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugins.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
 

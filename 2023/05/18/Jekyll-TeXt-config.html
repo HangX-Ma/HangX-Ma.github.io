@@ -320,7 +320,7 @@
             </li>
 <li>
 <i class="fas fa-file-word"></i>
-                <span> Total 25120 words </span>
+                <span> Total 25125 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
@@ -435,7 +435,7 @@
   <p>后来想想对于 Archive 和 About 这两个界面而言也是同样的道理， 都应该能用 <code class="language-plaintext highlighter-rouge">pageview: false</code> 将 pageview 字样去除。 实践证明确实可行！</p>
 </blockquote>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--  article-info.html --&gt;</span>
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--  article-info.html --&gt;</span>
 {%- if page.layout != "404" -%}
     {%- if page.url != '/about.html' and page.url != '/archive.html' -%}
         <span class="nt">&lt;li&gt;&lt;i</span> <span class="na">class=</span><span class="s">"far fa-eye"</span><span class="nt">&gt;&lt;/i&gt;</span> <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"js-pageview"</span> <span class="na">data-page-key=</span><span class="s">"{{ include.article.url | replace: '/', 's' }}"</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;</span> {{ _locale_views }}<span class="nt">&lt;/li&gt;</span>
@@ -449,8 +449,11 @@
 
 <p>从博客园换成 Git Pages 的另外一个原因是评论系统的便利性， Github 账号登陆省去了评论需要重新创建账号的麻烦。 尝试过使用 valine 作为评论系统， 虽然可以和 leancloud 公用 key， 但界面有些复杂不简洁不如 gitalk 赏心悦目。</p>
 
-<p class="info">gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-plaintext highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>gitalk 在 2023-05 时的最新版本是 1.7.2， 使用前记得在 <code class="language-plaintext highlighter-rouge">_include/variable.yml</code> 中更新 bootcdn 地址。</p>
 
+
+
+ </div> </div>
 <h3 id="1-让-gitalk-摆脱-pagekey">1. 让 gitalk 摆脱 page.key</h3>
 
 <p>这里就不能直接改成把 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中的 <code class="language-plaintext highlighter-rouge">page.key</code> 直接改成 <code class="language-plaintext highlighter-rouge">page.url</code>， 不然在 Home 和 About 这两个界面也会出现评论框， 我改成了 <code class="language-plaintext highlighter-rouge">page.id</code> 就神奇的解决了问题。</p>
@@ -459,7 +462,7 @@
 
 <h3 id="2-error-request-failed-with-status-code-403">2. Error: Request failed with status code 403</h3>
 
-<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-plaintext highlighter-rouge">proxy</code> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-plaintext highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-plaintext highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-plaintext highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <a href="https://xxxx.netlify.app">https://xxxx.netlify.app</a> 的 site 地址， 如果在网页中输入 <a href="https://xxxx.netlify.app/github_access_token">https://xxxx.netlify.app/github_access_token</a> 会出现 <code class="language-plaintext highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-plaintext highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <em>github_access_token</em> 也是可以的。</p>
+<p>这个问题就是 gitalk 被墙了， 加一个 <code class="language-plaintext highlighter-rouge">proxy</code> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 就行， 但也要记得同步更新 <code class="language-plaintext highlighter-rouge">gitalk.html</code> 中的配置。 <code class="language-plaintext highlighter-rouge">proxy</code> 的值如何获取我找到了 <a href="https://prohibitorum.top/7cc2c97a15b4.html">解决 Gitalk 无法获取 Github Token 问题</a> 文章， <a href="https://github.com/Dedicatus546/cors-server">fork</a> 这个作者的仓库然后按照他文中给的步骤注册 netlify账号并编译部署 <code class="language-plaintext highlighter-rouge">cors-server</code> 仓库， 它会生成一个 <strong>[https://xxxx.netlify.app]</strong> 的 site 地址， 如果在网页中输入 <strong>[https://xxxx.netlify.app/github_access_token]</strong> 会出现 <code class="language-plaintext highlighter-rouge">a cors proxy by netlify!</code> 那就是成功了。 <code class="language-plaintext highlighter-rouge">proxy</code> 部分用这个地址即可。 懒的话直接拿这个作者已经建好的 <code class="language-plaintext highlighter-rouge">github_access_token</code> 也是可以的。</p>
 
 <blockquote>
   <p><strong>vercel</strong>: <a href="https://vercel.prohibitorum.top/github_access_token">https://vercel.prohibitorum.top/github_access_token</a><br>
@@ -470,14 +473,14 @@
 
 <p>在 gitalk repository 的 issue 界面就可以找到这条问题的处理办法， <a href="https://github.com/gitalk/gitalk/issues/114">Error: u.concat(…).join is not a function! #114</a> 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 配置界面给 gitalk 加上如下代码。</p>
 
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gitalk</span><span class="pi">:</span>
+<div class="language-yml copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gitalk</span><span class="pi">:</span>
   <span class="na">labels</span><span class="pi">:</span>
     <span class="pi">-</span> <span class="s">gitalk</span>
 </code></pre></div></div>
 
 <p>另外在 <code class="language-plaintext highlighter-rouge">_includes/comments-providers/gitalk.html</code> 中进行修改。</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const gitalk = new Gitalk({
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const gitalk = new Gitalk({
     // ...
     labels: '{{ theme.gitalk.labels }}'.split(',').filter(l =&gt; l),
     //...
@@ -535,7 +538,7 @@ gitalk.render('gitalk-container');
     <details>
       <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">commit_urls.py</code> </summary>
 
-      <div class="language-python highlighter-rouge">
+      <div class="language-python copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  <span class="kn">import</span> <span class="n">os</span>
   <span class="kn">import</span> <span class="n">subprocess</span>
   <span class="kn">import</span> <span class="n">requests</span>
@@ -619,14 +622,14 @@ gitalk.render('gitalk-container');
 
     <p>如果成功则会有类似如下的打印</p>
 
-    <div class="language-markdown highlighter-rouge">
-<div class="highlight"><pre class="highlight"><code>  Submit newest URLs to Baidu and Bing
+    <div class="language-terminal highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="go">  Submit newest URLs to Baidu and Bing
   Switched to branch 'master'
   Your branch is up to date with 'origin/master'.
   Current submitted URLs: ['https://hangx-ma.github.io/2023/05/18/Jekyll-TeXt-config']
   Bing's response:  b'{"d":null}'
   Baidu's response:  b'{"remain":99,"success":1}'
-</code></pre></div>    </div>
+</span></code></pre></div>    </div>
   </li>
 </ul>
 
@@ -637,7 +640,7 @@ gitalk.render('gitalk-container');
 <details>
   <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">copyright.js</code> </summary>
 
-  <div class="language-javascript highlighter-rouge">
+  <div class="language-javascript copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">setClipboardText</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
     <span class="c1">// clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容</span>
     <span class="kd">let</span> <span class="nx">clipboardData</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">clipboardData</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">clipboardData</span><span class="p">;</span>
@@ -699,9 +702,8 @@ gitalk.render('gitalk-container');
   <li>
     <p>将 <code class="language-plaintext highlighter-rouge">copyright.js</code> 监听 javascript 文件在 head 中引用。</p>
 
-    <div class="language-html highlighter-rouge">
+    <div class="language-html copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- _layouts/page.html 底部增添 copyright.js --&gt;</span>
-  ...
   {%- if page.copyright -%}
   <span class="nt">&lt;script&gt;</span>
   <span class="p">{</span><span class="o">%-</span> <span class="nx">include</span> <span class="nx">custom</span><span class="o">/</span><span class="nx">copyright</span><span class="p">.</span><span class="nx">js</span> <span class="o">-%</span><span class="p">}</span>
@@ -740,7 +742,7 @@ gitalk.render('gitalk-container');
 
 <h3 id="2-代码块折叠">2. 代码块折叠</h3>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{::options parse_block_html="true" /}
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{::options parse_block_html="true" /}
 
 <span class="nt">&lt;details&gt;&lt;summary</span> <span class="na">markdown=</span><span class="s">"span"</span><span class="nt">&gt;</span> `commit_urls.py` <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"fas fa-file-code"</span> <span class="na">style=</span><span class="s">"color: #ff4040;"</span><span class="nt">&gt;&lt;/i&gt;&lt;/summary&gt;</span>
 
@@ -761,7 +763,7 @@ YOUR_CODE_HERE
 
 <p>给网页增加返回顶部的功能能提供阅读的便利， 尝试过很多自己添加 js 代码的方式都没成功， 或者是中间没有过渡动画。 Github 上的一个开源的库倒是非常好用， 配置也很简单。 我在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 的 body 部分增加了配置代码， 毕竟所有的页面都是继承自 base， 这样这个 Back-To-Top 按钮就能全局可见了。</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- _layouts/base.html --&gt;</span>
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- _layouts/base.html --&gt;</span>
 <span class="nt">&lt;body&gt;</span>
     ...
     <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
@@ -789,7 +791,7 @@ YOUR_CODE_HERE
 
 <p>用 “不蒜子”， 非常简易！ 只需要在 <code class="language-plaintext highlighter-rouge">_includes/footer.html</code> 中加入如下代码， 就能获得和咱一样的显示效果了。</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"site-info mt-2"</span><span class="nt">&gt;</span>
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"site-info mt-2"</span><span class="nt">&gt;</span>
       ...
       <span class="nt">&lt;div</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>
         <span class="nt">&lt;script </span><span class="na">async</span> <span class="na">src=</span><span class="s">"//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
@@ -807,7 +809,7 @@ YOUR_CODE_HERE
 
 <p>个性化 Tab 标签。 相信很多人都看过 Tab 标签显示突然崩溃， 然后点回去又是好的。 我创建了 <code class="language-plaintext highlighter-rouge">_include/custom/funny-title.js</code> 文件， 并在 <code class="language-plaintext highlighter-rouge">_layouts/base.html</code> 中以 script 的形式引用了该文件。 这样我的网站的 Tab 也能跟读者开个小小的玩笑了 <img class="emoji" title=":stuck_out_tongue_closed_eyes:" alt=":stuck_out_tongue_closed_eyes:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f61d.png" height="20" width="20">。</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// funny-title.js</span>
+<div class="language-javascript copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// funny-title.js</span>
 <span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">OriginTitle</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">title</span><span class="p">;</span>
     <span class="kd">var</span> <span class="nx">titleTime</span><span class="p">;</span>
@@ -836,14 +838,14 @@ YOUR_CODE_HERE
   <li>
     <p>增加 <code class="language-plaintext highlighter-rouge">_show_last_modified</code> 标识以判断是否显示最后修改日期。</p>
 
-    <div class="language-html highlighter-rouge">
+    <div class="language-html copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  {%- assign _show_last_modified = include.article.last_modified -%}
 </code></pre></div>    </div>
   </li>
   <li>
     <p>增加新的文章信息。</p>
 
-    <div class="language-html highlighter-rouge">
+    <div class="language-html copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code>  {%- if _show_author or _show_date or _pageview or _show_last_modified -%}
     {%- if _show_last_modified -%}
       <span class="nt">&lt;li&gt;</span>
@@ -874,7 +876,7 @@ YOUR_CODE_HERE
 <details>
   <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">copy-to-clipboard.js</code> </summary>
 
-  <div class="language-js highlighter-rouge">
+  <div class="language-js copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// This script is built on clipboard.js, cf: https://clipboardjs.com/</span>
     <span class="c1">// 1. find all code blocks defined under snippet class</span>
@@ -965,7 +967,7 @@ YOUR_CODE_HERE
 
 <p>在 <code class="language-plaintext highlighter-rouge">_sass/custom.scss</code> 中加入如下代码即可， 但一般不建议使用， 代码多了容易臃肿混乱。</p>
 
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* auto wrap code */</span>
+<div class="language-scss copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* auto wrap code */</span>
 <span class="nt">pre</span> <span class="p">{</span>
     <span class="nl">white-space</span><span class="p">:</span> <span class="n">pre-wrap</span><span class="p">;</span>
     <span class="nl">word-wrap</span><span class="p">:</span> <span class="n">break-word</span><span class="p">;</span>
@@ -980,7 +982,7 @@ YOUR_CODE_HERE
 
 <p>按这种方法可以对常规的 Markdown 的代码段自动显示行号， 在 <code class="language-plaintext highlighter-rouge">_config.yml</code> 中加入以下代码即可。 但这种方式会在 code 外层套上一个 table 的框， 不美观。</p>
 
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># More › http://kramdown.gettalong.org/quickref.html</span>
+<div class="language-yml copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># More › http://kramdown.gettalong.org/quickref.html</span>
 <span class="c1"># Options › http://kramdown.gettalong.org/options.html</span>
 <span class="na">kramdown</span><span class="pi">:</span>
   <span class="na">input</span><span class="pi">:</span>          <span class="s">GFM</span>
@@ -1020,7 +1022,7 @@ YOUR_CODE_HERE
  </div> </div>
 <p>相关的代码就参照仓库的指导， 把 <code class="language-plaintext highlighter-rouge">put-code-elements.js</code> 脚本文件放在 <code class="language-plaintext highlighter-rouge">&lt;head&gt;&lt;/head&gt;</code> 块之间：</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;head&gt;</span>
+<div class="language-html copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;head&gt;</span>
     <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">'{{ "/js/put-code-elements.js" }}'</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;/head&gt;</span>
 </code></pre></div></div>
@@ -1031,7 +1033,7 @@ YOUR_CODE_HERE
   <li>
     <p><code class="language-plaintext highlighter-rouge">put-code-elements.js</code> 中需要添加对 <code class="language-plaintext highlighter-rouge">.copyable</code> class 的筛选， 增加拷贝按钮之后 children 的起始位置需要向后延一个， copy button 占用了一个位置。</p>
 
-    <div class="language-js highlighter-rouge">
+    <div class="language-js copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="nb">window</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">DOMContentLoaded</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">codeBlocks</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelectorAll</span><span class="p">(</span><span class="dl">"</span><span class="s2">pre.highlight</span><span class="dl">"</span><span class="p">)</span>
   <span class="nx">codeBlocks</span><span class="p">.</span><span class="nf">forEach</span><span class="p">((</span><span class="nx">element</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
@@ -1074,7 +1076,7 @@ YOUR_CODE_HERE
 
 <p>使用 <code class="language-plaintext highlighter-rouge">::webkit-scrollbar</code> 伪元素选择器，不过这个选择器只在 webkit 核心的浏览器中有效，例如 Chrome、新 Edge、Safari 等。<code class="language-plaintext highlighter-rouge">::web-kit-scrollbar</code> 可以直接选择滚动条元素，把它的 display 属性设置为 none 就可以隐藏滚动条了：</p>
 
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// custom.scss</span>
+<div class="language-scss copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// custom.scss</span>
 <span class="nd">::-webkit-scrollbar</span> <span class="p">{</span>
   <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
 <span class="p">}</span>
@@ -1088,7 +1090,6 @@ YOUR_CODE_HERE
   <span class="nl">width</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
   <span class="nl">height</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
 <span class="p">}</span>
-
 </code></pre></div></div>
 
 <blockquote>
@@ -1099,7 +1100,7 @@ YOUR_CODE_HERE
 
 <p>按照上述设置可以取消滚动条的显示， 但对用户的使用产生了一定的障碍， 很可能用户不会注意到滚动条的存在而遗漏更多的被隐藏的内容。 因而可以对代码块部分的滚动条进行定制化， hover 和 normal 两种情况显示不同的颜色， 并让底色与代码块保持一致。</p>
 
-<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* scroll bar */</span>
+<div class="language-scss copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* scroll bar */</span>
 <span class="nt">pre</span> <span class="p">{</span>
   <span class="nl">overflow</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
   <span class="na">-webkit-overflow-scrolling</span><span class="p">:</span> <span class="n">touch</span><span class="p">;</span>
@@ -1171,7 +1172,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
     <details>
       <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">_premonition.scss</code> </summary>
 
-      <div class="language-scss highlighter-rouge">
+      <div class="language-scss copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="c1">// https://github.com/zhonger/jekyll-theme-H2O-ac/blob/551145e14e46ab62cfdca5eb2dc90510b98f8e02/dev/sass/premonition.scss</span>
 <span class="nv">$color-info-dark</span><span class="p">:</span> <span class="mh">#009400</span><span class="p">;</span>
 <span class="nv">$color-info-darker</span><span class="p">:</span> <span class="mh">#008b00</span><span class="p">;</span>
@@ -1315,7 +1316,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean interdum, ligula
     <details>
       <summary> <code class="language-plaintext button button--outline-primary button--pill highlighter-rouge">_config.yml</code> </summary>
 
-      <div class="language-yml highlighter-rouge">
+      <div class="language-yml copyable highlighter-rouge">
 <div class="highlight"><pre class="highlight"><code><span class="c1"># premonition</span>
 <span class="na">premonition</span><span class="pi">:</span>
   <span class="na">default</span><span class="pi">:</span>

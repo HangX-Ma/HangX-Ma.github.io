@@ -502,7 +502,7 @@
   <li>
     <p><em>实现一个linux应用程序A，显示当前目录下的文件名。（用C或Rust编程）</em></p>
 
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">use</span> <span class="nn">std</span><span class="p">::{</span><span class="nn">process</span><span class="p">::</span><span class="n">Command</span><span class="p">};</span>
+    <div class="language-rust copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">use</span> <span class="nn">std</span><span class="p">::{</span><span class="nn">process</span><span class="p">::</span><span class="n">Command</span><span class="p">};</span>
  <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
      <span class="k">let</span> <span class="n">output</span> <span class="o">=</span> <span class="nn">Command</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"ls"</span><span class="p">)</span><span class="nf">.arg</span><span class="p">(</span><span class="s">"-a"</span><span class="p">)</span><span class="nf">.output</span><span class="p">()</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"failed to execute the process"</span><span class="p">);</span>
      <span class="k">let</span> <span class="n">file_list</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from_utf8</span><span class="p">(</span><span class="n">output</span><span class="py">.stdout</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
@@ -521,7 +521,7 @@
 
     <p>根据文档描述， 栈帧存储着函数之间的调用信息， 当前栈帧的头部是 <em>sp(x1)</em> 指向的位置， 尾部是 <em>fp(s0)</em> 指向的位置。 其中 <code class="language-plaintext highlighter-rouge">fp</code> 寄存器中保存了父栈帧的结束地址， x86 架构的结构与 RISC-V 有所不同， <code class="language-plaintext highlighter-rouge">rbp</code> 存储的内容就是父栈帧的 <code class="language-plaintext highlighter-rouge">rbp</code> 地址。 另外， 在调试过程中发现有 <code class="language-plaintext highlighter-rouge">stack overflow</code> 的错误， 参考给出解释需要用到 <code class="language-plaintext highlighter-rouge">libunwind</code> 库解决标准库不存储栈帧指针的问题， 遂仅进行有限个栈帧回溯。 注意需要开启 <code class="language-plaintext highlighter-rouge">force-frame-pointers</code> 编译选项。</p>
 
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">arch</span><span class="p">::</span><span class="n">asm</span><span class="p">;</span>
+    <div class="language-rust copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">arch</span><span class="p">::</span><span class="n">asm</span><span class="p">;</span>
 
  <span class="k">fn</span> <span class="nf">print_stack_trace_chain</span><span class="p">()</span> <span class="p">{</span>
      <span class="k">let</span> <span class="n">fp</span><span class="p">:</span> <span class="nb">usize</span><span class="p">;</span>

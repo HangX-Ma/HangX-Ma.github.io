@@ -324,7 +324,7 @@
   <p>64 位机器编译时， 由于库不支持 32 位代码编译， 因而需要下载 <code class="language-plaintext highlighter-rouge">gcc-multilib</code>。</p>
 </blockquote>
 
-<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">sudo apt install build-essential make
+<div class="language-terminal copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">sudo apt install build-essential make
 sudo apt install gcc gcc-multilib gdb
 </span></code></pre></div></div>
 
@@ -332,7 +332,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="1-bitxor">1. bitXor</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * bitXor - x^y using only ~ and &amp;
  *   Example: bitXor(4, 5) = 1
  *   Legal ops: ~ &amp;
@@ -350,7 +350,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="2-tmin">2. tmin</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
  *   Max ops: 4
@@ -365,7 +365,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="3-istmax">3. isTmax</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * isTmax - returns 1 if x is the maximum, two's complement number,
  *     and 0 otherwise
  *   Legal ops: ! ~ &amp; ^ | +
@@ -385,7 +385,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="4-alloddbits">4. allOddBits</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
  *   where bits are numbered from 0 (least significant) to 31 (most significant)
  *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
@@ -406,7 +406,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="5-negate">5. negate</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * negate - return -x
  *   Example: negate(1) = -1.
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
@@ -422,7 +422,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="6-isasciidigit">6. isAsciiDigit</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters '0' to '9')
  *   Example: isAsciiDigit(0x35) = 1.
  *            isAsciiDigit(0x3a) = 0.
@@ -443,7 +443,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="7-conditional">7. conditional</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * conditional - same as x ? y : z
  *   Example: conditional(2,4,5) = 4
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
@@ -470,7 +470,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="8-islessorequal">8. isLessOrEqual</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * isLessOrEqual - if x &lt;= y  then return 1, else return 0
  *   Example: isLessOrEqual(4,5) = 1.
  *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
@@ -502,7 +502,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="9-logicalneg">9. logicalNeg</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * logicalNeg - implement the ! operator, using all of
  *              the legal operators except !
  *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
@@ -534,7 +534,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <p>但是负数部分着实有些迷惑， 看来看去都像是取负之后的结果。 比如 <code class="language-plaintext highlighter-rouge">-5</code> 取负后为 <code class="language-plaintext highlighter-rouge">5 = 0101</code> 加上符号位正好结果为 4。 但是 <code class="language-plaintext highlighter-rouge">-1</code> 和 <code class="language-plaintext highlighter-rouge">0</code> 的结果都为 1 说明对于这两个特殊数字而言符号位是不需要加上的， 那么同理若输入为 <code class="language-plaintext highlighter-rouge">1</code> 也不需要。 （在具体实现中满足了这点要求）</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* howManyBits - return the minimum number of bits required to represent x in
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
  *  Examples: howManyBits(12) = 5
  *            howManyBits(298) = 10
@@ -589,7 +589,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <p>对于此道题而言， 输入 <code class="language-plaintext highlighter-rouge">uf</code> 需要返回 <code class="language-plaintext highlighter-rouge">2 * uf</code>， 根据上述公式， <code class="language-plaintext highlighter-rouge">E</code> 的值应当加 1。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatScale2 - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -623,7 +623,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <p>对尾数 M 部分的作用以及实现逻辑的理解有缺失， 查阅资料后发现尾数的 M 实际隐藏了一个 1。 严格来说尾数应当是 24 位， $2^0 + 2^{-1} + 2^{-2} + … + 2^{-23}$， 其实际表示的范围为 $[1, 2 - 2^{-23}]$。 （本质上 Normalized 和 Denormalized 是一致的， 书上列了一张表显示二者之间是可以精确衔接的。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
  *   for floating point argument f.
  *   Argument is passed as unsigned int, but
@@ -683,7 +683,7 @@ sudo apt install gcc gcc-multilib gdb
 
 <h3 id="13-floatpower2">13. floatPower2</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
  *   (2.0 raised to the power x) for any 32-bit integer x.
  *

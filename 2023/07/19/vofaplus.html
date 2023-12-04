@@ -381,7 +381,7 @@
 
 <p>可以结合我在 USART 中 DMA 接收部分对数据的解析方式进行理解。</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">USARTx_DMA_RX_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-c copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">USARTx_DMA_RX_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// If data receiving complete, clear the TC5 flag</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">LL_DMA_IsActiveFlag_TC5</span><span class="p">(</span><span class="n">DMA1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RESET</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">LL_DMA_ClearFlag_TC5</span><span class="p">(</span><span class="n">DMA1</span><span class="p">);</span>
