@@ -296,11 +296,11 @@
                 href="/blog/archive.html?tag=cmu15-445">cmu15-445</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Nov 28, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 12567 words </span>
+                <span> Total 12616 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 35 mins </span>
+                <span> About 36 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s11s28scmu15445-fa23-p2.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-11-28T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,cmu15-445"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -344,7 +344,7 @@
     <p><code class="language-plaintext highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
 
     <blockquote>
-      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
+      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 之前擅作主张添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 想要以此避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用， 但实际上原有的对 page 指针的判断已经足够。 添加这个标志位反而引起 P3 的 shell 报错 deadlock。</p>
     </blockquote>
   </li>
   <li>

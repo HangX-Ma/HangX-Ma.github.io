@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-05T16:12:03+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-06T10:05:37+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</title><link href="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html" rel="alternate" type="text/html" title="CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX" /><published>2023-11-28T00:00:00+08:00</published><updated>2023-11-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html"><![CDATA[<h2 id="1-理解-extendible-hash">1. 理解 Extendible Hash</h2>
 
 <ul>
@@ -38,7 +38,7 @@
     <p><code class="language-plaintext highlighter-rouge">Drop()</code>: Unpin and/or unlatch.</p>
 
     <blockquote>
-      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 我个人还添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 主要是避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用所引起的问题。</p>
+      <p>对 Basic 版本， 在 Page 有值的情况下需要调用 <code class="language-plaintext highlighter-rouge">UnpinPage</code> 进行资源释放。 而对于 Upgrade 版本则需要释放相应的读写锁并调用 Basic 的 <code class="language-plaintext highlighter-rouge">Drop</code>。 之前擅作主张添加了一个标志位表示是否已经调用过 <code class="language-plaintext highlighter-rouge">Drop</code>， 想要以此避免后续手动调用 <code class="language-plaintext highlighter-rouge">Drop</code> 函数可能出现的重复调用， 但实际上原有的对 page 指针的判断已经足够。 添加这个标志位反而引起 P3 的 shell 报错 deadlock。</p>
     </blockquote>
   </li>
   <li>
