@@ -12,11 +12,10 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Home - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Vim Plugin: YouCompleteMe 旧版本装配 - 一只豆腐</title>
 
-<meta name="description" content="Code, life and embedded system...
-">
-<link rel="canonical" href="https://hangx-ma.github.io/blog/"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="记录 Vim 补全插件 YouCompleteMe C++11 老旧版本的安装与配置， 适用 Clang Completer">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/12/06/YCM-config.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -272,135 +271,371 @@
   </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
 
       <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
       <div class="header__title">
         <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
 " href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
-        <ul><li class="navigation__item navigation__item--active"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
 </div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
 
-              <div class="col-aside d-print-none js-col-aside"></div>
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
 
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="HangX-Ma"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/12/06/YCM-config.html"><h2 itemprop="headline" class="item__header">Vim Plugin: YouCompleteMe 旧版本装配</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">记录 Vim 补全插件 YouCompleteMe C++11 老旧版本的安装与配置， 适用 Clang Completer</div><p><a href="/2023/12/06/YCM-config.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Vim Plugin: YouCompleteMe 旧版本装配</h1></header></div><meta itemprop="headline" content="Vim Plugin: YouCompleteMe 旧版本装配"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=Tool">Tool</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=neovim">neovim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Dec 06, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 5418 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 16 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s12s06sYCM-config.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-12-06T00:00:00+08:00">
-    <meta itemprop="keywords" content="Tool,neovim"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/11/28/cmu15445-fa23-p2.html"><h2 itemprop="headline" class="item__header">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">学习 CMU15-445 Fall 2023， 该章与 Extendible Hash Index 相关， 介绍 Extendible Hash 的原理与实施细节</div><p><a href="/2023/11/28/cmu15445-fa23-p2.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=cmu15-445">cmu15-445</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Nov 28, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s11s28scmu15445-fa23-p2.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-11-28T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cmu15-445"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/11/14/cpp-details.html"><h2 itemprop="headline" class="item__header">Cpp-Quiz</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">做 C++ Quiz 遇到一些有意思的语法细节记录，钻牛角尖的那种。</div><p><a href="/2023/11/14/cpp-details.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=C%2B%2B">C++</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Nov 14, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s11s14scpp-details.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-11-14T00:00:00+08:00">
-    <meta itemprop="keywords" content="C++"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/10/21/cs61b-proj3.html"><h2 itemprop="headline" class="item__header">cs61b Proj3-BYoW</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">UCB cs61 spring 2021 Proj3-BYoW 设计思路与记录</div><p><a href="/2023/10/21/cs61b-proj3.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Course">Course</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=cs61b">cs61b</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Java">Java</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Oct 21, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s10s21scs61b-proj3.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-10-21T00:00:00+08:00">
-    <meta itemprop="keywords" content="Course,cs61b,Java"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/28/miniFOC-concept.html"><h2 itemprop="headline" class="item__header">miniFOC 原理阐述与多模式应用</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。</div><p><a href="/2023/07/28/miniFOC-concept.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=FOC">FOC</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 28, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Aug 01, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-28T00:00:00+08:00">
-    <meta itemprop="keywords" content="FOC,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/19/vofaplus.html"><h2 itemprop="headline" class="item__header">STM32F103 Vofa+ 配置与调试指南</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">上位机调试工具 Vofa+ 食用指南， 结合电机调试进行说明， 感谢 Bilibili 大学。</div><p><a href="/2023/07/19/vofaplus.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=C">C</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 19, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Jul 26, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s19svofaplus.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-19T00:00:00+08:00">
-    <meta itemprop="keywords" content="C,STM32"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/18/oopc.html"><h2 itemprop="headline" class="item__header">OOP C Programming</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">结合 OOP 思想进行 C 语言编程， 这篇文章并不从头介绍相关的知识， 而是记录个人学习的疑难点以及参考资料等资源。</div><p><a href="/2023/07/18/oopc.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=C">C</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 18, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s18soopc.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-18T00:00:00+08:00">
-    <meta itemprop="keywords" content="C"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/2023/07/17/miniFOC-dev.html"><h2 itemprop="headline" class="item__header">miniFOC Driver Development</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">miniFOC 驱动板开发的记录， 涉及 STM32 配置， 所用器件， 以及相关通信协议。</div><p><a href="/2023/07/17/miniFOC-dev.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=FOC">FOC</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=STM32">STM32</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 17, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Aug 05, 2023</span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s17sminiFOC-dev.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-07-17T00:00:00+08:00">
-    <meta itemprop="keywords" content="FOC,STM32"></div>
-      </article></div>
-</div><div class="layout--home"><div class="pagination"><p>30 post articles, 4 pages.</p>
-    <div class="pagination__menu">
-      <ul class="menu menu--nowrap"><li><div class="button button--secondary button--circle disabled">
-            <i class="fas fa-angle-left"></i>
-          </div></li><li>
-              <div class="button button--primary button--circle focus"><span>1</span></div>
-            </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2"><span>2</span></a>
-              </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page3" href="/blog/page3"><span>3</span></a>
-              </li><li>
-                <a class="button button--secondary button--circle" title="/blog/page4" href="/blog/page4"><span>4</span></a>
-              </li><li><a class="button button--secondary button--circle" title="/blog/page2" href="/blog/page2">
-            <i class="fas fa-angle-right"></i>
-          </a></li></ul>
-    </div>
-  </div></div>
-<script>/*(function () {
+    <meta itemprop="keywords" content="Tool,neovim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
-})();*/
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>YouCompleteMe 是 Vim 比较常用的一款代码补全插件， 在 neovim 盛行的当下， 这类补全插件也逐渐淡出了大众视野， 但也有一些场合使用 YouCompleteMe 也有自己的一席之地。</p>
+
+<p>为了开发环境的稳定性， 有些服务器的操作系统版本比较低， 甚至在 CMake 这类编译工具的版本也比较低。 为了尽可能减少对低版本系统环境的更改， 我尝试尽可能通过手动编译配置的方式完成在这类开发环境的 Vim 配置。</p>
+<blockquote>
+  <p>其实无奈的是自己没有账户的 <code class="language-plaintext highlighter-rouge">sudo</code> 权限。</p>
+</blockquote>
+
+<p>我选择的是 YCM 的 <code class="language-plaintext highlighter-rouge">legacy-c++11</code> 版本， 还未升级到 C++17 因而对编译工具的要求会低一些。 官方在 Ubuntu 20.04 上做过适配是比较成功的， 但我在 Ubuntu 18.04 上也成功安装了。 我的装配环境如下：</p>
+
+<ul>
+  <li>Ubuntu 18.04</li>
+  <li>GCC v7.5.0</li>
+  <li>CMake v3.10.2</li>
+  <li>Python 3.6.7</li>
+  <li>Vim 8.2.1258</li>
+  <li>YCM legacy-c++11</li>
+</ul>
+
+<blockquote>
+  <p>如果是最新的 YCM 版本， GCC 至少需要 v8.x， Clang 版本需要 v7.x。</p>
+</blockquote>
+
+<h2 id="0-编译环境">0. 编译环境</h2>
+
+<p>CMake 和 build-essential 最好能用 apt 的方式装好了， 不然得手动去装会很麻烦。 另外， 如果需要自己手动编译安装 python3， 那 <code class="language-plaintext highlighter-rouge">python3-dev</code> 也不是特别必要。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ubuntu 16.04 and later</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>build-essential cmake python3-dev
+</code></pre></div></div>
+
+<h2 id="1-python36-安装">1. Python3.6 安装</h2>
+
+<p>安装 Python3.6 的原因是这台服务器的 python3 在安装的时候没有支持 <code class="language-plaintext highlighter-rouge">--enable-shared</code> 或 <code class="language-plaintext highlighter-rouge">--enable-framework</code>， 另外也是本着不破坏原有编译环境的想法。 最重要的是 <strong>Requirements</strong> 明确声明了 python 3.6 runtime。</p>
+
+<p>到 python 官网的 <a href="https://www.python.org/ftp/python/3.6.7/">https://www.python.org/ftp/python/3.6.7/</a> 找一找 <code class="language-plaintext highlighter-rouge">Python-3.6.7.tar.xz</code>， 用 wget 直接下载到自己的 home 目录下。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">tar </span>zxvf Python-3.6.7.tgz
+<span class="nb">cd </span>Python-3.6.7
+./configure <span class="nt">--prefix</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6 <span class="nt">--enable-optimizations</span> <span class="nt">--enable-shared</span>
+make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>然后更改 <code class="language-plaintext highlighter-rouge">.bashrc</code> 增添相关的执行文件目录就行了。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .bashrc</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:<span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/bin
+</code></pre></div></div>
+
+<h2 id="2-llvm-安装">2. LLVM 安装</h2>
+
+<p>方便一些直接用 LLVM + Clang 的组合包， 省去了自己编译的麻烦事儿。 我选择的版本是 LLVM 12.0.0， 因为后续在安装 YCM 的时候 10.0.0 版本已经太老给删掉了， 找个稍微接近的新版本是可以平替的。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># wget 不成功直接去 github 的 release 版面下载</span>
+wget https://github.com/ycm-core/llvm/releases/download/12.0.0/clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar.xz
+xz <span class="nt">-d</span> clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar.xz
+<span class="nb">tar</span> <span class="nt">-xvf</span> clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar
+</code></pre></div></div>
+
+<p>解压完之后就配置 <code class="language-plaintext highlighter-rouge">.bashrc</code> 即可， 记得 <code class="language-plaintext highlighter-rouge">source ~/.bashrc</code>。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .bashrc</span>
+<span class="nb">export </span><span class="nv">LLVM_PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/clang+llvm-12.0.0-x86_64-unknown-linux-gnu/bin
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:LLVM_PATH
+</code></pre></div></div>
+
+<h2 id="3-vim-安装">3. Vim 安装</h2>
+
+<p>一般来说 Ubuntu 18.04 默认安装的 Vim 版本是 8.0 的， 而 YCM 的要求是 <strong>Vim v8.1.2269 huge build, compiled with Python 3.6 support</strong>， 所以不妨手动装个稍微高点的版本。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://codeload.github.com/vim/vim/tar.gz/v8.2.1258
+<span class="nb">mv </span>v8.2.1258  vim-v8.2.1258.tar.gz
+<span class="nb">tar</span> <span class="nt">-xvzf</span> vim-v8.2.1258.tar.gz
+<span class="nb">cd </span>vim-8.2.1258
+./configure <span class="nt">--prefix</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local<span class="se">\</span>
+        <span class="nt">--with-python3-command</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/bin/python3<span class="se">\</span>
+        <span class="nt">--enable-python3interp</span><span class="o">=</span>dynamic<span class="se">\</span>
+        <span class="nt">--enable-cscope</span><span class="se">\</span>
+        <span class="nt">--with-features</span><span class="o">=</span>huge<span class="se">\</span>
+        <span class="nt">--enable-multibyte</span><span class="se">\</span>
+        <span class="nt">--with-python3-config-dir</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/lib/python3.6/config-3.6m-x86_64-linux-gnu/<span class="se">\</span>
+        <span class="nt">--enable-largefile</span><span class="se">\</span>
+        <span class="nt">--enable-fail-if-missing</span>
+make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>这里需要注意的是 <code class="language-plaintext highlighter-rouge">--enable-python3interp=dynamic</code> 选项， 很多编译 vim 都跟你说要填 <code class="language-plaintext highlighter-rouge">yes</code>， 然后用 <code class="language-plaintext highlighter-rouge">LDFLAG='-rdynamic'</code> 开启相关的 dynamic 编译， 我试过并没有起作用。 安装完之后可以用如下代码检查是否有 <code class="language-plaintext highlighter-rouge">+python3/dyn</code> 的支持用以确认安装是否成功。 <code class="language-plaintext highlighter-rouge">python3/dyn</code> 也是 YCM 的安装要求之一， 并且仅支持 python3 版本， YCM 已经抛弃了对 python2 的支持， 除非切换到更老旧的对 python2 支持的 branch。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim <span class="nt">--version</span> | <span class="nb">grep </span>python3
+</code></pre></div></div>
+
+<h2 id="4-youcompleteme-安装">4. YouCompleteMe 安装</h2>
+
+<ul>
+  <li><strong>Vundle</strong></li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+</code></pre></div></div>
+
+<ul>
+  <li>直接拷贝 <code class="language-plaintext highlighter-rouge">legacy-c++11</code> 分支版本的 YCM</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle
+git clone <span class="nt">--branch</span> legacy-c++11 https://github.com/ycm-core/YouCompleteMe.git
+<span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe
+git submodule update <span class="nt">--init</span> <span class="nt">--recursive</span>
+</code></pre></div></div>
+
+<p>到这一步应该会说在 <code class="language-plaintext highlighter-rouge">~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/watchdog_deps/pathtools/docs/source/_themes</code> 下载不成功， 因为人家已经删掉了。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/watchdog_deps/pathtools/docs/source/
+<span class="nb">rmdir </span>_themes
+git clone https://github.com/pallets/flask-sphinx-themes.git _themes
+checkout THE_VERSION_THAT_ASKS
+</code></pre></div></div>
+
+<ul>
+  <li>安装 YCM 的 Clang Completer</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe
+python3.6 install.py <span class="nt">--clangd-completer</span>
+</code></pre></div></div>
+
+<p>然后又会遇到麻烦了， 说 clangd-10.0.0 这个包的 checksum 不对， 实际上是这个下载地址已经寄了， 那没办法了， 自己手动下载一个吧， 对于这个老的 YCM 版本下载的位置是相应的 <code class="language-plaintext highlighter-rouge">third_party</code> 的包的 <code class="language-plaintext highlighter-rouge">cache</code> 目录， 并不是传闻的 <code class="language-plaintext highlighter-rouge">clang_archives</code>。 为了和前述的 LLVM 的版本匹配我们也装 clangd 12.0.0 版本， 但需要改一下 <code class="language-plaintext highlighter-rouge">build.py</code> 的一些内容。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># cd ~/.vim/bundle/YouCompleteMe/third_party/ycmd/build.py
+</span><span class="n">CLANGD_VERSION</span> <span class="o">=</span> <span class="sh">'</span><span class="s">12.0.0</span><span class="sh">'</span>
+<span class="bp">...</span>
+
+<span class="k">def</span> <span class="nf">DownloadClangd</span><span class="p">(</span> <span class="n">printer</span> <span class="p">):</span>
+  <span class="n">CLANGD_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">DIR_OF_THIRD_PARTY</span><span class="p">,</span> <span class="sh">'</span><span class="s">clangd</span><span class="sh">'</span><span class="p">,</span> <span class="p">)</span>
+  <span class="n">CLANGD_CACHE_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_DIR</span><span class="p">,</span> <span class="sh">'</span><span class="s">cache</span><span class="sh">'</span> <span class="p">)</span>
+  <span class="n">CLANGD_OUTPUT_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_DIR</span><span class="p">,</span> <span class="sh">'</span><span class="s">output</span><span class="sh">'</span> <span class="p">)</span>
+
+  <span class="n">target</span> <span class="o">=</span> <span class="nc">GetClangdTarget</span><span class="p">()</span>
+  <span class="n">target_name</span><span class="p">,</span> <span class="n">check_sum</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span> <span class="ow">not</span> <span class="n">IS_64BIT</span> <span class="p">]</span>
+  <span class="n">target_name</span> <span class="o">=</span> <span class="n">target_name</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">version</span> <span class="o">=</span> <span class="n">CLANGD_VERSION</span> <span class="p">)</span>
+  <span class="n">file_name</span> <span class="o">=</span> <span class="sh">'</span><span class="s">{}.tar.bz2</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">target_name</span> <span class="p">)</span>
+  <span class="n">download_url</span> <span class="o">=</span> <span class="sh">'</span><span class="s">https://github.com/ycm-core/llvm/releases?q={}/{}</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">CLANGD_VERSION</span><span class="p">,</span> <span class="n">file_name</span> <span class="p">)</span>
+
+  <span class="n">file_name</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span><span class="p">,</span> <span class="n">file_name</span> <span class="p">)</span>
+
+  <span class="nc">MakeCleanDirectory</span><span class="p">(</span> <span class="n">CLANGD_OUTPUT_DIR</span> <span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span> <span class="p">):</span>
+    <span class="n">os</span><span class="p">.</span><span class="nf">makedirs</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span> <span class="p">)</span>
+<span class="c1">#  elif p.exists( file_name ) and not CheckFileIntegrity( file_name, check_sum ):
+#    printer( 'Cached Clangd archive does not match checksum. Removing...' )
+#    os.remove( file_name )
+</span>    <span class="bp">...</span>
+</code></pre></div></div>
+
+<p>这里我改掉了 <code class="language-plaintext highlighter-rouge">CLANGD_VERSION</code> 以及下载的文件地址和文件名， 另外注释掉了 Checksum 的检查。 一般来说这样也是能下载成功了， 要是还不行就手动给它整完。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/clangd/cache
+wget https://github.com/ycm-core/llvm/releases/download/12.0.0/clangd-12.0.0-x86_64-unknown-linux-gnu.tar.bz2
+</code></pre></div></div>
+
+<h2 id="5-vimrc-配置">5. .vimrc 配置</h2>
+
+<ul>
+  <li>拷贝一下 YCM 的配置文件</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp</span> ~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py ~/.vim
+</code></pre></div></div>
+
+<ul>
+  <li>在 home 目录下创建 <code class="language-plaintext highlighter-rouge">.vimrc</code> 文件向其中写入以下内容， 关掉 vim 重启之后应该就自动帮你装好了 Vundle 和 YouCompleteMe， 或者用 vim 命令 <code class="language-plaintext highlighter-rouge">:PluginInstall</code> 手动安装一下。</li>
+</ul>
+
+<div class="language-vimscript copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">" Vundle</span>
+<span class="k">set</span> <span class="nb">nocompatible</span>        " be iMproved<span class="p">,</span> required
+<span class="k">filetype</span> off            " required
+
+<span class="c">" set the runtime path to include Vundle and initialize</span>
+<span class="k">set</span> <span class="nb">rtp</span><span class="p">+=~</span><span class="sr">/.vim/</span>bundle/Vundle<span class="p">.</span><span class="k">vim</span>
+<span class="k">call</span> vundle#begin<span class="p">()</span>
+<span class="c">" alternatively, pass a path where Vundle should install plugins</span>
+<span class="c">"call vundle#begin('~/some/path/here')</span>
+
+<span class="c">" let Vundle manage Vundle, required</span>
+Plugin <span class="s1">'VundleVim/Vundle.vim'</span>
+Plugin <span class="s1">'ycm-core/YouCompleteMe'</span>
+
+<span class="c">" All of your Plugins must be added before the following line</span>
+<span class="k">call</span> vundle#end<span class="p">()</span>            " required
+<span class="k">filetype</span> plugin <span class="nb">indent</span> <span class="k">on</span>    " required
+
+<span class="k">let</span> <span class="nv">g:syntastic_python_python_exec</span> <span class="p">=</span> <span class="s1">'${HOME}/.local/python3.6/bin/python3'</span>·
+<span class="k">let</span> <span class="nv">g:ycm_server_python_interpreter</span><span class="p">=</span><span class="s1">'${HOME}/.local/python3.6/bin/python3'</span>
+<span class="k">let</span> <span class="nv">g:ycm_python_sys_path</span> <span class="p">=</span> <span class="s1">'${HOME}/.local/python3.6/lib/python3.6'</span>
+<span class="k">let</span> <span class="nv">g:ycm_global_ycm_extra_conf</span><span class="p">=</span><span class="s1">'~/.vim/.ycm_extra_conf.py'</span>
+</code></pre></div></div>
+
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> 关于 YCM 的配置 </div> </div> <div class="content"> <p>喜欢折腾的同学肯定不想装完 YCM 就完事儿了， 把它调教成一键趁手的工具才是我们安装这个插件的初心， 这里推荐几篇还不错的配置文档供大家参阅。 我自己也配置了一份精简版的， 可参阅 <a href="https://github.com/HangX-Ma/dotfiles/blob/main/vim/.vimrc">HangX-Ma/dotfiles: vim/.vimrc</a>.</p>
+
+<ul>
+  <li><a href="https://cloud.tencent.com/developer/article/1745640">手把手教你配置linux下C++开发工具</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/33046090">知乎 - 韦易笑 YouCompleteMe 中容易忽略的配置</a></li>
+  <li><a href="http://howiefh.github.io/2015/05/22/vim-install-youcompleteme-plugin/">FengHao - Vim 自动补全插件 YouCompleteMe 安装与配置</a></li>
+</ul>
+
+
+
+ </div> </div>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
 </script>
 
+<script async src="https://static.addtoany.com/menu/page.js"></script>
 
-</div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-12-06T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/11/28/cmu15445-fa23-p2.html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/12/06/YCM-config',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
 
 <!-- end custom main bottom snippet -->
 </div>
@@ -959,6 +1194,68 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 
 })();*/
 </script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
   window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
     var $canvas = null, $this = null, _ctx = null, _text = '';
     $('.language-chart').each(function(){
@@ -1065,12 +1362,10 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
         appClass: 'Git'
       });
-      $('.js-pageview').each(function() {
-        var $this = $(this);
-        var key = $this.attr('data-page-key');
-        pageview.get(key, function(view) {
-          $this.attr('itemprop', 'userInteractionCount').attr('content', view).text(view);
-        });
+      var key =   's2023s12s06sYCM-config.html';
+      var title = "Vim Plugin: YouCompleteMe 旧版本装配";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s12s06sYCM-config.html']").text(view);
       });
     });
   </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
@@ -1147,7 +1442,43 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 		}
 		return actionMsg;
 	}
-})();</script>
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 20) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
     </div>
     <script>(function () {
   var $root = document.getElementsByClassName('root')[0];

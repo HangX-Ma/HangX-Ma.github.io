@@ -1,5 +1,214 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-06T10:05:37+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</title><link href="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html" rel="alternate" type="text/html" title="CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX" /><published>2023-11-28T00:00:00+08:00</published><updated>2023-11-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html"><![CDATA[<h2 id="1-理解-extendible-hash">1. 理解 Extendible Hash</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-07T10:10:04+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">Vim Plugin: YouCompleteMe 旧版本装配</title><link href="https://hangx-ma.github.io/2023/12/06/YCM-config.html" rel="alternate" type="text/html" title="Vim Plugin: YouCompleteMe 旧版本装配" /><published>2023-12-06T00:00:00+08:00</published><updated>2023-12-06T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/12/06/YCM-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/12/06/YCM-config.html"><![CDATA[<p>YouCompleteMe 是 Vim 比较常用的一款代码补全插件， 在 neovim 盛行的当下， 这类补全插件也逐渐淡出了大众视野， 但也有一些场合使用 YouCompleteMe 也有自己的一席之地。</p>
+
+<p>为了开发环境的稳定性， 有些服务器的操作系统版本比较低， 甚至在 CMake 这类编译工具的版本也比较低。 为了尽可能减少对低版本系统环境的更改， 我尝试尽可能通过手动编译配置的方式完成在这类开发环境的 Vim 配置。</p>
+<blockquote>
+  <p>其实无奈的是自己没有账户的 <code class="language-plaintext highlighter-rouge">sudo</code> 权限。</p>
+</blockquote>
+
+<p>我选择的是 YCM 的 <code class="language-plaintext highlighter-rouge">legacy-c++11</code> 版本， 还未升级到 C++17 因而对编译工具的要求会低一些。 官方在 Ubuntu 20.04 上做过适配是比较成功的， 但我在 Ubuntu 18.04 上也成功安装了。 我的装配环境如下：</p>
+
+<ul>
+  <li>Ubuntu 18.04</li>
+  <li>GCC v7.5.0</li>
+  <li>CMake v3.10.2</li>
+  <li>Python 3.6.7</li>
+  <li>Vim 8.2.1258</li>
+  <li>YCM legacy-c++11</li>
+</ul>
+
+<blockquote>
+  <p>如果是最新的 YCM 版本， GCC 至少需要 v8.x， Clang 版本需要 v7.x。</p>
+</blockquote>
+
+<h2 id="0-编译环境">0. 编译环境</h2>
+
+<p>CMake 和 build-essential 最好能用 apt 的方式装好了， 不然得手动去装会很麻烦。 另外， 如果需要自己手动编译安装 python3， 那 <code class="language-plaintext highlighter-rouge">python3-dev</code> 也不是特别必要。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ubuntu 16.04 and later</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>build-essential cmake python3-dev
+</code></pre></div></div>
+
+<h2 id="1-python36-安装">1. Python3.6 安装</h2>
+
+<p>安装 Python3.6 的原因是这台服务器的 python3 在安装的时候没有支持 <code class="language-plaintext highlighter-rouge">--enable-shared</code> 或 <code class="language-plaintext highlighter-rouge">--enable-framework</code>， 另外也是本着不破坏原有编译环境的想法。 最重要的是 <strong>Requirements</strong> 明确声明了 python 3.6 runtime。</p>
+
+<p>到 python 官网的 <a href="https://www.python.org/ftp/python/3.6.7/">https://www.python.org/ftp/python/3.6.7/</a> 找一找 <code class="language-plaintext highlighter-rouge">Python-3.6.7.tar.xz</code>， 用 wget 直接下载到自己的 home 目录下。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">tar </span>zxvf Python-3.6.7.tgz
+<span class="nb">cd </span>Python-3.6.7
+./configure <span class="nt">--prefix</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6 <span class="nt">--enable-optimizations</span> <span class="nt">--enable-shared</span>
+make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>然后更改 <code class="language-plaintext highlighter-rouge">.bashrc</code> 增添相关的执行文件目录就行了。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .bashrc</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:<span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/bin
+</code></pre></div></div>
+
+<h2 id="2-llvm-安装">2. LLVM 安装</h2>
+
+<p>方便一些直接用 LLVM + Clang 的组合包， 省去了自己编译的麻烦事儿。 我选择的版本是 LLVM 12.0.0， 因为后续在安装 YCM 的时候 10.0.0 版本已经太老给删掉了， 找个稍微接近的新版本是可以平替的。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># wget 不成功直接去 github 的 release 版面下载</span>
+wget https://github.com/ycm-core/llvm/releases/download/12.0.0/clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar.xz
+xz <span class="nt">-d</span> clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar.xz
+<span class="nb">tar</span> <span class="nt">-xvf</span> clang+llvm-12.0.0-x86_64-unknown-linux-gnu.tar
+</code></pre></div></div>
+
+<p>解压完之后就配置 <code class="language-plaintext highlighter-rouge">.bashrc</code> 即可， 记得 <code class="language-plaintext highlighter-rouge">source ~/.bashrc</code>。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .bashrc</span>
+<span class="nb">export </span><span class="nv">LLVM_PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/clang+llvm-12.0.0-x86_64-unknown-linux-gnu/bin
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:LLVM_PATH
+</code></pre></div></div>
+
+<h2 id="3-vim-安装">3. Vim 安装</h2>
+
+<p>一般来说 Ubuntu 18.04 默认安装的 Vim 版本是 8.0 的， 而 YCM 的要求是 <strong>Vim v8.1.2269 huge build, compiled with Python 3.6 support</strong>， 所以不妨手动装个稍微高点的版本。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://codeload.github.com/vim/vim/tar.gz/v8.2.1258
+<span class="nb">mv </span>v8.2.1258  vim-v8.2.1258.tar.gz
+<span class="nb">tar</span> <span class="nt">-xvzf</span> vim-v8.2.1258.tar.gz
+<span class="nb">cd </span>vim-8.2.1258
+./configure <span class="nt">--prefix</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local<span class="se">\</span>
+        <span class="nt">--with-python3-command</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/bin/python3<span class="se">\</span>
+        <span class="nt">--enable-python3interp</span><span class="o">=</span>dynamic<span class="se">\</span>
+        <span class="nt">--enable-cscope</span><span class="se">\</span>
+        <span class="nt">--with-features</span><span class="o">=</span>huge<span class="se">\</span>
+        <span class="nt">--enable-multibyte</span><span class="se">\</span>
+        <span class="nt">--with-python3-config-dir</span><span class="o">=</span><span class="k">${</span><span class="nv">HOME</span><span class="k">}</span>/.local/python3.6/lib/python3.6/config-3.6m-x86_64-linux-gnu/<span class="se">\</span>
+        <span class="nt">--enable-largefile</span><span class="se">\</span>
+        <span class="nt">--enable-fail-if-missing</span>
+make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>这里需要注意的是 <code class="language-plaintext highlighter-rouge">--enable-python3interp=dynamic</code> 选项， 很多编译 vim 都跟你说要填 <code class="language-plaintext highlighter-rouge">yes</code>， 然后用 <code class="language-plaintext highlighter-rouge">LDFLAG='-rdynamic'</code> 开启相关的 dynamic 编译， 我试过并没有起作用。 安装完之后可以用如下代码检查是否有 <code class="language-plaintext highlighter-rouge">+python3/dyn</code> 的支持用以确认安装是否成功。 <code class="language-plaintext highlighter-rouge">python3/dyn</code> 也是 YCM 的安装要求之一， 并且仅支持 python3 版本， YCM 已经抛弃了对 python2 的支持， 除非切换到更老旧的对 python2 支持的 branch。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim <span class="nt">--version</span> | <span class="nb">grep </span>python3
+</code></pre></div></div>
+
+<h2 id="4-youcompleteme-安装">4. YouCompleteMe 安装</h2>
+
+<ul>
+  <li><strong>Vundle</strong></li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+</code></pre></div></div>
+
+<ul>
+  <li>直接拷贝 <code class="language-plaintext highlighter-rouge">legacy-c++11</code> 分支版本的 YCM</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle
+git clone <span class="nt">--branch</span> legacy-c++11 https://github.com/ycm-core/YouCompleteMe.git
+<span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe
+git submodule update <span class="nt">--init</span> <span class="nt">--recursive</span>
+</code></pre></div></div>
+
+<p>到这一步应该会说在 <code class="language-plaintext highlighter-rouge">~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/watchdog_deps/pathtools/docs/source/_themes</code> 下载不成功， 因为人家已经删掉了。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/watchdog_deps/pathtools/docs/source/
+<span class="nb">rmdir </span>_themes
+git clone https://github.com/pallets/flask-sphinx-themes.git _themes
+checkout THE_VERSION_THAT_ASKS
+</code></pre></div></div>
+
+<ul>
+  <li>安装 YCM 的 Clang Completer</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe
+python3.6 install.py <span class="nt">--clangd-completer</span>
+</code></pre></div></div>
+
+<p>然后又会遇到麻烦了， 说 clangd-10.0.0 这个包的 checksum 不对， 实际上是这个下载地址已经寄了， 那没办法了， 自己手动下载一个吧， 对于这个老的 YCM 版本下载的位置是相应的 <code class="language-plaintext highlighter-rouge">third_party</code> 的包的 <code class="language-plaintext highlighter-rouge">cache</code> 目录， 并不是传闻的 <code class="language-plaintext highlighter-rouge">clang_archives</code>。 为了和前述的 LLVM 的版本匹配我们也装 clangd 12.0.0 版本， 但需要改一下 <code class="language-plaintext highlighter-rouge">build.py</code> 的一些内容。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># cd ~/.vim/bundle/YouCompleteMe/third_party/ycmd/build.py
+</span><span class="n">CLANGD_VERSION</span> <span class="o">=</span> <span class="sh">'</span><span class="s">12.0.0</span><span class="sh">'</span>
+<span class="bp">...</span>
+
+<span class="k">def</span> <span class="nf">DownloadClangd</span><span class="p">(</span> <span class="n">printer</span> <span class="p">):</span>
+  <span class="n">CLANGD_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">DIR_OF_THIRD_PARTY</span><span class="p">,</span> <span class="sh">'</span><span class="s">clangd</span><span class="sh">'</span><span class="p">,</span> <span class="p">)</span>
+  <span class="n">CLANGD_CACHE_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_DIR</span><span class="p">,</span> <span class="sh">'</span><span class="s">cache</span><span class="sh">'</span> <span class="p">)</span>
+  <span class="n">CLANGD_OUTPUT_DIR</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_DIR</span><span class="p">,</span> <span class="sh">'</span><span class="s">output</span><span class="sh">'</span> <span class="p">)</span>
+
+  <span class="n">target</span> <span class="o">=</span> <span class="nc">GetClangdTarget</span><span class="p">()</span>
+  <span class="n">target_name</span><span class="p">,</span> <span class="n">check_sum</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span> <span class="ow">not</span> <span class="n">IS_64BIT</span> <span class="p">]</span>
+  <span class="n">target_name</span> <span class="o">=</span> <span class="n">target_name</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">version</span> <span class="o">=</span> <span class="n">CLANGD_VERSION</span> <span class="p">)</span>
+  <span class="n">file_name</span> <span class="o">=</span> <span class="sh">'</span><span class="s">{}.tar.bz2</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">target_name</span> <span class="p">)</span>
+  <span class="n">download_url</span> <span class="o">=</span> <span class="sh">'</span><span class="s">https://github.com/ycm-core/llvm/releases?q={}/{}</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span> <span class="n">CLANGD_VERSION</span><span class="p">,</span> <span class="n">file_name</span> <span class="p">)</span>
+
+  <span class="n">file_name</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span><span class="p">,</span> <span class="n">file_name</span> <span class="p">)</span>
+
+  <span class="nc">MakeCleanDirectory</span><span class="p">(</span> <span class="n">CLANGD_OUTPUT_DIR</span> <span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span> <span class="p">):</span>
+    <span class="n">os</span><span class="p">.</span><span class="nf">makedirs</span><span class="p">(</span> <span class="n">CLANGD_CACHE_DIR</span> <span class="p">)</span>
+<span class="c1">#  elif p.exists( file_name ) and not CheckFileIntegrity( file_name, check_sum ):
+#    printer( 'Cached Clangd archive does not match checksum. Removing...' )
+#    os.remove( file_name )
+</span>    <span class="bp">...</span>
+</code></pre></div></div>
+
+<p>这里我改掉了 <code class="language-plaintext highlighter-rouge">CLANGD_VERSION</code> 以及下载的文件地址和文件名， 另外注释掉了 Checksum 的检查。 一般来说这样也是能下载成功了， 要是还不行就手动给它整完。</p>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/.vim/bundle/YouCompleteMe/third_party/ycmd/third_party/clangd/cache
+wget https://github.com/ycm-core/llvm/releases/download/12.0.0/clangd-12.0.0-x86_64-unknown-linux-gnu.tar.bz2
+</code></pre></div></div>
+
+<h2 id="5-vimrc-配置">5. .vimrc 配置</h2>
+
+<ul>
+  <li>拷贝一下 YCM 的配置文件</li>
+</ul>
+
+<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp</span> ~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py ~/.vim
+</code></pre></div></div>
+
+<ul>
+  <li>在 home 目录下创建 <code class="language-plaintext highlighter-rouge">.vimrc</code> 文件向其中写入以下内容， 关掉 vim 重启之后应该就自动帮你装好了 Vundle 和 YouCompleteMe， 或者用 vim 命令 <code class="language-plaintext highlighter-rouge">:PluginInstall</code> 手动安装一下。</li>
+</ul>
+
+<div class="language-vimscript copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">" Vundle</span>
+<span class="k">set</span> <span class="nb">nocompatible</span>        " be iMproved<span class="p">,</span> required
+<span class="k">filetype</span> off            " required
+
+<span class="c">" set the runtime path to include Vundle and initialize</span>
+<span class="k">set</span> <span class="nb">rtp</span><span class="p">+=~</span><span class="sr">/.vim/</span>bundle/Vundle<span class="p">.</span><span class="k">vim</span>
+<span class="k">call</span> vundle#begin<span class="p">()</span>
+<span class="c">" alternatively, pass a path where Vundle should install plugins</span>
+<span class="c">"call vundle#begin('~/some/path/here')</span>
+
+<span class="c">" let Vundle manage Vundle, required</span>
+Plugin <span class="s1">'VundleVim/Vundle.vim'</span>
+Plugin <span class="s1">'ycm-core/YouCompleteMe'</span>
+
+<span class="c">" All of your Plugins must be added before the following line</span>
+<span class="k">call</span> vundle#end<span class="p">()</span>            " required
+<span class="k">filetype</span> plugin <span class="nb">indent</span> <span class="k">on</span>    " required
+
+<span class="k">let</span> <span class="nv">g:syntastic_python_python_exec</span> <span class="p">=</span> <span class="s1">'${HOME}/.local/python3.6/bin/python3'</span>·
+<span class="k">let</span> <span class="nv">g:ycm_server_python_interpreter</span><span class="p">=</span><span class="s1">'${HOME}/.local/python3.6/bin/python3'</span>
+<span class="k">let</span> <span class="nv">g:ycm_python_sys_path</span> <span class="p">=</span> <span class="s1">'${HOME}/.local/python3.6/lib/python3.6'</span>
+<span class="k">let</span> <span class="nv">g:ycm_global_ycm_extra_conf</span><span class="p">=</span><span class="s1">'~/.vim/.ycm_extra_conf.py'</span>
+</code></pre></div></div>
+
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> 关于 YCM 的配置 </div> </div> <div class="content"> <p>喜欢折腾的同学肯定不想装完 YCM 就完事儿了， 把它调教成一键趁手的工具才是我们安装这个插件的初心， 这里推荐几篇还不错的配置文档供大家参阅。 我自己也配置了一份精简版的， 可参阅 <a href="https://github.com/HangX-Ma/dotfiles/blob/main/vim/.vimrc">HangX-Ma/dotfiles: vim/.vimrc</a>.</p>
+
+<ul>
+  <li><a href="https://cloud.tencent.com/developer/article/1745640">手把手教你配置linux下C++开发工具</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/33046090">知乎 - 韦易笑 YouCompleteMe 中容易忽略的配置</a></li>
+  <li><a href="http://howiefh.github.io/2015/05/22/vim-install-youcompleteme-plugin/">FengHao - Vim 自动补全插件 YouCompleteMe 安装与配置</a></li>
+</ul>
+
+
+
+ </div> </div>]]></content><author><name>HangX-Ma</name></author><category term="Tool" /><category term="neovim" /><summary type="html"><![CDATA[记录 Vim 补全插件 YouCompleteMe C++11 老旧版本的安装与配置， 适用 Clang Completer]]></summary></entry><entry><title type="html">CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX</title><link href="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html" rel="alternate" type="text/html" title="CMU15-445 Fa23: PROJECT2 - EXTENDIBLE HASH INDEX" /><published>2023-11-28T00:00:00+08:00</published><updated>2023-11-28T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2</id><content type="html" xml:base="https://hangx-ma.github.io/2023/11/28/cmu15445-fa23-p2.html"><![CDATA[<h2 id="1-理解-extendible-hash">1. 理解 Extendible Hash</h2>
 
 <ul>
   <li><a href="https://www.geeksforgeeks.org/extendible-hashing-dynamic-approach-to-dbms/">Extendible Hashing (Dynamic approach to DBMS)</a></li>
@@ -2058,424 +2267,4 @@ Expected equality of these values:
 
 <blockquote>
   <p>具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e9b19e5f19851f12bcae83531a050d60230abd08">commit#e9b19e5</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 6</title><link href="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 6" /><published>2023-07-10T00:00:00+08:00</published><updated>2023-07-10T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/10/rcore-note-ch6</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/10/rcore-note-ch6.html"><![CDATA[<blockquote>
-  <p>文件系统这块的内容还是相当复杂的， 当时学 xv6 就是一知半解把 lab 草草做完了事儿了， 结果这几个月调设备的时候遇到用 SPI Nand Flash 的设备， 文件系统挂载不上等问题。 自己对 Block Device， VFS， 以及 inode 这些概念的理解都不是很到位， 调试非常痛苦到最后陷入了死胡同， 借着学习 rCore 的机会争取把这块搞懂， 毕竟从头搭一个 OS 要对细节有更好的把握。</p>
-</blockquote>
-
-<p><code class="language-plaintext highlighter-rouge">easy-fs</code> 自下而上大致可以分成五个不同的层次：</p>
-
-<dl>
-  <dt>磁盘块设备接口层</dt>
-  <dd>定义了以块大小为单位对磁盘块设备进行读写的 trait 接口</dd>
-  <dt>块缓存层</dt>
-  <dd>在内存中缓存磁盘块的数据， 避免频繁读写磁盘</dd>
-  <dt>磁盘数据结构层</dt>
-  <dd>磁盘上的超级块、 位图、 索引节点、 数据块、 目录项等核心数据结构和相关处理</dd>
-  <dt>磁盘块管理器层</dt>
-  <dd>合并了上述核心数据结构和磁盘布局所形成的磁盘文件系统数据结构， 以及基于这些结构进行文件系统的创建等操作， 以及对磁盘块进行分配和回收处理</dd>
-  <dt>索引节点层</dt>
-  <dd>管理索引节点（即文件控制块）数据结构， 并实现文件创建/文件打开/文件读写等成员函数， 以向上支持文件操作相关的系统调用</dd>
-</dl>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-10-rcore-note-ch6/fsos-fsdisk.png" alt="Filesystem OS details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Filesystem OS Details, rCore</u></font>
-</div>
-
-<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第六章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch6">[ch6]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="1-文件系统">1. 文件系统</h2>
-
-<p>文件系统交互的主要对象是磁盘这类的存储器， 这类存储器和 RAM 的管理方式不同， 这类存储器以扇区 （一般为 512 bytes） 进行读写， 以块为单位进行存储 （一个块为由多个扇区组成）。 文件系统的职责就是将逻辑上的目录树结构映射存储到这类存储器中并进行管理。 另外， 为了适配管理多个文件系统， 在此基础上抽象出一层 <strong>虚拟文件系统（VFS, Virtual File System）</strong> 提供统一的接口和目录树的通用格式方便进行管理。</p>
-
-<h2 id="2-块设备接口层">2. 块设备接口层</h2>
-
-<p>文件系统以块为单位进行数据管理， 一般我们会通过 <strong>块设备驱动</strong> 完成对磁盘的数据的存取， 这需要文件系统提供接口对接驱动， 这种方式以二者职能为分界进行了层次化处理。 在 rCore 中提供 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 抽象接口， 不过需要注意的是， 这个接口实现了 <code class="language-plaintext highlighter-rouge">Send</code>， <code class="language-plaintext highlighter-rouge">Sync</code>， <code class="language-plaintext highlighter-rouge">Any</code> 这几个 trait。 前两个见过面， 用以保证数据的线程安全， 但我目前还是不太理解下面这两句：</p>
-
-<ul>
-  <li><em>A type is Send if it is safe to send it to another thread.</em></li>
-  <li><em>A type is Sync if it is safe to share between threads (<code class="language-plaintext highlighter-rouge">T</code> is Sync if and only if <code class="language-plaintext highlighter-rouge">&amp;T</code> is Send).</em></li>
-</ul>
-
-<p>由于 Rust 编译器需要知道 trait 实现时的具体大小， 因而 rCore 后续使用的时候都是以 <code class="language-plaintext highlighter-rouge">Arc&lt;dyn BlockDevice&gt;</code> 表明该 trait 类型， 被 <code class="language-plaintext highlighter-rouge">Arc</code> 引用包裹的静态大小是已知的， 这样编译器可以保证引用指向已分配堆的 <code class="language-plaintext highlighter-rouge">BlockDevice</code>， 同时还需要使用 <code class="language-plaintext highlighter-rouge">dyn</code> 关键字。</p>
-
-<p>用到 <code class="language-plaintext highlighter-rouge">Any</code> 与 <code class="language-plaintext highlighter-rouge">BlockDevice</code> 是一个 trait 类型相关。 <code class="language-plaintext highlighter-rouge">Any</code> 的存在实现了 Rust 语言的部分的反射功能， 获得变量的类型 <code class="language-plaintext highlighter-rouge">TypeId</code>， 判断变量是否是指定类型， 转换该类型， 获取类型名称等， 具体的作用后续阅读代码再补充。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_dev.rs</span>
-<span class="k">pub</span> <span class="k">trait</span> <span class="n">BlockDevice</span> <span class="p">:</span> <span class="nb">Send</span> <span class="o">+</span> <span class="nb">Sync</span> <span class="o">+</span> <span class="n">Any</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">read_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
-    <span class="k">fn</span> <span class="nf">write_block</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://doc.rust-lang.org/nomicon/send-and-sync.html">The Rustonomicon - 8.2. Send and Sync</a><br />
-<a href="https://rustwiki.org/zh-CN/rust-by-example/trait/dyn.html">通过例子学 Rust 中文版 - 16.2. 使用 dyn 返回 trait</a><br />
-<a href="https://www.jianshu.com/p/28386b52c607">Rust std-any 模块详解</a></p>
-</blockquote>
-
-<h2 id="3-块缓存层">3. 块缓存层</h2>
-
-<p>块缓存层的存在是为了减少块设备频繁读写的开销， 相较于直接从 RAM 中获取数据， 读写磁盘的速度还是太慢了， 因而我们在软件层面实现块的缓存以加快数据的读写。 但缓存还得解决缓存一致性以及同步性等问题， rCore 使用块缓存全局管理器解决这些问题， 并通过该管理器一次性让更多的块合并操作， 这是因为连续的块的操作能够加速存取速度。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCache</span> <span class="p">{</span>
-    <span class="n">cache</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">],</span>
-    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">modified</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>每个 BlockCache 缓存一个磁盘块， 这是一个最小单位， rCore 提供了一些对缓存管理的方法：</p>
-
-<ul>
-  <li><strong>new</strong>： <code class="language-plaintext highlighter-rouge">BlockCache</code> 实现了 <code class="language-plaintext highlighter-rouge">new</code> 方法创建从磁盘读取一个 Block 到缓冲区。 前述所言， Block 大小和 Sector 大小一致均为 512 bytes， 这也是缓冲区 <code class="language-plaintext highlighter-rouge">cache</code> 被设置为 <code class="language-plaintext highlighter-rouge">BLOCK_SZ</code> 大小的原因。</li>
-  <li><strong>addr_of_offset</strong>： 获取 <code class="language-plaintext highlighter-rouge">cache</code> 数组偏移 <code class="language-plaintext highlighter-rouge">offset</code> 大小的字节地址。</li>
-  <li><strong>get_ref， get_mut</strong>： 通过调用 <code class="language-plaintext highlighter-rouge">addr_of_offset</code> 获取地址后， 将该地址声明为不可变或可变引用。</li>
-</ul>
-
-<p>rCore 将 <code class="language-plaintext highlighter-rouge">BlockCache::get_ref</code> 和 <code class="language-plaintext highlighter-rouge">BlockCache::get_mut</code> 封装成了 <code class="language-plaintext highlighter-rouge">BlockCache::read</code> 以及 <code class="language-plaintext highlighter-rouge">BlockCache::modify</code> 这两个泛型， 这两个函数后续用到非常多， 后面结合具体代码进行解释。 但从代码的构成而言， <code class="language-plaintext highlighter-rouge">read/modify</code> 构成了传入闭包 f 的一层执行环境，让它能够绑定到一个缓冲区上执行。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
-
-<span class="k">impl</span> <span class="n">BlockCache</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="n">read</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
-        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_ref</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
-    <span class="p">}</span>
-
-    <span class="k">pub</span> <span class="k">fn</span> <span class="n">modify</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
-        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>rCore 实现了很多与 <code class="language-plaintext highlighter-rouge">BlockCache</code> 相关的操作方法详见 Tutorial， 这里仅对个人疑难点做记录以及梳理思路。</p>
-</blockquote>
-
-<p>rCore 用 FIFO 作为简单的缓存替换策略并限定了缓存区的大小， <strong>块缓存全局管理器</strong> 完成了上述所说的缓存管理的功能。 值得注意的是缓存队列中存储的是 <strong>块编号</strong> 和 <strong>块缓存</strong> 组。 块缓存类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code>， 共享引用保证在当前 <strong>块缓存全局管理器</strong> 中保留一个引用外（FIFO 剔除缓存的依据）， 缓存请求者能够对缓存进行访问， 而 Mutex 则避免在后续多核拓展时的访存冲突。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">BlockCacheManager</span> <span class="p">{</span>
-    <span class="n">queue</span><span class="p">:</span> <span class="n">VecDeque</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">usize</span><span class="p">,</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">struct BlockCacheManager</code> 实现了一个 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 的方法， 通过将全局实例 <code class="language-plaintext highlighter-rouge">BLOCK_CACHE_MANAGER</code> 封装， 其他模块能够方便地调用 <code class="language-plaintext highlighter-rouge">get_block_cache</code> 获取 <code class="language-plaintext highlighter-rouge">block_id</code> 对应的缓存块， 但需要注意的是返回类型是 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;BlockCache&gt;&gt;</code> 调用者还需要通过 <code class="language-plaintext highlighter-rouge">.lock()</code> 方法获取互斥锁才能对 <code class="language-plaintext highlighter-rouge">BlockCache</code> 进行操作。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_cache</span><span class="p">(</span>
-    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span>
-<span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">BlockCache</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="n">BLOCK_CACHE_MANAGER</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.get_block_cache</span><span class="p">(</span><span class="n">block_id</span><span class="p">,</span> <span class="n">block_device</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="4-磁盘布局及磁盘上数据结构">4. 磁盘布局及磁盘上数据结构</h2>
-
-<p>前面几个部分比较好理解， 个人认为这个小节和 inode 小节最为关键且复杂。 要理解磁盘布局先得理解几个概念：</p>
-
-<dl>
-  <dt>索引节点(Inode, Index Node)</dt>
-  <dd>Inode 编码了文件/目录的底层编号， 这个数据结构包含文件大小， 访问权限， 文件类型等信息， 还包含对数据的索引信息， 通过这些索引信息就能够找到数据块存储在磁盘上的位置。</dd>
-  <dt>位图(Bitmap)</dt>
-  <dd>位图用以标注索引节点以及数据块的分配情况， 通过位图能够方便分配和回收在磁盘上的存储资源。</dd>
-</dl>
-
-<p>rCore 中的磁盘布局如下图所示， 他们是以 Block ID 顺序排布的， 后续根据这个顺序对关键数据结构进行阐述。 这里需要注意的是， rCore 的假定内核仅管理一个块设备， 否则仅以 Block ID 作为标识， 在访问多个不同的块设备的时候会引起歧义。</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-10-rcore-note-ch6/layouts.png" alt="Disk Layouts, HangX-Ma" width="800" /><a id="disk-layouts"></a>
-    <br />
-    <font size="2" color="#999"><u>Disk Layouts, HangX-Ma</u></font>
-</div>
-
-<h3 id="41-super-block">4.1 Super Block</h3>
-
-<p>一句话可以概括， Super Block 存储了后续四个分区占用的 <strong>块数量</strong>， 并利用 <strong>MAGIC</strong> 验证文件系统的合法性。</p>
-
-<h3 id="42-inodedata-bitmap">4.2 Inode/Data Bitmap</h3>
-
-<p>从磁盘布局可以看出， rCore 通过 <strong>Inode Bitmap</strong> 和 <strong>Data Bitmap</strong> 分别管理索引节点和数据块。 每个 Bitmap 可以占据多个块， 在 rCore 中一个块的大小和一个扇区的大小一致都是 512 bytes， 相当于每个 Bitmap 实际上可以管理 \(4096 \times n\) 个索引节点或数据块。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/bitmap.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Bitmap</span> <span class="p">{</span>
-    <span class="n">start_block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">blocks</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">type</span> <span class="n">BitmapBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u64</span><span class="p">;</span> <span class="mi">64</span><span class="p">];</span>
-</code></pre></div></div>
-
-<p>rCore 教程中的 <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 存储的是 <strong>Inode Bitmap</strong> 或 <strong>Data Bitmap</strong> 在磁盘中的位置和大小的信息， 而这个数据结构本身则是存储在 RAM 中的。 rCore 另外用 <code class="language-plaintext highlighter-rouge">BitmapBlock</code> 数组表示每个 4096-bit 大小的数据块。 理解这个数据结构的设计原理， <code class="language-plaintext highlighter-rouge">struct Bitmap</code> 中的 <code class="language-plaintext highlighter-rouge">alloc</code> 和 <code class="language-plaintext highlighter-rouge">dealloc</code> 两个方法的实现就容易理解了。</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            start_block_id(Start ID)
-                  v
-        ----------+---------------------+--------
-                  |//// Bitmap Area ////|
-        ----------+---------------------+--------
-                                        ^
-                             start_block_id + blocks(End ID)
-        Block ID =&gt; 
-        (increase)
-</code></pre></div></div>
-
-<p>这里结合 <code class="language-plaintext highlighter-rouge">alloc</code> 函数阐明 <code class="language-plaintext highlighter-rouge">BlockCache</code> 提供的 <code class="language-plaintext highlighter-rouge">read/modify</code> 方法。 注意 <code class="language-plaintext highlighter-rouge">modify</code> 函数中的闭包， 它显式声明了传入闭包的参数的类型是 <code class="language-plaintext highlighter-rouge">&amp;mut BitmapBlock</code> 这样 <code class="language-plaintext highlighter-rouge">modify</code> 中才能将泛型 <code class="language-plaintext highlighter-rouge">T</code> 实例化为具体的类型 <code class="language-plaintext highlighter-rouge">BitmapBlock</code>。 这样通过声明的 <code class="language-plaintext highlighter-rouge">bitmap_block</code>， 我们实际上能对缓冲区的数据进行更改操作。 如果没有理解 <code class="language-plaintext highlighter-rouge">read/modify</code> 泛型的作用， 闭包中捕获的参数的数据来源就会混淆， 对后续的实验理解造成较大的阻碍。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/block_cache.rs</span>
-
-<span class="k">impl</span> <span class="n">BlockCache</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="n">modify</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="k">impl</span> <span class="nf">FnOnce</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">V</span> <span class="p">{</span>
-        <span class="nf">f</span><span class="p">(</span><span class="k">self</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-<span class="c1">// easy-fs/src/bitmap.rs</span>
-
-<span class="k">const</span> <span class="n">BLOCK_BITS</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="n">BLOCK_SZ</span> <span class="o">*</span> <span class="mi">8</span><span class="p">;</span>
-
-<span class="k">impl</span> <span class="n">Bitmap</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">alloc</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span> <span class="p">{</span>
-        <span class="k">for</span> <span class="n">block_id</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="k">self</span><span class="py">.blocks</span> <span class="p">{</span>
-            <span class="k">let</span> <span class="n">pos</span> <span class="o">=</span> <span class="nf">get_block_cache</span><span class="p">(</span>
-                <span class="n">block_id</span> <span class="o">+</span> <span class="k">self</span><span class="py">.start_block_id</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span>
-                <span class="nn">Arc</span><span class="p">::</span><span class="nf">clone</span><span class="p">(</span><span class="n">block_device</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="nf">.lock</span><span class="p">()</span>
-            <span class="nf">.modify</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> 
-            <span class="p">|</span><span class="n">bitmap_block</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">BitmapBlock</span><span class="p">|</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">((</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">inner_pos</span><span class="p">))</span> <span class="o">=</span> <span class="n">bitmap_block</span>
-                    <span class="nf">.iter</span><span class="p">()</span>
-                    <span class="nf">.enumerate</span><span class="p">()</span>
-                    <span class="nf">.find</span><span class="p">(|(</span><span class="n">_</span><span class="p">,</span> <span class="n">bits64</span><span class="p">)|</span> <span class="o">**</span><span class="n">bits64</span> <span class="o">!=</span> <span class="nn">u64</span><span class="p">::</span><span class="n">MAX</span><span class="p">)</span>
-                    <span class="nf">.map</span><span class="p">(|(</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">bits64</span><span class="p">)|</span> <span class="p">{</span>
-                        <span class="p">(</span><span class="n">bits64_pos</span><span class="p">,</span> <span class="n">bits64</span><span class="nf">.trailing_ones</span><span class="p">()</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span>
-                    <span class="p">})</span> <span class="p">{</span>
-                    <span class="c1">// modify cache</span>
-                    <span class="n">bitmap_block</span><span class="p">[</span><span class="n">bits64_pos</span><span class="p">]</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1u64</span> <span class="o">&lt;&lt;</span> <span class="n">inner_pos</span><span class="p">;</span>
-                    <span class="nf">Some</span><span class="p">(</span><span class="n">block_id</span> <span class="o">*</span> <span class="n">BLOCK_BITS</span> <span class="o">+</span> <span class="n">bits64_pos</span> <span class="o">*</span> <span class="mi">64</span> <span class="o">+</span> <span class="n">inner_pos</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                    <span class="nb">None</span>
-                <span class="p">}</span>
-            <span class="p">});</span>
-            <span class="k">if</span> <span class="n">pos</span><span class="nf">.is_some</span><span class="p">()</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="n">pos</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="nb">None</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="43-inode-blocks">4.3 Inode Blocks</h3>
-
-<p>Inode 存储着每个文件/目录的元数据： 文件/目录大小 <code class="language-plaintext highlighter-rouge">size</code>， 索引节点类型 <code class="language-plaintext highlighter-rouge">type_</code>， 以及对数据块的索引 <code class="language-plaintext highlighter-rouge">direct/indirect1/indirect2</code>。 在虚拟内存映射的章节 rCore 通过三级页表进行索引， 这里的 Inode 索引方式也很类似。 rCore 设计的单个 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的大小是 128 bytes， 也就是 <strong>Inode Blocks</strong> 中每个块能够存储 4 个 <code class="language-plaintext highlighter-rouge">DiskInode</code>。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
-
-<span class="k">const</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">28</span><span class="p">;</span>
-
-<span class="nd">#[repr(C)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">DiskInode</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">size</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">direct</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="n">INODE_DIRECT_COUNT</span><span class="p">],</span>
-    <span class="k">pub</span> <span class="n">indirect1</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">indirect2</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">DiskInodeType</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="nd">#[derive(PartialEq)]</span>
-<span class="k">pub</span> <span class="k">enum</span> <span class="n">DiskInodeType</span> <span class="p">{</span>
-    <span class="n">File</span><span class="p">,</span>
-    <span class="n">Directory</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>这里的多级索引是这样理解的， 分为直接索引 (direct) 和 间接索引 (indirect1/indirect2)。</p>
-
-<ul>
-  <li><strong>直接索引</strong> <code class="language-plaintext highlighter-rouge">direct</code> 数组的每一个元素都保存着一个数据块的 Block ID， 这在文件尺寸不大于 <code class="language-plaintext highlighter-rouge">28 * 512 bytes = 14 KiB</code> 时使用。</li>
-</ul>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-10-rcore-note-ch6/direct-index.png" alt="Direct Index, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Direct Index, HangX-Ma</u></font>
-</div>
-
-<ul>
-  <li><strong>间接索引</strong>
-    <ul>
-      <li>装满 <code class="language-plaintext highlighter-rouge">direct</code> 这部分内容后需要用间接索引扩大索引范围。 可以使用 <code class="language-plaintext highlighter-rouge">indirect1</code> 存储一个数据块的 Block ID 获取到这个数据块的内容， 而这个数据块我们不直接保存数据， 而是将其当作一个跳板用来存储其他数据块的 Block ID。 512 bytes 的数据块以 <code class="language-plaintext highlighter-rouge">u32(4 bytes)</code> 为单位， 这个数据块最大能存储 128 个 Block ID， 这样我们还能额外索引到 <code class="language-plaintext highlighter-rouge">128 * 512 bytes = 64 KiB</code> 的数据。</li>
-      <li>相同的道理， 一级间接索引和直接索引总共 78 KiB 空间都不够用， 就可以再加上二级间接索引， 通过二级索引先找到一级索引块的 Block ID， 这些一级间接索引指向的每个数据块都不直接保存数据， 而是存储其他数据块的 Block ID， 这样再通过一级索引就能确定最终的数据块， 这种设计能额外索引 8 MiB 的额外内容。</li>
-    </ul>
-  </li>
-</ul>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-10-rcore-note-ch6/indirect-index.png" alt="Indirect Index, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Indirect Index, HangX-Ma</u></font>
-</div>
-
-<p><code class="language-plaintext success highlighter-rouge">NOTE: 关于 get_block_id 的一些疑惑和相关解释</code></p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DiskInode</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_block_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">inner_id</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="n">block_device</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u32</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>基于直接索引和间接索引， <code class="language-plaintext highlighter-rouge">DiskInode</code> 提供了获取数据块索引的功能的 <code class="language-plaintext highlighter-rouge">get_block_id</code> 函数。 这个函数的接口需要读入一个 <code class="language-plaintext highlighter-rouge">inner_id</code>， 这个并不是对应实际的磁盘的 Block ID 的， 而是根据这个 <code class="language-plaintext highlighter-rouge">inner_id</code> 的大小结合我们存储在 <code class="language-plaintext highlighter-rouge">Inode</code> 中的 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code> 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 可以获取到对应的数据块所在的 Block ID。</p>
-<blockquote>
-  <p>那这些数据又是怎么来的？ 通过 <a href="#6-索引节点">6. 索引节点</a>， 中 <code class="language-plaintext highlighter-rouge">struct Inode</code> 提供了 <code class="language-plaintext highlighter-rouge">create</code> 方法。</p>
-</blockquote>
-
-<p>对于 <code class="language-plaintext highlighter-rouge">inner_id</code> 可以确定是使用直接索引还是间接索引， 直接索引 <code class="language-plaintext highlighter-rouge">direct</code> 范围是 \([0;27]\)，  <code class="language-plaintext highlighter-rouge">indirect1</code> 的范围是 \([28;127]\)， <code class="language-plaintext highlighter-rouge">indirect2</code> 的范围是 \([128;128*128-1]\)。 实际的 <code class="language-plaintext highlighter-rouge">inner_id</code> 和索引方式的分布值如下图所示：</p>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-10-rcore-note-ch6/inner-id.png" alt="Inner ID, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Inner ID, HangX-Ma</u></font>
-</div>
-
-<p>后续关于 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的各种辅助方法就不展开了。</p>
-
-<h3 id="44-data-block--directory">4.4 Data Block / Directory</h3>
-
-<p>对 <strong>文件</strong> 而言其内容就是字节序列， 保存文件内容的数据块可以用字节数组表示。 前述的 Inode 相关的 <code class="language-plaintext highlighter-rouge">read_at</code> 和 <code class="language-plaintext highlighter-rouge">write_at</code> 方法中就是对这些字节数组进行操作。 这里我对 <code class="language-plaintext highlighter-rouge">read_at</code> 以及 <code class="language-plaintext highlighter-rouge">write_at</code> 操作的数据的位置是有疑惑的， 因为 rCore 自下而上编写的这个教学手册， 底层的内容很可能是有上层的包装的 （突然就想起李雅普诺夫判定式了）。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
-<span class="k">type</span> <span class="n">DataBlock</span> <span class="o">=</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">BLOCK_SZ</span><span class="p">];</span>
-</code></pre></div></div>
-
-<p>对 <strong>目录</strong> 而言情况则有所不同， 我们需要建立一种树的结构进行逐级访问。 rCore 设计了 <code class="language-plaintext highlighter-rouge">struct DirEntry</code> 用以存储目录项结构， 其大小为 32 bytes， 这意味着每个 Data Block 可以最多存储 16 个目录项结构。 <code class="language-plaintext highlighter-rouge">name</code> 表示该目录下的一个文件名或子目录目录名， <code class="language-plaintext highlighter-rouge">inode_number</code> 则是这个文件或子目录所对应的 Inode 的节点编号。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/layout.rs</span>
-<span class="k">const</span> <span class="n">NAME_LENGTH_LIMIT</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
-
-<span class="nd">#[repr(C)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">DirEntry</span> <span class="p">{</span>
-    <span class="n">name</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">NAME_LENGTH_LIMIT</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
-    <span class="n">inode_number</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">const</span> <span class="n">DIRENT_SZ</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h2 id="5-磁盘块管理器">5. 磁盘块管理器</h2>
-
-<p>在前面我们描述了磁盘的布局及其相应的数据结构， 这里就是将这些这些细节进行统筹管理， <code class="language-plaintext highlighter-rouge">struct EasyFileSystem</code> 中所保留的信息正好是 <a href="#disk-layouts">Disk Layouts</a> 中描述的几个部分。 另外， 保留 <code class="language-plaintext highlighter-rouge">block_device</code> 指针引用是方便下层数据结构访问块设备。 可以看到这个数据结构中是不包含 superblock 的， 但是在后续计算的时候需要考虑进去。 从这里开始， 所有的数据结构都存储在内存上。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/efs.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">EasyFileSystem</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">inode_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">data_bitmap</span><span class="p">:</span> <span class="n">Bitmap</span><span class="p">,</span>
-    <span class="n">inode_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="c1">// inode 区域的起始 block id</span>
-    <span class="n">data_area_start_block</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span> <span class="c1">// data 区域的起始 block id</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="6-索引节点">6. 索引节点</h2>
-
-<p>服务于文件相关系统调用的索引节点层的代码在 <code class="language-plaintext highlighter-rouge">vfs.rs</code> 中， rCore 抽象了一层 Virtual Filesystem 方便使用者管理文件系统的文件与目录。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Inode</code> 和 <code class="language-plaintext highlighter-rouge">DiskInode</code> 的区别从它们的名字中就可以看出： <code class="language-plaintext highlighter-rouge">DiskInode</code> 放在磁盘块中比较固定的位置，而 <code class="language-plaintext highlighter-rouge">Inode</code> 是放在内存中的记录文件索引节点信息的数据结构。 <code class="language-plaintext highlighter-rouge">Inode</code> 数据结构给使用者直接管理目录树结构中逻辑上的文件和目录的接口。 这个 <code class="language-plaintext highlighter-rouge">Inode</code> 在磁盘上所处的位置用 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可表示， <code class="language-plaintext highlighter-rouge">fs</code> 则给 Inode 提供了访问底层文件系统的接口。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Inode</span> <span class="p">{</span>
-    <span class="n">block_id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">block_offset</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">fs</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">EasyFileSystem</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-    <span class="n">block_device</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="k">dyn</span> <span class="n">BlockDevice</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>rCore 后续还介绍了获取根目录 Inode, 文件索引， 文件列举， 文件创建， 文件清空， 文件读写的方式。 一直到这里把这几个函数读完， 以及将前述的所有内容再细读之后， 我才理清了 <code class="language-plaintext highlighter-rouge">DiskInode</code> 中的数据是如何被创建以及如何被索引管理的， 之前一直没搞懂究竟数据是如何被定位到 Data Block 的， 实际上就是 root_node 创建新的 child node 的时候 (Inode::create) 就通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_inode</code> 在 Inode Area 创建了一个新的 Inode， 最开始这个 Inode 是不存在任何数据的(<code class="language-plaintext highlighter-rouge">DiskInode::initialize</code> 返回的是个空的 <code class="language-plaintext highlighter-rouge">DiskInode</code>)， 只有在调用 <code class="language-plaintext highlighter-rouge">Inode::increase_size</code> 之后， 通过 <code class="language-plaintext highlighter-rouge">EasyFileSystem::alloc_data</code> 申请数据块后， 利用 <code class="language-plaintext highlighter-rouge">DiskInode::increase_size</code> 函数将这些数据块和 <code class="language-plaintext highlighter-rouge">direct</code>， <code class="language-plaintext highlighter-rouge">indirect1</code>， 以及 <code class="language-plaintext highlighter-rouge">indirect2</code> 填充并联系起来的。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// easy-fs/src/vfs.rs</span>
-<span class="cd">/// Increase the size of a disk inode</span>
-<span class="k">fn</span> <span class="nf">increase_size</span><span class="p">(</span>
-    <span class="o">&amp;</span><span class="k">self</span><span class="p">,</span>
-    <span class="n">new_size</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
-    <span class="n">disk_inode</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">DiskInode</span><span class="p">,</span>
-    <span class="n">fs</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">MutexGuard</span><span class="o">&lt;</span><span class="n">EasyFileSystem</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="n">new_size</span> <span class="o">&lt;</span> <span class="n">disk_inode</span><span class="py">.size</span> <span class="p">{</span>
-        <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">let</span> <span class="n">blocks_needed</span> <span class="o">=</span> <span class="n">disk_inode</span><span class="nf">.blocks_num_needed</span><span class="p">(</span><span class="n">new_size</span><span class="p">);</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">v</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">blocks_needed</span> <span class="p">{</span>
-        <span class="n">v</span><span class="nf">.push</span><span class="p">(</span><span class="n">fs</span><span class="nf">.alloc_data</span><span class="p">());</span>
-    <span class="p">}</span>
-    <span class="n">disk_inode</span><span class="nf">.increase_size</span><span class="p">(</span><span class="n">new_size</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.block_device</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="7-课后练习">7. 课后练习</h2>
-
-<h3 id="71-编程练习">7.1 编程练习</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
-</ul>
-
-<h3 id="72-实验练习">7.2 实验练习</h3>
-
-<h4 id="硬链接">硬链接</h4>
-
-<p>硬链接要求两个不同的目录项指向同一个文件， 在 easy-fs 中就是两个不同名称目录项指向同一个磁盘块。 需要实现三个系统调用 <code class="language-plaintext highlighter-rouge">sys_linkat</code>， <code class="language-plaintext highlighter-rouge">sys_unlinkat</code>， 以及 <code class="language-plaintext highlighter-rouge">sys_stat</code>。</p>
-
-<p>硬链接需要新的 Inode 的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 与被链接的对象是一致的， 这样才能保证链接到同一个文件数据， 而这两个数据则是通过 <code class="language-plaintext highlighter-rouge">get_disk_inode_pos</code> 函数获取到的， 依据是 <code class="language-plaintext highlighter-rouge">DirEntry</code> 中的 <code class="language-plaintext highlighter-rouge">inode_id</code> 这个数据。 所以 <code class="language-plaintext highlighter-rouge">sys_linkat</code> 的实现和 <code class="language-plaintext highlighter-rouge">Inode::create</code> 非常类似， 唯一不同的是 <code class="language-plaintext highlighter-rouge">new_inode_id</code> 不再是通过 <code class="language-plaintext highlighter-rouge">fs.alloc_inode</code> 获取一个新的 <code class="language-plaintext highlighter-rouge">inode_id</code>， 而是和需要链接的对象的完全一致。</p>
-
-<p>对于 <code class="language-plaintext highlighter-rouge">sys_unlinkat</code> 就是和上述实现相反， 通过输入的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 这两个参数， 遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 并将数据读取到 <code class="language-plaintext highlighter-rouge">buf</code> 中查看 <code class="language-plaintext highlighter-rouge">buf</code> 对应的 <code class="language-plaintext highlighter-rouge">block_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_offset</code> 是否和所给的参数一致， 另外实验不要求删除这个被分配的 inode。</p>
-
-<p><code class="language-plaintext highlighter-rouge">sys_stat</code> 这部分遇到的比较大的问题是如何将 <code class="language-plaintext highlighter-rouge">fd_table</code> 获取的到的 <code class="language-plaintext highlighter-rouge">OSInode</code> 从一个 trait 转换成实际的数据类型。 参考了 <a href="https://github.com/yao-jz/rCore-lab/commit/5bdaac804d7ab042f337261ecefa50bda72c0896">yao-jz/rCore-lab - ch6</a> 中的实现， 需要给 File Trait 增加一个自己实现的 AnyConvertor Trait， 能够将任意类型转为 <code class="language-plaintext highlighter-rouge">&amp;dyn Any</code> 再通过 <code class="language-plaintext highlighter-rouge">downcast_ref::&lt;OSInode&gt;()</code> 强制转换为 <code class="language-plaintext highlighter-rouge">OSInode</code> 数据类型。 这样我们再给 <code class="language-plaintext highlighter-rouge">OSInode</code> 增加 <code class="language-plaintext highlighter-rouge">get_inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">get_inode_pos</code> 获取 <code class="language-plaintext highlighter-rouge">inode_id</code> 以及 <code class="language-plaintext highlighter-rouge">block_id</code> 和 <code class="language-plaintext highlighter-rouge">block_offset</code> 即可。 另外需要一个 <code class="language-plaintext highlighter-rouge">get_nlink_num</code> 函数获取 <code class="language-plaintext highlighter-rouge">nlink</code> 硬链接的数量， 思路和 unlink 的实现很类似， 也是遍历 <code class="language-plaintext highlighter-rouge">file_count</code> 数量的 <code class="language-plaintext highlighter-rouge">DirEntry</code> 只不过我们只计数。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">any</span><span class="p">::</span><span class="n">Any</span><span class="p">;</span>
-
-<span class="cd">/// convert current type to &amp;dyn Any</span>
-<span class="k">pub</span> <span class="k">trait</span> <span class="n">AnyConvertor</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">as_any</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Any</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="k">'static</span><span class="o">&gt;</span> <span class="n">AnyConvertor</span> <span class="k">for</span> <span class="n">T</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">as_any</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Any</span> <span class="p">{</span>
-        <span class="k">self</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<blockquote>
-  <p>具体实现可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/1b6c70b223719a7207a786fdc49e09eccce51480">commit#1b6c70b</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第六章：文件系统， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
