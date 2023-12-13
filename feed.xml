@@ -1,5 +1,386 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-07T10:10:04+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
-</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">Vim Plugin: YouCompleteMe 旧版本装配</title><link href="https://hangx-ma.github.io/2023/12/06/YCM-config.html" rel="alternate" type="text/html" title="Vim Plugin: YouCompleteMe 旧版本装配" /><published>2023-12-06T00:00:00+08:00</published><updated>2023-12-06T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/12/06/YCM-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/12/06/YCM-config.html"><![CDATA[<p>YouCompleteMe 是 Vim 比较常用的一款代码补全插件， 在 neovim 盛行的当下， 这类补全插件也逐渐淡出了大众视野， 但也有一些场合使用 YouCompleteMe 也有自己的一席之地。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2023-12-13T21:59:36+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+</subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CSAPP - Bomb Lab</title><link href="https://hangx-ma.github.io/2023/12/12/csapp-bomblab.html" rel="alternate" type="text/html" title="CSAPP - Bomb Lab" /><published>2023-12-12T00:00:00+08:00</published><updated>2023-12-12T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/12/12/csapp-bomblab</id><content type="html" xml:base="https://hangx-ma.github.io/2023/12/12/csapp-bomblab.html"><![CDATA[<p>Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Bomb Lab， 实现源码可从 <a href="https://github.com/HangX-Ma/csapp/tree/main/02-bomblab">HangX-Ma/csapp: 02-bomblab</a> 获取。
+<!--more--></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Progress and timeline <font color="#4682B4">[2/14]</font></li>
+</ul>
+
+<p>阅读 <a href="https://csapp.cs.cmu.edu/3e/students.html">CS:APP3e Student Site - Online GDB Materials</a> 章节的内容可以快速熟悉 GDB 的使用指令， 另外 <a href="https://csapp.cs.cmu.edu/3e/docs/gdbnotes-x86-64.pdf">GDB Notes</a> 罗列了一系列常用的 GDB 指令， 比网上搜索的要简洁完备。</p>
+
+<p>开始实验之前用 <code class="language-plaintext highlighter-rouge">objdump -d bomb &gt; bomb.s</code> 反汇编这段二级制代码， 后续就不用在 GDB 里用 <code class="language-plaintext highlighter-rouge">print</code> 找半天了， 便捷很多。</p>
+
+<h2 id="1-phase1">1. Phase1</h2>
+
+<p>从 <code class="language-plaintext highlighter-rouge">bomb.c</code> 文件可以看到总共有 6 个 phase 的问题， 不难直接定位 <code class="language-plaintext highlighter-rouge">phase_1</code> 所在的部分：</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">ee0</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_1</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">ee0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%rsp
+  400ee4:	be 00 24 40 00       	mov    $0x402400,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">ee9</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">4</span><span class="n">a</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">eee</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef0</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">ef7</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_1</span><span class="m">+0</span><span class="n">x17</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef2</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">43</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef7</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c4</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">400</span><span class="n">efb</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<p>这里可以看到 <code class="language-plaintext highlighter-rouge">string_not_equal</code> 函数会进行字符串匹配， 而在调用函数之前， <code class="language-plaintext highlighter-rouge">%esi</code> 寄存器实际上传递的是第二个函数参数， 这个需要留意。 那索性看看 <code class="language-plaintext highlighter-rouge">string_note_equal</code> 函数做了什么：</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">401338</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">54</span><span class="w">                	</span><span class="n">push</span><span class="w">   </span><span class="o">%r12
+  40133a:	55                   	push   %</span><span class="n">rbp</span><span class="w">
+  </span><span class="m">40133</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">53</span><span class="w">                   	</span><span class="n">push</span><span class="w">   </span><span class="o">%rbx
+  40133c:	48 89 fb             	mov    %</span><span class="n">rdi</span><span class="p">,</span><span class="o">%rbx
+  40133f:	48 89 f5             	mov    %</span><span class="n">rsi</span><span class="p">,</span><span class="o">%rbp
+  401342:	e8 d4 ff ff ff       	call   40131b &lt;string_length&gt;
+  401347:	41 89 c4             	mov    %</span><span class="n">eax</span><span class="p">,</span><span class="o">%r12d
+  40134a:	48 89 ef             	mov    %</span><span class="n">rbp</span><span class="p">,</span><span class="o">%rdi
+  40134d:	e8 c9 ff ff ff       	call   40131b &lt;string_length&gt;
+  401352:	ba 01 00 00 00       	mov    $0x1,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401357</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">39</span><span class="w"> </span><span class="n">c4</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">r12d</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这里没有放全部的代码， 但前面的处理也比较清晰了。 <code class="language-plaintext highlighter-rouge">%rdi</code> 存储的是第一个函数参数， 可以看两次 <code class="language-plaintext highlighter-rouge">string_length</code> 函数调用存储的结果会进行比较， 如果不同就会 Explore Bomb。 而函数的输入参数在观察后也是清晰的， 仅有一个输入参数， 第一次给的 <code class="language-plaintext highlighter-rouge">%rdi</code> 中的内容， 第二次则是 <code class="language-plaintext highlighter-rouge">%rsi</code> 中的内容。 而在进入 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 之前 <code class="language-plaintext highlighter-rouge">%esi</code> 中的内容被赋值为了 <code class="language-plaintext highlighter-rouge">0x402400</code>， 说明这个地址应当存储着被比较的答案。 那么， 在 GDB 调试的时候不妨在 <code class="language-plaintext highlighter-rouge">0x400ee9</code> 调用 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 函数处设置断点， 调用如下命令打印的内容就是答案了：</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">(gdb) b *0x400ee9
+(gdb) r
+(gdb) print (char *)0x402400
+</span><span class="gp">$</span>1 <span class="o">=</span> <span class="s2">"Border relations with Canada have never been better."</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>用如上命令的主要原因是此处比较的是字符串是否匹配，　因而猜测答案应该是一串字符串。</p>
+</blockquote>
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>将上述答案放入 <code class="language-plaintext highlighter-rouge">result.txt</code> 文件的时候， 需要单独留一空行在最后， 否则 EOF 读取会有误。</p>
+
+
+
+ </div> </div>
+<h2 id="2-phase2">2. Phase2</h2>
+
+<p>开始在 <code class="language-plaintext highlighter-rouge">read_six_numbers</code> 函数里面看了半天， 发现就是读了几个数塞到特定的位置， 其中调用了 <code class="language-plaintext highlighter-rouge">sscanf</code>。 在过来看这段 <code class="language-plaintext highlighter-rouge">phase_2</code> 的代码， 获取数据后对 <code class="language-plaintext highlighter-rouge">%rsp</code> 存储的内容进行比较， 只有为 1 才会跳转到 <code class="language-plaintext highlighter-rouge">0x400f30</code> 位置， 取了一些值后继续跳转到 <code class="language-plaintext highlighter-rouge">0x400f17</code> 位置。 获取了 <code class="language-plaintext highlighter-rouge">%rsp</code> 寄存器中的内容， 一开始这个寄存器被设置为 1， 0x400f17 到 0x400f29 这部分代码就是检测前当前 <code class="language-plaintext highlighter-rouge">(%rbx)</code> 的值是否为 <code class="language-plaintext highlighter-rouge">-0x4%(rbx)</code> 即前一个值的两倍， 甚至这里的 4 字节宽度可以看出是个 <code class="language-plaintext highlighter-rouge">int</code> 类型数据， 总共循环 6 次。</p>
+
+<p>不难推断出答案应当为 <code class="language-plaintext highlighter-rouge">1 2 4 8 16 32</code>， 当然可以在 <code class="language-plaintext highlighter-rouge">0x400f1a</code> 处打断点， 查看上一个值 <code class="language-plaintext highlighter-rouge">%eax</code> 和 现在的值 <code class="language-plaintext highlighter-rouge">(%rbx)</code> 的内容也是一样的。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">efc</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">efc</span><span class="o">:</span><span class="w">	</span><span class="m">55</span><span class="w">                   	</span><span class="n">push</span><span class="w">   </span><span class="o">%rbp
+  400efd:	53                   	push   %</span><span class="n">rbx</span><span class="w">
+  </span><span class="m">400</span><span class="n">efe</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">28</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x28</span><span class="p">,</span><span class="o">%rsp
+  400f02:	48 89 e6             	mov    %</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rsi
+  400f05:	e8 52 05 00 00       	call   40145c &lt;read_six_numbers&gt;
+  400f0a:	83 3c 24 01          	cmpl   $0x1,(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f0e</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">20</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">f30</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x34</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f10</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f15</span><span class="o">:</span><span class="w">	</span><span class="n">eb</span><span class="w"> </span><span class="m">19</span><span class="w">                	</span><span class="n">jmp</span><span class="w">    </span><span class="m">400</span><span class="n">f30</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x34</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f17</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">43</span><span class="w"> </span><span class="n">fc</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="m">-0</span><span class="n">x4</span><span class="p">(</span><span class="o">%rbx),%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1a</span><span class="o">:</span><span class="w">	</span><span class="m">01</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">add</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1c</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="m">03</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,(%</span><span class="n">rbx</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1e</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">f25</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x29</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f20</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f25</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%rbx
+  400f29:	48 39 eb             	cmp    %</span><span class="n">rbp</span><span class="p">,</span><span class="o">%rbx
+  400f2c:	75 e9                	jne    400f17 &lt;phase_2+0x1b&gt;
+  400f2e:	eb 0c                	jmp    400f3c &lt;phase_2+0x40&gt;
+  400f30:	48 8d 5c 24 04       	lea    0x4(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rbx
+  400f35:	48 8d 6c 24 18       	lea    0x18(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rbp
+  400f3a:	eb db                	jmp    400f17 &lt;phase_2+0x1b&gt;
+  400f3c:	48 83 c4 28          	add    $0x28,%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">400</span><span class="n">f40</span><span class="o">:</span><span class="w">	</span><span class="m">5</span><span class="n">b</span><span class="w">                   	</span><span class="n">pop</span><span class="w">    </span><span class="o">%rbx
+  400f41:	5d                   	pop    %</span><span class="n">rbp</span><span class="w">
+  </span><span class="m">400</span><span class="n">f42</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">(gdb) print /d $</span>rax
+<span class="gp">$</span>1 <span class="o">=</span> 1
+<span class="gp">(gdb) print *(int *) ($</span>rbx<span class="o">)</span>
+<span class="gp">$</span>2 <span class="o">=</span> 2
+</code></pre></div></div>
+
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>这里要注意的是， 在进入 GDB 调试之前， 需要用 <code class="language-plaintext highlighter-rouge">set args result.txt</code> 设置程序的读取参数。 另外， bomb 程序会要求输入一组数， 一定要记得先随便输入 6 个数， 否则在判断输入数量就会出错了。</p>
+
+
+
+ </div> </div>
+<h2 id="3-phase3">3. Phase3</h2>
+
+<p>乍一看是理不出具体的操作的， 不过有几个地方还是能找到一些信息的。 如下代码先将 <code class="language-plaintext highlighter-rouge">%rsp</code> 预留出的几个位置的地址放到了 <code class="language-plaintext highlighter-rouge">%rcx</code> 和 <code class="language-plaintext highlighter-rouge">%rdx</code> 寄存器。 我们知道 <code class="language-plaintext highlighter-rouge">%rdx</code> 和 <code class="language-plaintext highlighter-rouge">%rcx</code> 是用以传输第三第四个参数的， 根据 <code class="language-plaintext highlighter-rouge">int sscanf(const char *str, const char *format, ...)</code> 的函数声明， 不难得知 <code class="language-plaintext highlighter-rouge">%esi</code> 中的内容通过 <code class="language-plaintext highlighter-rouge">sscanf</code> 格式化后写入到了 <code class="language-plaintext highlighter-rouge">%rdx</code> 和 <code class="language-plaintext highlighter-rouge">%rcx</code> 并返回格式化参数的个数。</p>
+
+<blockquote>
+  <p>通过读取 <code class="language-plaintext highlighter-rouge">0x4025cf</code> 处的内容得知为 <strong>“%d %d”</strong> 说明会格式化 2 个 <code class="language-plaintext highlighter-rouge">int</code> 类型的数据， 与猜测相符合。</p>
+</blockquote>
+
+<p>按照下面的代码， 需要返回参数数量在需要大于 1 并且， 并且 <code class="language-plaintext highlighter-rouge">%rdx</code> 的值需要小于等于 7 否则会 Explore Bomb。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">f43</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">f43</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">18</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x18</span><span class="p">,</span><span class="o">%rsp
+  400f47:	48 8d 4c 24 0c       	lea    0xc(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rcx
+  400f4c:	48 8d 54 24 08       	lea    0x8(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rdx
+  400f51:	be cf 25 40 00       	mov    $0x4025cf,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">f56</span><span class="o">:</span><span class="w">	</span><span class="n">b8</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%eax
+  400f5b:	e8 90 fc ff ff       	call   400bf0 &lt;__isoc99_sscanf@plt&gt;
+  400f60:	83 f8 01             	cmp    $0x1,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f63</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">f</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">jg</span><span class="w">     </span><span class="m">400</span><span class="n">f6a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="m">+0</span><span class="n">x27</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f65</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">d0</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f6a</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w"> </span><span class="m">07</span><span class="w">       	</span><span class="n">cmpl</span><span class="w">   </span><span class="o">$</span><span class="mh">0x7</span><span class="p">,</span><span class="mh">0x8</span><span class="p">(</span><span class="o">%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f6f</span><span class="o">:</span><span class="w">	</span><span class="m">77</span><span class="w"> </span><span class="m">3</span><span class="n">c</span><span class="w">                	</span><span class="n">ja</span><span class="w">     </span><span class="m">400</span><span class="n">fad</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="m">+0</span><span class="n">x6a</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>之后就是一个间接跳转的指令了， 这个间接跳转的指令和第一个输入的值有关系， 第一个输入的值在 0 到 7 之间， 那么就会根据第一参数跳转到不同的位置， 可以查看 <code class="language-plaintext highlighter-rouge">0x402470</code> 的值为 <strong>0x400f7c</strong>， 需要第二个输入的值为 <code class="language-plaintext highlighter-rouge">0x137</code> 这不巧了， 下面一对类似的语句应该都是间接跳转的情况。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">f71</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x8</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f75</span><span class="o">:</span><span class="w">	</span><span class="n">ff</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="n">c5</span><span class="w"> </span><span class="m">70</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">jmp</span><span class="w">    </span><span class="o">*</span><span class="mh">0x402470</span><span class="p">(,</span><span class="o">%</span><span class="n">rax</span><span class="p">,</span><span class="m">8</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>如此有不同的答案， 分别为 <code class="language-plaintext highlighter-rouge">0 207</code>， <code class="language-plaintext highlighter-rouge">1 311</code>， <code class="language-plaintext highlighter-rouge">2 707</code>， <code class="language-plaintext highlighter-rouge">3 256</code>， <code class="language-plaintext highlighter-rouge">4 389</code>， <code class="language-plaintext highlighter-rouge">5 206</code>， <code class="language-plaintext highlighter-rouge">6 682</code>， <code class="language-plaintext highlighter-rouge">7 327</code>。 真贴心， 还打乱了顺序！</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">(gdb) print /x *(int *) 0x402470
+</span><span class="gp">$</span>1 <span class="o">=</span> 0x400f7c
+<span class="go">(gdb) print /x *(int *) 0x402478
+</span><span class="gp">$</span>2 <span class="o">=</span> 0x400fb9
+<span class="go">(gdb) print /x *(int *) 0x402480
+</span><span class="gp">$</span>3 <span class="o">=</span> 0x400f83
+<span class="go">(gdb) print /x *(int *) 0x402488
+</span><span class="gp">$</span>4 <span class="o">=</span> 0x400f8a
+<span class="go">(gdb) print /x *(int *) 0x402490
+</span><span class="gp">$</span>5 <span class="o">=</span> 0x400f91
+<span class="go">(gdb) print /x *(int *) 0x402498
+</span><span class="gp">$</span>6 <span class="o">=</span> 0x400f98
+<span class="go">(gdb) print /x *(int *) 0x4024a0
+</span><span class="gp">$</span>7 <span class="o">=</span> 0x400f9f
+<span class="go">(gdb) print /x *(int *) 0x4024a8
+</span><span class="gp">$</span>8 <span class="o">=</span> 0x400fa6
+</code></pre></div></div>
+
+<h2 id="4-phase4">4. Phase4</h2>
+
+<p>同样也是读取数据如出一辙， 甚至连字符串的地址都和 Phase3 的一致。 不过 <code class="language-plaintext highlighter-rouge">cmpl    $0xe,0x8(%rsp)</code> 这一句要求 <code class="language-plaintext highlighter-rouge">%rdx</code> 获取到的第一个参数值要小于等于 0xe。</p>
+
+<p>后面的这几句也很明确， 为了调用 <code class="language-plaintext highlighter-rouge">func4</code> 函数， 将其第三个参数 <code class="language-plaintext highlighter-rouge">%edx</code> 设置为 0xe， 第二个参数 <code class="language-plaintext highlighter-rouge">%esi</code> 设置为 0x0， 第一个参数则是从 <code class="language-plaintext highlighter-rouge">sscanf</code> 输入读取的第一个参数。 暂且放一放 <code class="language-plaintext highlighter-rouge">func4</code>， 0x401051 地址的语句是判断 <code class="language-plaintext highlighter-rouge">sscanf</code> 输入的第二个参数是否为 0， 否则就 Explore Bomb， 答案的一半已经呼之欲出了 （就是 <code class="language-plaintext highlighter-rouge">0</code>）。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40103</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="n">ba</span><span class="w"> </span><span class="m">0</span><span class="n">e</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0xe</span><span class="p">,</span><span class="o">%edx
+  40103f:	be 00 00 00 00       	mov    $0x0,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">401044</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x8</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">edi</span><span class="w">
+  </span><span class="m">401048</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">81</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">40104</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">40104</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="m">07</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401058</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_4</span><span class="m">+0</span><span class="n">x4c</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">401051</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">cmpl</span><span class="w">   </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="mh">0xc</span><span class="p">(</span><span class="o">%rsp)
+  401056:	74 05                	je     40105d &lt;phase_4+0x51&gt;
+  401058:	e8 dd 03 00 00       	call   40143a &lt;explode_bomb&gt;
+  40105d:	48 83 c4 18          	add    $0x18,%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">401061</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">func4</code> 的内容还是有些神奇， 跟着流程走下来， 比如我当前设定的第一个数是 1， 0x400fdb 时 <code class="language-plaintext highlighter-rouge">%ecx</code> 的值从 0xe， 会递归更新到 0x6， 0x2， 而相应的 <code class="language-plaintext highlighter-rouge">%eax</code> 的值在 <code class="language-plaintext highlighter-rouge">sar    %eax</code> 语句执行后会变更为 0x7, 0x3, 0x1， 这个 <code class="language-plaintext highlighter-rouge">sar</code> 的指令的使用我没见过， 但看流程应该是将 <code class="language-plaintext highlighter-rouge">%eax</code> 向右移动一位， 因为 <code class="language-plaintext highlighter-rouge">%ecx</code> 的值是更新到 <code class="language-plaintext highlighter-rouge">%eax</code> 中的， 正好和上述结果对应。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">fe2</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="n">f9</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%edi,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe4</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">400</span><span class="n">ff2</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="m">+0</span><span class="n">x24</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe6</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">51</span><span class="w"> </span><span class="n">ff</span><span class="w">             	</span><span class="n">lea</span><span class="w">    </span><span class="m">-0</span><span class="n">x1</span><span class="p">(</span><span class="o">%rcx),%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe9</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">e0</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这个函数还处理了了第一个输入的数更大的情况， 但范围是也是被限制在了 0 到 7 之内。 也就是说， 根据 <code class="language-plaintext highlighter-rouge">func4</code> 的处理逻辑， 只有输入的值为 <code class="language-plaintext highlighter-rouge">1 0</code>， <code class="language-plaintext highlighter-rouge">3 0</code>， <code class="language-plaintext highlighter-rouge">7 0</code> 才能返回 <code class="language-plaintext highlighter-rouge">%eax</code> 为 0。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">ff7</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="n">f9</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%edi,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">400</span><span class="n">ff9</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">d</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w">                	</span><span class="n">jge</span><span class="w">    </span><span class="m">401007</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="m">+0</span><span class="n">x39</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ffb</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">71</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x1</span><span class="p">(</span><span class="o">%rcx),%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">ffe</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">cb</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="5-phase5">5. Phase5</h2>
+
+<p><code class="language-plaintext highlighter-rouge">phase_5</code> 开头有这么一段， 在堆栈的特定位置存入了一个 Canary 值以监测程序是否有被栈溢出问题修改内容。 对程序主体没有影响。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40106</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">64</span><span class="w"> </span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">28</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">mov</span><span class="w">    </span><span class="o">%fs:0x28,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">401071</span><span class="o">:</span><span class="w">	</span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> 
+  </span><span class="m">401073</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">18</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rax,0x18(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>而后则是判断输入的字符串的长度， 如果长度相等则会跳转到 0x4010d2 处， 清空 <code class="language-plaintext highlighter-rouge">%rax</code> 中的内容跳到实际的函数主体的入口地址 0x40108b。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">401078</span><span class="o">:</span><span class="w">	</span><span class="m">31</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">xor</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w"> </span><span class="c1"># clear %eax</span><span class="w">
+  </span><span class="m">40107</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">9</span><span class="n">c</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40131</span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="n">string_length</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># check length equals to 6 or not</span><span class="w">
+  </span><span class="m">40107</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">06</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%eax
+  401082:	74 4e                	je     4010d2 &lt;phase_5+0x70&gt;
+  401084:	e8 b1 03 00 00       	call   40143a &lt;explode_bomb&gt;
+  401089:	eb 47                	jmp    4010d2 &lt;phase_5+0x70&gt;
+  40108b:	0f b6 0c 03          	movzbl (%</span><span class="n">rbx</span><span class="p">,</span><span class="o">%rax,1),%</span><span class="n">ecx</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这个主体部分的逻辑也非常清晰， <code class="language-plaintext highlighter-rouge">%rbx</code> 中的内容是我们输入的字符串的起始地址， 由 <code class="language-plaintext highlighter-rouge">%rdi</code> 赋值得到。 可以看到这段代码是根据 <code class="language-plaintext highlighter-rouge">%rax</code> 的值进行循环逐个取输入字符串中的单个字符， 处理传入的 <code class="language-plaintext highlighter-rouge">char input[6]</code>， 并将 <code class="language-plaintext highlighter-rouge">input[n]</code> 的低 4 位作为 offset 取以 <code class="language-plaintext highlighter-rouge">0x4024b0</code> 为首地址的字符串中的字符。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40108</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">0</span><span class="n">f</span><span class="w"> </span><span class="n">b6</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">03</span><span class="w">          	</span><span class="n">movzbl</span><span class="w"> </span><span class="p">(</span><span class="o">%rbx,%</span><span class="n">rax</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="o">%ecx
+  40108f:	88 0c 24             	mov    %</span><span class="n">cl</span><span class="p">,(</span><span class="o">%rsp)
+  401092:	48 8b 14 24          	mov    (%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rdx
+  401096:	83 e2 0f             	and    $0xf,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401099</span><span class="o">:</span><span class="w">	</span><span class="m">0</span><span class="n">f</span><span class="w"> </span><span class="n">b6</span><span class="w"> </span><span class="m">92</span><span class="w"> </span><span class="n">b0</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">movzbl</span><span class="w"> </span><span class="mh">0x4024b0</span><span class="p">(</span><span class="o">%rdx),%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">4010</span><span class="n">a0</span><span class="o">:</span><span class="w">	</span><span class="m">88</span><span class="w"> </span><span class="m">54</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">10</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="o">%dl,0x10(%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rax,1)
+  4010a4:	48 83 c0 01          	add    $0x1,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4010</span><span class="n">a8</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">06</span><span class="w">          	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4010</span><span class="n">ac</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">dd</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">40108</span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_5</span><span class="m">+0</span><span class="n">x29</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>上述循环结束后就会进入下列代码中， 又见到老朋友 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 了， 我们很清楚 <code class="language-plaintext highlighter-rouge">0x40245e</code> 地址存储着最后的字符组合， 打印出来是 <code class="language-plaintext highlighter-rouge">flyers</code>。 因此根据这个值我们就可以进行逆推了， 打印 <code class="language-plaintext highlighter-rouge">0x4024b0</code> 为首地址的字符串可以得到 <code class="language-plaintext highlighter-rouge">maduiersnfotvbylSo you think you can stop the bomb with ctrl-c, do you?</code>， 我们可以找到 <code class="language-plaintext highlighter-rouge">flyers</code> 的每个对应的位置而得出 offset 的值为 <code class="language-plaintext highlighter-rouge">9, 15, 14, 5, 6, 7</code>。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4010</span><span class="n">ae</span><span class="o">:</span><span class="w">	</span><span class="n">c6</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">movb</span><span class="w">   </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="mh">0x16</span><span class="p">(</span><span class="o">%rsp)
+  4010b3:	be 5e 24 40 00       	mov    $0x40245e,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">4010</span><span class="n">b8</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">10</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x10</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rdi</span><span class="w">
+  </span><span class="m">4010</span><span class="n">bd</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">76</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">4010</span><span class="n">c2</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+</span></code></pre></div></div>
+
+<p>反正最后是要的低 4 位， 根据 <a href="https://www.asciitable.com/">ASCII Table</a> 的内容， 答案可以有很多种， <code class="language-plaintext highlighter-rouge">9?&gt;567</code>(0x30 + offset)，  <code class="language-plaintext highlighter-rouge">IONEFG</code>(0x40 + offset) 等等。</p>
+
+<h2 id="6-phase6">6. Phase6</h2>
+
+<p>代码好长， 建议看一点就在旁边做点注释。</p>
+
+<p>最开始先是读取了 6 个数， 之后就进入下列代码中， 这段代码的目的就是判断这 6 个数是两两不同的， 否则会 Explore Bomb， 流程可以跟着代码中的注释走一遍留个印象。 另外要求这几个数在减 1 之后要小于等于 5， 因而可以肯定的是这几个数的范围是 1 到 6， 就是目前顺序还不确定。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">40110</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">    	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%r12d
+401114:	4c 89 ed             	mov    %</span><span class="n">r13</span><span class="p">,</span><span class="o">%rbp
+401117:	41 8b 45 00          	mov    0x0(%</span><span class="n">r13</span><span class="p">),</span><span class="o">%eax
+40111b:	83 e8 01             	sub    $0x1,%</span><span class="n">eax</span><span class="w">
+</span><span class="m">40111</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">05</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x5</span><span class="p">,</span><span class="o">%eax
+401121:	76 05                	jbe    401128 &lt;phase_6+0x34&gt; # %</span><span class="n">eax</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">5</span><span class="p">,</span><span class="w"> </span><span class="n">otherwise</span><span class="w"> </span><span class="n">explore</span><span class="w"> </span><span class="n">bomb</span><span class="p">,</span><span class="w"> </span><span class="n">means</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">six</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">less</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">equal</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="m">6</span><span class="w">
+</span><span class="m">401123</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="m">03</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401128</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c4</span><span class="w"> </span><span class="m">01</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%r12d # %</span><span class="n">r12d</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="n">indicating</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">six</span><span class="w"> </span><span class="n">numbers</span><span class="w">
+</span><span class="m">40112</span><span class="n">c</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">fc</span><span class="w"> </span><span class="m">06</span><span class="w">          	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%r12d
+401130:	74 21                	je     401153 &lt;phase_6+0x5f&gt;
+401132:	44 89 e3             	mov    %</span><span class="n">r12d</span><span class="p">,</span><span class="o">%ebx
+401135:	48 63 c3             	movslq %</span><span class="n">ebx</span><span class="p">,</span><span class="o">%rax
+401138:	8b 04 84             	mov    (%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rax,4),%</span><span class="n">eax</span><span class="w"> </span><span class="c1"># int type, get input six number iteratively</span><span class="w">
+</span><span class="m">40113</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="m">45</span><span class="w"> </span><span class="m">00</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,0x0(%</span><span class="n">rbp</span><span class="p">)</span><span class="w"> </span><span class="c1"># compare current value to first value for 5 times, needs to be not equal</span><span class="w">
+</span><span class="m">40113</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401145</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x51</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401140</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">f5</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401145</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%ebx
+401148:	83 fb 05             	cmp    $0x5,%</span><span class="n">ebx</span><span class="w">
+</span><span class="m">40114</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="n">e8</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">401135</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x41</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">40114</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">49</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c5</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%</span><span class="n">r13</span><span class="w"> </span><span class="c1"># move to next number</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这段的逻辑比较清晰， 对每一项储存在堆栈上的数 <code class="language-plaintext highlighter-rouge">num[i]</code> 做 <code class="language-plaintext highlighter-rouge">num[i] = 7 - num[i]</code> 的操作， 对每个数进行重新赋值。 跳出循环的条件是 <code class="language-plaintext highlighter-rouge">%rsi</code> 中存储的地址和 <code class="language-plaintext highlighter-rouge">%rax</code> 一致。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">401153</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">18</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x18</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rsi</span><span class="w"> </span><span class="c1"># 0x18 = 24, move the last number address into %rsi</span><span class="w">
+  </span><span class="m">401158</span><span class="o">:</span><span class="w">	</span><span class="m">4</span><span class="n">c</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="n">f0</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="o">%r14,%</span><span class="n">rax</span><span class="w"> </span><span class="c1"># initial stack base address</span><span class="w">
+  </span><span class="m">40115</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="n">b9</span><span class="w"> </span><span class="m">07</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x7</span><span class="p">,</span><span class="o">%ecx
+  401160:	89 ca                	mov    %</span><span class="n">ecx</span><span class="p">,</span><span class="o">%edx # iteratively use 7 to subtract the stored number and replace the orignal ones
+  401162:	2b 10                	sub    (%</span><span class="n">rax</span><span class="p">),</span><span class="o">%edx
+  401164:	89 10                	mov    %</span><span class="n">edx</span><span class="p">,(</span><span class="o">%rax)
+  401166:	48 83 c0 04          	add    $0x4,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">40116</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">39</span><span class="w"> </span><span class="n">f0</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%rsi,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">40116</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">f1</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401160</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x6c</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>做好上述工作后进入如下代码段， 本质上做了一个映射， 将 0x6032d0 起始， 以 0x10 为步长的地址中， 按照所给数据的顺序将对应的地址填入堆栈中。 例如 0x603320 对应数字 6， 数字 6 在第一个位置， 则 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 存储着 <code class="language-plaintext highlighter-rouge">0x603320</code> 这个地址。</p>
+<blockquote>
+  <p>通过调试可以清楚 <code class="language-plaintext highlighter-rouge">*(0x6032d0 + 8)=0x6032f0</code>， 即在这一过程中存在着链表结构， 当前链表节点中存储着下一个链表节点的地址。</p>
+</blockquote>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40116</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="n">be</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%esi
+  401174:	eb 21                	jmp    401197 &lt;phase_6+0xa3&gt;
+  401176:	48 8b 52 08          	mov    0x8(%</span><span class="n">rdx</span><span class="p">),</span><span class="o">%rdx # update %</span><span class="n">rdx</span><span class="w"> </span><span class="n">content</span><span class="p">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">8</span><span class="n">n</span><span class="err">，</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">8</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w">
+  </span><span class="m">40117</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">c0</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%eax
+  40117d:	39 c8                	cmp    %</span><span class="n">ecx</span><span class="p">,</span><span class="o">%eax
+  40117f:	75 f5                	jne    401176 &lt;phase_6+0x82&gt;
+  401181:	eb 05                	jmp    401188 &lt;phase_6+0x94&gt;
+  401183:	ba d0 32 60 00       	mov    $0x6032d0,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401188</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">54</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">20</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rdx,0x20(%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rsi,2) # store the address into stack, whose address start from 20(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">40118</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c6</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%rsi
+  401191:	48 83 fe 18          	cmp    $0x18,%</span><span class="n">rsi</span><span class="w">
+  </span><span class="m">401195</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">14</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">4011</span><span class="n">ab</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">xb7</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">401197</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">34</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="p">(</span><span class="o">%rsp,%</span><span class="n">rsi</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="o">%ecx # entry
+  40119a:	83 f9 01             	cmp    $0x1,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">40119</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="n">e4</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">401183</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x8f</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># less or equal to 1 (you know must be 1)</span><span class="w">
+  </span><span class="m">40119</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="n">b8</span><span class="w"> </span><span class="m">01</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%eax
+  4011a4:	ba d0 32 60 00       	mov    $0x6032d0,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">a9</span><span class="o">:</span><span class="w">	</span><span class="n">eb</span><span class="w"> </span><span class="n">cb</span><span class="w">                	</span><span class="n">jmp</span><span class="w">    </span><span class="m">401176</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x82</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>上述代码完成工作后， <code class="language-plaintext highlighter-rouge">%rbx</code> 首先被赋值为排序后的栈顶 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 内容， <code class="language-plaintext highlighter-rouge">%rax</code> 则被赋值为排序后的栈顶偏移 8 byte 的地址 <code class="language-plaintext highlighter-rouge">0x28(%rsp)</code>， 而 <code class="language-plaintext highlighter-rouge">%rsi</code> 则填入栈底地址 <code class="language-plaintext highlighter-rouge">0x50(%rsp)</code>。</p>
+
+<p>如下代码所要做的工作， 将堆栈栈顶 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 中的内容（该内容为一段地址）取出放在 <code class="language-plaintext highlighter-rouge">%rcx</code>， 并将相邻的 <code class="language-plaintext highlighter-rouge">0x28(%rsp)</code> 中的地址也取出放到 <code class="language-plaintext highlighter-rouge">%rdx</code>， 根据之前的描述 <code class="language-plaintext highlighter-rouge">*(0x6032d0 + 8n) = 0x6032d0 + 0x10 * n</code> 成立， 即表明这是一种链式结构， <code class="language-plaintext highlighter-rouge">mov    %rdx,0x8(%rcx)</code> 就是将当前栈中的链表节点存储的下一个链表节点地址， 更新为存储在堆栈相邻位置的链表节点的地址。 最后一个链表节点中则存一个空地址。 这样按照堆栈的存储顺序， 栈顶成了头节点， 栈底成了尾节点。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4011</span><span class="n">ab</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">5</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">20</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x20</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rbx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">b0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">28</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x28</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4011</span><span class="n">b5</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">50</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x50</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rsi</span><span class="w">
+  </span><span class="m">4011</span><span class="n">ba</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="n">d9</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rbx,%</span><span class="n">rcx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">bd</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">10</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="p">(</span><span class="o">%rax),%</span><span class="n">rdx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">c0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">51</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rdx,0x8(%</span><span class="n">rcx</span><span class="p">)</span><span class="w">
+  </span><span class="m">4011</span><span class="n">c4</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c0</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%rax
+  4011c8:	48 39 f0             	cmp    %</span><span class="n">rsi</span><span class="p">,</span><span class="o">%rax
+  4011cb:	74 05                	je     4011d2 &lt;phase_6+0xde&gt;
+  4011cd:	48 89 d1             	mov    %</span><span class="n">rdx</span><span class="p">,</span><span class="o">%rcx
+  4011d0:	eb eb                	jmp    4011bd &lt;phase_6+0xc9&gt;
+  4011d2:	48 c7 42 08 00 00 00 	movq   $0x0,0x8(%</span><span class="n">rdx</span><span class="p">)</span><span class="w">
+  </span><span class="m">4011</span><span class="n">d9</span><span class="o">:</span><span class="w">	</span><span class="m">00</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p>最后就是遍历堆栈啦， <code class="language-plaintext highlighter-rouge">%rbx</code> 的值没有修改过仍然指向栈顶位置 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code>， 接着判断当前位置取到的值是否会比栈中下一个元素取得的值大或相等， 不满足则会 Explore Bomb。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4011</span><span class="n">da</span><span class="o">:</span><span class="w">	</span><span class="n">bd</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x5</span><span class="p">,</span><span class="o">%ebp
+  4011df:	48 8b 43 08          	mov    0x8(%</span><span class="n">rbx</span><span class="p">),</span><span class="o">%rax
+  4011e3:	8b 00                	mov    (%</span><span class="n">rax</span><span class="p">),</span><span class="o">%eax
+  4011e5:	39 03                	cmp    %</span><span class="n">eax</span><span class="p">,(</span><span class="o">%rbx)
+  4011e7:	7d 05                	jge    4011ee &lt;phase_6+0xfa&gt;
+  4011e9:	e8 4c 02 00 00       	call   40143a &lt;explode_bomb&gt;
+  4011ee:	48 8b 5b 08          	mov    0x8(%</span><span class="n">rbx</span><span class="p">),</span><span class="o">%rbx
+  4011f2:	83 ed 01             	sub    $0x1,%</span><span class="n">ebp</span><span class="w">
+  </span><span class="m">4011</span><span class="n">f5</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">e8</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">4011</span><span class="n">df</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">xeb</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>我们知道存储值的地址分别为 <code class="language-plaintext highlighter-rouge">0x6032d0</code>， <code class="language-plaintext highlighter-rouge">0x6032e0</code>， <code class="language-plaintext highlighter-rouge">0x6032f0</code>， <code class="language-plaintext highlighter-rouge">0x603300</code>， <code class="language-plaintext highlighter-rouge">0x603310</code>， <code class="language-plaintext highlighter-rouge">0x603320</code>， 不妨都打印出来排个序， 顺序从大到小排序。 根据排序后的关系， 以及前述映射， 可以得到我们的输入为 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code>。 但是， 我们还做了一次转换改变了原来的链表结构， 按照原来的顺序排序肯定不一样。</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">924 -&gt;</span><span class="w"> </span>0x6032f0 -&gt; 3
+<span class="gp">691 -&gt;</span><span class="w"> </span>0x603300 -&gt; 4
+<span class="gp">477 -&gt;</span><span class="w"> </span>0x603310 -&gt; 5
+<span class="gp">443 -&gt;</span><span class="w"> </span>0x603320 -&gt; 6
+<span class="gp">332 -&gt;</span><span class="w"> </span>0x6032d0 -&gt; 1
+<span class="gp">168 -&gt;</span><span class="w"> </span>0x6032e0 -&gt; 2
+</code></pre></div></div>
+
+<p>在 <strong>0x4011b</strong> 处打断点， 此时还未进行重组排序， 直接打印堆栈中存储的各个值， 把之前的 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code> 当作数组的索引按照打印顺序取值即可。 例如 3 则取 <code class="language-plaintext highlighter-rouge">0x603300</code> 对应原值的 4， 4 则取 <code class="language-plaintext highlighter-rouge">0x6032f0</code> 对应原值 3， 依次类推， 得到最终的答案应当为 <code class="language-plaintext highlighter-rouge">4 3 2 1 6 5</code>。</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x20<span class="o">)</span>
+<span class="gp">$</span>39 <span class="o">=</span> 0x603320 -&gt; 6
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x28<span class="o">)</span>
+<span class="gp">$</span>40 <span class="o">=</span> 0x603310 -&gt; 5
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x30<span class="o">)</span>
+<span class="gp">$</span>41 <span class="o">=</span> 0x603300 -&gt; 4
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x38<span class="o">)</span>
+<span class="gp">$</span>42 <span class="o">=</span> 0x6032f0 -&gt; 3
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x40<span class="o">)</span>
+<span class="gp">$</span>43 <span class="o">=</span> 0x6032e0 -&gt; 2
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x48<span class="o">)</span>
+<span class="gp">$</span>44 <span class="o">=</span> 0x6032d0 -&gt; 1
+</code></pre></div></div>
+
+<h2 id="7-写在最后">7. 写在最后</h2>
+
+<p>通关之后的情况如下， 最后一个 <code class="language-plaintext highlighter-rouge">phase_6</code> 有些坑人， 还有一层转换容易忘掉， 做的时候怎么都过不去人都懵了， 后来看了 <a href="https://github.com/Exely/CSAPP-Labs/blob/master/notes/bomb.md">Exely - Bomb</a> 做的 Bomb 的笔记才意识到这个问题。 GDB 仅用过 VSCode 的图形化版本， 对 CLI 版本非常不熟悉， 这次实验也算是锻炼了一下这方面的能力。</p>
+<blockquote>
+  <p>CSAPP 拿来复习基础知识是真的很不错！</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># result.txt</span>
+Border relations with Canada have never been better.
+1 2 4 8 16 32
+7 327
+1 0
+IONEFG
+4 3 2 1 6 5
+</code></pre></div></div>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">Welcome to my fiendish little bomb. You have 6 phases with
+which to blow yourself up. Have a nice day!
+Phase 1 defused. How about the next one?
+That's number 2.  Keep going!
+Halfway there!
+So you got that one.  Try this one.
+Good work!  On to the next...
+Congratulations! You've defused the bomb!
+</span></code></pre></div></div>]]></content><author><name>HangX-Ma</name></author><category term="Course" /><category term="CSAPP" /><summary type="html"><![CDATA[Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Bomb Lab， 实现源码可从 HangX-Ma/csapp: 02-bomblab 获取。]]></summary></entry><entry><title type="html">Vim Plugin: YouCompleteMe 旧版本装配</title><link href="https://hangx-ma.github.io/2023/12/06/YCM-config.html" rel="alternate" type="text/html" title="Vim Plugin: YouCompleteMe 旧版本装配" /><published>2023-12-06T00:00:00+08:00</published><updated>2023-12-06T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/12/06/YCM-config</id><content type="html" xml:base="https://hangx-ma.github.io/2023/12/06/YCM-config.html"><![CDATA[<p>YouCompleteMe 是 Vim 比较常用的一款代码补全插件， 在 neovim 盛行的当下， 这类补全插件也逐渐淡出了大众视野， 但也有一些场合使用 YouCompleteMe 也有自己的一席之地。</p>
 
 <p>为了开发环境的稳定性， 有些服务器的操作系统版本比较低， 甚至在 CMake 这类编译工具的版本也比较低。 为了尽可能减少对低版本系统环境的更改， 我尝试尽可能通过手动编译配置的方式完成在这类开发环境的 Vim 配置。</p>
 <blockquote>
@@ -1890,381 +2271,4 @@ Expected equality of these values:
 
 <p>另外， rCore 介绍了条件变量的两种用法 <strong>条件同步问题</strong> 以及 <strong>同步屏障问题</strong>， 尤其同步屏障问题在多线程编程中会经常遇到， 深有体会。 对此可详见 <a href="http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter8/4condition-variable.html#id6">条件变量的使用方法</a> 学习。</p>
 
-<p>TODO…</p>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry><entry><title type="html">rCore OS Note - Chapter 7</title><link href="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html" rel="alternate" type="text/html" title="rCore OS Note - Chapter 7" /><published>2023-07-13T00:00:00+08:00</published><updated>2023-07-13T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/13/rcore-note-ch7</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/13/rcore-note-ch7.html"><![CDATA[<p>该章节尝试建立基于文件的统一I/O抽象， 将标准输入/标准输出的访问改造为基于文件描述符， 然后同样基于文件描述符实现一种父子进程之间的通信机制 —— <strong>管道</strong>， 从而实现灵活的进程间通信， 并基于文件抽象和管道支持不同的独立进程之间的动态组合来实现复杂功能。</p>
-
-<dl>
-  <dt>管道</dt>
-  <dd>一种数据交换的机制， 管道可被视为一种特殊的内存文件， 在进程被打开的 <em><strong>fd_table</strong></em> 中被管理。 管道通过复用文件读写的系统函数调用可以方便地进行数据交换。</dd>
-  <dt>信号</dt>
-  <dd>进程间通信的一种异步通知机制， 可以看成是一个应用发出某种信号， 希望另外一个应用能及时响应。</dd>
-</dl>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-13-rcore-note-ch7/ipc-os-detail-2.png" alt="IPC OS details, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>IPC OS Details, rCore</u></font>
-</div>
-
-<h2 id="0-资料汇总">0. 资料汇总</h2>
-
-<ul>
-  <li><strong>RISC-V</strong>
-    <ul>
-      <li><a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc">RISC-V ELF psABI</a>: Processor-specific application binary interface document.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-sbi-doc">RISC-V Supervisor Binary Interface</a>: Spec for SBI.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-c-api-doc">RISC-V C API</a>: RISC-V-specific predefined macros, function attributes and language extensions.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual">RISC-V Assembly Programmer’s Manual</a>: Document for pseudoinstructions and assembly directives.</li>
-      <li><a href="https://wiki.riscv.org/display/HOME/RISC-V+Technical+Specifications">RISC-V Specifications</a>:
-        <ul>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf">Unprivileged Specification version 20191213</a></li>
-          <li><a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">Privileged Specification version 20211203</a></li>
-        </ul>
-      </li>
-      <li><a href="https://github.com/riscv/riscv-aclint">RISC-V ACLINT specification</a>: ACLINT (Advanced Core Local Interruptor) specification defines a set of memory mapped devices which provide inter-processor interrupt and timer functionality for each HART of a multi-HART (or multi-processor) RISC-V platform.</li>
-      <li><a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a>: Provide guidance to assembly programmers targeting the standard RISC-V assembly language.</li>
-    </ul>
-  </li>
-  <li><strong>rCore</strong>
-    <ul>
-      <li>rCore 第七章相关内容的实现记录在 Github Tag: <a href="https://github.com/HangX-Ma/rCore-sp23/tree/ch7">[ch7]</a></li>
-      <li>rCore source code of labs for spring 2023: <a href="https://github.com/LearningOS/rCore-Tutorial-Guide-2023S">rCore-Tutorial-Guide-2023S Source Code</a></li>
-      <li>rCore Concise Manual: <a href="https://learningos.github.io/rCore-Tutorial-Guide-2023S/">rCore-Tutorial-Guide-2023S</a></li>
-      <li>rCore Detail Book: <a href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/">rCore-Tutorial-Book-v3</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="1-文件抽象">1. 文件抽象</h2>
-
-<p><strong>文件</strong> 抽象统一了对 I/O 设备的管理， <strong>Everything is a file</strong> 的思想继承于 Multics OS 的 <strong>通用性</strong> 文件设计。 操作系统不关心文件的具体内容， 而只关心如何对文件按字节流进行读写。 rCore 对此进行了举例， 例如 <strong>键盘设备</strong> 对操作系统而言就是一个只读文件（读取键盘的输入数据）， <strong>屏幕设备</strong> 是只写文件（输出图片文字等信息） 等等。 在该章节基于文件的抽象， rCore 对标准输入和标准输出进行了重构， 为其实现了 <code class="language-plaintext highlighter-rouge">File Trait</code>， 使得进程能按照文件的接口与 I/O 外设交互。</p>
-
-<p>一般来说， 文件的会涉及到， <code class="language-plaintext highlighter-rouge">open</code>， <code class="language-plaintext highlighter-rouge">close</code>， <code class="language-plaintext highlighter-rouge">read</code>， <code class="language-plaintext highlighter-rouge">write</code> 这些基本操作。</p>
-
-<p>另外， 进程被创建的时候内核会默认打开三个缺省的文件， 这个设计对于后续的 I/O 重定向而言非常重要。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">fd: 0</code> 标准输入</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 1</code> 标准输出</li>
-  <li><code class="language-plaintext highlighter-rouge">fd: 2</code> 标准错误输出</li>
-</ul>
-
-<p>需要注意的是， 子进程需要继承其父进程的所有的文件描述符与父进程共享所有文件， 基于这个设计， <code class="language-plaintext highlighter-rouge">pipe</code> 管道机制能够让父子进程共用一套标准输入和输出接口， 这样就构成了进程之间通信的基本桥梁。</p>
-
-<h2 id="2-管道">2. 管道</h2>
-
-<p>管道的设计就是基于以上文件抽象实现的几种机制， 其本质可被描述为一个 <strong>环形的缓冲队列</strong>， 具备 <strong>读端</strong> 和 <strong>写端</strong>， 读写两端通过不同的文件描述符进行访问。 通过文件抽象， 我们能对读写进行权限控制， 控制数据的流向。 另外， 只有读写两端都关闭后管道的资源才能被回收， 这要求除了实现 <code class="language-plaintext highlighter-rouge">sys_pipe</code> 系统调用， 还需要实现 <code class="language-plaintext highlighter-rouge">sys_close</code> 对文件的关闭进行控制。</p>
-
-<p>rCore 对管道的设计分为端口设计与缓存设计。</p>
-
-<ul>
-  <li><strong>端口设计</strong> <code class="language-plaintext highlighter-rouge">struct Pipe</code>， 通过实现 <code class="language-plaintext highlighter-rouge">File Trait</code> 使得这两个端口能够通过文件描述符进行访问。</li>
-  <li><strong>缓存设计</strong> <code class="language-plaintext highlighter-rouge">struct PipeRingBuffer</code>， 实际就是维护了一个环形的缓存队列。 值得注意的是 <code class="language-plaintext highlighter-rouge">struct Pipe</code> 用 <code class="language-plaintext highlighter-rouge">Arc&lt;Mutex&lt;PipeRingBuffer&gt;&gt;</code> 维护对 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 的强引用计数， 这能保证在读写两端都被关闭后 <code class="language-plaintext highlighter-rouge">PipeRingBuffer</code> 中的资源能够被自动回收， 而 <code class="language-plaintext highlighter-rouge">PipeRingBuffer::write_end</code> 维护了一个弱引用计数， 这是为了后续检查写端是否全部被关闭的依据。</li>
-</ul>
-
-<blockquote>
-  <p>只有写端都被关闭后才能保证没有数据被遗漏， 此时读端的关闭才是安全的。 另外， 写端实际是对读端存在依赖的， 若仅有一个写端， pipe 的缓冲区一定会耗尽， 而只存在一个读端却没什么问题， 大不了每次读返回都是 0。</p>
-</blockquote>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/fs/pipe.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Pipe</span> <span class="p">{</span>
-    <span class="n">readable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">writable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">buffer</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">PipeRingBuffer</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">PipeRingBuffer</span> <span class="p">{</span>
-    <span class="n">arr</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="n">RING_BUFFER_SIZE</span><span class="p">],</span>
-    <span class="n">head</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">tail</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="n">status</span><span class="p">:</span> <span class="n">RingBufferStatus</span><span class="p">,</span>
-    <span class="n">write_end</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Weak</span><span class="o">&lt;</span><span class="n">Pipe</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="nd">#[derive(Copy,</span> <span class="nd">Clone,</span> <span class="nd">PartialEq)]</span>
-<span class="k">enum</span> <span class="n">RingBufferStatus</span> <span class="p">{</span>
-    <span class="n">FULL</span><span class="p">,</span>
-    <span class="n">EMPTY</span><span class="p">,</span>
-    <span class="n">NORMAL</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="3-标准-io-重定向">3. 标准 I/O 重定向</h2>
-
-<p>重定向的想法在于对 <code class="language-plaintext highlighter-rouge">fd</code> 文件描述符进行替换。 由前述内容可知， 新建进程默认打开三个缺省的文件描述符分别描述标准输入(0)， 标准输出(1)， 标准错误输出(2)， 文件描述符分配有一条重要的性质： <em><strong>必定分配可用描述符中编号最小的一个</strong></em>， 而 <code class="language-plaintext highlighter-rouge">sys_dup</code> 做的工作就是将当前的文件拷贝到一个新的文件描述符。 所以， 例如我们先通过 <code class="language-plaintext highlighter-rouge">sys_close</code> 关闭标准输入， 那么再调用 <code class="language-plaintext highlighter-rouge">sys_dup(current_fd)</code> 就能让 <code class="language-plaintext highlighter-rouge">fd=1</code> 的位置的内容被替换为当前的目标文件。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/syscall/fs.rs</span>
-
-<span class="cd">/// 功能：将进程中一个已经打开的文件复制一份并分配到一个新的文件描述符中。</span>
-<span class="cd">/// 参数：fd 表示进程中一个已经打开的文件的文件描述符。</span>
-<span class="cd">/// 返回值：如果出现了错误则返回 -1，否则能够访问已打开文件的新文件描述符。</span>
-<span class="cd">/// 可能的错误原因是：传入的 fd 并不对应一个合法的已打开文件。</span>
-<span class="cd">/// syscall ID：24</span>
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_dup</span><span class="p">(</span><span class="n">fd</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">task</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.acquire_inner_lock</span><span class="p">();</span>
-    <span class="k">if</span> <span class="n">fd</span> <span class="o">&gt;=</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.is_none</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">let</span> <span class="n">new_fd</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.alloc_fd</span><span class="p">();</span>
-    <span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">new_fd</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">clone</span><span class="p">(</span><span class="n">inner</span><span class="py">.fd_table</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span><span class="nf">.as_ref</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()));</span>
-    <span class="n">new_fd</span> <span class="k">as</span> <span class="nb">isize</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>为了能让用户端使用重定向， rCore 对 <code class="language-plaintext highlighter-rouge">user_shell</code> 进行了改进使其支持用户参数输入。 另外 <code class="language-plaintext highlighter-rouge">sys_exec</code> 需要取出这些传入的命令行参数， 放入 <code class="language-plaintext highlighter-rouge">args_vec: Vec&lt;String&gt;</code> 中作为参数传入 <code class="language-plaintext highlighter-rouge">TaskControlBlock::exec</code> 中， 这些参数会被压入用户栈中。 压栈的主体代码如下代码所示， 为了更清晰的表示压栈的过程， 我绘制了压栈的过程图， 假设压入了两个命令行参数 <code class="language-plaintext highlighter-rouge">aa</code> 和 <code class="language-plaintext highlighter-rouge">bb</code>。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-
-<span class="k">impl</span> <span class="n">TaskControlBlock</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">exec</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">elf_data</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">],</span> <span class="n">args</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="o">...</span>
-        <span class="c1">// push arguments on user stack</span>
-        <span class="n">user_sp</span> <span class="o">-=</span> <span class="p">(</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
-        <span class="k">let</span> <span class="n">argv_base</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
-        <span class="k">let</span> <span class="k">mut</span> <span class="n">argv</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">..=</span><span class="n">args</span><span class="nf">.len</span><span class="p">())</span>
-            <span class="nf">.map</span><span class="p">(|</span><span class="n">arg</span><span class="p">|</span> <span class="p">{</span>
-                <span class="nf">translated_refmut</span><span class="p">(</span>
-                    <span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span>
-                    <span class="p">(</span><span class="n">argv_base</span> <span class="o">+</span> <span class="n">arg</span> <span class="o">*</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">())</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">usize</span>
-                <span class="p">)</span>
-            <span class="p">})</span>
-            <span class="nf">.collect</span><span class="p">();</span>
-        <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">args</span><span class="nf">.len</span><span class="p">()]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">args</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
-            <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-            <span class="o">*</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
-            <span class="k">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">user_sp</span><span class="p">;</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="k">in</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="nf">.as_bytes</span><span class="p">()</span> <span class="p">{</span>
-                <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
-                <span class="n">p</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">memory_set</span><span class="nf">.token</span><span class="p">(),</span> <span class="n">p</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="c1">// make the user_sp aligned to 8B for k210 platform</span>
-        <span class="n">user_sp</span> <span class="o">-=</span> <span class="n">user_sp</span> <span class="o">%</span> <span class="nn">core</span><span class="p">::</span><span class="nn">mem</span><span class="p">::</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">();</span>
-        <span class="o">...</span>
-        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="nf">.len</span><span class="p">();</span>
-        <span class="n">trap_cx</span><span class="py">.x</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">argv_base</span><span class="p">;</span>
-        <span class="o">...</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack1.png" alt="Push stack process 1, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Push stack process 1, HangX-Ma</u></font>
-</div>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-13-rcore-note-ch7/push_stack2.png" alt="Push stack process 2, HangX-Ma" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Push stack process 2, HangX-Ma</u></font>
-</div>
-
-<p>压栈完成后 rCore 将 <code class="language-plaintext highlighter-rouge">TrapContext</code>中的 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器的值分别设置为输入参数的数量以及前述的 <code class="language-plaintext highlighter-rouge">argv_base</code>。 这样， 在应用第一次进入用户态的时候， 放在 Trap 上下文 <code class="language-plaintext highlighter-rouge">a0</code> 和 <code class="language-plaintext highlighter-rouge">a1</code> 两个寄存器中的内容可以被用户库中的入口函数以参数的形式接收。 rCore 在 <code class="language-plaintext highlighter-rouge">_start</code> 入口函数对这些起始地址做了转化， 将其转化为编写应用的时候看到的 <code class="language-plaintext highlighter-rouge">&amp;[&amp;str]</code> 的形式。</p>
-
-<h2 id="4-信号">4. 信号</h2>
-
-<p>信号机制补足了单向事件通知的机制， 这是一种类似于硬件中断的软件级异步通知机制， 使得进程在接收到特定事件的时候能够暂停当前的工作并及时响应事件， 并在响应事件之后可以恢复当前工作继续执行。 如果进程没有接收到任何事件， 它可以执行自己的任务。 这里的暂停与恢复的工作， 都由操作系统来完成， 应用程序只需设置好响应某事件的事件处理例程就够了。</p>
-
-<p>信号的 <strong>接收方</strong> 是一个进程。 当某进程或操作系统发出信号时，会指定信号响应的对象， 即某个进程的 <code class="language-plaintext highlighter-rouge">pid</code>， 并由该进程预设的信号处理例程来进行具体的信号响应。 接收到信号有多种处理方式， 最常见的三种如下：</p>
-
-<ul>
-  <li>
-    <p><strong>忽略</strong>：就像信号没有发生过一样。</p>
-  </li>
-  <li>
-    <p><strong>捕获</strong>：进程会调用相应的处理函数进行处理。</p>
-  </li>
-  <li>
-    <p><strong>终止</strong>：终止进程。</p>
-  </li>
-</ul>
-
-<p>而信号的 <strong>发送方</strong> 有两个：</p>
-
-<ul>
-  <li><strong>异步信号</strong>： 进程在正常执行， 此时可能内核或者其他进程给它发送了一个信号， 这些就属于异步信号。</li>
-  <li><strong>同步信号</strong>： 由进程自身的执行触发， 在处理 Trap 的时候内核会将相应的信号直接附加到进程控制块中， 这种属于同步信号。</li>
-</ul>
-
-<div align="center">
-    <img src="/norobots/images/2023-07-13-rcore-note-ch7/signal.png" alt="Signal process, rCore" width="600" />
-    <br />
-    <font size="2" color="#999"><u>Signal process, rCore</u></font>
-</div>
-
-<p>内核会在 Trap 处理完成即将返回用户态之前检查要返回到的进程是否还有信号待处理。 如果需要处理的话，取决于进程是否提供该种信号的处理函数， 若没有提供该函数内核会接管进行默认处理， 整体流程如上图所示。</p>
-
-<h3 id="41-信号相关的数据结构">4.1 信号相关的数据结构</h3>
-
-<p>进程间发送的信号是某种事件， UNIX 采用了整数来对信号进行编号， 这些整数编号都定义了对应的信号的宏名， 宏名都是以 SIG 开头， 比如 SIGABRT, SIGKILL, SIGSTOP, SIGCONT。 rCore 定义了一个 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 类型用以描述这些信号量的集合， 这个数据结构会大量应用到信号处理相关的功能上。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">bitflags!</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalFlags</span><span class="p">:</span> <span class="nb">i32</span> <span class="p">{</span>
-        <span class="k">const</span> <span class="n">SIGDEF</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Default signal handling</span>
-        <span class="k">const</span> <span class="n">SIGHUP</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="k">const</span> <span class="n">SIGINT</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">;</span>
-        <span class="o">...</span>
-        <span class="k">const</span> <span class="n">SIGSYS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>另外为了处理收到的信号， rCore 定义了 <code class="language-plaintext highlighter-rouge">SignalAction</code> 结构， 其中 <code class="language-plaintext highlighter-rouge">handler</code> 记录了信号处理的回调函数的入口地址， <code class="language-plaintext highlighter-rouge">mask</code> 则表示在处理该函数时需要屏蔽的其他信号的掩码， 这样内核就不会对这些信号进行处理而是直接回到用户态继续执行回调函数， 但这些被屏蔽的信号会被记录在 TCB 中延后处理。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// Action for a signal</span>
-<span class="nd">#[repr(C,</span> <span class="nd">align(</span><span class="mi">16</span><span class="nd">))]</span>
-<span class="nd">#[derive(Debug,</span> <span class="nd">Clone,</span> <span class="nd">Copy)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalAction</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">handler</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="42-信号的产生">4.2 信号的产生</h3>
-
-<p>如前所述， 信号产生有异步信号和同步信号， rCore 将其分作三类， 前两类是异步信号， 最后一类是同步信号。</p>
-
-<ol>
-  <li>进程通过 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用给自己或者其他进程发送信号。</li>
-  <li>内核检测到某些事件给某个进程发送信号， 但这个事件与接收信号的进程的执行无关。</li>
-  <li>进程执行的时候触发了某些条件， 于是在 Trap 到内核处理的时候， 内核给该进程发送相应的信号。 典型的就是 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 段错误和 <code class="language-plaintext highlighter-rouge">SIGILL</code> 非法指令。</li>
-</ol>
-
-<h4 id="kill-系统调用">kill 系统调用</h4>
-
-<p>实现 <code class="language-plaintext highlighter-rouge">kill</code> 系统调用发送信号， 需要现在 TCB 中加入 <code class="language-plaintext highlighter-rouge">SignalFlags</code> 用以记录当前进程收到了哪些信号还未处理。 该系统调用的实现不算复杂， 我们需要给 <code class="language-plaintext highlighter-rouge">manager.rs</code> 中增添 <code class="language-plaintext highlighter-rouge">PID2TCB</code> 全局变量， 这个全局变量是一个 <strong>BtreeMap</strong> 数据结构， 在每次 <code class="language-plaintext highlighter-rouge">add_task</code> 的时候建立当前进程 pid 与当前进程的 TCB 的映射。 这样在实现 <code class="language-plaintext highlighter-rouge">sys_kill</code> 的时候能通过 <code class="language-plaintext highlighter-rouge">pid2task</code> 获取到对应的 TCB。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="k">pub</span> <span class="n">signals</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_kill</span><span class="p">(</span><span class="n">pid</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">pid2task</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
-            <span class="c1">// insert the signal if legal</span>
-            <span class="k">let</span> <span class="k">mut</span> <span class="n">task_ref</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
-            <span class="k">if</span> <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.contains</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="n">task_ref</span><span class="py">.signals</span><span class="nf">.insert</span><span class="p">(</span><span class="n">flag</span><span class="p">);</span>
-            <span class="mi">0</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="o">-</span><span class="mi">1</span>
-        <span class="p">}</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="o">-</span><span class="mi">1</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>需要注意的是， 如果 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 中已经记录了未处理的信号， 在这个信号被处理之前不能加入同一个信号的待处理量。</p>
-
-<h4 id="内核信号生成">内核信号生成</h4>
-
-<p>就是将之前说的 <code class="language-plaintext highlighter-rouge">SIGSEGV</code> 以及 <code class="language-plaintext highlighter-rouge">SIGILL</code>， 在捕获到相应的 trap 之后， 内核主动对 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 进行修改补充。</p>
-
-<h3 id="43-信号的处理">4.3 信号的处理</h3>
-
-<p>与信号处理相关的系统调用则有三个：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigaction</code>：设置信号处理例程</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_procmask</code>： 设置进程的信号屏蔽掩码</li>
-  <li><code class="language-plaintext highlighter-rouge">sys_sigreturn</code>： 清除栈帧，从信号处理例程返回</li>
-</ul>
-
-<p>需要在 <code class="language-plaintext highlighter-rouge">TaskControlBlock</code> 中增加 <code class="language-plaintext highlighter-rouge">signal_mask</code> 以及 <code class="language-plaintext highlighter-rouge">signal_actions</code> 这两个变量用以屏蔽其他信号量以及记录如何对前述 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signals</code> 记录的信号进行响应。 因而可以看到， <code class="language-plaintext highlighter-rouge">SignalActions</code> 实际上是个信号数量匹配的数组， 数组类型是 <code class="language-plaintext highlighter-rouge">SignalAction</code> 这样就能将信号量与待处理函数进行一一对应。 需要说明的是 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::signal_mask</code> 声明了在该进程内会屏蔽的信号， 而 <code class="language-plaintext highlighter-rouge">SignalAction::mask</code> 是该回调函数会屏蔽的信号， 二者需要做 <strong>或</strong> 操作。</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// os/src/task/task.rs</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">TaskControlBlockInner</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="k">pub</span> <span class="n">signal_mask</span><span class="p">:</span> <span class="n">SignalFlags</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">signal_actions</span><span class="p">:</span> <span class="n">SignalActions</span><span class="p">,</span>
-    <span class="o">...</span>
-<span class="p">}</span>
-
-<span class="c1">// os/src/task/action.rs</span>
-<span class="nd">#[derive(Clone)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">SignalActions</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">table</span><span class="p">:</span> <span class="p">[</span><span class="n">SignalAction</span><span class="p">;</span> <span class="n">MAX_SIG</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<ul>
-  <li>
-    <p>进程可以通过 <code class="language-plaintext highlighter-rouge">sys_sigaction</code> 系统调用捕获某种信号， 暂停进程当前的执行， 调用进程为该种信号提供的函数对信号进行处理， 处理完成之后再恢复进程原先的执行。 可以看到 <code class="language-plaintext highlighter-rouge">prev_action</code> 中存储着之前的处理例程（回调函数）， 需要将这部分内容存放在 <code class="language-plaintext highlighter-rouge">old_action</code> 中， 而将 <code class="language-plaintext highlighter-rouge">action</code> 中的内容替换进 table 中。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigaction</span><span class="p">(</span>
-      <span class="n">signum</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
-      <span class="n">action</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">SignalAction</span><span class="p">,</span>
-      <span class="n">old_action</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">SignalAction</span><span class="p">,</span>
-  <span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-      <span class="o">...</span>
-      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="o">=</span> <span class="nn">SignalFlags</span><span class="p">::</span><span class="nf">from_bits</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">signum</span><span class="p">)</span> <span class="p">{</span>
-          <span class="k">if</span> <span class="nf">check_sigaction_error</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">old_action</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
-              <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-          <span class="p">}</span>
-          <span class="k">let</span> <span class="n">prev_action</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">];</span>
-          <span class="o">*</span><span class="nf">translated_refmut</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">old_action</span><span class="p">)</span> <span class="o">=</span> <span class="n">prev_action</span><span class="p">;</span>
-          <span class="n">inner</span><span class="py">.signal_actions.table</span><span class="p">[</span><span class="n">signum</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">]</span> <span class="o">=</span> <span class="o">*</span><span class="nf">translated_ref</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
-          <span class="mi">0</span>
-      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-          <span class="o">-</span><span class="mi">1</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_procmask</code> 就没啥好说的， 把传入进来的 flags 设置好就行。</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">sys_sigreturn</code> 的实现在逻辑上也不复杂， 更新 <code class="language-plaintext highlighter-rouge">TaskControlBlockInner::handling_sig</code> 并恢复保存在 <code class="language-plaintext highlighter-rouge">trap_ctx_backup</code> 中的上下文， 需要注意的是返回的时候是 <code class="language-plaintext highlighter-rouge">trap_ctx.x[10]</code>， 这是为了避免上下文返回时原来的 <code class="language-plaintext highlighter-rouge">a0</code> 返回值被覆盖而出现返回值变更的问题。</p>
-
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// os/src/syscall/process.rs</span>
-
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">sys_sigreturn</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">isize</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="o">=</span> <span class="nf">current_task</span><span class="p">()</span> <span class="p">{</span>
-          <span class="k">let</span> <span class="k">mut</span> <span class="n">inner</span> <span class="o">=</span> <span class="n">task</span><span class="nf">.inner_exclusive_access</span><span class="p">();</span>
-          <span class="n">inner</span><span class="py">.handling_sig</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-          <span class="c1">// restore the trap context</span>
-          <span class="k">let</span> <span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="nf">.get_trap_cx</span><span class="p">();</span>
-          <span class="o">*</span><span class="n">trap_ctx</span> <span class="o">=</span> <span class="n">inner</span><span class="py">.trap_ctx_backup</span><span class="nf">.unwrap</span><span class="p">();</span>
-          <span class="n">trap_ctx</span><span class="py">.x</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="k">as</span> <span class="nb">isize</span>
-      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-          <span class="o">-</span><span class="mi">1</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<p>关于 <code class="language-plaintext highlighter-rouge">handle_signals</code> 包括的一系列内容详见 rCore 的指导书， 并没有太多疑问。</p>
-
-<h2 id="5-课后练习">5. 课后练习</h2>
-
-<h3 id="51-编程练习">5.1 编程练习</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />TODO: 这部分回头再说</li>
-</ul>
-
-<h3 id="52-实验练习">5.2 实验练习</h3>
-
-<h4 id="进程通信邮箱">进程通信：邮箱</h4>
-
-<p>没有测例也不知道写的对不对， 基本上就是魔改一下 Pipe 的环形缓冲队列就整完了。</p>
-
-<blockquote>
-  <p>具体可以参考 <a href="https://github.com/HangX-Ma/rCore-sp23/commit/e9b19e5f19851f12bcae83531a050d60230abd08">commit#e9b19e5</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第七章：进程间通信与 I/O 重定向， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>
+<p>TODO…</p>]]></content><author><name>HangX-Ma</name></author><category term="Rust" /><category term="rCore" /><summary type="html"><![CDATA[第八章：并发， 阅读 rCore tutorial book v3 的笔记以及实践部分的实现与记录。]]></summary></entry></feed>

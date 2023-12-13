@@ -1,0 +1,1689 @@
+<!DOCTYPE html><html lang="en">
+  <head><!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WJM3K8CC36"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-WJM3K8CC36');
+		
+			gtag('config', 'G-WJM3K8CC36', { 'anonymize_ip': true });
+		
+	</script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>CSAPP - Bomb Lab - 一只豆腐</title>
+
+<meta name="description" content="Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Bomb Lab， 实现源码可从 HangX-Ma/csapp: 02-bomblab 获取。">
+<link rel="canonical" href="https://hangx-ma.github.io/2023/12/12/csapp-bomblab.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#eee9e9">
+<!-- end favicons snippet --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" ><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<meta name="google-site-verification" content="huXBxAwupuA9E4ECeGMrfbXaj7Ll6sDpJ37add6OHJA"><script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://use.fontawesome.com/releases/v5.15.4/css/all.css',
+        jquery: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js',
+        leancloud_js_sdk: 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js',
+        chart: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js',
+        gitalk: {
+          js: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js',
+          css: 'https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+<script type="text/javascript" src='/js/put-code-elements.js'></script>
+    <!-- ==================== IF YOU WANT TO USE highlight.js SYNTAX ======================== -->
+    <!-- <link rel="stylesheet" href="/assets/css/atom-one-dark.min.css">
+    <script src="/js/gungnir/highlight.min.js"></script>
+    <script src="/js/gungnir/highlightjs-line-numbers.js"></script>
+    <script src="/js/gungnir/gungnir.js"></script> -->
+  </head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+" href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>CSAPP - Bomb Lab</h1></header></div><meta itemprop="headline" content="CSAPP - Bomb Lab"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=Course">Course</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=CSAPP">CSAPP</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Dec 12, 2023</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 11821 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 33 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s12s12scsapp-bomblab.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-12-12T00:00:00+08:00">
+    <meta itemprop="keywords" content="Course,CSAPP"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Bomb Lab， 实现源码可从 <a href="https://github.com/HangX-Ma/csapp/tree/main/02-bomblab">HangX-Ma/csapp: 02-bomblab</a> 获取。
+<!--more--></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Progress and timeline <font color="#4682B4">[2/14]</font></li>
+</ul>
+
+<p>阅读 <a href="https://csapp.cs.cmu.edu/3e/students.html">CS:APP3e Student Site - Online GDB Materials</a> 章节的内容可以快速熟悉 GDB 的使用指令， 另外 <a href="https://csapp.cs.cmu.edu/3e/docs/gdbnotes-x86-64.pdf">GDB Notes</a> 罗列了一系列常用的 GDB 指令， 比网上搜索的要简洁完备。</p>
+
+<p>开始实验之前用 <code class="language-plaintext highlighter-rouge">objdump -d bomb &gt; bomb.s</code> 反汇编这段二级制代码， 后续就不用在 GDB 里用 <code class="language-plaintext highlighter-rouge">print</code> 找半天了， 便捷很多。</p>
+
+<h2 id="1-phase1">1. Phase1</h2>
+
+<p>从 <code class="language-plaintext highlighter-rouge">bomb.c</code> 文件可以看到总共有 6 个 phase 的问题， 不难直接定位 <code class="language-plaintext highlighter-rouge">phase_1</code> 所在的部分：</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">ee0</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_1</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">ee0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%rsp
+  400ee4:	be 00 24 40 00       	mov    $0x402400,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">ee9</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">4</span><span class="n">a</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">eee</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef0</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">ef7</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_1</span><span class="m">+0</span><span class="n">x17</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef2</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">43</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ef7</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c4</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">400</span><span class="n">efb</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<p>这里可以看到 <code class="language-plaintext highlighter-rouge">string_not_equal</code> 函数会进行字符串匹配， 而在调用函数之前， <code class="language-plaintext highlighter-rouge">%esi</code> 寄存器实际上传递的是第二个函数参数， 这个需要留意。 那索性看看 <code class="language-plaintext highlighter-rouge">string_note_equal</code> 函数做了什么：</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">401338</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">54</span><span class="w">                	</span><span class="n">push</span><span class="w">   </span><span class="o">%r12
+  40133a:	55                   	push   %</span><span class="n">rbp</span><span class="w">
+  </span><span class="m">40133</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">53</span><span class="w">                   	</span><span class="n">push</span><span class="w">   </span><span class="o">%rbx
+  40133c:	48 89 fb             	mov    %</span><span class="n">rdi</span><span class="p">,</span><span class="o">%rbx
+  40133f:	48 89 f5             	mov    %</span><span class="n">rsi</span><span class="p">,</span><span class="o">%rbp
+  401342:	e8 d4 ff ff ff       	call   40131b &lt;string_length&gt;
+  401347:	41 89 c4             	mov    %</span><span class="n">eax</span><span class="p">,</span><span class="o">%r12d
+  40134a:	48 89 ef             	mov    %</span><span class="n">rbp</span><span class="p">,</span><span class="o">%rdi
+  40134d:	e8 c9 ff ff ff       	call   40131b &lt;string_length&gt;
+  401352:	ba 01 00 00 00       	mov    $0x1,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401357</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">39</span><span class="w"> </span><span class="n">c4</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">r12d</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这里没有放全部的代码， 但前面的处理也比较清晰了。 <code class="language-plaintext highlighter-rouge">%rdi</code> 存储的是第一个函数参数， 可以看两次 <code class="language-plaintext highlighter-rouge">string_length</code> 函数调用存储的结果会进行比较， 如果不同就会 Explore Bomb。 而函数的输入参数在观察后也是清晰的， 仅有一个输入参数， 第一次给的 <code class="language-plaintext highlighter-rouge">%rdi</code> 中的内容， 第二次则是 <code class="language-plaintext highlighter-rouge">%rsi</code> 中的内容。 而在进入 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 之前 <code class="language-plaintext highlighter-rouge">%esi</code> 中的内容被赋值为了 <code class="language-plaintext highlighter-rouge">0x402400</code>， 说明这个地址应当存储着被比较的答案。 那么， 在 GDB 调试的时候不妨在 <code class="language-plaintext highlighter-rouge">0x400ee9</code> 调用 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 函数处设置断点， 调用如下命令打印的内容就是答案了：</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">(gdb) b *0x400ee9
+(gdb) r
+(gdb) print (char *)0x402400
+</span><span class="gp">$</span>1 <span class="o">=</span> <span class="s2">"Border relations with Canada have never been better."</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>用如上命令的主要原因是此处比较的是字符串是否匹配，　因而猜测答案应该是一串字符串。</p>
+</blockquote>
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>将上述答案放入 <code class="language-plaintext highlighter-rouge">result.txt</code> 文件的时候， 需要单独留一空行在最后， 否则 EOF 读取会有误。</p>
+
+
+
+ </div> </div>
+<h2 id="2-phase2">2. Phase2</h2>
+
+<p>开始在 <code class="language-plaintext highlighter-rouge">read_six_numbers</code> 函数里面看了半天， 发现就是读了几个数塞到特定的位置， 其中调用了 <code class="language-plaintext highlighter-rouge">sscanf</code>。 在过来看这段 <code class="language-plaintext highlighter-rouge">phase_2</code> 的代码， 获取数据后对 <code class="language-plaintext highlighter-rouge">%rsp</code> 存储的内容进行比较， 只有为 1 才会跳转到 <code class="language-plaintext highlighter-rouge">0x400f30</code> 位置， 取了一些值后继续跳转到 <code class="language-plaintext highlighter-rouge">0x400f17</code> 位置。 获取了 <code class="language-plaintext highlighter-rouge">%rsp</code> 寄存器中的内容， 一开始这个寄存器被设置为 1， 0x400f17 到 0x400f29 这部分代码就是检测前当前 <code class="language-plaintext highlighter-rouge">(%rbx)</code> 的值是否为 <code class="language-plaintext highlighter-rouge">-0x4%(rbx)</code> 即前一个值的两倍， 甚至这里的 4 字节宽度可以看出是个 <code class="language-plaintext highlighter-rouge">int</code> 类型数据， 总共循环 6 次。</p>
+
+<p>不难推断出答案应当为 <code class="language-plaintext highlighter-rouge">1 2 4 8 16 32</code>， 当然可以在 <code class="language-plaintext highlighter-rouge">0x400f1a</code> 处打断点， 查看上一个值 <code class="language-plaintext highlighter-rouge">%eax</code> 和 现在的值 <code class="language-plaintext highlighter-rouge">(%rbx)</code> 的内容也是一样的。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">efc</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">efc</span><span class="o">:</span><span class="w">	</span><span class="m">55</span><span class="w">                   	</span><span class="n">push</span><span class="w">   </span><span class="o">%rbp
+  400efd:	53                   	push   %</span><span class="n">rbx</span><span class="w">
+  </span><span class="m">400</span><span class="n">efe</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">28</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x28</span><span class="p">,</span><span class="o">%rsp
+  400f02:	48 89 e6             	mov    %</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rsi
+  400f05:	e8 52 05 00 00       	call   40145c &lt;read_six_numbers&gt;
+  400f0a:	83 3c 24 01          	cmpl   $0x1,(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f0e</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">20</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">f30</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x34</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f10</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f15</span><span class="o">:</span><span class="w">	</span><span class="n">eb</span><span class="w"> </span><span class="m">19</span><span class="w">                	</span><span class="n">jmp</span><span class="w">    </span><span class="m">400</span><span class="n">f30</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x34</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f17</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">43</span><span class="w"> </span><span class="n">fc</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="m">-0</span><span class="n">x4</span><span class="p">(</span><span class="o">%rbx),%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1a</span><span class="o">:</span><span class="w">	</span><span class="m">01</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">add</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1c</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="m">03</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,(%</span><span class="n">rbx</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f1e</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">400</span><span class="n">f25</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_2</span><span class="m">+0</span><span class="n">x29</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f20</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f25</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%rbx
+  400f29:	48 39 eb             	cmp    %</span><span class="n">rbp</span><span class="p">,</span><span class="o">%rbx
+  400f2c:	75 e9                	jne    400f17 &lt;phase_2+0x1b&gt;
+  400f2e:	eb 0c                	jmp    400f3c &lt;phase_2+0x40&gt;
+  400f30:	48 8d 5c 24 04       	lea    0x4(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rbx
+  400f35:	48 8d 6c 24 18       	lea    0x18(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rbp
+  400f3a:	eb db                	jmp    400f17 &lt;phase_2+0x1b&gt;
+  400f3c:	48 83 c4 28          	add    $0x28,%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">400</span><span class="n">f40</span><span class="o">:</span><span class="w">	</span><span class="m">5</span><span class="n">b</span><span class="w">                   	</span><span class="n">pop</span><span class="w">    </span><span class="o">%rbx
+  400f41:	5d                   	pop    %</span><span class="n">rbp</span><span class="w">
+  </span><span class="m">400</span><span class="n">f42</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">(gdb) print /d $</span>rax
+<span class="gp">$</span>1 <span class="o">=</span> 1
+<span class="gp">(gdb) print *(int *) ($</span>rbx<span class="o">)</span>
+<span class="gp">$</span>2 <span class="o">=</span> 2
+</code></pre></div></div>
+
+<div class="premonition note"> <div class="header"> <i class="fas fa-sticky-note" style="color: #87d8f2;"></i> <div class="title"> Note </div> </div> <div class="content"> <p>这里要注意的是， 在进入 GDB 调试之前， 需要用 <code class="language-plaintext highlighter-rouge">set args result.txt</code> 设置程序的读取参数。 另外， bomb 程序会要求输入一组数， 一定要记得先随便输入 6 个数， 否则在判断输入数量就会出错了。</p>
+
+
+
+ </div> </div>
+<h2 id="3-phase3">3. Phase3</h2>
+
+<p>乍一看是理不出具体的操作的， 不过有几个地方还是能找到一些信息的。 如下代码先将 <code class="language-plaintext highlighter-rouge">%rsp</code> 预留出的几个位置的地址放到了 <code class="language-plaintext highlighter-rouge">%rcx</code> 和 <code class="language-plaintext highlighter-rouge">%rdx</code> 寄存器。 我们知道 <code class="language-plaintext highlighter-rouge">%rdx</code> 和 <code class="language-plaintext highlighter-rouge">%rcx</code> 是用以传输第三第四个参数的， 根据 <code class="language-plaintext highlighter-rouge">int sscanf(const char *str, const char *format, ...)</code> 的函数声明， 不难得知 <code class="language-plaintext highlighter-rouge">%esi</code> 中的内容通过 <code class="language-plaintext highlighter-rouge">sscanf</code> 格式化后写入到了 <code class="language-plaintext highlighter-rouge">%rdx</code> 和 <code class="language-plaintext highlighter-rouge">%rcx</code> 并返回格式化参数的个数。</p>
+
+<blockquote>
+  <p>通过读取 <code class="language-plaintext highlighter-rouge">0x4025cf</code> 处的内容得知为 <strong>“%d %d”</strong> 说明会格式化 2 个 <code class="language-plaintext highlighter-rouge">int</code> 类型的数据， 与猜测相符合。</p>
+</blockquote>
+
+<p>按照下面的代码， 需要返回参数数量在需要大于 1 并且， 并且 <code class="language-plaintext highlighter-rouge">%rdx</code> 的值需要小于等于 7 否则会 Explore Bomb。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">0000000000400</span><span class="n">f43</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="o">&gt;:</span><span class="w">
+  </span><span class="m">400</span><span class="n">f43</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="m">18</span><span class="w">          	</span><span class="n">sub</span><span class="w">    </span><span class="o">$</span><span class="mh">0x18</span><span class="p">,</span><span class="o">%rsp
+  400f47:	48 8d 4c 24 0c       	lea    0xc(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rcx
+  400f4c:	48 8d 54 24 08       	lea    0x8(%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rdx
+  400f51:	be cf 25 40 00       	mov    $0x4025cf,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">f56</span><span class="o">:</span><span class="w">	</span><span class="n">b8</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%eax
+  400f5b:	e8 90 fc ff ff       	call   400bf0 &lt;__isoc99_sscanf@plt&gt;
+  400f60:	83 f8 01             	cmp    $0x1,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f63</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">f</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">jg</span><span class="w">     </span><span class="m">400</span><span class="n">f6a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="m">+0</span><span class="n">x27</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f65</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">d0</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">f6a</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w"> </span><span class="m">07</span><span class="w">       	</span><span class="n">cmpl</span><span class="w">   </span><span class="o">$</span><span class="mh">0x7</span><span class="p">,</span><span class="mh">0x8</span><span class="p">(</span><span class="o">%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">400</span><span class="n">f6f</span><span class="o">:</span><span class="w">	</span><span class="m">77</span><span class="w"> </span><span class="m">3</span><span class="n">c</span><span class="w">                	</span><span class="n">ja</span><span class="w">     </span><span class="m">400</span><span class="n">fad</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_3</span><span class="m">+0</span><span class="n">x6a</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>之后就是一个间接跳转的指令了， 这个间接跳转的指令和第一个输入的值有关系， 第一个输入的值在 0 到 7 之间， 那么就会根据第一参数跳转到不同的位置， 可以查看 <code class="language-plaintext highlighter-rouge">0x402470</code> 的值为 <strong>0x400f7c</strong>， 需要第二个输入的值为 <code class="language-plaintext highlighter-rouge">0x137</code> 这不巧了， 下面一对类似的语句应该都是间接跳转的情况。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">f71</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x8</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">400</span><span class="n">f75</span><span class="o">:</span><span class="w">	</span><span class="n">ff</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="n">c5</span><span class="w"> </span><span class="m">70</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">jmp</span><span class="w">    </span><span class="o">*</span><span class="mh">0x402470</span><span class="p">(,</span><span class="o">%</span><span class="n">rax</span><span class="p">,</span><span class="m">8</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>如此有不同的答案， 分别为 <code class="language-plaintext highlighter-rouge">0 207</code>， <code class="language-plaintext highlighter-rouge">1 311</code>， <code class="language-plaintext highlighter-rouge">2 707</code>， <code class="language-plaintext highlighter-rouge">3 256</code>， <code class="language-plaintext highlighter-rouge">4 389</code>， <code class="language-plaintext highlighter-rouge">5 206</code>， <code class="language-plaintext highlighter-rouge">6 682</code>， <code class="language-plaintext highlighter-rouge">7 327</code>。 真贴心， 还打乱了顺序！</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">(gdb) print /x *(int *) 0x402470
+</span><span class="gp">$</span>1 <span class="o">=</span> 0x400f7c
+<span class="go">(gdb) print /x *(int *) 0x402478
+</span><span class="gp">$</span>2 <span class="o">=</span> 0x400fb9
+<span class="go">(gdb) print /x *(int *) 0x402480
+</span><span class="gp">$</span>3 <span class="o">=</span> 0x400f83
+<span class="go">(gdb) print /x *(int *) 0x402488
+</span><span class="gp">$</span>4 <span class="o">=</span> 0x400f8a
+<span class="go">(gdb) print /x *(int *) 0x402490
+</span><span class="gp">$</span>5 <span class="o">=</span> 0x400f91
+<span class="go">(gdb) print /x *(int *) 0x402498
+</span><span class="gp">$</span>6 <span class="o">=</span> 0x400f98
+<span class="go">(gdb) print /x *(int *) 0x4024a0
+</span><span class="gp">$</span>7 <span class="o">=</span> 0x400f9f
+<span class="go">(gdb) print /x *(int *) 0x4024a8
+</span><span class="gp">$</span>8 <span class="o">=</span> 0x400fa6
+</code></pre></div></div>
+
+<h2 id="4-phase4">4. Phase4</h2>
+
+<p>同样也是读取数据如出一辙， 甚至连字符串的地址都和 Phase3 的一致。 不过 <code class="language-plaintext highlighter-rouge">cmpl    $0xe,0x8(%rsp)</code> 这一句要求 <code class="language-plaintext highlighter-rouge">%rdx</code> 获取到的第一个参数值要小于等于 0xe。</p>
+
+<p>后面的这几句也很明确， 为了调用 <code class="language-plaintext highlighter-rouge">func4</code> 函数， 将其第三个参数 <code class="language-plaintext highlighter-rouge">%edx</code> 设置为 0xe， 第二个参数 <code class="language-plaintext highlighter-rouge">%esi</code> 设置为 0x0， 第一个参数则是从 <code class="language-plaintext highlighter-rouge">sscanf</code> 输入读取的第一个参数。 暂且放一放 <code class="language-plaintext highlighter-rouge">func4</code>， 0x401051 地址的语句是判断 <code class="language-plaintext highlighter-rouge">sscanf</code> 输入的第二个参数是否为 0， 否则就 Explore Bomb， 答案的一半已经呼之欲出了 （就是 <code class="language-plaintext highlighter-rouge">0</code>）。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40103</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="n">ba</span><span class="w"> </span><span class="m">0</span><span class="n">e</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0xe</span><span class="p">,</span><span class="o">%edx
+  40103f:	be 00 00 00 00       	mov    $0x0,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">401044</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x8</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">edi</span><span class="w">
+  </span><span class="m">401048</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">81</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">40104</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+  </span><span class="m">40104</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="m">07</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401058</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_4</span><span class="m">+0</span><span class="n">x4c</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">401051</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">cmpl</span><span class="w">   </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="mh">0xc</span><span class="p">(</span><span class="o">%rsp)
+  401056:	74 05                	je     40105d &lt;phase_4+0x51&gt;
+  401058:	e8 dd 03 00 00       	call   40143a &lt;explode_bomb&gt;
+  40105d:	48 83 c4 18          	add    $0x18,%</span><span class="n">rsp</span><span class="w">
+  </span><span class="m">401061</span><span class="o">:</span><span class="w">	</span><span class="n">c3</span><span class="w">                   	</span><span class="n">ret</span><span class="w">    
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">func4</code> 的内容还是有些神奇， 跟着流程走下来， 比如我当前设定的第一个数是 1， 0x400fdb 时 <code class="language-plaintext highlighter-rouge">%ecx</code> 的值从 0xe， 会递归更新到 0x6， 0x2， 而相应的 <code class="language-plaintext highlighter-rouge">%eax</code> 的值在 <code class="language-plaintext highlighter-rouge">sar    %eax</code> 语句执行后会变更为 0x7, 0x3, 0x1， 这个 <code class="language-plaintext highlighter-rouge">sar</code> 的指令的使用我没见过， 但看流程应该是将 <code class="language-plaintext highlighter-rouge">%eax</code> 向右移动一位， 因为 <code class="language-plaintext highlighter-rouge">%ecx</code> 的值是更新到 <code class="language-plaintext highlighter-rouge">%eax</code> 中的， 正好和上述结果对应。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">fe2</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="n">f9</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%edi,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe4</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">400</span><span class="n">ff2</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="m">+0</span><span class="n">x24</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe6</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">51</span><span class="w"> </span><span class="n">ff</span><span class="w">             	</span><span class="n">lea</span><span class="w">    </span><span class="m">-0</span><span class="n">x1</span><span class="p">(</span><span class="o">%rcx),%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">400</span><span class="n">fe9</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">e0</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这个函数还处理了了第一个输入的数更大的情况， 但范围是也是被限制在了 0 到 7 之内。 也就是说， 根据 <code class="language-plaintext highlighter-rouge">func4</code> 的处理逻辑， 只有输入的值为 <code class="language-plaintext highlighter-rouge">1 0</code>， <code class="language-plaintext highlighter-rouge">3 0</code>， <code class="language-plaintext highlighter-rouge">7 0</code> 才能返回 <code class="language-plaintext highlighter-rouge">%eax</code> 为 0。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">400</span><span class="n">ff7</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="n">f9</span><span class="w">                	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%edi,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">400</span><span class="n">ff9</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">d</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w">                	</span><span class="n">jge</span><span class="w">    </span><span class="m">401007</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="m">+0</span><span class="n">x39</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">400</span><span class="n">ffb</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">71</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x1</span><span class="p">(</span><span class="o">%rcx),%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">400</span><span class="n">ffe</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">cb</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="n">ff</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">400</span><span class="n">fce</span><span class="w"> </span><span class="o">&lt;</span><span class="n">func4</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="5-phase5">5. Phase5</h2>
+
+<p><code class="language-plaintext highlighter-rouge">phase_5</code> 开头有这么一段， 在堆栈的特定位置存入了一个 Canary 值以监测程序是否有被栈溢出问题修改内容。 对程序主体没有影响。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40106</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">64</span><span class="w"> </span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">28</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">mov</span><span class="w">    </span><span class="o">%fs:0x28,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">401071</span><span class="o">:</span><span class="w">	</span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> 
+  </span><span class="m">401073</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">18</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rax,0x18(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>而后则是判断输入的字符串的长度， 如果长度相等则会跳转到 0x4010d2 处， 清空 <code class="language-plaintext highlighter-rouge">%rax</code> 中的内容跳到实际的函数主体的入口地址 0x40108b。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">401078</span><span class="o">:</span><span class="w">	</span><span class="m">31</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">xor</span><span class="w">    </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w"> </span><span class="c1"># clear %eax</span><span class="w">
+  </span><span class="m">40107</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">9</span><span class="n">c</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40131</span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="n">string_length</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># check length equals to 6 or not</span><span class="w">
+  </span><span class="m">40107</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">06</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%eax
+  401082:	74 4e                	je     4010d2 &lt;phase_5+0x70&gt;
+  401084:	e8 b1 03 00 00       	call   40143a &lt;explode_bomb&gt;
+  401089:	eb 47                	jmp    4010d2 &lt;phase_5+0x70&gt;
+  40108b:	0f b6 0c 03          	movzbl (%</span><span class="n">rbx</span><span class="p">,</span><span class="o">%rax,1),%</span><span class="n">ecx</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这个主体部分的逻辑也非常清晰， <code class="language-plaintext highlighter-rouge">%rbx</code> 中的内容是我们输入的字符串的起始地址， 由 <code class="language-plaintext highlighter-rouge">%rdi</code> 赋值得到。 可以看到这段代码是根据 <code class="language-plaintext highlighter-rouge">%rax</code> 的值进行循环逐个取输入字符串中的单个字符， 处理传入的 <code class="language-plaintext highlighter-rouge">char input[6]</code>， 并将 <code class="language-plaintext highlighter-rouge">input[n]</code> 的低 4 位作为 offset 取以 <code class="language-plaintext highlighter-rouge">0x4024b0</code> 为首地址的字符串中的字符。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40108</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">0</span><span class="n">f</span><span class="w"> </span><span class="n">b6</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">03</span><span class="w">          	</span><span class="n">movzbl</span><span class="w"> </span><span class="p">(</span><span class="o">%rbx,%</span><span class="n">rax</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="o">%ecx
+  40108f:	88 0c 24             	mov    %</span><span class="n">cl</span><span class="p">,(</span><span class="o">%rsp)
+  401092:	48 8b 14 24          	mov    (%</span><span class="n">rsp</span><span class="p">),</span><span class="o">%rdx
+  401096:	83 e2 0f             	and    $0xf,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401099</span><span class="o">:</span><span class="w">	</span><span class="m">0</span><span class="n">f</span><span class="w"> </span><span class="n">b6</span><span class="w"> </span><span class="m">92</span><span class="w"> </span><span class="n">b0</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="m">00</span><span class="w"> 	</span><span class="n">movzbl</span><span class="w"> </span><span class="mh">0x4024b0</span><span class="p">(</span><span class="o">%rdx),%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">4010</span><span class="n">a0</span><span class="o">:</span><span class="w">	</span><span class="m">88</span><span class="w"> </span><span class="m">54</span><span class="w"> </span><span class="m">04</span><span class="w"> </span><span class="m">10</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="o">%dl,0x10(%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rax,1)
+  4010a4:	48 83 c0 01          	add    $0x1,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4010</span><span class="n">a8</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">06</span><span class="w">          	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4010</span><span class="n">ac</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">dd</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">40108</span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_5</span><span class="m">+0</span><span class="n">x29</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>上述循环结束后就会进入下列代码中， 又见到老朋友 <code class="language-plaintext highlighter-rouge">strings_not_equal</code> 了， 我们很清楚 <code class="language-plaintext highlighter-rouge">0x40245e</code> 地址存储着最后的字符组合， 打印出来是 <code class="language-plaintext highlighter-rouge">flyers</code>。 因此根据这个值我们就可以进行逆推了， 打印 <code class="language-plaintext highlighter-rouge">0x4024b0</code> 为首地址的字符串可以得到 <code class="language-plaintext highlighter-rouge">maduiersnfotvbylSo you think you can stop the bomb with ctrl-c, do you?</code>， 我们可以找到 <code class="language-plaintext highlighter-rouge">flyers</code> 的每个对应的位置而得出 offset 的值为 <code class="language-plaintext highlighter-rouge">9, 15, 14, 5, 6, 7</code>。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4010</span><span class="n">ae</span><span class="o">:</span><span class="w">	</span><span class="n">c6</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">movb</span><span class="w">   </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="mh">0x16</span><span class="p">(</span><span class="o">%rsp)
+  4010b3:	be 5e 24 40 00       	mov    $0x40245e,%</span><span class="n">esi</span><span class="w">
+  </span><span class="m">4010</span><span class="n">b8</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">7</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">10</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x10</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rdi</span><span class="w">
+  </span><span class="m">4010</span><span class="n">bd</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">76</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">401338</span><span class="w"> </span><span class="o">&lt;</span><span class="n">strings_not_equal</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">4010</span><span class="n">c2</span><span class="o">:</span><span class="w">	</span><span class="m">85</span><span class="w"> </span><span class="n">c0</span><span class="w">                	</span><span class="n">test</span><span class="w">   </span><span class="o">%eax,%</span><span class="n">eax</span><span class="w">
+</span></code></pre></div></div>
+
+<p>反正最后是要的低 4 位， 根据 <a href="https://www.asciitable.com/">ASCII Table</a> 的内容， 答案可以有很多种， <code class="language-plaintext highlighter-rouge">9?&gt;567</code>(0x30 + offset)，  <code class="language-plaintext highlighter-rouge">IONEFG</code>(0x40 + offset) 等等。</p>
+
+<h2 id="6-phase6">6. Phase6</h2>
+
+<p>代码好长， 建议看一点就在旁边做点注释。</p>
+
+<p>最开始先是读取了 6 个数， 之后就进入下列代码中， 这段代码的目的就是判断这 6 个数是两两不同的， 否则会 Explore Bomb， 流程可以跟着代码中的注释走一遍留个印象。 另外要求这几个数在减 1 之后要小于等于 5， 因而可以肯定的是这几个数的范围是 1 到 6， 就是目前顺序还不确定。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="m">40110</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">    	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%r12d
+401114:	4c 89 ed             	mov    %</span><span class="n">r13</span><span class="p">,</span><span class="o">%rbp
+401117:	41 8b 45 00          	mov    0x0(%</span><span class="n">r13</span><span class="p">),</span><span class="o">%eax
+40111b:	83 e8 01             	sub    $0x1,%</span><span class="n">eax</span><span class="w">
+</span><span class="m">40111</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">f8</span><span class="w"> </span><span class="m">05</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x5</span><span class="p">,</span><span class="o">%eax
+401121:	76 05                	jbe    401128 &lt;phase_6+0x34&gt; # %</span><span class="n">eax</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">5</span><span class="p">,</span><span class="w"> </span><span class="n">otherwise</span><span class="w"> </span><span class="n">explore</span><span class="w"> </span><span class="n">bomb</span><span class="p">,</span><span class="w"> </span><span class="n">means</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">six</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">less</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">equal</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="m">6</span><span class="w">
+</span><span class="m">401123</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="m">03</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401128</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c4</span><span class="w"> </span><span class="m">01</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%r12d # %</span><span class="n">r12d</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="n">indicating</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">six</span><span class="w"> </span><span class="n">numbers</span><span class="w">
+</span><span class="m">40112</span><span class="n">c</span><span class="o">:</span><span class="w">	</span><span class="m">41</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">fc</span><span class="w"> </span><span class="m">06</span><span class="w">          	</span><span class="n">cmp</span><span class="w">    </span><span class="o">$</span><span class="mh">0x6</span><span class="p">,</span><span class="o">%r12d
+401130:	74 21                	je     401153 &lt;phase_6+0x5f&gt;
+401132:	44 89 e3             	mov    %</span><span class="n">r12d</span><span class="p">,</span><span class="o">%ebx
+401135:	48 63 c3             	movslq %</span><span class="n">ebx</span><span class="p">,</span><span class="o">%rax
+401138:	8b 04 84             	mov    (%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rax,4),%</span><span class="n">eax</span><span class="w"> </span><span class="c1"># int type, get input six number iteratively</span><span class="w">
+</span><span class="m">40113</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">39</span><span class="w"> </span><span class="m">45</span><span class="w"> </span><span class="m">00</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%eax,0x0(%</span><span class="n">rbp</span><span class="p">)</span><span class="w"> </span><span class="c1"># compare current value to first value for 5 times, needs to be not equal</span><span class="w">
+</span><span class="m">40113</span><span class="n">e</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="m">05</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401145</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x51</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401140</span><span class="o">:</span><span class="w">	</span><span class="n">e8</span><span class="w"> </span><span class="n">f5</span><span class="w"> </span><span class="m">02</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">call</span><span class="w">   </span><span class="m">40143</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="n">explode_bomb</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">401145</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%ebx
+401148:	83 fb 05             	cmp    $0x5,%</span><span class="n">ebx</span><span class="w">
+</span><span class="m">40114</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="n">e8</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">401135</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x41</span><span class="o">&gt;</span><span class="w">
+</span><span class="m">40114</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">49</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c5</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%</span><span class="n">r13</span><span class="w"> </span><span class="c1"># move to next number</span><span class="w">
+</span></code></pre></div></div>
+
+<p>这段的逻辑比较清晰， 对每一项储存在堆栈上的数 <code class="language-plaintext highlighter-rouge">num[i]</code> 做 <code class="language-plaintext highlighter-rouge">num[i] = 7 - num[i]</code> 的操作， 对每个数进行重新赋值。 跳出循环的条件是 <code class="language-plaintext highlighter-rouge">%rsi</code> 中存储的地址和 <code class="language-plaintext highlighter-rouge">%rax</code> 一致。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">401153</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">18</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x18</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rsi</span><span class="w"> </span><span class="c1"># 0x18 = 24, move the last number address into %rsi</span><span class="w">
+  </span><span class="m">401158</span><span class="o">:</span><span class="w">	</span><span class="m">4</span><span class="n">c</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="n">f0</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="o">%r14,%</span><span class="n">rax</span><span class="w"> </span><span class="c1"># initial stack base address</span><span class="w">
+  </span><span class="m">40115</span><span class="n">b</span><span class="o">:</span><span class="w">	</span><span class="n">b9</span><span class="w"> </span><span class="m">07</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x7</span><span class="p">,</span><span class="o">%ecx
+  401160:	89 ca                	mov    %</span><span class="n">ecx</span><span class="p">,</span><span class="o">%edx # iteratively use 7 to subtract the stored number and replace the orignal ones
+  401162:	2b 10                	sub    (%</span><span class="n">rax</span><span class="p">),</span><span class="o">%edx
+  401164:	89 10                	mov    %</span><span class="n">edx</span><span class="p">,(</span><span class="o">%rax)
+  401166:	48 83 c0 04          	add    $0x4,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">40116</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">39</span><span class="w"> </span><span class="n">f0</span><span class="w">             	</span><span class="n">cmp</span><span class="w">    </span><span class="o">%rsi,%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">40116</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">f1</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">401160</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x6c</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>做好上述工作后进入如下代码段， 本质上做了一个映射， 将 0x6032d0 起始， 以 0x10 为步长的地址中， 按照所给数据的顺序将对应的地址填入堆栈中。 例如 0x603320 对应数字 6， 数字 6 在第一个位置， 则 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 存储着 <code class="language-plaintext highlighter-rouge">0x603320</code> 这个地址。</p>
+<blockquote>
+  <p>通过调试可以清楚 <code class="language-plaintext highlighter-rouge">*(0x6032d0 + 8)=0x6032f0</code>， 即在这一过程中存在着链表结构， 当前链表节点中存储着下一个链表节点的地址。</p>
+</blockquote>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">40116</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="n">be</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x0</span><span class="p">,</span><span class="o">%esi
+  401174:	eb 21                	jmp    401197 &lt;phase_6+0xa3&gt;
+  401176:	48 8b 52 08          	mov    0x8(%</span><span class="n">rdx</span><span class="p">),</span><span class="o">%rdx # update %</span><span class="n">rdx</span><span class="w"> </span><span class="n">content</span><span class="p">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">8</span><span class="n">n</span><span class="err">，</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">8</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x6032d0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w">
+  </span><span class="m">40117</span><span class="n">a</span><span class="o">:</span><span class="w">	</span><span class="m">83</span><span class="w"> </span><span class="n">c0</span><span class="w"> </span><span class="m">01</span><span class="w">             	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%eax
+  40117d:	39 c8                	cmp    %</span><span class="n">ecx</span><span class="p">,</span><span class="o">%eax
+  40117f:	75 f5                	jne    401176 &lt;phase_6+0x82&gt;
+  401181:	eb 05                	jmp    401188 &lt;phase_6+0x94&gt;
+  401183:	ba d0 32 60 00       	mov    $0x6032d0,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">401188</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">54</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">20</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rdx,0x20(%</span><span class="n">rsp</span><span class="p">,</span><span class="o">%rsi,2) # store the address into stack, whose address start from 20(%</span><span class="n">rsp</span><span class="p">)</span><span class="w">
+  </span><span class="m">40118</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c6</span><span class="w"> </span><span class="m">04</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x4</span><span class="p">,</span><span class="o">%rsi
+  401191:	48 83 fe 18          	cmp    $0x18,%</span><span class="n">rsi</span><span class="w">
+  </span><span class="m">401195</span><span class="o">:</span><span class="w">	</span><span class="m">74</span><span class="w"> </span><span class="m">14</span><span class="w">                	</span><span class="n">je</span><span class="w">     </span><span class="m">4011</span><span class="n">ab</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">xb7</span><span class="o">&gt;</span><span class="w">
+  </span><span class="m">401197</span><span class="o">:</span><span class="w">	</span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">0</span><span class="n">c</span><span class="w"> </span><span class="m">34</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="p">(</span><span class="o">%rsp,%</span><span class="n">rsi</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="o">%ecx # entry
+  40119a:	83 f9 01             	cmp    $0x1,%</span><span class="n">ecx</span><span class="w">
+  </span><span class="m">40119</span><span class="n">d</span><span class="o">:</span><span class="w">	</span><span class="m">7</span><span class="n">e</span><span class="w"> </span><span class="n">e4</span><span class="w">                	</span><span class="n">jle</span><span class="w">    </span><span class="m">401183</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x8f</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># less or equal to 1 (you know must be 1)</span><span class="w">
+  </span><span class="m">40119</span><span class="n">f</span><span class="o">:</span><span class="w">	</span><span class="n">b8</span><span class="w"> </span><span class="m">01</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x1</span><span class="p">,</span><span class="o">%eax
+  4011a4:	ba d0 32 60 00       	mov    $0x6032d0,%</span><span class="n">edx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">a9</span><span class="o">:</span><span class="w">	</span><span class="n">eb</span><span class="w"> </span><span class="n">cb</span><span class="w">                	</span><span class="n">jmp</span><span class="w">    </span><span class="m">401176</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">x82</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>上述代码完成工作后， <code class="language-plaintext highlighter-rouge">%rbx</code> 首先被赋值为排序后的栈顶 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 内容， <code class="language-plaintext highlighter-rouge">%rax</code> 则被赋值为排序后的栈顶偏移 8 byte 的地址 <code class="language-plaintext highlighter-rouge">0x28(%rsp)</code>， 而 <code class="language-plaintext highlighter-rouge">%rsi</code> 则填入栈底地址 <code class="language-plaintext highlighter-rouge">0x50(%rsp)</code>。</p>
+
+<p>如下代码所要做的工作， 将堆栈栈顶 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code> 中的内容（该内容为一段地址）取出放在 <code class="language-plaintext highlighter-rouge">%rcx</code>， 并将相邻的 <code class="language-plaintext highlighter-rouge">0x28(%rsp)</code> 中的地址也取出放到 <code class="language-plaintext highlighter-rouge">%rdx</code>， 根据之前的描述 <code class="language-plaintext highlighter-rouge">*(0x6032d0 + 8n) = 0x6032d0 + 0x10 * n</code> 成立， 即表明这是一种链式结构， <code class="language-plaintext highlighter-rouge">mov    %rdx,0x8(%rcx)</code> 就是将当前栈中的链表节点存储的下一个链表节点地址， 更新为存储在堆栈相邻位置的链表节点的地址。 最后一个链表节点中则存一个空地址。 这样按照堆栈的存储顺序， 栈顶成了头节点， 栈底成了尾节点。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4011</span><span class="n">ab</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">5</span><span class="n">c</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">20</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="mh">0x20</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rbx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">b0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">44</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">28</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x28</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rax</span><span class="w">
+  </span><span class="m">4011</span><span class="n">b5</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">d</span><span class="w"> </span><span class="m">74</span><span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">50</span><span class="w">       	</span><span class="n">lea</span><span class="w">    </span><span class="mh">0x50</span><span class="p">(</span><span class="o">%rsp),%</span><span class="n">rsi</span><span class="w">
+  </span><span class="m">4011</span><span class="n">ba</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="n">d9</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rbx,%</span><span class="n">rcx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">bd</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">8</span><span class="n">b</span><span class="w"> </span><span class="m">10</span><span class="w">             	</span><span class="n">mov</span><span class="w">    </span><span class="p">(</span><span class="o">%rax),%</span><span class="n">rdx</span><span class="w">
+  </span><span class="m">4011</span><span class="n">c0</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">89</span><span class="w"> </span><span class="m">51</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">mov</span><span class="w">    </span><span class="o">%rdx,0x8(%</span><span class="n">rcx</span><span class="p">)</span><span class="w">
+  </span><span class="m">4011</span><span class="n">c4</span><span class="o">:</span><span class="w">	</span><span class="m">48</span><span class="w"> </span><span class="m">83</span><span class="w"> </span><span class="n">c0</span><span class="w"> </span><span class="m">08</span><span class="w">          	</span><span class="n">add</span><span class="w">    </span><span class="o">$</span><span class="mh">0x8</span><span class="p">,</span><span class="o">%rax
+  4011c8:	48 39 f0             	cmp    %</span><span class="n">rsi</span><span class="p">,</span><span class="o">%rax
+  4011cb:	74 05                	je     4011d2 &lt;phase_6+0xde&gt;
+  4011cd:	48 89 d1             	mov    %</span><span class="n">rdx</span><span class="p">,</span><span class="o">%rcx
+  4011d0:	eb eb                	jmp    4011bd &lt;phase_6+0xc9&gt;
+  4011d2:	48 c7 42 08 00 00 00 	movq   $0x0,0x8(%</span><span class="n">rdx</span><span class="p">)</span><span class="w">
+  </span><span class="m">4011</span><span class="n">d9</span><span class="o">:</span><span class="w">	</span><span class="m">00</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p>最后就是遍历堆栈啦， <code class="language-plaintext highlighter-rouge">%rbx</code> 的值没有修改过仍然指向栈顶位置 <code class="language-plaintext highlighter-rouge">0x20(%rsp)</code>， 接着判断当前位置取到的值是否会比栈中下一个元素取得的值大或相等， 不满足则会 Explore Bomb。</p>
+
+<div class="language-s highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="m">4011</span><span class="n">da</span><span class="o">:</span><span class="w">	</span><span class="n">bd</span><span class="w"> </span><span class="m">05</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="m">00</span><span class="w">       	</span><span class="n">mov</span><span class="w">    </span><span class="o">$</span><span class="mh">0x5</span><span class="p">,</span><span class="o">%ebp
+  4011df:	48 8b 43 08          	mov    0x8(%</span><span class="n">rbx</span><span class="p">),</span><span class="o">%rax
+  4011e3:	8b 00                	mov    (%</span><span class="n">rax</span><span class="p">),</span><span class="o">%eax
+  4011e5:	39 03                	cmp    %</span><span class="n">eax</span><span class="p">,(</span><span class="o">%rbx)
+  4011e7:	7d 05                	jge    4011ee &lt;phase_6+0xfa&gt;
+  4011e9:	e8 4c 02 00 00       	call   40143a &lt;explode_bomb&gt;
+  4011ee:	48 8b 5b 08          	mov    0x8(%</span><span class="n">rbx</span><span class="p">),</span><span class="o">%rbx
+  4011f2:	83 ed 01             	sub    $0x1,%</span><span class="n">ebp</span><span class="w">
+  </span><span class="m">4011</span><span class="n">f5</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">e8</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">4011</span><span class="n">df</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">xeb</span><span class="o">&gt;</span><span class="w">
+</span></code></pre></div></div>
+
+<p>我们知道存储值的地址分别为 <code class="language-plaintext highlighter-rouge">0x6032d0</code>， <code class="language-plaintext highlighter-rouge">0x6032e0</code>， <code class="language-plaintext highlighter-rouge">0x6032f0</code>， <code class="language-plaintext highlighter-rouge">0x603300</code>， <code class="language-plaintext highlighter-rouge">0x603310</code>， <code class="language-plaintext highlighter-rouge">0x603320</code>， 不妨都打印出来排个序， 顺序从大到小排序。 根据排序后的关系， 以及前述映射， 可以得到我们的输入为 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code>。 但是， 我们还做了一次转换改变了原来的链表结构， 按照原来的顺序排序肯定不一样。</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">924 -&gt;</span><span class="w"> </span>0x6032f0 -&gt; 3
+<span class="gp">691 -&gt;</span><span class="w"> </span>0x603300 -&gt; 4
+<span class="gp">477 -&gt;</span><span class="w"> </span>0x603310 -&gt; 5
+<span class="gp">443 -&gt;</span><span class="w"> </span>0x603320 -&gt; 6
+<span class="gp">332 -&gt;</span><span class="w"> </span>0x6032d0 -&gt; 1
+<span class="gp">168 -&gt;</span><span class="w"> </span>0x6032e0 -&gt; 2
+</code></pre></div></div>
+
+<p>在 <strong>0x4011b</strong> 处打断点， 此时还未进行重组排序， 直接打印堆栈中存储的各个值， 把之前的 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code> 当作数组的索引按照打印顺序取值即可。 例如 3 则取 <code class="language-plaintext highlighter-rouge">0x603300</code> 对应原值的 4， 4 则取 <code class="language-plaintext highlighter-rouge">0x6032f0</code> 对应原值 3， 依次类推， 得到最终的答案应当为 <code class="language-plaintext highlighter-rouge">4 3 2 1 6 5</code>。</p>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x20<span class="o">)</span>
+<span class="gp">$</span>39 <span class="o">=</span> 0x603320 -&gt; 6
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x28<span class="o">)</span>
+<span class="gp">$</span>40 <span class="o">=</span> 0x603310 -&gt; 5
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x30<span class="o">)</span>
+<span class="gp">$</span>41 <span class="o">=</span> 0x603300 -&gt; 4
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x38<span class="o">)</span>
+<span class="gp">$</span>42 <span class="o">=</span> 0x6032f0 -&gt; 3
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x40<span class="o">)</span>
+<span class="gp">$</span>43 <span class="o">=</span> 0x6032e0 -&gt; 2
+<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x48<span class="o">)</span>
+<span class="gp">$</span>44 <span class="o">=</span> 0x6032d0 -&gt; 1
+</code></pre></div></div>
+
+<h2 id="7-写在最后">7. 写在最后</h2>
+
+<p>通关之后的情况如下， 最后一个 <code class="language-plaintext highlighter-rouge">phase_6</code> 有些坑人， 还有一层转换容易忘掉， 做的时候怎么都过不去人都懵了， 后来看了 <a href="https://github.com/Exely/CSAPP-Labs/blob/master/notes/bomb.md">Exely - Bomb</a> 做的 Bomb 的笔记才意识到这个问题。 GDB 仅用过 VSCode 的图形化版本， 对 CLI 版本非常不熟悉， 这次实验也算是锻炼了一下这方面的能力。</p>
+<blockquote>
+  <p>CSAPP 拿来复习基础知识是真的很不错！</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># result.txt</span>
+Border relations with Canada have never been better.
+1 2 4 8 16 32
+7 327
+1 0
+IONEFG
+4 3 2 1 6 5
+</code></pre></div></div>
+
+<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">Welcome to my fiendish little bomb. You have 6 phases with
+which to blow yourself up. Have a nice day!
+Phase 1 defused. How about the next one?
+That's number 2.  Keep going!
+Halfway there!
+So you got that one.  Try this one.
+Good work!  On to the next...
+Congratulations! You've defused the bomb!
+</span></code></pre></div></div>
+</div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
+    <div id="share_btn">
+        <a class="a2a_button_copy_link"></a>
+        <a class="a2a_button_wechat"></a>
+        <a class="a2a_button_twitter"></a>
+        <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+    </div>
+    <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-left" style="color: #FF6A6A;"></i> Hide
+    </button>
+    <button id="btn_show" style="color: #FF6A6A; display: none;" onclick="toggle()" type="button">
+        <i class="fas fa-caret-right" style="color: #FF6A6A;"></i>
+    </button>
+<style>
+.a2a_svg, .a2a_count { border-radius: 0 !important; }
+</style>
+</div>
+
+<script>
+var a2a_config = a2a_config || {};
+a2a_config.thanks = {
+    postShare: true,
+};
+</script>
+
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+
+<!-- hide or show share buttons -->
+<script type="text/javascript">
+function toggle() {
+  var content = document.getElementById("share_btn");
+  var btn_show = document.getElementById("btn_show"); 
+  var btn_hide = document.getElementById("btn_hide"); 
+
+  if (btn_hide.style.display == "block") {
+    btn_show.style.display = "block";
+
+    content.style.opacity = 0;
+    btn_hide.style.opacity = 0;
+    setTimeout(function() {
+        content.style.display = "none";
+        btn_hide.style.display = "none";
+        btn_show.style.opacity = 1;
+    }, 400);
+  } else {
+    btn_show.style.display = "none";
+    btn_hide.style.display = "block";
+    content.style.display = "block";
+
+    btn_show.style.opacity = 0;
+    setTimeout(function() {
+        content.style.opacity = 1;
+        btn_hide.style.opacity = 1;
+    }, 20);
+  }
+
+}
+</script>
+<!-- AddToAny END --></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2023-12-12T00:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/2023/12/06/YCM-config.html">Vim Plugin: YouCompleteMe 旧版本装配</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"><!-- fix text color in the input textarea of gitalk -->
+	<style type="text/css">
+		.gitalk-wrapper .gt-header-textarea {
+			color: #333 !important;
+		}
+	</style><div class="gitalk-wrapper" id="js-gitalk-container"></div><script>
+		window.Lazyload.css('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.css');
+		window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/gitalk/1.7.2/gitalk.min.js', function() {
+			var gitalk = new Gitalk({
+				clientID: 'f43c7dd1eca0970b1d59',
+				clientSecret: '6af676c04af0bc153db9b119793f4666f6be27bc',
+				repo: 'HangX-Ma.github.io',
+				owner: 'HangX-Ma',
+				admin: ['HangX-Ma'],
+				id: '/2023/12/12/csapp-bomblab',
+                labels: 'gitalk'.split(',').filter(l => l),
+                perPage: '15',
+                proxy: 'https://magical-youtiao-59a80c.netlify.app/github_access_token',
+			});
+			gitalk.render('js-gitalk-container');
+		});
+	</script></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="HangX-Ma"><meta itemprop="url" content="https://HangX-Ma.github.io"><meta itemprop="description" content="Never stop studying"><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline">
+    <li></li><link itemprop="url" href="https://HangX-Ma.github.io"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" title="email" href="mailto:m-contour@qq.com" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" title="github" href="https://github.com/HangX-Ma" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© 一只豆腐 2023,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+      <div align="center">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">
+            Total <span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-pulse"></i></span> views,
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-pulse"></i></span> visitors.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- <script src="/js/gungnir/gungnir.js"></script> --></div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" title="input"/>
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script><script>
+  window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.0/chart.min.js'], function() {
+    var $canvas = null, $this = null, _ctx = null, _text = '';
+    $('.language-chart').each(function(){
+      $this = $(this);
+      $canvas = $('<canvas></canvas>');
+      _text = $this.text();
+      $this.text('').append($canvas);
+      _ctx = $canvas.get(0).getContext('2d');
+      (_ctx && _text) && (new Chart(_ctx, JSON.parse(_text)) && $this.attr('data-processed', true));
+    });
+  });
+</script>
+<script type="text/x-mathjax-config">
+	var _config = { tex2jax: {
+		inlineMath: [['$','$'], ['\\(','\\)']]
+	}};_config.TeX = { equationNumbers: { autoNumber: "all" } };MathJax.Hub.Config(_config);
+</script>
+<script type="text/javascript" src="https://unpkg.com/mathjax@2.7.4/unpacked/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+  window.Lazyload.js('https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js', function() {
+    mermaid.initialize({
+      startOnLoad: true
+    });
+    mermaid.init(undefined, '.language-mermaid');
+  });
+</script>
+<script>(function() {
+  function errorHandler(error, callback) {
+    if (error) {
+      callback && callback(error);
+      throw error;
+    }
+  }
+
+  function pageview(_AV, options) {
+    var AV = _AV;
+    var appId, appKey, appClass;
+    appId = options.appId;
+    appKey = options.appKey;
+    appClass = options.appClass;
+    AV.init({
+      serverURLs: 'https://OJsIdIlk.api.lncldglobal.com',
+      appId: appId,
+      appKey: appKey
+    });
+    return {
+      get: get,
+      increase: increase
+    };
+
+    function searchKey(key) {
+      var query = new AV.Query(appClass);
+      query.equalTo('key', key);
+      return query.first();
+    }
+
+    function insert(key, title) {
+      var Blog = AV.Object.extend(appClass);
+      var blog = new Blog();
+      blog.set('title', title);
+      blog.set('key', key);
+      blog.set('views', 0);
+      return blog.save();
+    }
+
+    function increment(result) {
+      result.increment('views', 1);
+      return result.save(null, {
+        fetchWhenSave: true
+      });
+    }
+
+    function get(key, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          callback && callback(result.attributes.views);
+        }
+      }, errorHandler);
+    }
+
+    function increase(key, title, callback) {
+      searchKey(key).then(function(result) {
+        if (result) {
+          increment(result).then(function(result) {
+            callback && callback(result.attributes.views);
+          });
+        } else {
+          insert(key, title).then(function(result) {
+            increment(result).then(function(result) {
+              callback && callback(result.attributes.views);
+            });
+          }, errorHandler);
+        }
+      }, errorHandler);
+    }
+  }
+  window.pageview = pageview;
+})();
+</script>
+  <script>
+    window.Lazyload.js(['https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js', 'https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av.min.js'], function() {
+      var pageview = window.pageview(AV, {
+        appId:    'OJsIdIlkgV4ZPkrM6bdvEvBF-MdYXbMMI',
+        appKey:   'GrPamxbSd47qcgSB3MXPLzz3',
+        appClass: 'Git'
+      });
+      var key =   's2023s12s12scsapp-bomblab.html';
+      var title = "CSAPP - Bomb Lab";
+      pageview.increase(key, title, function(view) {
+        $("[data-page-key='s2023s12s12scsapp-bomblab.html']").text(view);
+      });
+    });
+  </script><script type="text/javascript" src='https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js'></script><script async>(function() {
+	// This script is built on clipboard.js, cf: https://clipboardjs.com/
+	// 1. find all code blocks defined under snippet class
+	var snippets = document.querySelectorAll('pre');
+	[].forEach.call(snippets, function(snippet) {
+		if (snippet.closest('.copyable') !== null) {
+		snippet.firstChild.insertAdjacentHTML('beforebegin', '<button class="btn" data-clipboard-snippet><i class="far fa-copy"></i></button>');
+		}
+	});
+	var clipboardSnippets = new ClipboardJS('[data-clipboard-snippet]', {
+		target: function(trigger) {
+			return trigger.nextElementSibling;
+		}
+	});
+    // ref: https://www.freecodecamp.org/chinese/news/copy-text-to-clipboard-javascript/
+    clipboardSnippets.on('success', function(e) {
+        e.clearSelection();
+        var res = "";
+        var regex_terminal = /^\$\s{2}/g;
+        var split_text = e.text.split('\n');
+        split_text.forEach((element, index) => {
+            // replace heading '$' and space
+            if (regex_terminal.test(element)) {
+                res += element.replace(regex_terminal, '') + "\n";
+            } else {
+                // replace heading number and space
+                res += element.replace(/^([1-9]\s{3}|[1-9][0-9]\s{2}|[1-9][0-9][0-9]\s{1})/g, '') + "\n";
+            }
+        })
+        navigator.clipboard.writeText(res).then(() => {
+            showTooltip(e.trigger, 'Copied!');
+        },() => {
+		    showTooltip(e.trigger, fallbackMessage(e.action));
+        });
+	});
+	clipboardSnippets.on('error', function(e) {
+		showTooltip(e.trigger, fallbackMessage(e.action));
+	});
+
+	// 2. add event listener for all created copy button
+	var btns = document.querySelectorAll('.btn');
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener('mouseleave', clearTooltip);
+		btns[i].addEventListener('blur', clearTooltip);
+		btns[i].addEventListener('mouseenter', showToolhint);
+	}
+
+	function clearTooltip(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	}
+
+	function showTooltip(elem, msg) {
+		elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+		elem.setAttribute('aria-label', msg);
+	}
+
+	function showToolhint(e) {
+		e.currentTarget.setAttribute('class', 'btn tooltipped tooltipped-s');
+		e.currentTarget.setAttribute('aria-label', 'copy to clipboard');
+	}
+
+	function fallbackMessage(action) {
+		var actionMsg = '';
+		var actionKey = (action === 'cut' ? 'X' : 'C');
+		if (/iPhone|iPad/i.test(navigator.userAgent)) {
+			actionMsg = 'No support :(';
+		} else if (/Mac/i.test(navigator.userAgent)) {
+			actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+		} else {
+			actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+		}
+		return actionMsg;
+	}
+})();</script><script>function setClipboardText(event){
+    // clipboardData 对象是为通过编辑菜单、快捷菜单和快捷键执行的编辑操作所保留的，也就是你复制或者剪切内容
+    let clipboardData = event.clipboardData || window.clipboardData;
+    // 如果未复制或者未剪切，则return出去
+    if (!clipboardData) { return; }
+    event.preventDefault();
+    // Selection 对象，表示用户选择的文本范围或光标的当前位置。
+    //     声明一个变量接收 -- 用户输入的剪切或者复制的文本转化为字符串
+    let text = window.getSelection().toString();
+
+    if (text) {
+        // 如果文本存在则先取消文本默认事件
+        event.preventDefault();
+        // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
+        // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
+        // data: 一个 DOMString表示要添加到 drag object的数据。
+        if (text.length > 20) {
+            var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
+            + '\nEmail: m-contour@qq.com'
+            + '\nArticle Address: ' + window.location.hostname + window.location.pathname
+            + '\nCopyright Notice: '
+            + 'The copyright belongs to the author. '
+            + 'For commercial reproduction, please contact the author for authorization. '
+            + 'For non-commercial reproduction, please indicate the source.'
+
+            clipboardData.setData('text/plain', text + copyright);
+        } else {
+            clipboardData.setData('text/plain', text);
+        }
+    }
+};
+var contents = document.getElementsByClassName("page__content");
+// 监听文章内容的copy事件
+contents[0].addEventListener('copy',function(e){
+    setClipboardText(e);
+});
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+    <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+    <script>addBackToTop({
+        diameter: 30,
+        backgroundColor: '#FF4040',
+        textColor: '#FFFFF0',
+    })</script>
+  </body>
+  <script type="text/javascript">(function () {
+    var OriginTitle = document.title;
+    var titleTime;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '╭(°A°`)╮ 页面崩溃啦 ~';
+            clearTimeout(titleTime);
+        }
+        else {
+            $('[rel="icon"]').attr('href', "/favicon.ico");
+            document.title = '(ฅ>ω<*ฅ) 噫又好啦 ~' + OriginTitle;
+            titleTime = setTimeout(function () {
+                document.title = OriginTitle;
+            }, 2000);
+        }
+    });
+})();</script>
+</html>
+
