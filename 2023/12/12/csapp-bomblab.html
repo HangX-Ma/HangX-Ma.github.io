@@ -296,11 +296,11 @@
                 href="/blog/archive.html?tag=CSAPP">CSAPP</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Dec 12, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 11821 words </span>
+                <span> Total 11408 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 33 mins </span>
+                <span> About 32 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s12s12scsapp-bomblab.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-12-12T00:00:00+08:00">
     <meta itemprop="keywords" content="Course,CSAPP"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
@@ -636,7 +636,7 @@
   </span><span class="m">4011</span><span class="n">f5</span><span class="o">:</span><span class="w">	</span><span class="m">75</span><span class="w"> </span><span class="n">e8</span><span class="w">                	</span><span class="n">jne</span><span class="w">    </span><span class="m">4011</span><span class="n">df</span><span class="w"> </span><span class="o">&lt;</span><span class="n">phase_6</span><span class="m">+0</span><span class="n">xeb</span><span class="o">&gt;</span><span class="w">
 </span></code></pre></div></div>
 
-<p>我们知道存储值的地址分别为 <code class="language-plaintext highlighter-rouge">0x6032d0</code>， <code class="language-plaintext highlighter-rouge">0x6032e0</code>， <code class="language-plaintext highlighter-rouge">0x6032f0</code>， <code class="language-plaintext highlighter-rouge">0x603300</code>， <code class="language-plaintext highlighter-rouge">0x603310</code>， <code class="language-plaintext highlighter-rouge">0x603320</code>， 不妨都打印出来排个序， 顺序从大到小排序。 根据排序后的关系， 以及前述映射， 可以得到我们的输入为 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code>。 但是， 我们还做了一次转换改变了原来的链表结构， 按照原来的顺序排序肯定不一样。</p>
+<p>我们知道存储值的地址分别为 <code class="language-plaintext highlighter-rouge">0x6032d0</code>， <code class="language-plaintext highlighter-rouge">0x6032e0</code>， <code class="language-plaintext highlighter-rouge">0x6032f0</code>， <code class="language-plaintext highlighter-rouge">0x603300</code>， <code class="language-plaintext highlighter-rouge">0x603310</code>， <code class="language-plaintext highlighter-rouge">0x603320</code>， 不妨都打印出来排个序， 顺序从大到小排序。 根据排序后的关系， 以及前述映射， 可以得到我们的输入为 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code>。 但是， 在此之前有一个 <code class="language-plaintext highlighter-rouge">7 - num[i]</code> 的转换， 因此正确答案应当为 <code class="language-plaintext highlighter-rouge">4 3 2 1 6 5</code>。</p>
 
 <div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">924 -&gt;</span><span class="w"> </span>0x6032f0 -&gt; 3
 <span class="gp">691 -&gt;</span><span class="w"> </span>0x603300 -&gt; 4
@@ -644,22 +644,6 @@
 <span class="gp">443 -&gt;</span><span class="w"> </span>0x603320 -&gt; 6
 <span class="gp">332 -&gt;</span><span class="w"> </span>0x6032d0 -&gt; 1
 <span class="gp">168 -&gt;</span><span class="w"> </span>0x6032e0 -&gt; 2
-</code></pre></div></div>
-
-<p>在 <strong>0x4011b</strong> 处打断点， 此时还未进行重组排序， 直接打印堆栈中存储的各个值， 把之前的 <code class="language-plaintext highlighter-rouge">3 4 5 6 1 2</code> 当作数组的索引按照打印顺序取值即可。 例如 3 则取 <code class="language-plaintext highlighter-rouge">0x603300</code> 对应原值的 4， 4 则取 <code class="language-plaintext highlighter-rouge">0x6032f0</code> 对应原值 3， 依次类推， 得到最终的答案应当为 <code class="language-plaintext highlighter-rouge">4 3 2 1 6 5</code>。</p>
-
-<div class="language-terminal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x20<span class="o">)</span>
-<span class="gp">$</span>39 <span class="o">=</span> 0x603320 -&gt; 6
-<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x28<span class="o">)</span>
-<span class="gp">$</span>40 <span class="o">=</span> 0x603310 -&gt; 5
-<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x30<span class="o">)</span>
-<span class="gp">$</span>41 <span class="o">=</span> 0x603300 -&gt; 4
-<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x38<span class="o">)</span>
-<span class="gp">$</span>42 <span class="o">=</span> 0x6032f0 -&gt; 3
-<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x40<span class="o">)</span>
-<span class="gp">$</span>43 <span class="o">=</span> 0x6032e0 -&gt; 2
-<span class="gp">(gdb) print /x *(int *) ($</span>rsp + 0x48<span class="o">)</span>
-<span class="gp">$</span>44 <span class="o">=</span> 0x6032d0 -&gt; 1
 </code></pre></div></div>
 
 <h2 id="7-写在最后">7. 写在最后</h2>
