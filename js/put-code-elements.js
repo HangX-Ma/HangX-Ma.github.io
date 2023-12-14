@@ -41,7 +41,7 @@ function putDollarSigns(lines) {
   var lineWithSign = ""
   var codeWithSigns = ""
   lines.forEach((element, index) => {
-    if (index !== lines.length - 1 && index !== 0) { // if this is not the last line (empty line)
+    if (index !== lines.length - 1) { // if this is not the last line (empty line)
       lineWithSign = "<span class='ln'>$&ensp;&ensp;</span>" + element
       codeWithSigns += lineWithSign + "\n"
     }
