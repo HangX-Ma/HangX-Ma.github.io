@@ -12,9 +12,9 @@
 		
 	</script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Start from scratch: Neovim for Rust - 一只豆腐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Start from scratch: Neovim - 一只豆腐</title>
 
-<meta name="description" content="鉴于NvChard 这类整包的灵活性不高， 以及 vscode 经常抽风的现实情况， 从零开始搭建用于 Rust 编程环境的 Neovim">
+<meta name="description" content="2024 年初发现 WSL 竟然无法更新 VSCode， 后发现其官网也被墙了， 为了愉快的在 Linux 环境写代码还是选择重回 nvim">
 <link rel="canonical" href="https://hangx-ma.github.io/2023/06/23/neovim-config.html"><link rel="alternate" type="application/rss+xml" title="一只豆腐" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#eee9e9"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -271,16 +271,32 @@
   </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__main--immersive page__viewport has-aside cell cell--auto">
 
-      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header header--dark"><div class="main">
       <div class="header__title">
-        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #515151); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
+        <div class="header__brand"><img style="filter: drop-shadow(1000px 0 0 #fff); transform: translate(-1000px); vertical-align: middle;" src="/assets/images/logo/logo.svg" alt="logo"/><a title="Code, life and embedded system...
 " href="/">一只豆腐</a></div><button class="button button--secondary button--circle search-button js-search-toggle" title=""><i class="fas fa-search"></i></button></div><nav class="navigation">
         <ul><li class="navigation__item"><a href="/blog/">Blogs</a></li><li class="navigation__item"><a href="/blog/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle" title="search provider"><i class="fas fa-search"></i></button></li></ul>
       </nav></div>
   </header>
-</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+</div><div class="page__content"><div class="article__header--overlay"><div class="hero hero--dark overlay" style="background-image:url(/assets/images/bg/vim/nvim.png);"><div class="hero__content"><div class ="main"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=Tool">Tool</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/blog/archive.html?tag=neovim">neovim</a>
+            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
+            </li><li><i class="far fa-edit"></i> <span>Feb 03, 2024</span>
+            </li><li><i class="fas fa-file-word"></i>
+                <span> Total 6483 words </span>
+            </li>
+            <li>
+                <i class="fas fa-clock"></i>
+                <span> About 19 mins </span>
+            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Start from scratch: Neovim</h1></header></div><p class="overlay__excerpt">2024 年初发现 WSL 竟然无法更新 VSCode， 后发现其官网也被墙了， 为了愉快的在 Linux 环境写代码还是选择重回 nvim</p></div></div>
+              </div>
+            </div><div class ="main"><div class="grid grid--reverse">
 
               <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
 </aside></div>
@@ -288,28 +304,54 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Start from scratch: Neovim for Rust</h1></header></div><meta itemprop="headline" content="Start from scratch: Neovim for Rust"><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=Tool">Tool</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/blog/archive.html?tag=neovim">neovim</a>
-            </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
-            </li><li><i class="fas fa-file-word"></i>
-                <span> Total 4072 words </span>
-            </li>
-            <li>
-                <i class="fas fa-clock"></i>
-                <span> About 12 mins </span>
-            </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
+<article itemscope itemtype="http://schema.org/Article"><meta itemprop="headline" content="Start from scratch: Neovim"><meta itemprop="author" content="HangX-Ma"/><meta itemprop="datePublished" content="2023-06-23T00:00:00+08:00">
     <meta itemprop="keywords" content="Tool,neovim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><blockquote>
-  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看， 配完后感觉没有汇编支持不适合 OS 底层开发， 到时候再看看吧， 先用回 vscode。</p>
+<div class="article__content" itemprop="articleBody"><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvim/
+├── init.lua
+├── lua
+│   ├── core
+│   │   ├── basic.lua
+│   │   └── keybindings.lua
+│   ├── lsp
+│   │   ├── cmp.lua
+│   │   ├── common-config.lua
+│   │   ├── config
+│   │   │   ├── bash.lua
+│   │   │   ├── clangd.lua
+│   │   │   ├── cmake.lua
+│   │   │   ├── lua.lua
+│   │   │   └── markdown.lua
+│   │   ├── formatter.lua
+│   │   ├── setup.lua
+│   │   └── ui.lua
+│   └── plugins
+│       ├── clipboard.lua
+│       ├── comment.lua
+│       ├── debug.lua
+│       ├── filetype.lua
+│       ├── gitsigns.lua
+│       ├── lualine.lua
+│       ├── navigation.lua
+│       ├── nvim-autopairs.lua
+│       ├── nvim-spider.lua
+│       ├── nvim-treesitter.lua
+│       ├── onedark.lua
+│       ├── plugin-setup.lua
+│       ├── rust-lang.lua
+│       ├── symbols-outline.lua
+│       ├── telescope.lua
+│       └── toggleterm.lua
+└── plugin
+    └── packer_compiled.lua <span class="c"># packer 编译生成的临时文件</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看</p>
 </blockquote>
 
-<h2 id="0-安装-neovim">0. 安装 Neovim</h2>
+<h2 id="1-安装-neovim">1. 安装 Neovim</h2>
 
 <p>使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim release build</a> 的方式， 省心省力。</p>
 
@@ -322,18 +364,21 @@ vim ~/.bashrc
 <span class="nb">source</span> ~/.bashrc
 </code></pre></div></div>
 
-<h2 id="1-vim-选项配置">1. vim 选项配置</h2>
+<h2 id="2-vim-选项配置">2. vim 选项配置</h2>
 
 <blockquote>
   <p><a href="https://www.ruanyifeng.com/blog/2018/09/vimrc.html">Vim 配置入门 - 阮一峰</a><br />
 <a href="https://www.xwxwgo.com/post/2022/09/21/spell_check_in_nvim/">Neovim拼写检查</a></p>
 </blockquote>
 
-<h2 id="2-快捷键配置">2. 快捷键配置</h2>
+<h2 id="3-vim-快捷键配置">3. vim 快捷键配置</h2>
 
-<p><a href="https://juejin.cn/book/7051157342770954277/section/7051536642238054430">Neovim 配置实战：从0到1打造自己的IDE</a></p>
+<p><a href="https://juejin.cn/book/7051157342770954277/section/7051536642238054430">Neovim 配置实战：从0到1打造自己的IDE</a>
+<a href="https://developer.aliyun.com/article/1295874">Neovim 配置美化完整流程</a></p>
 
-<h2 id="3-安装-packer-插件管理器">3. 安装 Packer 插件管理器</h2>
+<h2 id="4-插件安装">4. 插件安装</h2>
+
+<h2 id="40-安装-packer-插件管理器">4.0 安装 Packer 插件管理器</h2>
 
 <p>参照 Packer 的 repo 的配置内容快速安装 <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>。</p>
 
@@ -341,9 +386,7 @@ vim ~/.bashrc
  ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 </code></pre></div></div>
 
-<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugins.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
-
-<h2 id="4-插件安装">4. 插件安装</h2>
+<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugin-setup.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
 
 <h3 id="41-安装-onedark---dark-主题">4.1 安装 OneDark - Dark 主题</h3>
 
@@ -384,7 +427,7 @@ vim ~/.bashrc
 </dl>
 
 <blockquote>
-  <p><a href="https://blog.51cto.com/u_11090813/5575032">从零开始配置 vim(13)——标签页插件 - jesssic</a>
+  <p><a href="https://blog.51cto.com/u_11090813/5575032">从零开始配置 vim(13)——标签页插件 - jesssic</a><br />
 <a href="https://blog.51cto.com/u_11090813/5759499">从零开始配置vim(26)——LSP UI 美化 - jesssic</a></p>
 </blockquote>
 
@@ -393,8 +436,10 @@ vim ~/.bashrc
 <dl>
   <dt>Code Highlighting: <a href="https://github.com/nvim-treesitter/nvim-treesitter">nvim-treesitter.nvim</a></dt>
   <dd>nvim-treesitter 插件提供基于 <a href="https://github.com/tree-sitter/tree-sitter">tree-sitter</a> 的多个基础功能， 它可以让你在 nvim 中高效的实现 <strong>代码高亮， 增量选择</strong> 等功能。</dd>
-  <dt>Syntax Highlighting: <a href="https://github.com/p00f/nvim-ts-rainbow">nvim-ts-rainbow</a></dt>
-  <dd>该插件依赖于 nvim-treesitter， 允许多种配置策略为不同的文件类型提供高亮支持。</dd>
+  <dt>Parentheses Highlighting: <a href="https://github.com/HiPhish/nvim-ts-rainbow2">nvim-ts-rainbow2</a></dt>
+  <dd>对配对的括号进行彩色标注。</dd>
+  <dt>Markdown Preview: <a href="https://github.com/iamcco/markdown-preview.nvim">markdown-preview.nvim</a></dt>
+  <dd>实现类似 VSCode 的 Markdown Preview 的功能</dd>
 </dl>
 
 <h3 id="45-terminal">4.5 Terminal</h3>
@@ -420,6 +465,23 @@ vim ~/.bashrc
   <dd>telescope.nvim 能在 neovim 中提供文件名模糊搜索和文本内容搜索的功能， 以及更多复杂的功能。</dd>
 </dl>
 
+<p>telescope 常用的指令如下：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">find_files​​</code>: 查找文件</li>
+  <li><code class="language-plaintext highlighter-rouge">​​live_grep​​</code>: 使用正则表达式来进行内容的搜索，它可以跨文件搜索</li>
+  <li><code class="language-plaintext highlighter-rouge">​​buffers​​</code>: 查看当前打开的缓冲区，并且可以预览缓冲区的内容</li>
+  <li><code class="language-plaintext highlighter-rouge">​​grep_string​​</code>: 以当前光标所在单词进行搜索</li>
+  <li><code class="language-plaintext highlighter-rouge">​​oldfile​​</code>: 打开历史文件列表</li>
+  <li><code class="language-plaintext highlighter-rouge">​​marks​</code>​: 打开书签表</li>
+  <li><code class="language-plaintext highlighter-rouge">​​jumplist​</code>​: 打开跳转列表</li>
+</ul>
+
+<p>如果我们希望能够使用 <code class="language-plaintext highlighter-rouge">​​live_grep​​</code>​ 和 <code class="language-plaintext highlighter-rouge">​​grep_string​</code>​ 的功能需要提前在系统上安装 <code class="language-plaintext highlighter-rouge">ripgrep</code>。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>ripgrep
+</code></pre></div></div>
+
 <blockquote>
   <p><a href="https://zhuanlan.zhihu.com/p/609527018">Vim/Neovim 全文检索插件 – telescope.nvim - 知乎</a></p>
 </blockquote>
@@ -442,12 +504,21 @@ vim ~/.bashrc
   <dd>mason.nvim 是下一代 nvim-lsp-installer， 能够方便地安装和管理 LSP servers， DAP servers， linters， 以及 formatters.</dd>
   <dt>Packer: <a href="https://github.com/williamboman/mason-lspconfig.nvim">mason-lspconfig.nvim</a></dt>
   <dd>mason-lspconfig.nvim 为 mason.nvim 以及 nvim-lspconfig 建立了桥梁， 方便两个插件的协同工作和配置。</dd>
-  <dt>UI: <a href="https://github.com/j-hui/fidget.nvim">fidget.nvim</a></dt>
-  <dd>nvim-lsp progress 的独立 UI插件， 将这部分信息显示在窗口右下角为程序员更专注编程提供便利。</dd>
 </dl>
 
+<p>配置 clangd 可以参考 <a href="https://zhuanlan.zhihu.com/p/614518048">neovim Mason配置LSP相关 - 知乎</a> 以及 <a href="https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#clangd">lspconfig-clangd</a>， 且需要注意对 <code class="language-plaintext highlighter-rouge">build</code> 中的 <code class="language-plaintext highlighter-rouge">compile_commands.json</code> 进行软连接。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ln</span> <span class="nt">-s</span> /path/to/myproject/build/compile_commands.json /path/to/myproject/
+</code></pre></div></div>
+
+<p>配置代码格式化需要参考 <a href="https://developer.aliyun.com/article/1295874#slide-46">【Neovim】配置美化完整流程 - 代码格式化</a> 以及 <a href="https://blog.51cto.com/u_15366127/8643714">格式化插件</a> 如需使用 <code class="language-plaintext highlighter-rouge">clang-format</code> 还要进行相应的软件包安装：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> clang-format
+</code></pre></div></div>
+
 <blockquote>
-  <p><a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a></p>
+  <p>LSP 整体参考 <a href="https://github.com/jiaxinaoliao/neovimBeginCpp/tree/main/linuxConfig/lua/lsp">jiaxinaoliao/neovimBeginCpp</a> 域前述配置代码格式化的文章估计同属一个作者<br />
+<a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a></p>
 </blockquote>
 
 <h4 id="482-补全与自动提示">4.8.2 补全与自动提示</h4>
@@ -456,19 +527,33 @@ vim ~/.bashrc
   <dt>AutoPair: <a href="https://github.com/windwp/nvim-autopairs">nvim-autopairs</a></dt>
   <dd>自动补全括号的插件， 具体作用之后用了补充。</dd>
   <dt>Completion: <a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a></dt>
-  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code></dd>
+  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code>。</dd>
   <dt>Friendly Snippets: <a href="https://github.com/rafamadriz/friendly-snippets">friendly-snippets</a></dt>
   <dd>更够为不同语言提供 Snippets 支持。</dd>
 </dl>
 
+<blockquote>
+  <p><a href="https://blog.51cto.com/u_11090813/5667800">从零开始配置vim(24)——自动补全</a></p>
+</blockquote>
+
 <h3 id="49-debug">4.9 Debug</h3>
 
 <dl>
-  <dt>Debugger: <a href="https://github.com/puremourning/vimspector">vimspector</a></dt>
-  <dd>多语言的带图形界面的调试工具， 看起来挺复杂。</dd>
   <dt>Debug Adapter Protocol: <a href="https://github.com/mfussenegger/nvim-dap">nvim-dap</a></dt>
   <dd>Nvim-dap 是基于 Neovim 的 Debug Adapter Protocol 客户端实现的， 能够进行基本的断点、 步进等操作， 并监视应用的状态。</dd>
+  <dt>Debug UI: <a href="https://github.com/rcarriga/nvim-dap-ui">​​nvim-dap-ui</a></dt>
+  <dd>我们需要提供一个可用的界面用来显示调试过程中的各种信息，包括变量值和调用栈。</dd>
+  <dt>Debug Variable Value: <a href="https://github.com/theHamsta/nvim-dap-virtual-text">​nvim-dap-virtual-text​​​</a></dt>
+  <dd>用以显示 debug 过程中一些变量的值， 类似 vscode 中的 watch。</dd>
 </dl>
+
+<p>配置 cpp 调试需要参考 <a href="https://www.reddit.com/r/neovim/comments/zwlfkx/dap_configuration_for_c/">DAP configuration for C++</a></p>
+
+<blockquote>
+  <p><a href="https://blog.51cto.com/u_11090813/5807468">从零开始配置vim(28)——代码的编译、运行与调试</a><br />
+<a href="https://blog.51cto.com/u_11090813/5873288">从零开始配置vim(29)——DAP 配置</a><br />
+<a href="https://blog.51cto.com/u_11090813/5982386">从零开始配置vim(30)——DAP的其他配置</a></p>
+</blockquote>
 
 <h3 id="410-rust-语言支持">4.10 Rust 语言支持</h3>
 
@@ -493,6 +578,35 @@ vim ~/.bashrc
   <dd>打通操作系统与 nvim 之间的桥梁， 二者能共用剪贴板的缓存。</dd>
 </dl>
 
+<p>WSL - WSLg (Fast)
+Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">has</span><span class="p">(</span><span class="s2">"wsl"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">executable</span><span class="p">(</span><span class="s2">"wl-copy"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">then</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"wl-clipboard not found, clipboard integration won't work"</span><span class="p">)</span>
+    <span class="k">else</span>
+        <span class="n">vim</span><span class="p">.</span><span class="n">g</span><span class="p">.</span><span class="n">clipboard</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">"wl-clipboard (wsl)"</span><span class="p">,</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="p">[</span><span class="s2">"+"</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'wl-copy --foreground --type text/plain'</span><span class="p">,</span>
+                <span class="p">[</span><span class="s2">"*"</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'wl-copy --foreground --primary --type text/plain'</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">paste</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="p">[</span><span class="s2">"+"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="k">function</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">systemlist</span><span class="p">(</span><span class="s1">'wl-paste --no-newline|sed -e "s/\r$//"'</span><span class="p">,</span> <span class="p">{</span><span class="s1">''</span><span class="p">},</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">-- '1' keeps empty lines</span>
+                <span class="k">end</span><span class="p">),</span>
+                <span class="p">[</span><span class="s2">"*"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="k">function</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">systemlist</span><span class="p">(</span><span class="s1">'wl-paste --primary --no-newline|sed -e "s/\r$//"'</span><span class="p">,</span> <span class="p">{</span><span class="s1">''</span><span class="p">},</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">end</span><span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">cache_enabled</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="p">}</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a></p>
+
 <h3 id="412-git">4.12 Git</h3>
 
 <dl>
@@ -501,6 +615,12 @@ vim ~/.bashrc
   <dt>Git Signs: <a href="https://github.com/lewis6991/gitsigns.nvim">gitsigns.nvim</a></dt>
   <dd>提供了和 Git 相关的功能， 例如查看 git diff， last commit， status bar 等， 类似 vscode 中的 GitLen。</dd>
 </dl>
+
+<p>对于 LazyGit 还需要相应得安装其二进制包：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-Lo</span> lazygit.tar.gz <span class="s2">"https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.40.2_Linux_x86_64.tar.gz"</span>
+<span class="nb">sudo tar </span>xf lazygit.tar.gz <span class="nt">-C</span> /usr/local/bin lazygit
+</code></pre></div></div>
 
 <h3 id="413-speed-up">4.13 Speed Up</h3>
 
@@ -511,11 +631,20 @@ vim ~/.bashrc
   <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-plaintext highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
 </dl>
 
-<h3 id="414-greeter">4.14 Greeter</h3>
+<h3 id="414-easyusage">4.14 EasyUsage</h3>
 
 <dl>
   <dt>Greeter: <a href="https://github.com/startup-nvim/startup.nvim">startup.nvim</a></dt>
   <dd>自定义 nvim 启动界面， 能够自己更换喜欢的主题！</dd>
+  <dt>Which Key: <a href="https://github.com/folke/which-key.nvim">which-key.nvim</a></dt>
+  <dd>提示当前的 keybinding， 对记不住快捷键的人简直是神器！</dd>
+</dl>
+
+<h3 id="415-spider">4.15 Spider</h3>
+
+<dl>
+  <dt>CamelCase Motion: <a href="https://github.com/chrisgrieser/nvim-spider">nvim-spider</a></dt>
+  <dd>CamelCase Motion 的 lua 实现版本， 按照说明配置快捷键可实现相同功能。</dd>
 </dl>
 
 <h2 id="参考">参考</h2>
@@ -1372,7 +1501,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         appClass: 'Git'
       });
       var key =   's2023s06s23sneovim-config.html';
-      var title = "Start from scratch: Neovim for Rust";
+      var title = "Start from scratch: Neovim";
       pageview.increase(key, title, function(view) {
         $("[data-page-key='s2023s06s23sneovim-config.html']").text(view);
       });
@@ -1467,7 +1596,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
         // 通过调用常clipboardData对象的 setData(format, data) 方法；来设置相关文本
         // format: 一个DOMString 表示要添加到 drag object的拖动数据的类型。
         // data: 一个 DOMString表示要添加到 drag object的数据。
-        if (text.length > 20) {
+        if (text.length > 100) {
             var copyright = '\n\n' + '\nAuthor: HangX-Ma(一只豆腐)'
             + '\nEmail: m-contour@qq.com'
             + '\nArticle Address: ' + window.location.hostname + window.location.pathname
