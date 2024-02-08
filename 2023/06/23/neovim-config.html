@@ -289,11 +289,11 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Feb 03, 2024</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 6483 words </span>
+                <span> Total 9667 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 19 mins </span>
+                <span> About 27 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Start from scratch: Neovim</h1></header></div><p class="overlay__excerpt">2024 年初发现 WSL 竟然无法更新 VSCode， 后发现其官网也被墙了， 为了愉快的在 Linux 环境写代码还是选择重回 nvim</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -308,47 +308,71 @@
     <meta itemprop="keywords" content="Tool,neovim"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvim/
+<div class="article__content" itemprop="articleBody"><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvim
 ├── init.lua
-├── lua
-│   ├── core
-│   │   ├── basic.lua
-│   │   └── keybindings.lua
-│   ├── lsp
-│   │   ├── cmp.lua
-│   │   ├── common-config.lua
-│   │   ├── config
-│   │   │   ├── bash.lua
-│   │   │   ├── clangd.lua
-│   │   │   ├── cmake.lua
-│   │   │   ├── lua.lua
-│   │   │   └── markdown.lua
-│   │   ├── formatter.lua
-│   │   ├── setup.lua
-│   │   └── ui.lua
-│   └── plugins
-│       ├── clipboard.lua
-│       ├── comment.lua
-│       ├── debug.lua
-│       ├── filetype.lua
-│       ├── gitsigns.lua
-│       ├── lualine.lua
-│       ├── navigation.lua
-│       ├── nvim-autopairs.lua
-│       ├── nvim-spider.lua
-│       ├── nvim-treesitter.lua
-│       ├── onedark.lua
-│       ├── plugin-setup.lua
-│       ├── rust-lang.lua
-│       ├── symbols-outline.lua
-│       ├── telescope.lua
-│       └── toggleterm.lua
-└── plugin
-    └── packer_compiled.lua <span class="c"># packer 编译生成的临时文件</span>
+├── lazy-lock.json
+└── lua
+    ├── core
+    │   ├── autocmds.lua
+    │   ├── crisp.lua
+    │   ├── keybindings.lua
+    │   └── options.lua
+    ├── lazy-init.lua
+    └── plugins
+        ├── common
+        │   ├── clipboard.lua
+        │   ├── comment.lua
+        │   ├── filetype.lua
+        │   ├── indent-blankline.lua
+        │   ├── nvim-autopairs.lua
+        │   ├── nvim-spider.lua
+        │   ├── symbols-outline.lua
+        │   ├── telescope.lua
+        │   ├── todo-comments.lua
+        │   ├── toggleterm.lua
+        │   ├── trouble.lua
+        │   ├── utils.lua
+        │   └── which-key.lua
+        ├── debug
+        │   └── nvim-dap.lua
+        ├── extra
+        │   └── leetcode.lua
+        ├── git
+        │   ├── gitsigns.lua
+        │   └── lazygit.lua
+        ├── highlight
+        │   ├── markdown-preview.lua
+        │   ├── nvim-treesitter-context.lua
+        │   ├── nvim-treesitter.lua
+        │   └── nvim-ts-rainbow.lua
+        ├── init.lua
+        ├── lsp
+        │   ├── auto-complete.lua
+        │   ├── formatting.lua
+        │   ├── lsp.lua
+        │   ├── navic.lua
+        │   └── server
+        │       ├── bash.lua
+        │       ├── clangd.lua
+        │       ├── cmake.lua
+        │       ├── common.lua
+        │       ├── lua.lua
+        │       └── markdown.lua
+        ├── theme
+        │   └── onedark.lua
+        └── ui
+            ├── bufferline.lua
+            ├── lualine.lua
+            ├── navigation.lua
+            ├── nvim-notify.lua
+            └── startup.lua
+
+12 directories, 45 files
+
 </code></pre></div></div>
 
 <blockquote>
-  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">nvim-config</a> repo 下查看</p>
+  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">dotfiles</a> repo 下查看</p>
 </blockquote>
 
 <h2 id="1-安装-neovim">1. 安装 Neovim</h2>
@@ -378,15 +402,14 @@ vim ~/.bashrc
 
 <h2 id="4-插件安装">4. 插件安装</h2>
 
-<h2 id="40-安装-packer-插件管理器">4.0 安装 Packer 插件管理器</h2>
+<p><del><a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>: <a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugin-setup.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</del></p>
 
-<p>参照 Packer 的 repo 的配置内容快速安装 <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>。</p>
+<p>最近在群上看到 <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> 真香的言论特地搜索了一番， 竟然比 Packer 效率提高了将近 10 倍， 而且 Packer 的作者也不再维护 Packer 的仓库了， 是时候全面转向 lazy 了！</p>
 
-<div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--depth</span> 1 https://github.com/wbthomason/packer.nvim<span class="se">\</span>
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-</code></pre></div></div>
-
-<p><a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugin-setup.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</p>
+<blockquote>
+  <p><a href="https://github.com/Zwlin98/nvim">Zwlin98/nvim</a> LSP 配置要疯， 这个仓库简直救我狗命！
+<a href="https://blog.csdn.net/GrowlR/article/details/129781782">使用Lazy.nvim插件管理器，让你的Nvim懒惰起来（从Packer迁移到Lazy记录） - CSDN</a></p>
+</blockquote>
 
 <h3 id="41-安装-onedark---dark-主题">4.1 安装 OneDark - Dark 主题</h3>
 
@@ -408,10 +431,6 @@ vim ~/.bashrc
 <h3 id="42-status-line">4.2 Status Line</h3>
 
 <p>主要参考 <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a>， 拷贝 <a href="https://github.com/nvim-lualine/lualine.nvim#default-configuration">default configuration</a> 到 <code class="language-plaintext highlighter-rouge">lua/plugins/lualine.lua</code>， 其余步骤与上述一致。 后续若没有特殊情况就不重复说明相关步骤。</p>
-
-<blockquote>
-  <p>值得注意的是， 添加相关的插件后需要在 nvim 中运行 <code class="language-plaintext highlighter-rouge">PackerSync</code> 以安装相关插件， 否则 nvim 会报错。</p>
-</blockquote>
 
 <h3 id="43-navigation">4.3 Navigation</h3>
 
@@ -436,11 +455,15 @@ vim ~/.bashrc
 <dl>
   <dt>Code Highlighting: <a href="https://github.com/nvim-treesitter/nvim-treesitter">nvim-treesitter.nvim</a></dt>
   <dd>nvim-treesitter 插件提供基于 <a href="https://github.com/tree-sitter/tree-sitter">tree-sitter</a> 的多个基础功能， 它可以让你在 nvim 中高效的实现 <strong>代码高亮， 增量选择</strong> 等功能。</dd>
-  <dt>Parentheses Highlighting: <a href="https://github.com/HiPhish/nvim-ts-rainbow2">nvim-ts-rainbow2</a></dt>
+  <dt>Code Context: <a href="https://github.com/nvim-treesitter/nvim-treesitter-context">nvim-treesitter-context</a></dt>
+  <dd>它可以将当前函数的函数头固定在 neovim 界面的前几行，让你知道当前在编辑的是什么类、函数或方法。</dd>
+  <dt>Parentheses Highlighting: <a href="https://github.com/p00f/nvim-ts-rainbow">nvim-ts-rainbow</a></dt>
   <dd>对配对的括号进行彩色标注。</dd>
   <dt>Markdown Preview: <a href="https://github.com/iamcco/markdown-preview.nvim">markdown-preview.nvim</a></dt>
   <dd>实现类似 VSCode 的 Markdown Preview 的功能</dd>
 </dl>
+
+<p><strong>注意 <code class="language-plaintext highlighter-rouge">treesitter</code> 无法渲染 <code class="language-plaintext highlighter-rouge">.h</code> 文件， 需要强制转换 <code class="language-plaintext highlighter-rouge">set ft=cpp</code> 同样可以通过 <code class="language-plaintext highlighter-rouge">filetype.nvim</code> 解决</strong></p>
 
 <h3 id="45-terminal">4.5 Terminal</h3>
 
@@ -477,9 +500,10 @@ vim ~/.bashrc
   <li><code class="language-plaintext highlighter-rouge">​​jumplist​</code>​: 打开跳转列表</li>
 </ul>
 
-<p>如果我们希望能够使用 <code class="language-plaintext highlighter-rouge">​​live_grep​​</code>​ 和 <code class="language-plaintext highlighter-rouge">​​grep_string​</code>​ 的功能需要提前在系统上安装 <code class="language-plaintext highlighter-rouge">ripgrep</code>。</p>
+<p>如果我们希望能够使用 <code class="language-plaintext highlighter-rouge">​​live_grep​​</code>​ 和 <code class="language-plaintext highlighter-rouge">​​grep_string​</code>​ 的功能需要提前在系统上安装 <code class="language-plaintext highlighter-rouge">ripgrep</code>， 另外用 <code class="language-plaintext highlighter-rouge">checkhealth</code> 指令提示可以安装 <a href="https://github.com/sharkdp/fd">sharkdp/fd</a> 获取更多拓展功能。</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>ripgrep
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>fd-find
 </code></pre></div></div>
 
 <blockquote>
@@ -504,20 +528,32 @@ vim ~/.bashrc
   <dd>mason.nvim 是下一代 nvim-lsp-installer， 能够方便地安装和管理 LSP servers， DAP servers， linters， 以及 formatters.</dd>
   <dt>Packer: <a href="https://github.com/williamboman/mason-lspconfig.nvim">mason-lspconfig.nvim</a></dt>
   <dd>mason-lspconfig.nvim 为 mason.nvim 以及 nvim-lspconfig 建立了桥梁， 方便两个插件的协同工作和配置。</dd>
+  <dt>Formatter: <a href="https://github.com/stevearc/conform.nvim">stevearc/conform.nvim</a></dt>
+  <dd>null-ls 的替代品， 非常好用的 formatter!</dd>
 </dl>
 
 <p>配置 clangd 可以参考 <a href="https://zhuanlan.zhihu.com/p/614518048">neovim Mason配置LSP相关 - 知乎</a> 以及 <a href="https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#clangd">lspconfig-clangd</a>， 且需要注意对 <code class="language-plaintext highlighter-rouge">build</code> 中的 <code class="language-plaintext highlighter-rouge">compile_commands.json</code> 进行软连接。</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ln</span> <span class="nt">-s</span> /path/to/myproject/build/compile_commands.json /path/to/myproject/
 </code></pre></div></div>
+<p>如需使用 <code class="language-plaintext highlighter-rouge">clang-format</code> 还要进行相应的软件包安装， 相应的其他的 formatter 也是需要安装的。</p>
 
-<p>配置代码格式化需要参考 <a href="https://developer.aliyun.com/article/1295874#slide-46">【Neovim】配置美化完整流程 - 代码格式化</a> 以及 <a href="https://blog.51cto.com/u_15366127/8643714">格式化插件</a> 如需使用 <code class="language-plaintext highlighter-rouge">clang-format</code> 还要进行相应的软件包安装：</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> clang-format
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># install clang-format</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> clang-format
+<span class="c"># install lua-language-server</span>
+<span class="c"># check &lt;https://github.com/LuaLS/lua-language-server/releases&gt; to download release file</span>
+<span class="nb">mkdir </span>lua_ls
+<span class="nb">mv </span>lua-language-server-3.7.4-linux-x64.tar.gz lua_ls
+<span class="nb">tar</span> <span class="nt">-xvf</span> lua-language-server-3.7.4-linux-x64.tar.gz
+<span class="nb">sudo mv </span>lus_ls /usr/local
+<span class="c"># add lus_ls/bin into .bashrc</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/lus_ls/bin:<span class="nv">$PATH</span>
 </code></pre></div></div>
 
+<p><a href="https://www.youtube.com/watch?v=ybUE4D80XSk">How To Setup Linting And Formatting In Neovim To Replace null-ls</a> 介绍了新的 format 的插件， 我参考 <a href="https://www.josean.com/posts/neovim-linting-and-formatting">Blog</a> 配置了 <a href="https://github.com/stevearc/conform.nvim">stevearc/conform.nvim</a>。</p>
+
 <blockquote>
-  <p>LSP 整体参考 <a href="https://github.com/jiaxinaoliao/neovimBeginCpp/tree/main/linuxConfig/lua/lsp">jiaxinaoliao/neovimBeginCpp</a> 域前述配置代码格式化的文章估计同属一个作者<br />
+  <p>Packer 版本的 LSP 整体参考 <a href="https://github.com/jiaxinaoliao/neovimBeginCpp/tree/main/linuxConfig/lua/lsp">jiaxinaoliao/neovimBeginCpp</a> 后 Lazy 版本参考 <a href="https://github.com/Zwlin98/nvim/tree/main">Zwlin98/nvim</a><br />
 <a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a></p>
 </blockquote>
 
@@ -578,6 +614,8 @@ vim ~/.bashrc
   <dd>打通操作系统与 nvim 之间的桥梁， 二者能共用剪贴板的缓存。</dd>
 </dl>
 
+<p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a> 则介绍了另外一种办法， 不过推荐用上述插件更为便捷：</p>
+
 <p>WSL - WSLg (Fast)
 Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
 
@@ -604,8 +642,6 @@ Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
     <span class="k">end</span>
 <span class="k">end</span>
 </code></pre></div></div>
-
-<p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a></p>
 
 <h3 id="412-git">4.12 Git</h3>
 
@@ -636,16 +672,97 @@ Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
 <dl>
   <dt>Greeter: <a href="https://github.com/startup-nvim/startup.nvim">startup.nvim</a></dt>
   <dd>自定义 nvim 启动界面， 能够自己更换喜欢的主题！</dd>
+  <dt>Indent Display: <a href="https://github.com/lukas-reineke/indent-blankline.nvim">indent-blankline.nvim</a></dt>
+  <dd>方便显示 Indent 距离， 而且能够对代码块进行分隔。</dd>
+  <dt>Like VSCode: <a href="https://github.com/SmiteshP/nvim-navic">nvim-navic</a></dt>
+  <dd>作用看着不明显， 方便识别代码块？</dd>
   <dt>Which Key: <a href="https://github.com/folke/which-key.nvim">which-key.nvim</a></dt>
   <dd>提示当前的 keybinding， 对记不住快捷键的人简直是神器！</dd>
-</dl>
-
-<h3 id="415-spider">4.15 Spider</h3>
-
-<dl>
   <dt>CamelCase Motion: <a href="https://github.com/chrisgrieser/nvim-spider">nvim-spider</a></dt>
   <dd>CamelCase Motion 的 lua 实现版本， 按照说明配置快捷键可实现相同功能。</dd>
+  <dt>Trouble Shooter: <a href="https://github.com/folke/trouble.nvim">trouble.nvim</a></dt>
+  <dd>trouble.nvim可以让你快速查看你的工作区、文件中的LSP警告列表。</dd>
+  <dt>Like TODO: <a href="https://github.com/folke/todo-comments.nvim">todo-comments.nvim</a></dt>
+  <dd>高亮注释中的关键词， <code class="language-plaintext highlighter-rouge">HACK</code>, <code class="language-plaintext highlighter-rouge">NOTE</code>, <code class="language-plaintext highlighter-rouge">TODO</code>, <code class="language-plaintext highlighter-rouge">WARN</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, <code class="language-plaintext highlighter-rouge">BUG</code>, <code class="language-plaintext highlighter-rouge">FIX</code>, <code class="language-plaintext highlighter-rouge">PREF</code>。</dd>
+  <dt>LeetCode: <a href="https://github.com/kawre/leetcode.nvim">leetcode.nvim</a></dt>
+  <dd>用 neovim 刷 LeetCode 的必备工具。</dd>
+  <dt>Image: <a href="https://github.com/3rd/image.nvim">image.nvim</a></dt>
+  <dd>给 LeetCode 插件提供显示图片支持， 但需要安装以下软件提供支持。</dd>
 </dl>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># image magick</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>imagemagick
+<span class="c"># magick luarock</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>luarocks
+luarocks <span class="nt">--local</span> <span class="nb">install </span>magick
+<span class="c"># kitty</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>kitty
+<span class="c"># ueberzugpp Ubuntu 20.04</span>
+<span class="nb">echo</span> <span class="s1">'deb http://download.opensuse.org/repositories/home:/justkidding/xUbuntu_22.04/ /'</span> | <span class="nb">sudo tee</span> /etc/apt/sources.list.d/home:justkidding.list
+curl <span class="nt">-fsSL</span> https://download.opensuse.org/repositories/home:justkidding/xUbuntu_22.04/Release.key | gpg <span class="nt">--dearmor</span> | <span class="nb">sudo tee</span> /etc/apt/trusted.gpg.d/home_justkidding.gpg <span class="o">&gt;</span> /dev/null
+<span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>ueberzugpp
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># use following command to sign in LeetCode</span>
+nvim leetcode.nvim
+<span class="c"># search `graphql` to acquire cookies</span>
+</code></pre></div></div>
+
+<h2 id="5-配置问题">5. 配置问题</h2>
+
+<h3 id="51-mason-fails-checkhealth">5.1 Mason fails <code class="language-plaintext highlighter-rouge">checkhealth</code></h3>
+
+<p>运行 <code class="language-plaintext highlighter-rouge">:checkhealth mason</code> 遇到如下问题：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mason: require<span class="o">(</span><span class="s2">"mason.health"</span><span class="o">)</span>.check<span class="o">()</span>
+
+- ERROR Failed to run healthcheck <span class="k">for</span> <span class="s2">"mason"</span> plugin. Exception:
+  <span class="k">function </span>health#check, line 25
+  Vim<span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:E5108: Error executing lua ...r/.local/share/nvim/lazy/mason.nvim/lua/mason/health.lua:315: <span class="k">function </span>health#check[25]..health#report_error[2]..&lt;SNR&gt;66_format_report_message, line 7: a:1: expected String or List
+  stack traceback:
+  <span class="o">[</span>C]: <span class="k">in function</span> <span class="s1">'error'</span>
+  ...share/nvim/lazy/mason.nvim/lua/mason-core/async/init.lua:131: <span class="k">in function</span> <span class="s1">'run_blocking'</span>
+  ...r/.local/share/nvim/lazy/mason.nvim/lua/mason/health.lua:315: <span class="k">in function</span> <span class="s1">'check'</span>
+  <span class="o">[</span>string <span class="s2">"luaeval()"</span><span class="o">]</span>:1: <span class="k">in </span>main chunk
+</code></pre></div></div>
+
+<p><a href="https://github.com/williamboman/mason.nvim/issues/1323">Failed to run healthcheck for “mason” plugin #1323</a> 也有人提示了这个问题， PhilRunninger 的回答表示是 rust 版本太老需要升级， 但根据下述方法进行组件安装后未解决问题。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装</span>
+curl <span class="nt">--proto</span> <span class="s1">'=https'</span> <span class="nt">--tlsv1</span>.2 <span class="nt">-sSf</span> https://sh.rustup.rs | sh
+<span class="nb">source</span> <span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.cargo/env"</span>
+rustc <span class="nt">--version</span>
+cargo <span class="nt">--version</span>
+<span class="c"># 帮助</span>
+curl https://sh.rustup.rs <span class="nt">-sSf</span> | sh <span class="nt">-s</span> <span class="nt">--</span> <span class="nt">--help</span>
+<span class="c"># 升级</span>
+rustup update
+</code></pre></div></div>
+
+<p>另外尝试删除缓存也没有解决问题：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> <span class="nt">-rf</span> ~/.local/share/nvim ~/.cache/nvim ~/.local/state/nvim
+</code></pre></div></div>
+
+<p>后在 <a href="https://github.com/williamboman/mason-lspconfig.nvim">mason-lspconfig.nvim</a> 主页看到这么一句意识到自己的配置顺序有问题。</p>
+
+<div class="premonition warning"> <div class="header"> <i class="fas fa-exclamation-triangle" style="color: #ffcf4d;"></i> <div class="title"> Warning </div> </div> <div class="content"> <p>It’s important that you set up the plugins in the following order:</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">mason.nvim</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mason-lspconfig.nvim</code></li>
+  <li>Setup servers via <code class="language-plaintext highlighter-rouge">lspconfig</code></li>
+</ol>
+
+
+
+ </div> </div>
+<p>但最终问题是检查配置的时候发现 <code class="language-plaintext highlighter-rouge">bufferline</code> 这个插件多配置了一次发生了冲突， 处理之后 mason 该问题似乎解决了但重启 nvim 后又出现了。</p>
+
+<h3 id="52-unknow-plugin">5.2 UNKNOW PLUGIN</h3>
+
+<p>打开 nvim 出现 <code class="language-plaintext highlighter-rouge">(UNKNOWN PLUGIN): Error excuting lua: attempt to call a nil value</code> 的报错。 估摸着是某些插件有先后运行顺序， 但这个问题很难找， 暂时没有解决。</p>
 
 <h2 id="参考">参考</h2>
 
