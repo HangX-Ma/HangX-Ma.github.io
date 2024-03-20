@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2024-02-08T13:03:50+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://hangx-ma.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hangx-ma.github.io/" rel="alternate" type="text/html" /><updated>2024-03-20T14:19:33+08:00</updated><id>https://hangx-ma.github.io/feed.xml</id><title type="html">一只豆腐</title><subtitle>Code, life and embedded system...
 </subtitle><author><name>HangX-Ma</name><email>m-contour@qq.com</email></author><entry><title type="html">CSAPP - Bomb Lab</title><link href="https://hangx-ma.github.io/2023/12/12/csapp-bomblab.html" rel="alternate" type="text/html" title="CSAPP - Bomb Lab" /><published>2023-12-12T00:00:00+08:00</published><updated>2023-12-12T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/12/12/csapp-bomblab</id><content type="html" xml:base="https://hangx-ma.github.io/2023/12/12/csapp-bomblab.html"><![CDATA[<p>Computer Systems: A Programmer’s Perspective, 3/E (CS:APP3e) – Bomb Lab， 实现源码可从 <a href="https://github.com/HangX-Ma/csapp/tree/main/02-bomblab">HangX-Ma/csapp: 02-bomblab</a> 获取。
 <!--more--></p>
 
@@ -1157,13 +1157,17 @@ Expected equality of these values:
   <li><a href="https://wwjk.lanzoub.com/igCqS0jx5fwf">mini_FOC - 小男孩gugugu Bilibili</a></li>
 </ul>
 
-<h2 id="x1-零点标定">X1. 零点标定</h2>
+<h2 id="1-零点标定">1. 零点标定</h2>
 
 <div align="center">
     <img src="/norobots/images/2023-07-28-miniFOC-concept/zero_angle.png" alt="Zero angle concept, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Zero angle concept, HangX-Ma</u></font>
 </div>
+
+<blockquote>
+  <p>回顾一下 Park 变换和 Clark 变换： <a href="https://zhuanlan.zhihu.com/p/293470912">手撕系列（2）：Clark变换与Park变换 - 知乎</a></p>
+</blockquote>
 
 <p>标定初始电角度的原因在于， 一般情况下我们会将转子磁场方向与 \(\alpha\) 正向重合的方向作为转子的零点位置（转子角度为 \(0^{\circ}\)）。 但是， 上电的时候电机还为经过电角度标定， 转子的位置对于控制器而言是未知的， 如果转子此时正好与 \(\beta\) 轴重合， 即以前述定义描述此时的转子角度已经处于 \({90}^{\circ}\)， 而控制器以为其仍处于 \(0^{\circ}\) 位置而产生了一个超前 \({90}^{\circ}\) 的 \(I_{q}\)， 那么 \(I_{q}\) 与转子此时完全重合。 只有 \(I_{q}\) 与转子存在角度差才能在切向产生力做功， 而此时重合的情况就会导致电机卡死不动。</p>
 
@@ -1188,20 +1192,20 @@ Expected equality of these values:
 
 <p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
 
-<h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
+<h2 id="2-角度对齐与极对数计算">2. 角度对齐与极对数计算</h2>
 
 <p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
 
 <p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
 
 <blockquote>
-  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a>
+  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a><br />
 <a href="https://blog.csdn.net/loop222/article/details/120471390">SimpleFOC移植STM32（四）—— 闭环控制 - loop222 CSDN</a></p>
 </blockquote>
 
-<h2 id="x3-foc-多应用模式">X3. FOC 多应用模式</h2>
+<h2 id="3-foc-多应用模式">3. FOC 多应用模式</h2>
 
-<h3 id="x31-ratchet-棘轮模式">X3.1 Ratchet 棘轮模式</h3>
+<h3 id="31-ratchet-棘轮模式">3.1 Ratchet 棘轮模式</h3>
 
 <p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-plaintext highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
 
@@ -1235,7 +1239,89 @@ Expected equality of these values:
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/21207-iHome/p/16898471.html">无刷电机力矩控制模拟棘轮 - XXX已失联 博客园</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。]]></summary></entry><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
+</blockquote>
+
+<h3 id="32-rebound-回弹模式">3.2 Rebound 回弹模式</h3>
+
+<p>在实现 <strong>棘轮模式</strong> 后实现 <strong>回弹模式</strong> 就是水到渠成的事。 棘轮模式将棘轮的数量调整为 1 个自然就是回弹模式了， 但在实现上并不建议这么做， 棘轮模式中涉及到引力点搜索以及角度归一化这些操作， 而且分离功能的实现也可方便后续的拓展。 如此， 回弹模式可由串口设定一个引力点， 每轮控制周期检查当前角度和设定角度的偏差， 作为力矩控制的输入即可。</p>
+
+<h3 id="4-svpwm-细节">4. SVPWM 细节</h3>
+
+<p>SVPWM 的实现流程如下：</p>
+
+<ol>
+  <li>计算参考电压矢量；</li>
+  <li>判断参考电压矢量所在扇区位置；</li>
+  <li>计算扇区所在位置相邻电压矢量和零矢量的作用时间；</li>
+  <li>计算各个桥臂的功率器件的开关时间；</li>
+</ol>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/svpwm-max-voltage.png" alt="SVPWM Max Voltage, HangX-Ma" width="300" />
+    <br />
+    <font size="2" color="#999"><u>SVPWM Max Voltage, HangX-Ma</u></font>
+</div>
+
+<p>SVPWM 的原理可以参考 <a href="https://web.iitd.ac.in/~anandarup/nptel_high_power_conv/4_SVPWM.pdf">IIT - Space Vector PWM</a>， 为了让 SVPWM 的合成电压的输出不失真， 需要确定正六边形最大的正内切圆作为最大的不失真电压。 根据合成电压的公式 \(V_{ref}=\frac{3}{2}V_{m}e^{j\omega t}\) 最大的电压值为 \(\frac{3}{2}V_{m}\) 正好对应于正六边形或组成正六边形的六个三角形的边， 那么那条直角边也很好计算， 应当为 \(\frac{3}{2}V_{m}\bullet \cos{\frac{\pi}{6}}=\frac{\sqrt{3}}{3}V_{m}\)。</p>
+
+<p>另外， 转子磁场的位置实际对应于 d 轴方向， 而实际我们需要控制电压量为 q 轴， d 轴需要保证其分量为 0。 因而获取到的电角度需要根据旋转方向增添或减少 \(\frac{\pi}{2}\) 才满足， 这也是后续进行扇区判断前需要的一步矫正。</p>
+
+<p>判断合成电压所在的扇区比较方便， 在获取到电角度并进行纠偏后， 将电角度进行归一化保证其范围为 \([0,2\pi]\) 之间， 由于总共存在 6 个扇区， 电角度除以 \(\frac{\pi}{3}\) 即可获取到扇区位置。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/average_principle.png" alt="Average Principle, HangX-Ma" width="300" />
+    <br />
+    <font size="2" color="#999"><u>Average Principle, HangX-Ma</u></font>
+</div>
+
+<p>计算相邻电压电压矢量和零矢量的作用时间可以根据 <strong>平均值等效原理</strong>， \(U_{ref}\bullet T_{s} = V_{1}T_{1} + V_{2}T_{2}\)， 根据正弦定理， 可以得到如下等式成立：</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    V_{ref}\cos{\theta}=\frac{T_1}{T_s}V_1+\frac{T_2}{T_s}V_2\cos{\frac{\pi}{3}}, alpha\\
+    V_{ref}\sin{\theta}=\frac{T_2}{T_s}V_2\sin{\frac{\pi}{3}}, beta
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>另外， \(V_1\) 和 \(V_2\) 在未进行 Clark 变换前并没有进行等幅变换， 其值与\(V_m\) 母线电压一致（三相静止坐标系）， 进行转换后则为 \(\frac{2}{3}V_m\)（\(\alpha\beta\)坐标系）， 不难得到 \(T_1\) 和 \(T_2\) 的表达式， 其中 \(k^{'}\) 为调制比， 可根据上式推导得到 \(k^{'}=\frac{\sqrt{3}V_{ref}}{V_m}\)。</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_1 = k^{'}T_s\sin({\frac{\pi}{3} - \theta})\\
+    T_2 = k^{'}T_s\sin{\theta}
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>那么推广到整个矢量空间， 我们可以得到如下等式成立， \(sector\in[1,6]\)。</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_1 = k^{'}T_s\sin({sector\times \frac{\pi}{3} - \theta})\\
+    T_2 = k^{'}T_s\sin({\theta - (sector - 1)\times \frac{\pi}{3}})
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>相应的， 我们还可以得到零矢量的作用时间为 \(T_0 = (1 - T_1 - T_2)/2\)。</p>
+
+<p>那么如何计算三相器件的开关时间呢？ 我们仍以第一象限空间为例， 可以看到 SVPWM 作用时的 A， B， C 三相的开关情况。 对于 V1(100)， V2(110) 表示的是 A，B，C 上桥臂的开关情况， 1 为开， 0 为关， 按顺序从左向右分别表示 A， B， C三相。 那么组合一下有如下等式成立：</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_A = T_1 + T_2 + T_0\\
+    T_B = T_2 + T_0\\
+    T_C = T_0\\
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>哪个 MOS 管开了， 我们就相应的把这段作用时间加上， 其他象限的推导也是一致的。</p>]]></content><author><name>HangX-Ma</name></author><category term="FOC" /><category term="STM32" /><summary type="html"><![CDATA[miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。]]></summary></entry><entry><title type="html">STM32F103 Vofa+ 配置与调试指南</title><link href="https://hangx-ma.github.io/2023/07/19/vofaplus.html" rel="alternate" type="text/html" title="STM32F103 Vofa+ 配置与调试指南" /><published>2023-07-19T00:00:00+08:00</published><updated>2023-07-19T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/19/vofaplus</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/19/vofaplus.html"><![CDATA[<p>为了阐述清晰和 miniFOC 的开发进行的区分， 单独一章讲一讲这个上位机调试工具 <a href="https://www.vofa.plus/">Vofa+</a>， 当时是看到 B 站 Up <a href="https://space.bilibili.com/662875973">mandzy</a> 的视频以及 Vofa+ 精致的界面感觉这个工具能够帮上不少忙。 目前 Vofa+ 支持三种传输协， <em>FileWater</em>， <em>JustFloat</em>， <em>RawData</em>。 对于电机控制而言， 传输波形的数据需要用到浮点， 第二个传输浮点数据的协议就比较合适了， 具体选用哪种协议示情况而定。</p>
 
 <div align="center">
     <img src="/norobots/images/2023-07-19-vofaplus/vofaplus_demo.png" alt="Vofa+ demo, HangX-Ma" width="800" />
@@ -1418,11 +1504,7 @@ Expected equality of these values:
 
 <blockquote>
   <p><a href="https://www.cnblogs.com/wangh0802PositiveANDupward/archive/2012/08/06/2624827.html">C语言：全局变量在多个c文件中公用的方法 - 奔流聚海 博客园</a></p>
-</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="C" /><summary type="html"><![CDATA[结合 OOP 思想进行 C 语言编程， 这篇文章并不从头介绍相关的知识， 而是记录个人学习的疑难点以及参考资料等资源。]]></summary></entry><entry><title type="html">miniFOC Driver Development</title><link href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html" rel="alternate" type="text/html" title="miniFOC Driver Development" /><published>2023-07-17T00:00:00+08:00</published><updated>2023-07-17T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/17/miniFOC-dev</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><![CDATA[<p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对他高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历。</p>
-
-<blockquote>
-  <p>目前板子设计借鉴了 <a href="https://www.bilibili.com/video/BV1NW4y157Ls/?spm_id_from=333.880.my_history.page.click&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">小男孩gugugu</a> Up 的这部分内容（视频标题太长啦！）， 不想自己从头找元件然后再一个个建模搭了， 太费时间了这样就本末倒置了。</p>
-</blockquote>
+</blockquote>]]></content><author><name>HangX-Ma</name></author><category term="C" /><summary type="html"><![CDATA[结合 OOP 思想进行 C 语言编程， 这篇文章并不从头介绍相关的知识， 而是记录个人学习的疑难点以及参考资料等资源。]]></summary></entry><entry><title type="html">miniFOC Driver Development</title><link href="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html" rel="alternate" type="text/html" title="miniFOC Driver Development" /><published>2023-07-17T00:00:00+08:00</published><updated>2023-07-17T00:00:00+08:00</updated><id>https://hangx-ma.github.io/2023/07/17/miniFOC-dev</id><content type="html" xml:base="https://hangx-ma.github.io/2023/07/17/miniFOC-dev.html"><![CDATA[<p>研 0 的时候不知好歹自己做了一块驱动板， 但是没有任何经验也不知道怎么开发， 结果上电就烧。 直到最近看到了 B 站 Up <a href="https://space.bilibili.com/382415040">热心市民翔先生</a> 发的 FOC 开发的系列视频感觉这个项目是有救了。 这也算是圆了自己 STM32 开发的愿望， 之前只学习做过一些 demo， 导师甚至把 MCU 称之为玩具（相对高大上的嵌入式 Linux 而言确实如此）。 但无论如何， 学习的过程中总是会有收获的， 我不认为他们口中简单的东西在没有接触之前都是简单的， 至少我需要这个开发经历去了解这套体系。</p>
 
 <ul>
   <li><strong>MCU:</strong> STM32F103C8T6, 64K Flash, 20K SRAM</li>
@@ -1643,7 +1725,7 @@ Expected equality of these values:
 
 <h2 id="6-速度环调试">6. 速度环调试</h2>
 
-<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-plaintext highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-plaintext highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动， jitter。</p>
+<p>力矩环在电压控制的情况下就是开环的， 因而测试过后就调力矩环的外环电流环。 电流环遇到一个问题就是给定速度后， 电机转到某个位置就会发生明显的卡顿情况， 视觉上的感受就是这个地方电机遇到了一个非常大的阻力停顿了一下， 这在速度为 <code class="language-plaintext highlighter-rouge">10 - 20 rad/s</code> 时非常明显， 整个电机都会因为这个卡顿而发生弹跳。 但一旦速度达到 <code class="language-plaintext highlighter-rouge">40 rad/s</code> 及以上之后， 这种卡顿因为速度的提升会转变为一种高频且轻微的抖动(<strong>jitter</strong>)。</p>
 
 <p>用 PI 控制器几乎没办法解决这个问题， 凑巧的是我到 SimpleFOC 的官方文档看了看， 我发现他们的速度环实际上是用 PID 控制器实现的， 其中微分 Kd 仅为 0.001 大小。 微分的作用就是应对控制量的快速变化， 意识到这一点后我认为速度环电机的电角度的快速变化很可能让 PI 控制器没办法以较快的响应速度稳定到需要控制的角度， 因而产生了控制的滞后， 这在电机上的表现就是卡顿与抖动。 尝试加入了微小的微分量后， 电机的速度环果然稳定了下来并且表现优异。</p>
 
@@ -1715,15 +1797,15 @@ Expected equality of these values:
 
 <p>当时实际调试的时候， 设定 \(^{Q}K_{p}\) 和 \(^{D}K_{p}\) 的值为 0.6 的时候， 转矩设定为 0.6 以上电机才能够平稳旋转， 而这也直接导致套上速度环和位置环后， 在误差较小时电机的运行是不平稳的， 会产生抖动。 我原来想通过 Ki 弥补稳态误差， 但这个给定值非常难找， 经常导致电流环出现不收敛而发生电机转速疯狂飙升的情况。 目前暂时没有解决电流环的调试问题。</p>
 
-<h2 id="x-stm32-ll-库配置踩坑">X. STM32 LL 库配置踩坑</h2>
+<h2 id="9-stm32-ll-库配置踩坑">9. STM32 LL 库配置踩坑</h2>
 
 <p>在网上搜了一番发现 STM32 用 LL 库开发的效率和配置寄存器差不多， HAL 库的封装太多层了， 虽然移植性比较好但效率显著低于 LL 库。 但是， LL 库资源少而且有坑， 不过对于爱折腾的人以及从 51 那套开始习惯读寄存器的人而言， 倒也不是太大的问题。</p>
 
-<h3 id="x1-debug">X.1 Debug</h3>
+<h3 id="91-debug">9.1 Debug</h3>
 
 <p>CubeMX 中的 <code class="language-plaintext highlighter-rouge">SYS</code> 需要配置 <strong>Serial Wire</strong> 才能用 stlink-v2 进行调试。 但是我实际测试用 vscode 的 cortex-debug 插件， 开启这个设置会导致调试偏移到很奇怪的地方， 反倒是不用开也能调试。</p>
 
-<h3 id="x2-tim1-配置-pwm-输出">X.2 TIM1 配置 PWM 输出</h3>
+<h3 id="92-tim1-配置-pwm-输出">9.2 TIM1 配置 PWM 输出</h3>
 
 <p>LL 库通过 STM32CubeMX 生成的 TIM1 基础配置存在一定的问题。 见 <code class="language-plaintext highlighter-rouge">Core/Src/tim.c</code> 中对 <code class="language-plaintext highlighter-rouge">Prescaler</code> 以及 <code class="language-plaintext highlighter-rouge">Autoreload</code> 的配置， 会把 <code class="language-plaintext highlighter-rouge">36 - 1</code> 配置成 <code class="language-plaintext highlighter-rouge">36 - LL_TIM_IC_FILTER_FDIV1_N2</code> 怀疑这个与 CubeMX 不支持配置中运算有关系。</p>
 
@@ -1742,7 +1824,7 @@ Expected equality of these values:
   <p><a href="https://www.cnblogs.com/yhpbook/p/yhp_stm32_tim.html">关于STM32CubeMX使用LL库设置PWM输出</a></p>
 </blockquote>
 
-<h3 id="x3-spi">X.3 SPI</h3>
+<h3 id="93-spi">9.3 SPI</h3>
 
 <p>需要增加 <code class="language-plaintext highlighter-rouge">LL_SPI_Enable</code> 函数使能相关的 SPIx 设备。</p>
 
@@ -1764,11 +1846,11 @@ Expected equality of these values:
   <p><a href="https://blog.csdn.net/weixin_42832780/article/details/96424775">STM32 SPI发送与接收用一个函数实现的问题 - VX13260562029 CSDN</a></p>
 </blockquote>
 
-<h3 id="x4-dma">X.4 DMA</h3>
+<h3 id="94-dma">9.4 DMA</h3>
 
 <p>DMA 的配置需要在任何主配置， 如 USART， SPI 这些配置之前完成， 当时 USART 接收有问题， 看网上资料把 DMA 的配置放到了 USART 配置之前就解决问题了。</p>
 
-<h4 id="x41-usart-dma">X.4.1 USART DMA</h4>
+<h4 id="941-usart-dma">9.4.1 USART DMA</h4>
 
 <p>USART 的 DMA 开启有几个 LL 库的函数需要注意：</p>
 
@@ -1780,7 +1862,7 @@ Expected equality of these values:
 
 <p>除此之外， 对于配置了 <code class="language-plaintext highlighter-rouge">NORMAL</code> 类型的 DMA 传输， 需要在下一次 DMA 传输开启之前重新配置 <strong>传输的内存地址</strong> 以及 <strong>传输的数据大小</strong>。 值得注意的是， 在配置之前需要 <strong>失能</strong> 相关的 DMA 通道， 另外 <strong>传输的数据大小</strong> 和该传输方向定义的数据宽度相关。 也就是说， 如果此时我定义了 DMA 从外设到内存的传输数据宽度为 <code class="language-plaintext highlighter-rouge">Byte</code>， 那么这个传输的数据大小若设置为 4 则表示传输 4 个字节。 若定义的数据宽度为 <code class="language-plaintext highlighter-rouge">HalfWord</code>， 则传输的数据大小为 4 表示传输 4 个半字 （2 个字节）。</p>
 
-<h3 id="x5-重定向-printf">X.5 重定向 printf</h3>
+<h3 id="95-重定向-printf">9.5 重定向 printf</h3>
 
 <p>还得是知乎大佬 <a href="https://zhuanlan.zhihu.com/p/369380259">STM32用gcc编译printf重定向到串口 - gyx鑫 知乎</a> 这篇文章， 除了如下更改还需要在串口初始化的时候调用 <code class="language-plaintext highlighter-rouge">setvbuf(stdout, NULL, _IONBF, 0)</code>。</p>
 
@@ -1801,7 +1883,7 @@ Expected equality of these values:
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h3 id="x6-printf-浮点输出">X.6 printf 浮点输出</h3>
+<h3 id="96-printf-浮点输出">9.6 printf 浮点输出</h3>
 
 <p>但是这种办法还不能输出 float 浮点数， 这是因为 STM32 默认是关闭浮点输出的， STM32 社区论坛有一条帖子说明， 通过如下链接指令打开 GCC 中的浮点打印的编译。 但是， 我自己测试之后还是无法输出 float 类型， 即便将优化等级调整为 <code class="language-plaintext highlighter-rouge">-O0</code>。</p>
 

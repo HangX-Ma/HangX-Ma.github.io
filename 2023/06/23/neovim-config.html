@@ -289,11 +289,11 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Feb 03, 2024</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 9667 words </span>
+                <span> Total 10424 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 27 mins </span>
+                <span> About 29 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Start from scratch: Neovim</h1></header></div><p class="overlay__excerpt">2024 年初发现 WSL 竟然无法更新 VSCode， 后发现其官网也被墙了， 为了愉快的在 Linux 环境写代码还是选择重回 nvim</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -323,17 +323,24 @@
         │   ├── clipboard.lua
         │   ├── comment.lua
         │   ├── filetype.lua
+        │   ├── flash.lua
+        │   ├── goto-preview.lua
         │   ├── indent-blankline.lua
         │   ├── nvim-autopairs.lua
+        │   ├── nvim-bqf.lua
         │   ├── nvim-spider.lua
+        │   ├── rustaceanvim.lua
+        │   ├── startuptime.lua
         │   ├── symbols-outline.lua
         │   ├── telescope.lua
         │   ├── todo-comments.lua
         │   ├── toggleterm.lua
         │   ├── trouble.lua
         │   ├── utils.lua
+        │   ├── vim-surround.lua
         │   └── which-key.lua
         ├── debug
+        │   ├── neotest.lua
         │   └── nvim-dap.lua
         ├── extra
         │   └── leetcode.lua
@@ -367,8 +374,7 @@
             ├── nvim-notify.lua
             └── startup.lua
 
-12 directories, 45 files
-
+12 directories, 52 files
 </code></pre></div></div>
 
 <blockquote>
@@ -486,6 +492,8 @@ vim ~/.bashrc
   <dd>telescope.nvim 的必要组件， 能够提供异步编程， 目录扫描等基础功能。</dd>
   <dt>Fuzzy Finder: <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></dt>
   <dd>telescope.nvim 能在 neovim 中提供文件名模糊搜索和文本内容搜索的功能， 以及更多复杂的功能。</dd>
+  <dt>fzf: <a href="https://github.com/nvim-telescope/telescope-fzf-native.nvim">telescope-fzf-native.nvim</a></dt>
+  <dd>fzf 的集成插件， 拓展 telescope 功能。</dd>
 </dl>
 
 <p>telescope 常用的指令如下：</p>
@@ -550,6 +558,11 @@ vim ~/.bashrc
 <span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/lus_ls/bin:<span class="nv">$PATH</span>
 </code></pre></div></div>
 
+<p>建议安装 python 虚拟环境组件以供支持其他 LSP 安装。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>python3.10-venv
+</code></pre></div></div>
+
 <p><a href="https://www.youtube.com/watch?v=ybUE4D80XSk">How To Setup Linting And Formatting In Neovim To Replace null-ls</a> 介绍了新的 format 的插件， 我参考 <a href="https://www.josean.com/posts/neovim-linting-and-formatting">Blog</a> 配置了 <a href="https://github.com/stevearc/conform.nvim">stevearc/conform.nvim</a>。</p>
 
 <blockquote>
@@ -581,6 +594,8 @@ vim ~/.bashrc
   <dd>我们需要提供一个可用的界面用来显示调试过程中的各种信息，包括变量值和调用栈。</dd>
   <dt>Debug Variable Value: <a href="https://github.com/theHamsta/nvim-dap-virtual-text">​nvim-dap-virtual-text​​​</a></dt>
   <dd>用以显示 debug 过程中一些变量的值， 类似 vscode 中的 watch。</dd>
+  <dt>Tests: <a href="https://github.com/nvim-neotest/neotest">neotest</a></dt>
+  <dd>类似 VSCode 中的测试插件功能， 方便进行测试内容的可视化和快捷操作。</dd>
 </dl>
 
 <p>配置 cpp 调试需要参考 <a href="https://www.reddit.com/r/neovim/comments/zwlfkx/dap_configuration_for_c/">DAP configuration for C++</a></p>
@@ -614,10 +629,13 @@ vim ~/.bashrc
   <dd>打通操作系统与 nvim 之间的桥梁， 二者能共用剪贴板的缓存。</dd>
 </dl>
 
-<p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a> 则介绍了另外一种办法， 不过推荐用上述插件更为便捷：</p>
+<p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a> 则介绍了另外一种办法， 不过推荐用上述插件更为便捷， 但仍需保证提供一种 clipboard 组件， 例如在 wsl 上需要安装 <code class="language-plaintext highlighter-rouge">wl-clipboard</code>。</p>
 
 <p>WSL - WSLg (Fast)
-Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
+<strong>Make sure wl-clipboard is installed on your system and WSLg is enabled.</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>wl-clipboard
+</code></pre></div></div>
 
 <div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">has</span><span class="p">(</span><span class="s2">"wsl"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">then</span>
     <span class="k">if</span> <span class="n">vim</span><span class="p">.</span><span class="n">fn</span><span class="p">.</span><span class="n">executable</span><span class="p">(</span><span class="s2">"wl-copy"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">then</span>
@@ -672,16 +690,28 @@ Make sure wl-clipboard is installed on your system and WSLg is enabled.</p>
 <dl>
   <dt>Greeter: <a href="https://github.com/startup-nvim/startup.nvim">startup.nvim</a></dt>
   <dd>自定义 nvim 启动界面， 能够自己更换喜欢的主题！</dd>
+  <dt>Easy Jump: <a href="https://github.com/folke/flash.nvim">flash.nvim</a></dt>
+  <dd>EasyMotion 和 CamelCaseMotion 的结合体， neovim 的平替款。</dd>
+  <dt>Quick Punctuation Operate: <a href="https://github.com/tpope/vim-surround">vim-surround</a></dt>
+  <dd>不太会用但确实很有用的插件， 能对括号， 标点等进行快速更改。</dd>
+  <dt>Goto Preview: <a href="https://github.com/rmagatti/goto-preview">goto-preview</a></dt>
+  <dd>Goto 指令使用时类似 vscode 的选择界面， 以浮动窗口的形式预览符号的定义、实现等信息。</dd>
   <dt>Indent Display: <a href="https://github.com/lukas-reineke/indent-blankline.nvim">indent-blankline.nvim</a></dt>
   <dd>方便显示 Indent 距离， 而且能够对代码块进行分隔。</dd>
-  <dt>Like VSCode: <a href="https://github.com/SmiteshP/nvim-navic">nvim-navic</a></dt>
-  <dd>作用看着不明显， 方便识别代码块？</dd>
   <dt>Which Key: <a href="https://github.com/folke/which-key.nvim">which-key.nvim</a></dt>
   <dd>提示当前的 keybinding， 对记不住快捷键的人简直是神器！</dd>
   <dt>CamelCase Motion: <a href="https://github.com/chrisgrieser/nvim-spider">nvim-spider</a></dt>
   <dd>CamelCase Motion 的 lua 实现版本， 按照说明配置快捷键可实现相同功能。</dd>
   <dt>Trouble Shooter: <a href="https://github.com/folke/trouble.nvim">trouble.nvim</a></dt>
-  <dd>trouble.nvim可以让你快速查看你的工作区、文件中的LSP警告列表。</dd>
+  <dd>trouble.nvim可以让你快速查看你的工作区、文件中的LSP警告列表。 但是 <code class="language-plaintext highlighter-rouge">Lspsaga</code> 有内置的检查器倒是不必要安装。</dd>
+  <dt>QuickFix Enhance: <a href="https://github.com/kevinhwang91/nvim-bqf">nvim-bqf</a></dt>
+  <dd>quick fix 的增强插件， 配置的时候直接再装个 fzf。</dd>
+  <dt>Folder Wrapper: <a href="https://github.com/kevinhwang91/nvim-ufo">nvim-ufo</a></dt>
+  <dd>启用neovim的折叠功能，在左侧栏显示可折叠的项目，并能够自定义折叠显示的内容。
+    <blockquote>
+      <p>参考 <a href="https://www.bilibili.com/read/cv22495061/">Neovim插件推荐&amp;配置 - 2.26 nvim-ufo</a> 配置</p>
+    </blockquote>
+  </dd>
   <dt>Like TODO: <a href="https://github.com/folke/todo-comments.nvim">todo-comments.nvim</a></dt>
   <dd>高亮注释中的关键词， <code class="language-plaintext highlighter-rouge">HACK</code>, <code class="language-plaintext highlighter-rouge">NOTE</code>, <code class="language-plaintext highlighter-rouge">TODO</code>, <code class="language-plaintext highlighter-rouge">WARN</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, <code class="language-plaintext highlighter-rouge">BUG</code>, <code class="language-plaintext highlighter-rouge">FIX</code>, <code class="language-plaintext highlighter-rouge">PREF</code>。</dd>
   <dt>LeetCode: <a href="https://github.com/kawre/leetcode.nvim">leetcode.nvim</a></dt>
@@ -762,7 +792,7 @@ rustup update
 
 <h3 id="52-unknow-plugin">5.2 UNKNOW PLUGIN</h3>
 
-<p>打开 nvim 出现 <code class="language-plaintext highlighter-rouge">(UNKNOWN PLUGIN): Error excuting lua: attempt to call a nil value</code> 的报错。 估摸着是某些插件有先后运行顺序， 但这个问题很难找， 暂时没有解决。</p>
+<p>打开 nvim 出现 <code class="language-plaintext highlighter-rouge">(UNKNOWN PLUGIN): Error excuting lua: attempt to call a nil value</code> 的报错。 估摸着是某些插件有先后运行顺序， 但这个问题很难找， 不过后来在使用的过程中又折腾了一段时间， 发现是 telescope 中的插件配置问题， 导致 neovim 无法识别到相关的插件。</p>
 
 <h2 id="参考">参考</h2>
 

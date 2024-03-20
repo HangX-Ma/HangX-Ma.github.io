@@ -289,11 +289,11 @@
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jul 28, 2023</span>
             </li><li><i class="far fa-edit"></i> <span>Aug 01, 2023</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 2829 words </span>
+                <span> Total 4894 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 8 mins </span>
+                <span> About 14 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s07s28sminiFOC-concept.html">0</span> views</li></ul></div><div class="article__header"><header><h1>miniFOC 原理阐述与多模式应用</h1></header></div><p class="overlay__excerpt">miniFOC 相关的原理， 包括 FOC， SVPWM， 零点检测等， 主要记录自己不熟悉的部分， 另外也记录一些基于 FOC 实现的有趣的应用。</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -319,13 +319,17 @@
   <li><a href="https://wwjk.lanzoub.com/igCqS0jx5fwf">mini_FOC - 小男孩gugugu Bilibili</a></li>
 </ul>
 
-<h2 id="x1-零点标定">X1. 零点标定</h2>
+<h2 id="1-零点标定">1. 零点标定</h2>
 
 <div align="center">
     <img src="/norobots/images/2023-07-28-miniFOC-concept/zero_angle.png" alt="Zero angle concept, HangX-Ma" width="600" />
     <br />
     <font size="2" color="#999"><u>Zero angle concept, HangX-Ma</u></font>
 </div>
+
+<blockquote>
+  <p>回顾一下 Park 变换和 Clark 变换： <a href="https://zhuanlan.zhihu.com/p/293470912">手撕系列（2）：Clark变换与Park变换 - 知乎</a></p>
+</blockquote>
 
 <p>标定初始电角度的原因在于， 一般情况下我们会将转子磁场方向与 \(\alpha\) 正向重合的方向作为转子的零点位置（转子角度为 \(0^{\circ}\)）。 但是， 上电的时候电机还为经过电角度标定， 转子的位置对于控制器而言是未知的， 如果转子此时正好与 \(\beta\) 轴重合， 即以前述定义描述此时的转子角度已经处于 \({90}^{\circ}\)， 而控制器以为其仍处于 \(0^{\circ}\) 位置而产生了一个超前 \({90}^{\circ}\) 的 \(I_{q}\)， 那么 \(I_{q}\) 与转子此时完全重合。 只有 \(I_{q}\) 与转子存在角度差才能在切向产生力做功， 而此时重合的情况就会导致电机卡死不动。</p>
 
@@ -350,20 +354,20 @@
 
 <p>一般来说第二条比较方便， 需要注意的是这个初始给的 \(U_{q}\) 不能太大， 小电机 0.5 V 开始网上调能带动就行。 我们可以通过开环状态下， 多次循环 <code class="language-plaintext highlighter-rouge">set_phase_voltage(float Uq, float Ud, float e_angle)</code> 以达到固定角度的目的。</p>
 
-<h2 id="x2-角度对齐与极对数计算">X2. 角度对齐与极对数计算</h2>
+<h2 id="2-角度对齐与极对数计算">2. 角度对齐与极对数计算</h2>
 
 <p>角度对齐是基于电角度与机械角度方向需要一致的需求， 若电角度和机械角度相反， 电机会发生原位卡死的问题。 已经解决零点标定问题， 我们只需要让电机从零点开始以 \(2\pi\) 电角度为偏移量进行转动， 通过中间角度的正负值即可判断电机的转动方向（因为我们转动后还需要转回原来的零点位置， 所以这个 \(2\pi\) 角算是中间角）。 这里需要注意 <code class="language-plaintext highlighter-rouge">电角度 = 机械角度 * 极对数</code>， \(2\pi\) 的电角度不会导致电机转一整圈， 现在的 PMSM 一般都有 6 个极对数。</p>
 
 <p>此时我们还能进行极对数的计算， 因为转动 \(2\pi\) 后我们能读到一个机械角度量， 而电角度是机械角度的极对数倍（也就是整数倍）， 进行涉入取整计算即可得到极对数。</p>
 
 <blockquote>
-  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a>
+  <p><a href="https://www.bilibili.com/video/BV1C44y1j77b/?spm_id_from=333.788&amp;vd_source=ff5c0e57e43050131aa7ad47bb0e83d9">project_3 实现角度反馈及电机力矩控制 - 热心市民翔先生</a><br />
 <a href="https://blog.csdn.net/loop222/article/details/120471390">SimpleFOC移植STM32（四）—— 闭环控制 - loop222 CSDN</a></p>
 </blockquote>
 
-<h2 id="x3-foc-多应用模式">X3. FOC 多应用模式</h2>
+<h2 id="3-foc-多应用模式">3. FOC 多应用模式</h2>
 
-<h3 id="x31-ratchet-棘轮模式">X3.1 Ratchet 棘轮模式</h3>
+<h3 id="31-ratchet-棘轮模式">3.1 Ratchet 棘轮模式</h3>
 
 <p>棘轮模式目的是通过 FOC 力矩反馈使人感触到棘轮齿的一种力矩控制模式。 由于我的 miniFOC 的电流环调试效果并不好， 低速状态下存在抖动， 因而用 <code class="language-plaintext highlighter-rouge">Uq</code> 电压直接控制力矩大小。 棘轮模式的主要原理就是人为设定几个 <strong>引力点（Attractor）</strong>， 利用当前机械角度与引力点之间的位置误差， 控制输出的力矩大小， 一般来说我们可以直接使用 PID 中的比例控制直接决定输出力矩的以模拟棘轮的不同刚度。</p>
 
@@ -398,6 +402,88 @@
 <blockquote>
   <p><a href="https://www.cnblogs.com/21207-iHome/p/16898471.html">无刷电机力矩控制模拟棘轮 - XXX已失联 博客园</a></p>
 </blockquote>
+
+<h3 id="32-rebound-回弹模式">3.2 Rebound 回弹模式</h3>
+
+<p>在实现 <strong>棘轮模式</strong> 后实现 <strong>回弹模式</strong> 就是水到渠成的事。 棘轮模式将棘轮的数量调整为 1 个自然就是回弹模式了， 但在实现上并不建议这么做， 棘轮模式中涉及到引力点搜索以及角度归一化这些操作， 而且分离功能的实现也可方便后续的拓展。 如此， 回弹模式可由串口设定一个引力点， 每轮控制周期检查当前角度和设定角度的偏差， 作为力矩控制的输入即可。</p>
+
+<h3 id="4-svpwm-细节">4. SVPWM 细节</h3>
+
+<p>SVPWM 的实现流程如下：</p>
+
+<ol>
+  <li>计算参考电压矢量；</li>
+  <li>判断参考电压矢量所在扇区位置；</li>
+  <li>计算扇区所在位置相邻电压矢量和零矢量的作用时间；</li>
+  <li>计算各个桥臂的功率器件的开关时间；</li>
+</ol>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/svpwm-max-voltage.png" alt="SVPWM Max Voltage, HangX-Ma" width="300" />
+    <br />
+    <font size="2" color="#999"><u>SVPWM Max Voltage, HangX-Ma</u></font>
+</div>
+
+<p>SVPWM 的原理可以参考 <a href="https://web.iitd.ac.in/~anandarup/nptel_high_power_conv/4_SVPWM.pdf">IIT - Space Vector PWM</a>， 为了让 SVPWM 的合成电压的输出不失真， 需要确定正六边形最大的正内切圆作为最大的不失真电压。 根据合成电压的公式 \(V_{ref}=\frac{3}{2}V_{m}e^{j\omega t}\) 最大的电压值为 \(\frac{3}{2}V_{m}\) 正好对应于正六边形或组成正六边形的六个三角形的边， 那么那条直角边也很好计算， 应当为 \(\frac{3}{2}V_{m}\bullet \cos{\frac{\pi}{6}}=\frac{\sqrt{3}}{3}V_{m}\)。</p>
+
+<p>另外， 转子磁场的位置实际对应于 d 轴方向， 而实际我们需要控制电压量为 q 轴， d 轴需要保证其分量为 0。 因而获取到的电角度需要根据旋转方向增添或减少 \(\frac{\pi}{2}\) 才满足， 这也是后续进行扇区判断前需要的一步矫正。</p>
+
+<p>判断合成电压所在的扇区比较方便， 在获取到电角度并进行纠偏后， 将电角度进行归一化保证其范围为 \([0,2\pi]\) 之间， 由于总共存在 6 个扇区， 电角度除以 \(\frac{\pi}{3}\) 即可获取到扇区位置。</p>
+
+<div align="center">
+    <img src="/norobots/images/2023-07-28-miniFOC-concept/average_principle.png" alt="Average Principle, HangX-Ma" width="300" />
+    <br />
+    <font size="2" color="#999"><u>Average Principle, HangX-Ma</u></font>
+</div>
+
+<p>计算相邻电压电压矢量和零矢量的作用时间可以根据 <strong>平均值等效原理</strong>， \(U_{ref}\bullet T_{s} = V_{1}T_{1} + V_{2}T_{2}\)， 根据正弦定理， 可以得到如下等式成立：</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    V_{ref}\cos{\theta}=\frac{T_1}{T_s}V_1+\frac{T_2}{T_s}V_2\cos{\frac{\pi}{3}}, alpha\\
+    V_{ref}\sin{\theta}=\frac{T_2}{T_s}V_2\sin{\frac{\pi}{3}}, beta
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>另外， \(V_1\) 和 \(V_2\) 在未进行 Clark 变换前并没有进行等幅变换， 其值与\(V_m\) 母线电压一致（三相静止坐标系）， 进行转换后则为 \(\frac{2}{3}V_m\)（\(\alpha\beta\)坐标系）， 不难得到 \(T_1\) 和 \(T_2\) 的表达式， 其中 \(k^{'}\) 为调制比， 可根据上式推导得到 \(k^{'}=\frac{\sqrt{3}V_{ref}}{V_m}\)。</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_1 = k^{'}T_s\sin({\frac{\pi}{3} - \theta})\\
+    T_2 = k^{'}T_s\sin{\theta}
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>那么推广到整个矢量空间， 我们可以得到如下等式成立， \(sector\in[1,6]\)。</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_1 = k^{'}T_s\sin({sector\times \frac{\pi}{3} - \theta})\\
+    T_2 = k^{'}T_s\sin({\theta - (sector - 1)\times \frac{\pi}{3}})
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>相应的， 我们还可以得到零矢量的作用时间为 \(T_0 = (1 - T_1 - T_2)/2\)。</p>
+
+<p>那么如何计算三相器件的开关时间呢？ 我们仍以第一象限空间为例， 可以看到 SVPWM 作用时的 A， B， C 三相的开关情况。 对于 V1(100)， V2(110) 表示的是 A，B，C 上桥臂的开关情况， 1 为开， 0 为关， 按顺序从左向右分别表示 A， B， C三相。 那么组合一下有如下等式成立：</p>
+
+\[\begin{equation*}
+\left\{
+    \begin{array}{**lr**}
+    T_A = T_1 + T_2 + T_0\\
+    T_B = T_2 + T_0\\
+    T_C = T_0\\
+    \end{array}
+\right.
+\end{equation*}\]
+
+<p>哪个 MOS 管开了， 我们就相应的把这段作用时间加上， 其他象限的推导也是一致的。</p>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
