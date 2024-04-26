@@ -287,13 +287,13 @@
               <a class="button button--secondary button--pill button--sm"
                 href="/blog/archive.html?tag=neovim">neovim</a>
             </li></ul><ul class="right-col menu"><li><i class="fas fa-user"></i> <span>HangX-Ma</span></li><li><i class="far fa-calendar-alt"></i> <span>Jun 23, 2023</span>
-            </li><li><i class="far fa-edit"></i> <span>Feb 03, 2024</span>
+            </li><li><i class="far fa-edit"></i> <span>Apr 26, 2024</span>
             </li><li><i class="fas fa-file-word"></i>
-                <span> Total 10424 words </span>
+                <span> Total 11693 words </span>
             </li>
             <li>
                 <i class="fas fa-clock"></i>
-                <span> About 29 mins </span>
+                <span> About 33 mins </span>
             </li><li><i class="far fa-eye"></i> <span class="js-pageview" data-page-key="s2023s06s23sneovim-config.html">0</span> views</li></ul></div><div class="article__header"><header><h1>Start from scratch: Neovim</h1></header></div><p class="overlay__excerpt">2024 年初发现 WSL 竟然无法更新 VSCode， 后发现其官网也被墙了， 为了愉快的在 Linux 环境写代码还是选择重回 nvim</p></div></div>
               </div>
             </div><div class ="main"><div class="grid grid--reverse">
@@ -320,35 +320,31 @@
     ├── lazy-init.lua
     └── plugins
         ├── common
-        │   ├── clipboard.lua
-        │   ├── comment.lua
-        │   ├── filetype.lua
-        │   ├── flash.lua
-        │   ├── goto-preview.lua
-        │   ├── indent-blankline.lua
-        │   ├── nvim-autopairs.lua
-        │   ├── nvim-bqf.lua
-        │   ├── nvim-spider.lua
-        │   ├── rustaceanvim.lua
-        │   ├── startuptime.lua
-        │   ├── symbols-outline.lua
-        │   ├── telescope.lua
-        │   ├── todo-comments.lua
-        │   ├── toggleterm.lua
-        │   ├── trouble.lua
-        │   ├── utils.lua
-        │   ├── vim-surround.lua
-        │   └── which-key.lua
+        │   ├── leetcode.lua
+        │   └── rustaceanvim.lua
         ├── debug
         │   ├── neotest.lua
+        │   ├── nvim-dap-ui.lua
+        │   ├── nvim-dap-vtxt.lua
         │   └── nvim-dap.lua
-        ├── extra
-        │   └── leetcode.lua
+        ├── editor
+        │   ├── flash.lua
+        │   ├── nvim-spider.lua
+        │   └── vim-surround.lua
+        ├── file
+        │   ├── comment.lua
+        │   ├── goto-preview.lua
+        │   ├── indent-blankline.lua
+        │   ├── markdown-preview.lua
+        │   ├── nvim-autopairs.lua
+        │   ├── nvim-bqf.lua
+        │   ├── todo-comments.lua
+        │   ├── vim-doge.lua
+        │   └── wrapping.lua
         ├── git
         │   ├── gitsigns.lua
         │   └── lazygit.lua
         ├── highlight
-        │   ├── markdown-preview.lua
         │   ├── nvim-treesitter-context.lua
         │   ├── nvim-treesitter.lua
         │   └── nvim-ts-rainbow.lua
@@ -358,105 +354,195 @@
         │   ├── formatting.lua
         │   ├── lsp.lua
         │   ├── navic.lua
-        │   └── server
-        │       ├── bash.lua
-        │       ├── clangd.lua
-        │       ├── cmake.lua
-        │       ├── common.lua
-        │       ├── lua.lua
-        │       └── markdown.lua
+        │   ├── neodev.lua
+        │   ├── nvim-lint.lua
+        │   ├── server
+        │   │   ├── bash.lua
+        │   │   ├── clangd.lua
+        │   │   ├── cmake.lua
+        │   │   ├── common.lua
+        │   │   ├── lua.lua
+        │   │   └── markdown.lua
+        │   └── signature.lua
+        ├── manager
+        │   ├── bufferline.lua
+        │   ├── lualine.lua
+        │   ├── navigation.lua
+        │   ├── startup.lua
+        │   └── yazi.lua
+        ├── system
+        │   ├── clipboard.lua
+        │   ├── filetype.lua
+        │   ├── nvim-notify.lua
+        │   └── startuptime.lua
         ├── theme
         │   └── onedark.lua
-        └── ui
-            ├── bufferline.lua
-            ├── lualine.lua
-            ├── navigation.lua
-            ├── nvim-notify.lua
-            └── startup.lua
+        └── tools
+            ├── cscope_maps.lua
+            ├── symbols-outline.lua
+            ├── telescope.lua
+            ├── toggleterm.lua
+            ├── trouble.lua
+            └── which-key.lua
 
-12 directories, 52 files
+15 directories, 60 files
 </code></pre></div></div>
 
 <blockquote>
-  <p>配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">dotfiles</a> repo 下查看</p>
+  <p>需要安装 neovim 0.9 以上版本， 配置文件可以在 <a href="https://github.com/HangX-Ma/dotfiles/tree/main/nvim">dotfiles</a> repo 下查看。</p>
 </blockquote>
+
+<h2 id="0-初期参考">0. 初期参考</h2>
+
+<ul>
+  <li><a href="https://zhuanlan.zhihu.com/p/617522665">从零开始：使用Neovim搭建Rust开发IDE - 知乎</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/467428462">我的现代化 NeoVim 配置介绍/教程</a></li>
+</ul>
 
 <h2 id="1-安装-neovim">1. 安装 Neovim</h2>
 
-<p>使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim release build</a> 的方式， 省心省力。</p>
+<p>直接使用 <a href="https://github.com/neovim/neovim/releases/tag/stable">Nvim</a> Github 提供的二进制文件省心省力。</p>
 
 <div class="language-bash copyable highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
 <span class="nb">tar</span> <span class="nt">-xvf</span> nvim-linux64.tar.gz
+<span class="nb">sudo mv </span>nvim-linux64 /usr/local
+
+<span class="c"># edit the .bashrc file to add 'nvim-linux64' system path</span>
 vim ~/.bashrc
 <span class="c"># .bashrc</span>
-<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/nvim-linux64/bin:<span class="nv">$PATH</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/nvim-linux64/bin:<span class="nv">$PATH</span>
+
 <span class="c"># back to cli</span>
 <span class="nb">source</span> ~/.bashrc
 </code></pre></div></div>
 
 <h2 id="2-vim-选项配置">2. vim 选项配置</h2>
 
-<blockquote>
-  <p><a href="https://www.ruanyifeng.com/blog/2018/09/vimrc.html">Vim 配置入门 - 阮一峰</a><br />
-<a href="https://www.xwxwgo.com/post/2022/09/21/spell_check_in_nvim/">Neovim拼写检查</a></p>
-</blockquote>
+<ul>
+  <li><a href="https://www.ruanyifeng.com/blog/2018/09/vimrc.html">Vim 配置入门 - 阮一峰</a></li>
+</ul>
 
 <h2 id="3-vim-快捷键配置">3. vim 快捷键配置</h2>
 
-<p><a href="https://juejin.cn/book/7051157342770954277/section/7051536642238054430">Neovim 配置实战：从0到1打造自己的IDE</a>
-<a href="https://developer.aliyun.com/article/1295874">Neovim 配置美化完整流程</a></p>
+<ul>
+  <li><a href="https://juejin.cn/book/7051157342770954277/section/7051536642238054430">Neovim 配置实战：从0到1打造自己的IDE</a></li>
+  <li><a href="https://developer.aliyun.com/article/1295874">Neovim 配置美化完整流程</a></li>
+</ul>
 
 <h2 id="4-插件安装">4. 插件安装</h2>
-
-<p><del><a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>: <a href="https://github.com/wbthomason/packer.nvim#bootstrapping">Bootstrapping</a> 这一章节提供了一种便利的方式配置插件， 在导入配置后能自动安装已配置完的插件， 在 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins/plugin-setup.lua</code> 中拷贝这部分代码作为插件配置的基础。 我们创建 <code class="language-plaintext highlighter-rouge">$HOME/.config/nvim/lua/plugins</code> 文件夹用以管理各个安装的插件。 若需要对插件进行自定义配置， 我们需要创建相关的 lua 文件， 例如 <code class="language-plaintext highlighter-rouge">onedark.lua</code> 之后在 <code class="language-plaintext highlighter-rouge">init.lua</code> 文件中 <code class="language-plaintext highlighter-rouge">require(plugins.onedark)</code> 即可应用相关的配置。</del></p>
 
 <p>最近在群上看到 <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> 真香的言论特地搜索了一番， 竟然比 Packer 效率提高了将近 10 倍， 而且 Packer 的作者也不再维护 Packer 的仓库了， 是时候全面转向 lazy 了！</p>
 
 <blockquote>
-  <p><a href="https://github.com/Zwlin98/nvim">Zwlin98/nvim</a> LSP 配置要疯， 这个仓库简直救我狗命！
+  <p><a href="https://github.com/Zwlin98/nvim">Zwlin98/nvim</a> LSP 配置要疯， 这个仓库简直救我狗命！<br />
 <a href="https://blog.csdn.net/GrowlR/article/details/129781782">使用Lazy.nvim插件管理器，让你的Nvim懒惰起来（从Packer迁移到Lazy记录） - CSDN</a></p>
 </blockquote>
 
-<h3 id="41-安装-onedark---dark-主题">4.1 安装 OneDark - Dark 主题</h3>
-
-<p>主要参考 <a href="https://github.com/navarasu/onedark.nvim">onedark.nvim</a>， 加入插件后自定义配置即可。</p>
-
-<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- lua/plugins/plugins.lua</span>
-<span class="n">use</span> <span class="s1">'navarasu/onedark.nvim'</span>
-</code></pre></div></div>
-
-<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- plugins/onedark.lua</span>
-<span class="nb">require</span><span class="p">(</span><span class="s1">'onedark'</span><span class="p">).</span><span class="n">setup</span> <span class="p">{</span>
-    <span class="c1">-- Main options --</span>
-    <span class="n">style</span> <span class="o">=</span> <span class="s1">'dark'</span><span class="p">,</span>
-    <span class="n">transparent</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>  <span class="c1">-- Show/hide background</span>
-<span class="p">}</span>
-<span class="nb">require</span><span class="p">(</span><span class="s1">'onedark'</span><span class="p">).</span><span class="nb">load</span><span class="p">()</span>
-</code></pre></div></div>
-
-<h3 id="42-status-line">4.2 Status Line</h3>
-
-<p>主要参考 <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a>， 拷贝 <a href="https://github.com/nvim-lualine/lualine.nvim#default-configuration">default configuration</a> 到 <code class="language-plaintext highlighter-rouge">lua/plugins/lualine.lua</code>， 其余步骤与上述一致。 后续若没有特殊情况就不重复说明相关步骤。</p>
-
-<h3 id="43-navigation">4.3 Navigation</h3>
+<h3 id="41-common">4.1 Common</h3>
 
 <dl>
-  <dt>File Explorer: <a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.nvim</a></dt>
-  <dd>提供了便捷的文件管理树的功能， 所有的文件操作可以通过键盘实现</dd>
-  <dt>Tmux Navigator: <a href="https://github.com/christoomey/vim-tmux-navigator">vim-tmux-navigator.nvim</a></dt>
-  <dd>tmux (terminal multiplexer) 是一个终端复用器， 主要可以用于分屏和保持会话。 保持会话的意思是， 即使关闭终端窗口， 或者 SSH 由于各种原因连接中断， 在服务器端 tmux 中的会话和对应的进程仍然不会终止。 tmux 能够创建多个会话 （session）， 每个会话能够创建多个窗口 （window）， 每个窗口又可以分为多个窗格 （pane）。</dd>
-  <dt>Buffer Line: <a href="https://github.com/akinsho/bufferline.nvim">bufferline.nvim</a></dt>
-  <dd>这个插件提供了类似 vscode 的标签页的功能</dd>
-  <dt>Outline: <a href="https://github.com/simrat39/symbols-outline.nvim">symbols-outline.nvim</a></dt>
-  <dd>类似 vscode 中的 Outline， 基于 LSP 实现的函数与符号树， 方便查看代码实现的整体结构。</dd>
+  <dt>LeetCode: <a href="https://github.com/kawre/leetcode.nvim">leetcode.nvim</a></dt>
+  <dd>用 neovim 刷 LeetCode 的必备工具。</dd>
+  <dt>Rust: <a href="https://rust-analyzer.github.io/">rust-analyzer</a></dt>
+  <dd><code class="language-plaintext highlighter-rouge">rust-analyzer</code> 基于 LSP 实现， 它为许多代码编辑器 (包括 VS Code、 Emacs 和 Vim) 提供了补全和跳转定义等特性， 交给 <code class="language-plaintext highlighter-rouge">nvim-lspconfig.rust_analyzer</code> 安装配置即可。</dd>
+  <dt>Enhanced Rust Tool: <a href="https://github.com/mrcjkb/rustaceanvim">mrcjkb/rustaceanvim</a></dt>
+  <dd>Rust 语言的非标准化的扩展组件， 提供了一些基于 rust-analyzer 的额外的功能。</dd>
+  <dt>Image: <a href="https://github.com/3rd/image.nvim">image.nvim</a></dt>
+  <dd>给 LeetCode 插件提供显示图片支持， 但需要安装额外的软件提供支持， 而且还会影响 Leetcode 的 wrapper 功能， 一般不用它。</dd>
 </dl>
 
+<h4 id="leetcode-image-display">Leetcode Image Display</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># image magick</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>imagemagick
+<span class="c"># magick luarock</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>luarocks
+luarocks <span class="nt">--local</span> <span class="nb">install </span>magick
+<span class="c"># kitty</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>kitty
+<span class="c"># ueberzugpp Ubuntu 20.04</span>
+<span class="nb">echo</span> <span class="s1">'deb http://download.opensuse.org/repositories/home:/justkidding/xUbuntu_22.04/ /'</span> | <span class="nb">sudo tee</span> /etc/apt/sources.list.d/home:justkidding.list
+curl <span class="nt">-fsSL</span> https://download.opensuse.org/repositories/home:justkidding/xUbuntu_22.04/Release.key | gpg <span class="nt">--dearmor</span> | <span class="nb">sudo tee</span> /etc/apt/trusted.gpg.d/home_justkidding.gpg <span class="o">&gt;</span> /dev/null
+<span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>ueberzugpp
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># use following command to sign in LeetCode</span>
+nvim leetcode.nvim
+<span class="c"># search `graphql` to acquire cookies</span>
+</code></pre></div></div>
+
+<h3 id="42-debug">4.2 Debug</h3>
+
+<dl>
+  <dt>Debug Adapter Protocol: <a href="https://github.com/mfussenegger/nvim-dap">nvim-dap</a></dt>
+  <dd>Nvim-dap 是基于 Neovim 的 Debug Adapter Protocol 客户端实现的， 能够进行基本的断点、 步进等操作， 并监视应用的状态。</dd>
+  <dt>Debug UI: <a href="https://github.com/rcarriga/nvim-dap-ui">​​nvim-dap-ui</a></dt>
+  <dd>我们需要提供一个可用的界面用来显示调试过程中的各种信息，包括变量值和调用栈。</dd>
+  <dt>Debug Variable Value: <a href="https://github.com/theHamsta/nvim-dap-virtual-text">​nvim-dap-virtual-text​​​</a></dt>
+  <dd>用以显示 debug 过程中一些变量的值， 类似 vscode 中的 watch。</dd>
+  <dt>Tests: <a href="https://github.com/nvim-neotest/neotest">neotest</a></dt>
+  <dd>类似 VSCode 中的测试插件功能， 方便进行测试内容的可视化和快捷操作。</dd>
+</dl>
+
+<p>配置 cpp 调试需要参考 <a href="https://www.reddit.com/r/neovim/comments/zwlfkx/dap_configuration_for_c/">DAP configuration for C++</a>。</p>
+
 <blockquote>
-  <p><a href="https://blog.51cto.com/u_11090813/5575032">从零开始配置 vim(13)——标签页插件 - jesssic</a><br />
-<a href="https://blog.51cto.com/u_11090813/5759499">从零开始配置vim(26)——LSP UI 美化 - jesssic</a></p>
+  <p><a href="https://blog.51cto.com/u_11090813/5807468">从零开始配置vim(28)——代码的编译、运行与调试</a><br />
+<a href="https://blog.51cto.com/u_11090813/5873288">从零开始配置vim(29)——DAP 配置</a><br />
+<a href="https://blog.51cto.com/u_11090813/5982386">从零开始配置vim(30)——DAP的其他配置</a></p>
 </blockquote>
 
-<h3 id="44-highlight">4.4 Highlight</h3>
+<h3 id="43-editor">4.3 Editor</h3>
+
+<dl>
+  <dt>Easy Jump: <a href="https://github.com/folke/flash.nvim">flash.nvim</a></dt>
+  <dd>EasyMotion 在 neovim 中的平替款， 还对原生 vim 功能的 <code class="language-plaintext highlighter-rouge">f</code>， <code class="language-plaintext highlighter-rouge">F</code>， <code class="language-plaintext highlighter-rouge">t</code>， <code class="language-plaintext highlighter-rouge">T</code>， 这几个快捷键进行了增强。</dd>
+  <dt>Quick Punctuation Operate: <a href="https://github.com/tpope/vim-surround">vim-surround</a></dt>
+  <dd>不太会用但确实很有用的插件， 能对括号， 标点等进行快速更改。</dd>
+  <dt>CamelCase Motion: <a href="https://github.com/chrisgrieser/nvim-spider">nvim-spider</a></dt>
+  <dd>CamelCase Motion 的 lua 实现版本， 按照说明配置快捷键可实现相同功能。</dd>
+</dl>
+
+<h3 id="44-file">4.4 File</h3>
+
+<dl>
+  <dt>Smart Comment: <a href="https://github.com/numToStr/Comment.nvim">Comment.nvim</a></dt>
+  <dd>能够方便的对代码进行注释， 这个插件的配置更灵活也更强大， 用 <code class="language-plaintext highlighter-rouge">gcc</code>， <code class="language-plaintext highlighter-rouge">gbc</code> 等指令就能方便的进行行注释和块注释。</dd>
+  <dt>Goto Preview: <a href="https://github.com/rmagatti/goto-preview">goto-preview</a></dt>
+  <dd>Goto 指令使用时类似 vscode 的选择界面， 以浮动窗口的形式预览符号的定义、实现等信息。</dd>
+  <dt>Indent Display: <a href="https://github.com/lukas-reineke/indent-blankline.nvim">indent-blankline.nvim</a></dt>
+  <dd>方便显示 Indent 距离， 而且能够对代码块进行分隔。</dd>
+  <dt>Markdown Preview: <a href="https://github.com/iamcco/markdown-preview.nvim">markdown-preview.nvim</a></dt>
+  <dd>实现类似 VSCode 的 Markdown Preview 的功能</dd>
+  <dt>AutoPair: <a href="https://github.com/windwp/nvim-autopairs">nvim-autopairs</a></dt>
+  <dd>自动补全括号的插件， 具体作用之后用了补充。</dd>
+  <dt>QuickFix Enhance: <a href="https://github.com/kevinhwang91/nvim-bqf">nvim-bqf</a></dt>
+  <dd>quick fix 的增强插件， 配置的时候直接再装个 fzf。</dd>
+  <dt>Like TODO: <a href="https://github.com/folke/todo-comments.nvim">todo-comments.nvim</a></dt>
+  <dd>高亮注释中的关键词， <code class="language-plaintext highlighter-rouge">HACK</code>, <code class="language-plaintext highlighter-rouge">NOTE</code>, <code class="language-plaintext highlighter-rouge">TODO</code>, <code class="language-plaintext highlighter-rouge">WARN</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, <code class="language-plaintext highlighter-rouge">BUG</code>, <code class="language-plaintext highlighter-rouge">FIX</code>, <code class="language-plaintext highlighter-rouge">PREF</code>。</dd>
+  <dt>Doxygen: <a href="https://github.com/kkoomen/vim-doge">kkoomen/vim-doge</a></dt>
+  <dd>提供 doxygen 相关的支持， 当然 vim 本身也有多 doxygen 支持的选项需要在 options 中进行配置。</dd>
+  <dt>Text Wrapping: <a href="https://github.com/andrewferrier/wrapping.nvim">andrewferrier/wrapping.nvim</a></dt>
+  <dd>提升 Markdown 的使用体验， neovim 中 Markdown 文件一行如果太长不会自动折叠， 需要这个插件进行支持。</dd>
+</dl>
+
+<h3 id="45-git">4.5 Git</h3>
+
+<dl>
+  <dt>LazyGit: <a href="https://github.com/kdheepak/lazygit.nvim">lazygit.nvim</a></dt>
+  <dd>Git 相关组件， 实现 commit, push 等操作的可视化。</dd>
+  <dt>Git Signs: <a href="https://github.com/lewis6991/gitsigns.nvim">gitsigns.nvim</a></dt>
+  <dd>提供了和 Git 相关的功能， 例如查看 git diff， last commit， status bar 等， 类似 vscode 中的 GitLen。</dd>
+</dl>
+
+<p>对于 LazyGit 还需要相应得安装其二进制包， 一种通过下述方式将 <code class="language-plaintext highlighter-rouge">lazygit</code> 编译好的二进制文件拷贝到目录下， 另一种就通过增加 ppa 源的方式， 我在配置文件中写了自动安装的脚本。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-Lo</span> lazygit.tar.gz <span class="s2">"https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.40.2_Linux_x86_64.tar.gz"</span>
+<span class="nb">sudo tar </span>xf lazygit.tar.gz <span class="nt">-C</span> /usr/local/bin lazygit
+</code></pre></div></div>
+
+<h3 id="46-highlight">4.6 Highlight</h3>
 
 <dl>
   <dt>Code Highlighting: <a href="https://github.com/nvim-treesitter/nvim-treesitter">nvim-treesitter.nvim</a></dt>
@@ -465,69 +551,11 @@ vim ~/.bashrc
   <dd>它可以将当前函数的函数头固定在 neovim 界面的前几行，让你知道当前在编辑的是什么类、函数或方法。</dd>
   <dt>Parentheses Highlighting: <a href="https://github.com/p00f/nvim-ts-rainbow">nvim-ts-rainbow</a></dt>
   <dd>对配对的括号进行彩色标注。</dd>
-  <dt>Markdown Preview: <a href="https://github.com/iamcco/markdown-preview.nvim">markdown-preview.nvim</a></dt>
-  <dd>实现类似 VSCode 的 Markdown Preview 的功能</dd>
 </dl>
 
 <p><strong>注意 <code class="language-plaintext highlighter-rouge">treesitter</code> 无法渲染 <code class="language-plaintext highlighter-rouge">.h</code> 文件， 需要强制转换 <code class="language-plaintext highlighter-rouge">set ft=cpp</code> 同样可以通过 <code class="language-plaintext highlighter-rouge">filetype.nvim</code> 解决</strong></p>
 
-<h3 id="45-terminal">4.5 Terminal</h3>
-
-<dl>
-  <dt>Terminal: <a href="https://github.com/akinsho/toggleterm.nvim">toggleterm.nvim</a></dt>
-  <dd>虽然用 nvim 默认的指令可以在编辑文档时打开 Terminal， 但是 toggleterm.nvim 提供了更为便捷以及功能更强大的 Terminal 管理方案。</dd>
-</dl>
-
-<blockquote>
-  <p><a href="https://www.youtube.com/watch?v=5OD-7h7gzxU">Neovim - Toggleterm | Open terminal programs in Neovim - Youtube</a>
-<a href="https://blog.51cto.com/u_11090813/5647999">从零开始配置vim(19)——终端配置 - jesssic</a></p>
-</blockquote>
-
-<h3 id="46-search">4.6 Search</h3>
-
-<dl>
-  <dt>Basic Component: <a href="https://github.com/nvim-lua/popup.nvim">popup.nvim</a></dt>
-  <dd>plenary.nvim 的必要组件， 能够提供与 vim <code class="language-plaintext highlighter-rouge">popup_*</code> 兼容的 API 接口。</dd>
-  <dt>Basic Component: <a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></dt>
-  <dd>telescope.nvim 的必要组件， 能够提供异步编程， 目录扫描等基础功能。</dd>
-  <dt>Fuzzy Finder: <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></dt>
-  <dd>telescope.nvim 能在 neovim 中提供文件名模糊搜索和文本内容搜索的功能， 以及更多复杂的功能。</dd>
-  <dt>fzf: <a href="https://github.com/nvim-telescope/telescope-fzf-native.nvim">telescope-fzf-native.nvim</a></dt>
-  <dd>fzf 的集成插件， 拓展 telescope 功能。</dd>
-</dl>
-
-<p>telescope 常用的指令如下：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">find_files​​</code>: 查找文件</li>
-  <li><code class="language-plaintext highlighter-rouge">​​live_grep​​</code>: 使用正则表达式来进行内容的搜索，它可以跨文件搜索</li>
-  <li><code class="language-plaintext highlighter-rouge">​​buffers​​</code>: 查看当前打开的缓冲区，并且可以预览缓冲区的内容</li>
-  <li><code class="language-plaintext highlighter-rouge">​​grep_string​​</code>: 以当前光标所在单词进行搜索</li>
-  <li><code class="language-plaintext highlighter-rouge">​​oldfile​​</code>: 打开历史文件列表</li>
-  <li><code class="language-plaintext highlighter-rouge">​​marks​</code>​: 打开书签表</li>
-  <li><code class="language-plaintext highlighter-rouge">​​jumplist​</code>​: 打开跳转列表</li>
-</ul>
-
-<p>如果我们希望能够使用 <code class="language-plaintext highlighter-rouge">​​live_grep​​</code>​ 和 <code class="language-plaintext highlighter-rouge">​​grep_string​</code>​ 的功能需要提前在系统上安装 <code class="language-plaintext highlighter-rouge">ripgrep</code>， 另外用 <code class="language-plaintext highlighter-rouge">checkhealth</code> 指令提示可以安装 <a href="https://github.com/sharkdp/fd">sharkdp/fd</a> 获取更多拓展功能。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>ripgrep
-<span class="nb">sudo </span>apt-get <span class="nb">install </span>fd-find
-</code></pre></div></div>
-
-<blockquote>
-  <p><a href="https://zhuanlan.zhihu.com/p/609527018">Vim/Neovim 全文检索插件 – telescope.nvim - 知乎</a></p>
-</blockquote>
-
-<h3 id="47-comment">4.7 Comment</h3>
-
-<dl>
-  <dt>Smart Comment: <a href="https://github.com/numToStr/Comment.nvim">Comment.nvim</a></dt>
-  <dd>能够方便的对代码进行注释， 这个插件的配置更灵活也更强大。</dd>
-</dl>
-
-<h3 id="48-自动补全与内容查看">4.8 自动补全与内容查看</h3>
-
-<h4 id="481-lsp-mason">4.8.1 LSP， Mason</h4>
+<h3 id="47-lsp">4.7 LSP</h3>
 
 <dl>
   <dt>Language Server Protocol: <a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a></dt>
@@ -536,8 +564,20 @@ vim ~/.bashrc
   <dd>mason.nvim 是下一代 nvim-lsp-installer， 能够方便地安装和管理 LSP servers， DAP servers， linters， 以及 formatters.</dd>
   <dt>Packer: <a href="https://github.com/williamboman/mason-lspconfig.nvim">mason-lspconfig.nvim</a></dt>
   <dd>mason-lspconfig.nvim 为 mason.nvim 以及 nvim-lspconfig 建立了桥梁， 方便两个插件的协同工作和配置。</dd>
+  <dt>Linter: <a href="https://github.com/mfussenegger/nvim-lint">nvim-lint</a></dt>
+  <dd>Linter 的配置插件， 配合 <a href="https://github.com/rshkarin/mason-nvim-lint">rshkarin/mason-nvim-lint</a> 进行自动化包管理和安装。</dd>
   <dt>Formatter: <a href="https://github.com/stevearc/conform.nvim">stevearc/conform.nvim</a></dt>
   <dd>null-ls 的替代品， 非常好用的 formatter!</dd>
+  <dt>Completion: <a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a></dt>
+  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code>。</dd>
+  <dt>Friendly Snippets: <a href="https://github.com/rafamadriz/friendly-snippets">friendly-snippets</a></dt>
+  <dd>更够为不同语言提供 Snippets 支持。</dd>
+  <dt>Neovim Lua API LSP: <a href="https://github.com/folke/neodev.nvim">folke/neodev.nvim</a></dt>
+  <dd>folke 大神的又一杰作， 方便对 neovim 的 Lua 配置文件的开发与修改， 能够提供函数签名提示， 自动补全等功能。</dd>
+  <dt>Code Content Render: <a href="https://github.com/SmiteshP/nvim-navic">SmiteshP/nvim-navic</a></dt>
+  <dd>把函数签名， 代码等信息显示在 Statusline 或者 WinBar 上， 需要 LSP 支持并且需要用户自定义格式， 我参考了 <a href="https://waylonwalker.com/nvim-navic/">Waylon Walker - Nvim Navic</a> 的配置， 但是保留 navic 的 <strong>auto-attach</strong> 功能， 这样就不需要每次增加一个 LSP Server 就配置一次了。</dd>
+  <dt>Function Signature Display: <a href="https://github.com/ray-x/lsp_signature.nvim">lsp_signature.nvim</a></dt>
+  <dd>非常好用的 LSP 提示插件， 之前给函数输入参数的时候忘了得用 lspsaga 去重新提示声明， 这个直接自动化了。</dd>
 </dl>
 
 <p>配置 clangd 可以参考 <a href="https://zhuanlan.zhihu.com/p/614518048">neovim Mason配置LSP相关 - 知乎</a> 以及 <a href="https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#clangd">lspconfig-clangd</a>， 且需要注意对 <code class="language-plaintext highlighter-rouge">build</code> 中的 <code class="language-plaintext highlighter-rouge">compile_commands.json</code> 进行软连接。</p>
@@ -567,67 +607,50 @@ vim ~/.bashrc
 
 <blockquote>
   <p>Packer 版本的 LSP 整体参考 <a href="https://github.com/jiaxinaoliao/neovimBeginCpp/tree/main/linuxConfig/lua/lsp">jiaxinaoliao/neovimBeginCpp</a> 后 Lazy 版本参考 <a href="https://github.com/Zwlin98/nvim/tree/main">Zwlin98/nvim</a><br />
-<a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a></p>
+<a href="https://zhuanlan.zhihu.com/p/444836713">Neovim 内置 LSP 配置 (一)：基础配置 - 知乎</a><br />
+<a href="https://blog.51cto.com/u_11090813/5667800">从零开始配置vim(24)——自动补全</a></p>
 </blockquote>
 
-<h4 id="482-补全与自动提示">4.8.2 补全与自动提示</h4>
+<h3 id="48-manager">4.8 Manager</h3>
 
 <dl>
-  <dt>AutoPair: <a href="https://github.com/windwp/nvim-autopairs">nvim-autopairs</a></dt>
-  <dd>自动补全括号的插件， 具体作用之后用了补充。</dd>
-  <dt>Completion: <a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a></dt>
-  <dd>自动补全的引擎， 支持 LSP 以及自定义灵活配置， 我们需要安装如下插件 <code class="language-plaintext highlighter-rouge">neovim/nvim-lspconfig</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-nvim-lsp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-buffer</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-path</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-cmdline</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/nvim-cmp</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/cmp-vsnip</code>, <code class="language-plaintext highlighter-rouge">hrsh7th/vim-vsnip</code>, <code class="language-plaintext highlighter-rouge">saadparwaiz1/cmp_luasnip</code>。</dd>
-  <dt>Friendly Snippets: <a href="https://github.com/rafamadriz/friendly-snippets">friendly-snippets</a></dt>
-  <dd>更够为不同语言提供 Snippets 支持。</dd>
+  <dt>Status Line: <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a></dt>
+  <dd>neovim 的状态栏配置插件。</dd>
+  <dt>File Explorer: <a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.nvim</a></dt>
+  <dd>提供了便捷的文件管理树的功能， 所有的文件操作可以通过键盘实现。</dd>
+  <dt>Tmux Navigator: <a href="https://github.com/christoomey/vim-tmux-navigator">vim-tmux-navigator.nvim</a></dt>
+  <dd>tmux (terminal multiplexer) 是一个终端复用器， 主要可以用于分屏和保持会话。 保持会话的意思是， 即使关闭终端窗口， 或者 SSH 由于各种原因连接中断， 在服务器端 tmux 中的会话和对应的进程仍然不会终止。 tmux 能够创建多个会话 （session）， 每个会话能够创建多个窗口 （window）， 每个窗口又可以分为多个窗格 （pane）。</dd>
+  <dt>Buffer Line: <a href="https://github.com/akinsho/bufferline.nvim">bufferline.nvim</a></dt>
+  <dd>这个插件提供了类似 vscode 的标签页的功能</dd>
+  <dt>File Manager: <a href="https://github.com/sxyazi/yazi">Yazi</a></dt>
+  <dd>Terminal file manager， 适用于终端的文件管理器。</dd>
+  <dt>Startup: <a href="https://github.com/startup-nvim/startup.nvim">startup-nvim/startup.nvim</a></dt>
+  <dd>neovim 启动界面的个性化定制。</dd>
 </dl>
+
+<p>当然还有一些依赖插件， <a href="https://github.com/nvim-lua/plenary.nvim">nvim-lua/plenary.nvim</a>， <a href="https://github.com/nvim-lua/popup.nvim">nvim-lua/popup.nvim</a>， <a href="https://github.com/nvim-tree/nvim-web-devicons">nvim-tree/nvim-web-devicons</a>， <a href="https://github.com/MunifTanjim/nui.nvim">MunifTanjim/nui.nvim</a> 都是为了增强以上插件的使用体验， 具体可参考我的配置文件。</p>
 
 <blockquote>
-  <p><a href="https://blog.51cto.com/u_11090813/5667800">从零开始配置vim(24)——自动补全</a></p>
+  <p><a href="https://blog.51cto.com/u_11090813/5575032">从零开始配置 vim(13)——标签页插件 - jesssic</a><br />
+<a href="https://blog.51cto.com/u_11090813/5759499">从零开始配置vim(26)——LSP UI 美化 - jesssic</a></p>
 </blockquote>
 
-<h3 id="49-debug">4.9 Debug</h3>
+<h3 id="49-system">4.9 System</h3>
 
 <dl>
-  <dt>Debug Adapter Protocol: <a href="https://github.com/mfussenegger/nvim-dap">nvim-dap</a></dt>
-  <dd>Nvim-dap 是基于 Neovim 的 Debug Adapter Protocol 客户端实现的， 能够进行基本的断点、 步进等操作， 并监视应用的状态。</dd>
-  <dt>Debug UI: <a href="https://github.com/rcarriga/nvim-dap-ui">​​nvim-dap-ui</a></dt>
-  <dd>我们需要提供一个可用的界面用来显示调试过程中的各种信息，包括变量值和调用栈。</dd>
-  <dt>Debug Variable Value: <a href="https://github.com/theHamsta/nvim-dap-virtual-text">​nvim-dap-virtual-text​​​</a></dt>
-  <dd>用以显示 debug 过程中一些变量的值， 类似 vscode 中的 watch。</dd>
-  <dt>Tests: <a href="https://github.com/nvim-neotest/neotest">neotest</a></dt>
-  <dd>类似 VSCode 中的测试插件功能， 方便进行测试内容的可视化和快捷操作。</dd>
-</dl>
-
-<p>配置 cpp 调试需要参考 <a href="https://www.reddit.com/r/neovim/comments/zwlfkx/dap_configuration_for_c/">DAP configuration for C++</a></p>
-
-<blockquote>
-  <p><a href="https://blog.51cto.com/u_11090813/5807468">从零开始配置vim(28)——代码的编译、运行与调试</a><br />
-<a href="https://blog.51cto.com/u_11090813/5873288">从零开始配置vim(29)——DAP 配置</a><br />
-<a href="https://blog.51cto.com/u_11090813/5982386">从零开始配置vim(30)——DAP的其他配置</a></p>
-</blockquote>
-
-<h3 id="410-rust-语言支持">4.10 Rust 语言支持</h3>
-
-<dl>
-  <dt>Code: <a href="https://rust-analyzer.github.io/">rust-analyzer</a></dt>
-  <dd>rust-analyzer 基于 LSP 实现， 它为许多代码编辑器 (包括 VS Code、 Emacs 和 Vim) 提供了补全和跳转定义等特性。</dd>
-</dl>
-
-<blockquote>
-  <p>nvim 打开后使用 <code class="language-plaintext highlighter-rouge">:Mason</code> 选择 rust-analyzer 按 i 可以便捷安装。</p>
-</blockquote>
-
-<dl>
-  <dt>Tool: <a href="https://github.com/simrat39/rust-tools.nvim">rust-tools.nvim</a></dt>
-  <dd>为 rust 编程提供便利的实用工具。</dd>
-</dl>
-
-<h3 id="411-clipboard">4.11 Clipboard</h3>
-
-<dl>
+  <dt>FileType: <a href="https://github.com/nathom/filetype.nvim">filetype.nvim</a></dt>
+  <dd>filetype.nvim 是为了替代 nvim 启动时引用的 <code class="language-plaintext highlighter-rouge">filetype.vim</code> 文件， 该文件的目的是创建一系列自动命令， 根据文件名设置 filetype 变量， 但该文件的载入耗费了大量的时间， filetype.nvim 能优化这一载入过程， 对启动过程进行加速。</dd>
+  <dt>Lua Loader: <a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a></dt>
+  <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-plaintext highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
+  <dt>Notification: <a href="https://github.com/rcarriga/nvim-notify">nvim-notify</a></dt>
+  <dd>优化了原来的 vim 通知的风格， 用弹窗的形式进行展示， 不会打乱原有窗口的排布且该通知是异步操作的， 速度更快。</dd>
+  <dt>Startup Time Measurement: <a href="https://github.com/dstein64/vim-startuptime">vim-startuptime</a></dt>
+  <dd>用来监测 neovim 启动时间的， 不过 Lazy.nvim 表示它的更准确一些， 这个在我优化配置的时候会用到。</dd>
   <dt>Clipboard: <a href="https://github.com/EtiamNullam/deferred-clipboard.nvim/tree/master">deferred-clipboard.nvim</a></dt>
   <dd>打通操作系统与 nvim 之间的桥梁， 二者能共用剪贴板的缓存。</dd>
 </dl>
+
+<h4 id="clipboard-configuration">Clipboard Configuration</h4>
 
 <p><a href="https://stackoverflow.com/questions/75548458/copy-into-system-clipboard-from-neovim">Copy into system clipboard from neovim - StackOverflow</a> 则介绍了另外一种办法， 不过推荐用上述插件更为便捷， 但仍需保证提供一种 clipboard 组件， 例如在 wsl 上需要安装 <code class="language-plaintext highlighter-rouge">wl-clipboard</code>。</p>
 
@@ -661,83 +684,72 @@ vim ~/.bashrc
 <span class="k">end</span>
 </code></pre></div></div>
 
-<h3 id="412-git">4.12 Git</h3>
+<h3 id="410-theme">4.10 Theme</h3>
 
-<dl>
-  <dt>LazyGit: <a href="https://github.com/kdheepak/lazygit.nvim">lazygit.nvim</a></dt>
-  <dd>Git 相关组件， 实现 commit, push 等操作的可视化。</dd>
-  <dt>Git Signs: <a href="https://github.com/lewis6991/gitsigns.nvim">gitsigns.nvim</a></dt>
-  <dd>提供了和 Git 相关的功能， 例如查看 git diff， last commit， status bar 等， 类似 vscode 中的 GitLen。</dd>
-</dl>
+<p>个人比较喜欢 OneDark 系列， 主要参考 <a href="https://github.com/navarasu/onedark.nvim">onedark.nvim</a>， 加入插件后自定义配置即可。</p>
 
-<p>对于 LazyGit 还需要相应得安装其二进制包：</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-Lo</span> lazygit.tar.gz <span class="s2">"https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.40.2_Linux_x86_64.tar.gz"</span>
-<span class="nb">sudo tar </span>xf lazygit.tar.gz <span class="nt">-C</span> /usr/local/bin lazygit
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Lazy, theme/onedark.lua</span>
+<span class="k">return</span> <span class="p">{</span>
+    <span class="p">{</span>
+        <span class="s1">'navarasu/onedark.nvim'</span><span class="p">,</span>
+        <span class="n">lazy</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="c1">-- make sure we load this during startup if it is your main colorscheme</span>
+        <span class="n">priority</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="c1">-- make sure to load this before all the other start plugins</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+          <span class="c1">-- load the colorscheme here</span>
+          <span class="n">vim</span><span class="p">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">[[colorscheme onedark]]</span><span class="p">)</span>
+        <span class="k">end</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
-<h3 id="413-speed-up">4.13 Speed Up</h3>
+<h3 id="411-tools">4.11 Tools</h3>
 
 <dl>
-  <dt>FileType: <a href="https://github.com/nathom/filetype.nvim">filetype.nvim</a></dt>
-  <dd>filetype.nvim 是为了替代 nvim 启动时引用的 <code class="language-plaintext highlighter-rouge">filetype.vim</code> 文件， 该文件的目的是创建一系列自动命令， 根据文件名设置 filetype 变量， 但该文件的载入耗费了大量的时间， filetype.nvim 能优化这一载入过程， 对启动过程进行加速。</dd>
-  <dt>Lua Loader: <a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a></dt>
-  <dd>该插件在 neovim 0.9 后就不需要了， 只用开启 <code class="language-plaintext highlighter-rouge">vim.loader.enable()</code> 即可对 lua 模块以及文件的载入进行加速。</dd>
-</dl>
-
-<h3 id="414-easyusage">4.14 EasyUsage</h3>
-
-<dl>
-  <dt>Greeter: <a href="https://github.com/startup-nvim/startup.nvim">startup.nvim</a></dt>
-  <dd>自定义 nvim 启动界面， 能够自己更换喜欢的主题！</dd>
-  <dt>Easy Jump: <a href="https://github.com/folke/flash.nvim">flash.nvim</a></dt>
-  <dd>EasyMotion 和 CamelCaseMotion 的结合体， neovim 的平替款。</dd>
-  <dt>Quick Punctuation Operate: <a href="https://github.com/tpope/vim-surround">vim-surround</a></dt>
-  <dd>不太会用但确实很有用的插件， 能对括号， 标点等进行快速更改。</dd>
-  <dt>Goto Preview: <a href="https://github.com/rmagatti/goto-preview">goto-preview</a></dt>
-  <dd>Goto 指令使用时类似 vscode 的选择界面， 以浮动窗口的形式预览符号的定义、实现等信息。</dd>
-  <dt>Indent Display: <a href="https://github.com/lukas-reineke/indent-blankline.nvim">indent-blankline.nvim</a></dt>
-  <dd>方便显示 Indent 距离， 而且能够对代码块进行分隔。</dd>
+  <dt>Cscope: <a href="https://github.com/dhananjaylatkar/cscope_maps.nvim">cscope_maps.nvim</a></dt>
+  <dd>对于有 Linux 源码阅读需求的人而言 neovim 移除 cscope 支持实在无法接受， 这个插件对原生 cscope 进行封装和功能增强， 可自选 cscope 引擎， 我的在脚本中配置的是 <code class="language-plaintext highlighter-rouge">gtags-cscope</code>。 <a href="https://github.com/ludovicchabant/vim-gutentags">ludovicchabant/vim-gutentags</a> 可用 <code class="language-plaintext highlighter-rouge">cscope_maps.nvim</code> 作为 ctags 引擎自动生成所需要的 tags 并进行存档。</dd>
+  <dt>Terminal: <a href="https://github.com/akinsho/toggleterm.nvim">toggleterm.nvim</a></dt>
+  <dd>虽然用 nvim 默认的指令可以在编辑文档时打开 Terminal， 但是 toggleterm.nvim 提供了更为便捷以及功能更强大的 Terminal 管理方案。</dd>
+  <dt>Basic Component: <a href="https://github.com/nvim-lua/popup.nvim">popup.nvim</a></dt>
+  <dd>plenary.nvim 的必要组件， 能够提供与 vim <code class="language-plaintext highlighter-rouge">popup_*</code> 兼容的 API 接口。</dd>
+  <dt>Basic Component: <a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></dt>
+  <dd>telescope.nvim 的必要组件， 能够提供异步编程， 目录扫描等基础功能。</dd>
   <dt>Which Key: <a href="https://github.com/folke/which-key.nvim">which-key.nvim</a></dt>
   <dd>提示当前的 keybinding， 对记不住快捷键的人简直是神器！</dd>
-  <dt>CamelCase Motion: <a href="https://github.com/chrisgrieser/nvim-spider">nvim-spider</a></dt>
-  <dd>CamelCase Motion 的 lua 实现版本， 按照说明配置快捷键可实现相同功能。</dd>
   <dt>Trouble Shooter: <a href="https://github.com/folke/trouble.nvim">trouble.nvim</a></dt>
   <dd>trouble.nvim可以让你快速查看你的工作区、文件中的LSP警告列表。 但是 <code class="language-plaintext highlighter-rouge">Lspsaga</code> 有内置的检查器倒是不必要安装。</dd>
-  <dt>QuickFix Enhance: <a href="https://github.com/kevinhwang91/nvim-bqf">nvim-bqf</a></dt>
-  <dd>quick fix 的增强插件， 配置的时候直接再装个 fzf。</dd>
-  <dt>Folder Wrapper: <a href="https://github.com/kevinhwang91/nvim-ufo">nvim-ufo</a></dt>
-  <dd>启用neovim的折叠功能，在左侧栏显示可折叠的项目，并能够自定义折叠显示的内容。
-    <blockquote>
-      <p>参考 <a href="https://www.bilibili.com/read/cv22495061/">Neovim插件推荐&amp;配置 - 2.26 nvim-ufo</a> 配置</p>
-    </blockquote>
-  </dd>
-  <dt>Like TODO: <a href="https://github.com/folke/todo-comments.nvim">todo-comments.nvim</a></dt>
-  <dd>高亮注释中的关键词， <code class="language-plaintext highlighter-rouge">HACK</code>, <code class="language-plaintext highlighter-rouge">NOTE</code>, <code class="language-plaintext highlighter-rouge">TODO</code>, <code class="language-plaintext highlighter-rouge">WARN</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, <code class="language-plaintext highlighter-rouge">BUG</code>, <code class="language-plaintext highlighter-rouge">FIX</code>, <code class="language-plaintext highlighter-rouge">PREF</code>。</dd>
-  <dt>LeetCode: <a href="https://github.com/kawre/leetcode.nvim">leetcode.nvim</a></dt>
-  <dd>用 neovim 刷 LeetCode 的必备工具。</dd>
-  <dt>Image: <a href="https://github.com/3rd/image.nvim">image.nvim</a></dt>
-  <dd>给 LeetCode 插件提供显示图片支持， 但需要安装以下软件提供支持。</dd>
+  <dt>Symbols Outline: <a href="https://github.com/simrat39/symbols-outline.nvim">symbols-outline.nvim</a></dt>
+  <dd>类似 vscode 中的 Outline， 基于 LSP 实现的函数与符号树， 方便查看代码实现的整体结构。</dd>
+  <dt>Fuzzy Finder: <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></dt>
+  <dd>telescope.nvim 能在 neovim 中提供文件名模糊搜索和文本内容搜索的功能， 以及更多复杂的功能。</dd>
+  <dt>fzf: <a href="https://github.com/nvim-telescope/telescope-fzf-native.nvim">telescope-fzf-native.nvim</a></dt>
+  <dd>fzf 的集成插件， 拓展 telescope 功能。</dd>
 </dl>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># image magick</span>
-<span class="nb">sudo </span>apt-get <span class="nb">install </span>imagemagick
-<span class="c"># magick luarock</span>
-<span class="nb">sudo </span>apt-get <span class="nb">install </span>luarocks
-luarocks <span class="nt">--local</span> <span class="nb">install </span>magick
-<span class="c"># kitty</span>
-<span class="nb">sudo </span>apt-get <span class="nb">install </span>kitty
-<span class="c"># ueberzugpp Ubuntu 20.04</span>
-<span class="nb">echo</span> <span class="s1">'deb http://download.opensuse.org/repositories/home:/justkidding/xUbuntu_22.04/ /'</span> | <span class="nb">sudo tee</span> /etc/apt/sources.list.d/home:justkidding.list
-curl <span class="nt">-fsSL</span> https://download.opensuse.org/repositories/home:justkidding/xUbuntu_22.04/Release.key | gpg <span class="nt">--dearmor</span> | <span class="nb">sudo tee</span> /etc/apt/trusted.gpg.d/home_justkidding.gpg <span class="o">&gt;</span> /dev/null
-<span class="nb">sudo </span>apt update
-<span class="nb">sudo </span>apt <span class="nb">install </span>ueberzugpp
+<h4 id="telescope-usage">Telescope Usage</h4>
+
+<p>telescope 常用的指令如下：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">find_files​​</code>: 查找文件</li>
+  <li><code class="language-plaintext highlighter-rouge">​​live_grep​​</code>: 使用正则表达式来进行内容的搜索，它可以跨文件搜索</li>
+  <li><code class="language-plaintext highlighter-rouge">​​buffers​​</code>: 查看当前打开的缓冲区，并且可以预览缓冲区的内容</li>
+  <li><code class="language-plaintext highlighter-rouge">​​grep_string​​</code>: 以当前光标所在单词进行搜索</li>
+  <li><code class="language-plaintext highlighter-rouge">​​oldfile​​</code>: 打开历史文件列表</li>
+  <li><code class="language-plaintext highlighter-rouge">​​marks​</code>​: 打开书签表</li>
+  <li><code class="language-plaintext highlighter-rouge">​​jumplist​</code>​: 打开跳转列表</li>
+</ul>
+
+<p>如果我们希望能够使用 <code class="language-plaintext highlighter-rouge">​​live_grep​​</code>​ 和 <code class="language-plaintext highlighter-rouge">​​grep_string​</code>​ 的功能需要提前在系统上安装 <code class="language-plaintext highlighter-rouge">ripgrep</code>， 另外用 <code class="language-plaintext highlighter-rouge">checkhealth</code> 指令提示可以安装 <a href="https://github.com/sharkdp/fd">sharkdp/fd</a> 获取更多拓展功能， 我已添加自动化脚本方便安装和配置。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>ripgrep
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>fd-find
 </code></pre></div></div>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># use following command to sign in LeetCode</span>
-nvim leetcode.nvim
-<span class="c"># search `graphql` to acquire cookies</span>
-</code></pre></div></div>
+<blockquote>
+  <p><a href="https://zhuanlan.zhihu.com/p/609527018">Vim/Neovim 全文检索插件 – telescope.nvim - 知乎</a><br />
+<a href="https://www.youtube.com/watch?v=5OD-7h7gzxU">Neovim - Toggleterm | Open terminal programs in Neovim - Youtube</a><br />
+<a href="https://blog.51cto.com/u_11090813/5647999">从零开始配置vim(19)——终端配置 - jesssic</a></p>
+</blockquote>
 
 <h2 id="5-配置问题">5. 配置问题</h2>
 
@@ -793,19 +805,12 @@ rustup update
 <h3 id="52-unknow-plugin">5.2 UNKNOW PLUGIN</h3>
 
 <p>打开 nvim 出现 <code class="language-plaintext highlighter-rouge">(UNKNOWN PLUGIN): Error excuting lua: attempt to call a nil value</code> 的报错。 估摸着是某些插件有先后运行顺序， 但这个问题很难找， 不过后来在使用的过程中又折腾了一段时间， 发现是 telescope 中的插件配置问题， 导致 neovim 无法识别到相关的插件。</p>
-
-<h2 id="参考">参考</h2>
-
-<ul>
-  <li><a href="https://zhuanlan.zhihu.com/p/617522665">从零开始：使用Neovim搭建Rust开发IDE - 知乎</a></li>
-  <li><a href="https://zhuanlan.zhihu.com/p/467428462">我的现代化 NeoVim 配置介绍/教程</a></li>
-</ul>
 </div><section class="article__sharing d-print-none"><!-- AddToAny BEGIN -->
 <div class="a2a_kit a2a_kit_size_32 a2a_floating_style a2a_vertical_style" style="left: 0px; top: 30%;" data-a2a-scroll-show="0,50" data-a2a-icon-color="#FF6A6A">
     <div id="share_btn">
         <a class="a2a_button_copy_link"></a>
         <a class="a2a_button_wechat"></a>
-        <a class="a2a_button_twitter"></a>
+        <a class="a2a_button_facebook"></a>
         <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
     </div>
     <button id="btn_hide" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight:bold; color: #FF6A6A; display: block;" onclick="toggle()" type="button">
@@ -832,8 +837,8 @@ a2a_config.thanks = {
 <script type="text/javascript">
 function toggle() {
   var content = document.getElementById("share_btn");
-  var btn_show = document.getElementById("btn_show"); 
-  var btn_hide = document.getElementById("btn_hide"); 
+  var btn_show = document.getElementById("btn_show");
+  var btn_hide = document.getElementById("btn_hide");
 
   if (btn_hide.style.display == "block") {
     btn_show.style.display = "block";
